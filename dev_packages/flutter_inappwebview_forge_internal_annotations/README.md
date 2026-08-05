@@ -1,0 +1,1 @@
+Internal annotations used by the generator of [flutter_inappwebview_forge](https://github.com/emirkanacar/flutter_inappwebview) plugin.

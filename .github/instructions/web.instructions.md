@@ -1,5 +1,5 @@
 ---
-applyTo: "flutter_inappwebview_web/**"
+applyTo: "flutter_inappwebview_forge_web/**"
 ---
 
 # Web Platform Implementation Instructions
@@ -19,7 +19,7 @@ applyTo: "flutter_inappwebview_web/**"
 
 ## Source Code Structure
 
-### Dart Side (`flutter_inappwebview_web/lib/src/`)
+### Dart Side (`flutter_inappwebview_forge_web/lib/src/`)
 
 ```
 lib/src/
@@ -177,7 +177,7 @@ The compiled output is used by the Dart web plugin.
 ### Dart-Side Development
 
 For Dart-only changes:
-1. Implement platform interface from `flutter_inappwebview_platform_interface`
+1. Implement platform interface from `flutter_inappwebview_forge_platform_interface`
 2. Register in `WebPlatformInAppWebViewPlatform.registerWith()`
 3. Use `dart:js_interop` for JavaScript interop
 4. Use `dart:html` for DOM manipulation
@@ -186,7 +186,7 @@ For Dart-only changes:
 
 1. Update TypeScript in `web_support/src/` if JS bridge changes needed
 2. Run `npm run build` in `web_support/`
-3. Update Dart wrappers in `flutter_inappwebview_web/lib/src/`
+3. Update Dart wrappers in `flutter_inappwebview_forge_web/lib/src/`
 4. Implement platform interface methods
 
 ---
@@ -226,13 +226,13 @@ try {
 
 ```bash
 # Dart package
-cd flutter_inappwebview_web && flutter pub get
+cd flutter_inappwebview_forge_web && flutter pub get
 
 # TypeScript (if modified)
 cd web_support && npm install && npm run build
 
 # Example app
-cd flutter_inappwebview_web/example && flutter run -d chrome
+cd flutter_inappwebview_forge_web/example && flutter run -d chrome
 ```
 
 ## Testing Considerations

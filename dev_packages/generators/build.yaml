@@ -1,7 +1,7 @@
 targets:
   $default:
     builders:
-      generators|flutter_inappwebview_internal_annotations:
+      generators|flutter_inappwebview_forge_internal_annotations:
         enabled: true
 
 builders:

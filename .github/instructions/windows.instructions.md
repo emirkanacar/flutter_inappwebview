@@ -1,5 +1,5 @@
 ---
-applyTo: "flutter_inappwebview_windows/**"
+applyTo: "flutter_inappwebview_forge_windows/**"
 ---
 
 # Windows Platform Implementation Instructions
@@ -342,7 +342,7 @@ Additional scripts may be needed for features not natively supported by WebView2
 ## Dart-Side Development
 
 For Dart-only changes:
-1. Implement platform interface from `flutter_inappwebview_platform_interface`
+1. Implement platform interface from `flutter_inappwebview_forge_platform_interface`
 2. Windows-specific features: `WebViewEnvironment` for session isolation
 3. `WebViewInterface` enum maps to ICoreWebView2 interface versions
 
@@ -357,7 +357,7 @@ When modifying C++ code:
 ## Build Commands
 
 ```bash
-cd flutter_inappwebview_windows && flutter pub get
+cd flutter_inappwebview_forge_windows && flutter pub get
 cd example && flutter build windows --debug
 ```
 

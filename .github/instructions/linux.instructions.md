@@ -1,5 +1,5 @@
 ---
-applyTo: "flutter_inappwebview_linux/**"
+applyTo: "flutter_inappwebview_forge_linux/**"
 ---
 
 # Linux Platform Implementation Instructions

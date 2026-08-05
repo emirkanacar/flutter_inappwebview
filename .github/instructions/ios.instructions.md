@@ -1,5 +1,5 @@
 ---
-applyTo: "flutter_inappwebview_ios/**"
+applyTo: "flutter_inappwebview_forge_ios/**"
 ---
 
 # iOS Platform Implementation Instructions
@@ -306,7 +306,7 @@ JavaScript files injected into WebViews for native-web communication:
 ## Dart-Side Development
 
 For Dart-only changes:
-1. Implement platform interface from `flutter_inappwebview_platform_interface`
+1. Implement platform interface from `flutter_inappwebview_forge_platform_interface`
 2. Extend `Platform*CreationParams` for iOS-specific parameters
 3. Register in `IOSInAppWebViewPlatform.registerWith()`
 4. iOS-specific features: `WebAuthenticationSession`, Safari-style callbacks
@@ -322,7 +322,7 @@ When modifying Swift/Obj-C code:
 ## Build Commands
 
 ```bash
-cd flutter_inappwebview_ios && flutter pub get
+cd flutter_inappwebview_forge_ios && flutter pub get
 cd example && flutter build ios --debug --no-codesign
 ```
 
