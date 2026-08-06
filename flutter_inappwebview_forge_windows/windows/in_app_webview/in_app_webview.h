@@ -134,6 +134,7 @@ namespace flutter_inappwebview_plugin
     }
     void setSurfaceSize(size_t width, size_t height, float scale_factor);
     void setPosition(size_t x, size_t y, float scale_factor);
+    void setVisibility(bool visible);
     void setCursorPos(double x, double y);
     void setPointerUpdate(int32_t pointer, InAppWebViewPointerEventKind eventKind,
       double x, double y, double size, double pressure);

@@ -25,7 +25,9 @@ The confidence labels below describe the evidence available during this review:
 | P2 | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 16 KB page-size support still needs a produced-AAB and native dependency audit. |
 | Fixed (validation pending) | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) | iOS 2.0.1 restores scroll insets after UIKit finishes keyboard dismissal; validate on iOS 17.2+ devices. |
 | P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | iOS fullscreen/WebKit and Web iframe URL reporting still require platform-specific reproductions. |
-| P2 | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | OEM-specific UI, Linux installation/rendering, and Windows local-file compatibility issues. |
+| Fixed (validation pending) | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) | Android OEM selection-menu rendering and Windows minimized-window hit testing now have guarded platform paths; validate on affected devices. |
+| Fixed (build validation pending) | [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) | Linux theme-color access is compiled only for WPE WebKit 2.50+, with a no-theme-color fallback on older versions. |
+| P2 | [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux installation/rendering and Windows local-file compatibility issues still require platform-specific work. |
 | Monitor | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS/Xcode-specific memory failure with insufficient symbolicated evidence. |
 
 ## Detailed findings
@@ -100,9 +102,9 @@ Issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/276
 
 **Impact:** Visible Android text-selection UI corruption on Samsung One UI when the custom context menu is used. **Confidence:** Strong report; code path confirmed.
 
-The custom action-mode implementation in `InAppWebView.java` clears the native menu and rebuilds it as Flutter/plugin UI. It converts every native item title with `menuItem.getTitle().toString()` and renders it as a `TextView`. An OEM item that is icon-only or has a non-user-facing title can therefore appear as the literal string `false`. Hybrid composition avoids the custom toolbar in the reported configuration, but has a performance cost.
+The custom action-mode implementation in `InAppWebView.kt` clears the native menu and rebuilds it as Flutter/plugin UI. It previously converted every native item title with `menuItem.title.toString()` and rendered it as a `TextView`. An OEM item that is icon-only or has a non-user-facing title could therefore appear as the literal string `false`. Hybrid composition avoids the custom toolbar in the reported configuration, but has a performance cost.
 
-**Recommended action:** preserve native icon/visibility semantics when rebuilding items, or expose a setting to use the platform toolbar. Add a Samsung One UI regression test matrix.
+**Implementation:** Android 1.0.6 preserves a native icon for icon-only entries, skips entries with neither a usable title nor icon, and treats the OEM placeholder `false` as non-user-facing metadata. Native action-mode creation and title/icon lookups also catch `Resources.NotFoundException` so malformed OEM resources do not escape as an application crash. A Samsung One UI regression test matrix is still required.
 
 **Relation to the reported `Resources$NotFoundException`:** the supplied crash also enters `InAppWebView.startActionMode` through Chromium’s selection popup. It is not proof that #2868 has the same root cause, but both symptoms make the custom action-mode path a high-value shared investigation target. The Samsung issue is a UI rendering defect; the supplied stack is a resource lookup failure.
 
@@ -238,7 +240,7 @@ Issue [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/273
 
 Issue [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) is a reproducible platform-view hit-test/overlay regression after minimizing a Windows app. Issue [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) matches an unguarded `webkit_web_view_get_theme_color` call in the Linux C++ source, which can cause an undefined-reference failure on older WPE WebKit versions.
 
-**Recommended action:** test Windows composition/input hit-testing across minimize/restore, and guard or feature-detect the Linux theme-color API while documenting the supported WPE version range.
+**Implementation:** Windows 1.0.3 emits explicit minimize/restore events from `WM_SIZE`, hides the WebView2 controller and parent child window while minimized, and restores visibility plus the current Flutter position afterward. Linux 1.0.1 compiles `webkit_web_view_get_theme_color` only when `WEBKIT_CHECK_VERSION(2, 50, 0)` is true and returns no theme color on older WPE WebKit versions. Windows hit-testing and Linux builds still require native CI/device validation.
 
 ### Security claims requiring validation before labeling as vulnerabilities
 

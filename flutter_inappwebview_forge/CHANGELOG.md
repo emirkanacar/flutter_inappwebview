@@ -1,3 +1,13 @@
+## 2.0.5 - 2026-08-06
+
+- Android: prevent Samsung One UI icon-only selection actions from rendering the placeholder text `false`; native icons are preserved when available and invalid resource metadata is skipped safely.
+- Android: catch native action-mode `Resources.NotFoundException` failures so malformed OEM selection resources do not crash the Flutter application.
+- Linux: guard the WPE WebKit theme-color call behind `WEBKIT_CHECK_VERSION(2, 50, 0)`, keeping older WebKit development packages buildable.
+- Windows: hide the WebView2 child window while the Flutter window is minimized and restore its visibility and position after the window returns.
+- Examples: pin the Linux and Windows federated examples to the local platform-interface and annotation packages so their lockfiles resolve the repository versions consistently.
+- Examples: regenerate the Linux and Windows plugin registrants with the Forge package names while refreshing their dependency locks.
+- Add regression coverage and update the issue triage documentation for [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780), and [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789).
+
 ## 2.0.4 - 2026-08-06
 
 - iOS: restore WebView scroll insets after the keyboard has fully hidden, preventing stale negative insets from stopping scrolling before the bottom.

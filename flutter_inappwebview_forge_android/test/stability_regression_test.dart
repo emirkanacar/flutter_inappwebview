@@ -83,4 +83,17 @@ void main() {
     );
     expect(source, isNot(contains('statusBarColor')));
   });
+
+  test('Android action mode does not render OEM icon-only placeholders', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('startNativeActionMode'));
+    expect(source, contains('Resources.NotFoundException'));
+    expect(source, contains('equals("false", ignoreCase = true)'));
+    expect(source, contains('setCompoundDrawablesRelative'));
+    expect(source, contains('if (!hasMeaningfulTitle && itemIcon == null)'));
+  });
 }

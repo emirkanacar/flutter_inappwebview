@@ -5,6 +5,7 @@ import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.res.Resources
 import android.content.pm.PackageInfo
 import android.graphics.*
 import android.graphics.drawable.ColorDrawable
@@ -2078,9 +2079,9 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       customSettings.disableContextMenu != true &&
       contextMenu.isNullOrEmpty()
     ) {
-      return super.startActionMode(callback)
+      return startNativeActionMode(callback)
     }
-    return rebuildActionMode(super.startActionMode(callback), callback)
+    return rebuildActionMode(startNativeActionMode(callback), callback)
   }
 
   @RequiresApi(Build.VERSION_CODES.M)
@@ -2090,9 +2091,25 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       customSettings.disableContextMenu != true &&
       contextMenu.isNullOrEmpty()
     ) {
-      return super.startActionMode(callback, type)
+      return startNativeActionMode(callback, type)
     }
-    return rebuildActionMode(super.startActionMode(callback, type), callback)
+    return rebuildActionMode(startNativeActionMode(callback, type), callback)
+  }
+
+  private fun startNativeActionMode(
+    callback: ActionMode.Callback,
+    type: Int? = null
+  ): ActionMode? {
+    return try {
+      if (type == null) {
+        super.startActionMode(callback)
+      } else {
+        super.startActionMode(callback, type)
+      }
+    } catch (exception: Resources.NotFoundException) {
+      Log.w(LOG_TAG, "Unable to create the native text-selection action mode", exception)
+      null
+    }
   }
 
   fun rebuildActionMode(
@@ -2149,11 +2166,41 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
     if (contextMenuSettings.hideDefaultSystemContextMenuItems != true) {
       for (menuItem in defaultMenuItems) {
+        if (!menuItem.isVisible) {
+          continue
+        }
+
         val itemId = menuItem.itemId
-        val itemTitle = menuItem.title?.toString() ?: ""
+        val itemTitle = try {
+          menuItem.title?.toString().orEmpty()
+        } catch (exception: Resources.NotFoundException) {
+          Log.w(LOG_TAG, "Unable to read a native action-mode item title", exception)
+          ""
+        }
+        val itemIcon = try {
+          menuItem.icon
+        } catch (exception: Resources.NotFoundException) {
+          Log.w(LOG_TAG, "Unable to read a native action-mode item icon", exception)
+          null
+        }
+        val hasMeaningfulTitle =
+          itemTitle.isNotBlank() && !itemTitle.equals("false", ignoreCase = true)
+        if (!hasMeaningfulTitle && itemIcon == null) {
+          continue
+        }
+
         val textView = LayoutInflater.from(context)
           .inflate(R.layout.floating_action_mode_item, this, false) as TextView
-        textView.text = itemTitle
+        textView.isEnabled = menuItem.isEnabled
+        if (hasMeaningfulTitle) {
+          textView.text = itemTitle
+        } else {
+          val iconSize =
+            (24 * resources.displayMetrics.density).toInt().coerceAtLeast(1)
+          itemIcon?.setBounds(0, 0, iconSize, iconSize)
+          textView.text = ""
+          textView.setCompoundDrawablesRelative(itemIcon, null, null, null)
+        }
         textView.setOnClickListener {
           hideContextMenu()
           callback.onActionItemClicked(currentActionMode, menuItem)

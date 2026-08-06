@@ -57,6 +57,16 @@ namespace flutter_inappwebview_plugin
         _EmitEvent("onWindowEndMove");
       }
     }
+    else if (message == WM_SIZE) {
+      if (wParam == SIZE_MINIMIZED && !window_is_minimized_) {
+        window_is_minimized_ = true;
+        _EmitEvent("onWindowMinimize");
+      }
+      else if (wParam == SIZE_RESTORED && window_is_minimized_) {
+        window_is_minimized_ = false;
+        _EmitEvent("onWindowRestore");
+      }
+    }
 
     return result;
   }

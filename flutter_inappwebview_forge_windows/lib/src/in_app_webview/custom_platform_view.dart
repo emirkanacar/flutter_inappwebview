@@ -263,6 +263,13 @@ class CustomPlatformViewController
       scaleFactor,
     ]);
   }
+
+  Future<void> _setVisibility(bool visible) async {
+    if (_isDisposed || !value.isInitialized) {
+      return;
+    }
+    return _methodChannel.invokeMethod('setVisibility', visible);
+  }
 }
 
 class CustomPlatformView extends StatefulWidget {
@@ -354,6 +361,18 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
 
   @override
   void onWindowMove() {
+    _reportSurfaceSize();
+    _reportWidgetPosition();
+  }
+
+  @override
+  void onWindowMinimize() {
+    unawaited(_controller._setVisibility(false));
+  }
+
+  @override
+  void onWindowRestore() {
+    unawaited(_controller._setVisibility(true));
     _reportSurfaceSize();
     _reportWidgetPosition();
   }

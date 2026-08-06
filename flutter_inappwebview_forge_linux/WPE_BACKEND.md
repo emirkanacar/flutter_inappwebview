@@ -13,6 +13,13 @@ This plugin uses WPE WebKit for offscreen web rendering. WPE WebKit is the offic
 
 The WPE backend exports frames directly as GPU textures via DMA-BUF or SHM buffers.
 
+## WebKit compatibility
+
+The optional page theme-color value is read through `webkit_web_view_get_theme_color`
+when the detected WPE WebKit headers provide WebKit 2.50 or newer. Older WPE WebKit
+versions remain supported for rendering and return no theme color instead of failing
+at link time.
+
 ## Backend Selection
 
 The plugin supports two backend APIs, with automatic selection at compile time:

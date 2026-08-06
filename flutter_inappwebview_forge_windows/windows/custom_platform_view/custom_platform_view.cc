@@ -16,6 +16,7 @@ namespace flutter_inappwebview_plugin
 
   constexpr auto kMethodSetSize = "setSize";
   constexpr auto kMethodSetPosition = "setPosition";
+  constexpr auto kMethodSetVisibility = "setVisibility";
   constexpr auto kMethodSetCursorPos = "setCursorPos";
   constexpr auto kMethodSetPointerUpdate = "setPointerUpdate";
   constexpr auto kMethodSetPointerButton = "setPointerButton";
@@ -321,6 +322,14 @@ namespace flutter_inappwebview_plugin
           static_cast<size_t>(y),
           static_cast<float>(scale_factor));
 
+        return result->Success();
+      }
+      return result->Error(kErrorInvalidArgs);
+    }
+    else if (method_name.compare(kMethodSetVisibility) == 0) {
+      if (const auto visible = std::get_if<bool>(method_call.arguments());
+        visible && view) {
+        view->setVisibility(*visible);
         return result->Success();
       }
       return result->Error(kErrorInvalidArgs);

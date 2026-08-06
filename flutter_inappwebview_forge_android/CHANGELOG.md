@@ -1,3 +1,9 @@
+## 1.0.6 - 2026-08-06
+
+- Avoid rendering Samsung One UI icon-only action-mode items as the literal `false` text; preserve the native icon when available and omit unusable entries.
+- Catch native action-mode `Resources.NotFoundException` failures to prevent malformed OEM resource metadata from crashing text selection.
+- Add static regression coverage for icon-only placeholder handling and safe native action-mode creation.
+
 ## 1.0.5 - 2026-08-06
 
 - Remove the direct `Window.statusBarColor` call, avoiding Android 15 system-bar API warnings while retaining edge-to-edge toolbar inset handling.

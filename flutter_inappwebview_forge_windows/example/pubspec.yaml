@@ -43,6 +43,12 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.3
 
+dependency_overrides:
+  flutter_inappwebview_forge_internal_annotations:
+    path: ../../dev_packages/flutter_inappwebview_forge_internal_annotations
+  flutter_inappwebview_forge_platform_interface:
+    path: ../../flutter_inappwebview_forge_platform_interface
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

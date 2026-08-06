@@ -1,3 +1,10 @@
+## 1.0.3 - 2026-08-06
+
+- Hide the WebView2 child window when the Flutter window is minimized so it cannot block desktop mouse input in the former application area.
+- Emit native minimize/restore events and restore WebView2 visibility and screen position after the window is restored.
+- Keep the Windows example's local federated dependency overrides aligned with the repository packages.
+- Add regression coverage for the minimize/restore visibility path.
+
 ## 1.0.2 - 2026-08-06
 
 - Prevent static WinRT/Composition COM resources from being released during DLL unload; shared resources now use explicit last-instance shutdown and process-lifetime raw pointers.

@@ -3650,6 +3650,21 @@ namespace flutter_inappwebview_plugin
     }
   }
 
+  void InAppWebView::setVisibility(bool visible)
+  {
+    if (!webViewController) {
+      return;
+    }
+
+    webViewController->put_IsVisible(visible ? TRUE : FALSE);
+
+    HWND webViewHWnd = nullptr;
+    if (succeededOrLog(webViewController->get_ParentWindow(&webViewHWnd)) &&
+      webViewHWnd != nullptr) {
+      ShowWindow(webViewHWnd, visible ? SW_SHOWNOACTIVATE : SW_HIDE);
+    }
+  }
+
   void InAppWebView::setCursorPos(double x, double y)
   {
     if (!webViewCompositionController) {
