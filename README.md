@@ -37,6 +37,11 @@ Project repository: [github.com/emirkanacar/flutter_inappwebview](https://github
 
 ## Documentation
 
+- [Project documentation index](docs/README.md)
+- [Project overview](docs/project-overview.md)
+- [Development guide](docs/development.md)
+- [Issue and PR resolution log](docs/issue-pr-resolution-log.md)
+- [Open work plan](docs/open-work-plan.md)
 - [Known issues and upstream findings](docs/known-issues.md)
 - [Performance and WebView upgrade plan](docs/performance-and-webview-upgrade-plan.md)
 - The package API reference will be published with the `flutter_inappwebview_forge` release.
@@ -44,7 +49,7 @@ Project repository: [github.com/emirkanacar/flutter_inappwebview](https://github
 ## Requirements
 
 - Dart sdk: "^3.8.0"
-- Flutter: ">=3.38.0"
+- Flutter: ">=3.38.6"
 - Android: `minSdkVersion >= 19`, [AGP](https://developer.android.com/build/releases/gradle-plugin) version `>= 7.3.0` (use [Android Studio - Android Gradle plugin Upgrade Assistant](https://developer.android.com/build/agp-upgrade-assistant) for help)
 - iOS 15.0+, Xcode version `>= 15.0`
 - MacOS 10.14+: Xcode version `>= 15.0`

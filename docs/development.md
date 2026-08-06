@@ -1,0 +1,116 @@
+# Development Guide
+
+## Prerequisites
+
+- Flutter `3.38.6`, selected by `.fvmrc`, with Dart `^3.8.0`.
+- FVM or an equivalent Flutter installation available as `fvm flutter`.
+- Xcode for iOS/macOS builds and Swift package checks.
+- Android SDK, JDK 17, Gradle/AGP tooling, and a WebView-capable Android device or emulator.
+- Visual Studio/WebView2 SDK for Windows native builds.
+- GTK 3, libepoxy, libsecret, Wayland headers, libwpe, and a supported WPE WebKit backend for Linux. See `flutter_inappwebview_forge_linux/WPE_BACKEND.md`.
+- Node/npm only for the repository convenience scripts in `package.json`; Dart/Flutter remains the source-of-truth toolchain.
+
+## First checkout
+
+```sh
+fvm flutter --version
+fvm flutter pub get
+cd flutter_inappwebview_forge_platform_interface && fvm flutter pub get
+cd ../flutter_inappwebview_forge && fvm flutter pub get
+```
+
+When working on a platform package, run `fvm flutter pub get` in that package and its example as needed. Local `path:` overrides are intentionally commented in published package manifests; enable them only for a local multi-package change and inspect the lockfile afterward.
+
+## Code generation and formatting
+
+The platform-interface package owns generated exchangeable objects, enums, and capability metadata:
+
+```sh
+npm run build
+npm run format
+```
+
+The build command runs `build_runner` with `--delete-conflicting-outputs`. Review generated diffs for accidental contract changes. Do not manually edit generated serializers to fix a single test; update the source annotation/model and regenerate.
+
+## Test ladder
+
+Use the smallest useful test first, then expand to the affected platform:
+
+```sh
+cd flutter_inappwebview_forge_platform_interface && fvm flutter test
+cd ../flutter_inappwebview_forge_android && fvm flutter test
+cd ../flutter_inappwebview_forge_ios && fvm flutter test
+cd ../flutter_inappwebview_forge_web && fvm flutter test
+cd ../flutter_inappwebview_forge && fvm flutter test
+```
+
+For a broad Dart check:
+
+```sh
+fvm flutter analyze --no-pub
+fvm flutter test --no-pub
+```
+
+The main example has extensive integration coverage under `flutter_inappwebview_forge/example/integration_test/`. Platform examples also have platform-specific integration tests. Integration tests require the target runtime and are not replaced by host-only unit tests.
+
+## Native validation
+
+### Android
+
+- Compile the plugin and build the root/platform examples in debug and release modes.
+- Exercise API 19/21/23/24/29/35/36 where the selected dependency track supports them.
+- For lifecycle changes, test attach/detach/reattach, KeepAlive, fullscreen, keyboard, renderer loss, and disposal on a real device.
+- Validate release artifacts with:
+
+```sh
+tool/check_android_16k_alignment.sh <release.apk-or-aab>
+```
+
+### iOS and macOS
+
+```sh
+swift package dump-package
+flutter build ios --debug --no-codesign
+```
+
+Run the native checks from the relevant package directory. Validate both SPM and CocoaPods metadata when changing package manifests or resources. Device testing is required for scene transitions, Web Authentication, keyboard dismissal, fullscreen video, and WebKit crashes.
+
+### Linux
+
+Check the installed backend before configuring:
+
+```sh
+pkg-config --modversion wpe-webkit-2.0 wpe-platform-2.0 wpe-platform-headless-2.0
+pkg-config --modversion wpebackend-fdo-1.0 wpe-1.0 gtk+-3.0 epoxy libsecret-1 wayland-server
+```
+
+Test both the recommended WPE platform backend and the legacy fallback where the distribution provides them. Include software-rendering and Intel/X11 cases for rendering changes.
+
+### Windows
+
+Build and run the Windows example with the supported Visual Studio and WebView2 runtime. Test WebView creation, minimize/restore, asset loading through the virtual origin, permissions, and process exit. Native C++ lifetime changes require Windows validation; Dart tests alone cannot prove COM safety.
+
+### Web
+
+Run the Web package tests and browser integration tests with both same-origin and cross-origin pages. Browser privacy behavior must be documented rather than worked around by returning stale iframe URLs.
+
+## Change workflow
+
+1. Identify the owning package and read its README, changelog, and nearby tests.
+2. If a public contract changes, update the platform interface and every implementation together.
+3. Add a regression test that fails for the original issue or scenario.
+4. Implement the smallest platform-local fix; preserve fallback behavior for older runtimes.
+5. Run generation, formatting, focused tests, analysis, and the affected native build.
+6. Update the affected changelog and relevant document in `docs/`.
+7. Inspect `git diff` and `git status`; do not include unrelated worktree changes.
+
+## Release checklist
+
+- Package versions and dependency constraints are consistent.
+- Root and platform changelogs describe public, native, and breaking changes.
+- README requirements match the actual deployment targets and native prerequisites.
+- Generated files, lockfiles, plugin registrants, SPM manifests, podspecs, Gradle files, and CMake files are regenerated or validated as appropriate.
+- Android APK/AAB 16 KB alignment is checked by the consuming application.
+- iOS/macOS SPM and CocoaPods paths are checked.
+- Native device/OS/WebView/WebKit/WPE validation gaps are explicitly recorded.
+- `fvm flutter analyze --no-pub` and the relevant test suites pass.

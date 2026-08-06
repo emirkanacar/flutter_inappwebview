@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-06
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; promoted items use the issue body and local code evidence where available. Only issues with a plausible effect on stability, security, compatibility, or release documentation are promoted below. Issue status and platform behavior can change, so each item should be rechecked before implementation.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; promoted items below are explicitly classified as resolved locally, mitigated, validation-pending, or still requiring reproduction. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -10,28 +10,24 @@ The confidence labels below describe the evidence available during this review:
 - **Strong report**: the report contains a reproducible scenario and useful native/platform evidence, but the root cause still needs a regression test.
 - **Needs reproduction**: the symptom is important, but the report does not yet contain enough evidence to safely change the implementation.
 
-## Recommended order
+For the actionable backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md).
+
+## Resolution summary
+
+| Local status | Issues | Meaning |
+| --- | --- | --- |
+| Resolved in code | [#2873](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2873), [#2875](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2875), [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856), [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819), [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762), [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700), [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555), [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791), [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789), [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) | The local implementation contains the fix and focused regression coverage. Native/device/build validation is listed in the detailed entry when still required. |
+| Mitigated locally | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733), [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728), [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | A safe local behavior or targeted workaround exists, but the upstream/runtime boundary or final artifact still needs validation. |
+| Open or needs reproduction | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763), [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745), [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | No additional shared code change is justified from the available evidence. Reproduce on the affected platform or establish a source-to-sink path first. |
+
+## Remaining validation and follow-up
 
 | Priority | Issues | Reason |
 | --- | --- | --- |
-| Resolved | [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) | Android 2.0.2 keeps universal file-URL access disabled at the native boundary; migrate local resources to a controlled origin. |
-| Resolved | [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) | Android 2.0.2 coordinates provider startup and platform-view attach before bridge/document-start registration. |
-| Resolved | [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | Android 2.0.2 restores the Flutter IME connection after fullscreen exit and keeps the renderer/surface fallback. |
-| Mitigated | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows 1.0.2 removes static WinRT/Composition release during DLL unload and guards the reported Dart lifecycle races; affected-machine native creation still needs Windows validation. |
-| Fixed | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android 1.0.4 bounds interception/cookie waits and avoids IME calls against detached views. |
-| Fixed | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Android 1.0.4 preserves native HTTP/HTTPS main-frame navigation context when the Dart policy allows it. |
-| Fixed (validation pending) | [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) | iOS 2.0.0 provides scene-aware lifecycle handling; Forge now requires Flutter 3.38.6+ for the fixed iOS platform-view gesture behavior. |
-| Mitigated | [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android 1.0.5 skips the plugin's deprecated status-bar color call on Android 15+; remaining Play Console warnings may originate in Flutter or the host app. |
-| Mitigated (validation pending) | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 1.0.7 / root 2.0.6 adds final APK/AAB ELF and packaging alignment checks; validate every host application's release artifact. |
-| Fixed (validation pending) | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) | iOS 2.0.1 restores scroll insets after UIKit finishes keyboard dismissal; validate on iOS 17.2+ devices. |
-| P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | iOS 26 fullscreen video can remain black or unresponsive after seeking; the report is still consistent with an upstream WebKit/GPU issue and needs device validation. |
-| Mitigated (validation pending) | [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | Web now reports the exact same-origin iframe URL and returns `null` when browser same-origin policy prevents reading a cross-origin URL, avoiding stale initial data. |
-| Fixed (validation pending) | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) | Android OEM selection-menu rendering and Windows minimized-window hit testing now have guarded platform paths; validate on affected devices. |
-| Fixed (build validation pending) | [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) | Linux theme-color access is compiled only for WPE WebKit 2.50+, with a no-theme-color fallback on older versions. |
-| Mitigated (build validation pending) | [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862) | Linux CMake now lists every WPE `pkg-config` candidate, diagnostic command, and backend-specific prerequisite document. |
-| Fixed (validation pending) | [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) | Windows `loadFile` now maps Flutter assets to a restricted virtual HTTPS origin so relative resources do not depend on opaque `file:` origins. |
-| P2 | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux Intel/X11 GPU fallback still requires a platform-specific reproduction before changing the default renderer. |
-| Mitigated (validation pending) | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS 14–17 popup WebViews avoid the shared content-world evaluation path and detached popups skip early JavaScript; iOS 18/Xcode 26 still needs device validation. |
+| Device/native validation | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733), [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819), [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789), [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | The local fix exists; run the affected Windows, Android OEM, iOS/WebKit, or fullscreen matrix before declaring runtime behavior fully validated. |
+| Build/artifact validation | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) | Check the consuming Android AAB/APK, Linux WPE configurations, older WebKit builds, and Windows WebView2 asset trees. |
+| Reproduction required | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) | Do not change shared rendering, prompt, or multi-window code without a platform-specific reproduction and diagnostic evidence. |
+| Security claim validation | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745), [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | Validate the actual JavaScript/source-to-sink path and threat model before labeling either report as a package vulnerability. |
 
 ## Detailed findings
 
@@ -103,7 +99,7 @@ Issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/276
 
 ### #2868 — Samsung One UI custom selection toolbar renders `false`
 
-**Impact:** Visible Android text-selection UI corruption on Samsung One UI when the custom context menu is used. **Confidence:** Strong report; code path confirmed.
+**Status:** Fixed in Android 1.0.6; Samsung One UI device validation remains. **Impact:** Visible Android text-selection UI corruption on Samsung One UI when the custom context menu is used. **Confidence:** Strong report; code path confirmed.
 
 The custom action-mode implementation in `InAppWebView.kt` clears the native menu and rebuilds it as Flutter/plugin UI. It previously converted every native item title with `menuItem.title.toString()` and rendered it as a `TextView`. An OEM item that is icon-only or has a non-user-facing title could therefore appear as the literal string `false`. Hybrid composition avoids the custom toolbar in the reported configuration, but has a performance cost.
 
@@ -113,7 +109,7 @@ The custom action-mode implementation in `InAppWebView.kt` clears the native men
 
 ### #2862 — Linux WPE WebKit build prerequisites are easy to miss
 
-**Impact:** Ubuntu builds fail during CMake configuration when WPE WebKit development packages are absent or expose an unexpected `pkg-config` name. **Confidence:** Confirmed build requirement.
+**Status:** Mitigated in Linux 1.0.2; Ubuntu 24.04/26.04 backend builds remain to be exercised. **Impact:** Ubuntu builds fail during CMake configuration when WPE WebKit development packages are absent or expose an unexpected `pkg-config` name. **Confidence:** Confirmed build requirement.
 
 `flutter_inappwebview_forge_linux/linux/CMakeLists.txt` intentionally searches for WPE WebKit and stops with a fatal error when no supported package is found. Issue [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862) shows that this is not obvious on newer Ubuntu installations.
 
@@ -231,7 +227,7 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 ### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
 
-**Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and `onCreateWindow` results can be ignored. **Confidence:** Strong symptoms; several are likely iOS/WebKit/Flutter-version dependent.
+**Status:** #2710 is mitigated in iOS 2.1.0; #2831 and #2763 remain open pending reproductions. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and `onCreateWindow` results can be ignored. **Confidence:** Strong symptoms; several are likely iOS/WebKit/Flutter-version dependent.
 
 [Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) has a concrete iOS 26 report: after an inline HTML5 video is scrubbed and enters native fullscreen, playback can become black or unresponsive. The report also reproduces with `webview_flutter` and remains after testing the available inline/PiP/fullscreen settings, which points to the WebKit/GPU layer rather than a package-only path.
 
@@ -251,7 +247,7 @@ For a cross-origin document, the browser's same-origin policy can make `contentW
 
 ### #2789 and #2780 — Windows overlay and Linux WPE compatibility
 
-**Impact:** A minimized Windows WebView can continue intercepting desktop clicks; Linux builds can fail against WebKit versions below 2.50. **Confidence:** Strong report for #2789; confirmed compile-risk path for #2780.
+**Status:** Fixed in Windows 1.0.3 and Linux 1.0.1; native Windows and Linux validation remains. **Impact:** A minimized Windows WebView can continue intercepting desktop clicks; Linux builds can fail against WebKit versions below 2.50. **Confidence:** Strong report for #2789; confirmed compile-risk path for #2780.
 
 Issue [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) is a reproducible platform-view hit-test/overlay regression after minimizing a Windows app. Issue [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) matches an unguarded `webkit_web_view_get_theme_color` call in the Linux C++ source, which can cause an undefined-reference failure on older WPE WebKit versions.
 

@@ -51,7 +51,7 @@ Flutter 3.44 enables Swift Package Manager as the default native dependency path
 - Run the iOS example on iOS 15 and newer scene-based devices/simulators.
 - Exercise headless WebView rendering, Web Authentication, and InAppBrowser presentation/dismissal while the application moves between active and inactive scenes.
 
-The package baseline is now Flutter `>=3.38.0` and iOS `>=15.0`. Flutter 3.38–3.43 hosts can use the migration with Swift Package Manager explicitly enabled; Flutter 3.44 and newer hosts use the current default SPM workflow.
+The package baseline is now Flutter `>=3.38.6` and iOS `>=15.0`. Flutter 3.38.6–3.43 hosts can use the migration with Swift Package Manager explicitly enabled; Flutter 3.44 and newer hosts use the current default SPM workflow.
 
 ## Package-management design
 
