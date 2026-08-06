@@ -2048,6 +2048,15 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   bool? isElementFullscreenEnabled;
 
+  ///Sets whether Forge should keep the same [WKWebView] in a native fullscreen
+  ///container on iOS 26 and later after a media seek or time change.
+  ///
+  ///This works around an iOS 26 WebKit issue that can leave the standard HTML5
+  ///fullscreen surface black or unresponsive. The default value is `true`.
+  ///Set this to `false` to use the standard WebKit fullscreen presentation.
+  @SupportedPlatforms(platforms: [IOSPlatform(available: "26.0")])
+  bool? useNativeFullscreenContainer;
+
   ///Sets whether the web view's built-in find interaction native UI is enabled or not.
   ///
   ///The default value is `false`.
@@ -3413,6 +3422,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.isSiteSpecificQuirksModeEnabled = true,
     this.upgradeKnownHostsToHTTPS = true,
     this.isElementFullscreenEnabled = true,
+    this.useNativeFullscreenContainer = true,
     this.isFindInteractionEnabled = false,
     this.minimumViewportInset,
     this.maximumViewportInset,

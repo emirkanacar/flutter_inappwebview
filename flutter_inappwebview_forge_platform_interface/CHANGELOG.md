@@ -1,3 +1,8 @@
+## 1.1.0 - 2026-08-06
+
+- Add the iOS-only `InAppWebViewSettings.useNativeFullscreenContainer` setting, enabled by default for the iOS 26+ seek-to-fullscreen WebKit workaround.
+- Regenerate settings serialization, capability checks, and API documentation for the new setting.
+
 ## 1.0.4 - 2026-08-06
 
 - Clarify that Web iframe load callbacks and `getUrl()` report the current same-origin URL, while an inaccessible cross-origin URL is `null` after the document loads instead of the iframe's requested `src`.

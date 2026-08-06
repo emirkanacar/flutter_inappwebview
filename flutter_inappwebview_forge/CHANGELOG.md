@@ -1,9 +1,16 @@
+## 2.1.0 - 2026-08-06
+
+- iOS: keep the existing `WKWebView` in a native fullscreen container on iOS 26+ after a video seek or time change, avoiding the WebKit fullscreen surface that can become black or unresponsive.
+- iOS: add the `InAppWebViewSettings.useNativeFullscreenContainer` setting, enabled by default, with an opt-out for applications that need the standard WebKit fullscreen path.
+- Platform interface: expose and document the iOS-only fullscreen-container setting, including generated capability metadata.
+- Add iOS source-level regression coverage for the fullscreen message bridge, dynamic video tracking, native container restoration, and private per-WebView message authentication.
+- Document the mitigation and its remaining iOS/WebKit device-validation boundary for [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710).
+
 ## 2.0.7 - 2026-08-06
 
 - Web: report the current same-origin iframe URL after navigation instead of the requested `src`; inaccessible cross-origin URLs are reported as `null` rather than stale data.
 - Platform interface: document the Web iframe URL nullability and raise the federated dependency to 1.0.4.
 - iOS: defer popup WebView JavaScript initialization until Flutter attaches the platform view and use the page-world fallback for popup `evaluateJavaScript` and `callAsyncJavaScript` on iOS 14–17.
-- iOS: keep the iOS 26 fullscreen-video report as an upstream WebKit issue pending device validation; no speculative fullscreen workaround was added.
 - Add Web and iOS regression coverage and update issue triage for [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737), and [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867).
 - Refresh the iOS and Web example lockfiles to the new implementation and platform-interface versions.
 

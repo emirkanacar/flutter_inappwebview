@@ -79,6 +79,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var isSiteSpecificQuirksModeEnabled = true
     var upgradeKnownHostsToHTTPS = true
     var isElementFullscreenEnabled = true
+    var useNativeFullscreenContainer = true
     var isFindInteractionEnabled = false
     var minimumViewportInset: UIEdgeInsets? = nil
     var maximumViewportInset: UIEdgeInsets? = nil

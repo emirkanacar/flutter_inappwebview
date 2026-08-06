@@ -7,6 +7,7 @@
 
 import Flutter
 import Foundation
+import UIKit
 @preconcurrency import WebKit
 
 public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
@@ -14,6 +15,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                             WKDownloadDelegate,
                             PullToRefreshDelegate,
                             Disposable {
+    private enum FullscreenPresentationState {
+        case none
+        case webKit
+        case handoffPending
+        case nativeContainer
+    }
+
     static let METHOD_CHANNEL_NAME_PREFIX = "com.emirkanacar/flutter_inappwebview_"
 
     var id: Any? // viewId
@@ -31,7 +39,24 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     var currentOriginalUrl: URL?
     var inFullscreen = false
     weak var fullscreenWindow: UIWindow? // Track the window that entered fullscreen
+    private var fullscreenPresentationState: FullscreenPresentationState = .none
+    private var nativeFullscreenController: IOSFullscreenWebViewController?
+    private var nativeFullscreenVideoID: String?
+    private var nativeFullscreenFrameInfo: WKFrameInfo?
+    private var lastSeekedVideoID: String?
+    private var lastSeekedFrameInfo: WKFrameInfo?
+    private var lastSeekedAt: Date?
     var preventGestureDelay = false
+
+    var isInFullscreenPresentation: Bool {
+        if fullscreenPresentationState == .nativeContainer || inFullscreen {
+            return true
+        }
+        if #available(iOS 16.0, *) {
+            return fullscreenState == .enteringFullscreen || fullscreenState == .inFullscreen
+        }
+        return false
+    }
     
     private static var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
     private static var credentialsProposed: [URLCredential] = []
@@ -69,8 +94,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     var oldZoomScale = Float(1.0)
     
     fileprivate var interceptOnlyAsyncAjaxRequestsPluginScript: PluginScript?
-    
+
     private var exceptedBridgeSecret = NSUUID().uuidString
+    private var iosFullscreenVideoSecret = NSUUID().uuidString
     private var javaScriptBridgeEnabled = true
     
     init(id: Any?, plugin: InAppWebViewFlutterPlugin?, frame: CGRect, configuration: WKWebViewConfiguration,
@@ -640,7 +666,17 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             return
         }
         configuration.userContentController.initialize()
-        
+
+        if #available(iOS 26.0, *) {
+            configuration.userContentController.addPluginScript(
+                IOSFullscreenVideoJS.pluginScript(
+                    enabled: settings?.useNativeFullscreenContainer ?? true,
+                    allowedOriginRules: settings?.pluginScriptsOriginAllowList,
+                    messageSecret: iosFullscreenVideoSecret
+                )
+            )
+        }
+
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
@@ -863,17 +899,17 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     }
                 }
             }
-            // fullscreenState KVO - kept for potential future WebKit fixes,
-            // but currently UIWindow notifications are the reliable detection mechanism.
+            // Observe WebKit fullscreen transitions and unify them with the
+            // UIWindow fallback. iOS 26 can skip this KVO path, so both are
+            // intentionally retained.
             if #available(iOS 16.0, *) {
                 if keyPath == #keyPath(WKWebView.fullscreenState) {
-                    if fullscreenState == .enteringFullscreen && !inFullscreen {
-                        channelDelegate?.onEnterFullscreen()
-                        inFullscreen = true
-                    } else if fullscreenState == .exitingFullscreen && inFullscreen {
-                        fullscreenWindow = nil
-                        channelDelegate?.onExitFullscreen()
-                        inFullscreen = false
+                    if fullscreenState == .enteringFullscreen {
+                        if !beginNativeFullscreenFromRecentSeek() {
+                            enterWebKitFullscreen(window: nil)
+                        }
+                    } else if fullscreenState == .exitingFullscreen {
+                        exitWebKitFullscreen()
                     }
                 }
             }
@@ -1460,7 +1496,23 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 configuration.preferences.shouldPrintBackgrounds = newSettings.shouldPrintBackgrounds
             }
         }
-        
+
+        if #available(iOS 26.0, *),
+           newSettingsMap["useNativeFullscreenContainer"] != nil,
+           settings?.useNativeFullscreenContainer != newSettings.useNativeFullscreenContainer {
+            evaluateNativeFullscreenVideo(
+                source: IOSFullscreenVideoJS.setEnabledSource(newSettings.useNativeFullscreenContainer),
+                frameInfo: nil
+            )
+            if newSettings.useNativeFullscreenContainer == false {
+                if fullscreenPresentationState == .handoffPending {
+                    fallbackToWebKitFullscreen()
+                } else if let nativeFullscreenController = nativeFullscreenController {
+                    nativeFullscreenController.dismissFullscreen(animated: true)
+                }
+            }
+        }
+
         scrollView.isScrollEnabled = !(newSettings.disableVerticalScroll && newSettings.disableHorizontalScroll)
         
         self.settings = newSettings
@@ -2959,33 +3011,215 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         return isFullScreenSize && hasElevatedWindowLevel
     }
     
-    @objc func onEnterFullscreen(_ notification: Notification) {
-        // Check if already in fullscreen to avoid double-firing
-        // (both KVO observer and UIWindow notification might trigger this)
-        guard !inFullscreen else { return }
-        
-        if isFullscreenMediaWindow(notification.object as AnyObject?) {
-            fullscreenWindow = notification.object as? UIWindow
-            channelDelegate?.onEnterFullscreen()
-            inFullscreen = true
+    private func nativeFullscreenContainerEnabled() -> Bool {
+        guard #available(iOS 26.0, *) else { return false }
+        return settings?.useNativeFullscreenContainer ?? true
+    }
+
+    private func rememberSeekedVideo(videoID: String, frameInfo: WKFrameInfo) {
+        lastSeekedVideoID = videoID
+        lastSeekedFrameInfo = frameInfo
+        lastSeekedAt = Date()
+    }
+
+    private func hasRecentSeek(for videoID: String?) -> Bool {
+        guard let videoID = videoID,
+              lastSeekedVideoID == videoID,
+              let lastSeekedAt = lastSeekedAt else {
+            return false
+        }
+        return Date().timeIntervalSince(lastSeekedAt) <= 15
+    }
+
+    private func evaluateNativeFullscreenVideo(source: String, frameInfo: WKFrameInfo?, completion: (() -> Void)? = nil) {
+        if #available(iOS 14.0, *) {
+            evaluateJavaScript(source, frame: frameInfo, contentWorld: .page) { _ in
+                completion?()
+            }
+        } else {
+#if compiler(>=6.0)
+            evaluateJavaScript(source) { _, _ in
+                completion?()
+            }
+#else
+            evaluateJavaScript(source) { _ in
+                completion?()
+            }
+#endif
         }
     }
-    
+
+    private func beginNativeFullscreenFromRecentSeek() -> Bool {
+        guard nativeFullscreenContainerEnabled(),
+              fullscreenPresentationState != .handoffPending,
+              fullscreenPresentationState != .nativeContainer,
+              let videoID = lastSeekedVideoID,
+              let frameInfo = lastSeekedFrameInfo,
+              hasRecentSeek(for: videoID) else {
+            return false
+        }
+        beginNativeFullscreenContainer(videoID: videoID, frameInfo: frameInfo)
+        return true
+    }
+
+    private func beginNativeFullscreenContainer(videoID: String, frameInfo: WKFrameInfo) {
+        guard nativeFullscreenContainerEnabled(),
+              fullscreenPresentationState != .handoffPending,
+              fullscreenPresentationState != .nativeContainer else {
+            return
+        }
+
+        fullscreenPresentationState = .handoffPending
+        nativeFullscreenVideoID = videoID
+        nativeFullscreenFrameInfo = frameInfo
+
+        // Apply the CSS handoff before asking WebKit to close its media
+        // presentation. This keeps the same media element visible throughout
+        // the transition and avoids the stale iOS 26 fullscreen surface.
+        let presentContainer = { [weak self] in
+            DispatchQueue.main.async {
+                self?.presentNativeFullscreenContainer()
+            }
+        }
+
+        evaluateNativeFullscreenVideo(
+            source: IOSFullscreenVideoJS.enterSource(videoID: videoID),
+            frameInfo: frameInfo
+        ) { [weak self] in
+            guard let self = self, self.fullscreenPresentationState == .handoffPending else { return }
+            if #available(iOS 16.0, *) {
+                self.closeAllMediaPresentations(completionHandler: presentContainer)
+            } else {
+                self.closeAllMediaPresentations()
+                presentContainer()
+            }
+        }
+    }
+
+    private func presentNativeFullscreenContainer() {
+        guard fullscreenPresentationState == .handoffPending,
+              nativeFullscreenVideoID != nil,
+              let presenter = UIApplication.shared.visibleViewController,
+              presenter.viewIfLoaded?.window != nil else {
+            fallbackToWebKitFullscreen()
+            return
+        }
+
+        let controller = IOSFullscreenWebViewController(webView: self)
+        controller.onPresented = { [weak self] controller in
+            self?.nativeFullscreenControllerDidPresent(controller)
+        }
+        controller.onPresentationFailed = { [weak self] controller in
+            self?.nativeFullscreenPresentationFailed(controller)
+        }
+        controller.onRequestDismiss = { [weak self] in
+            self?.exitNativeFullscreenVideo()
+        }
+        controller.onDismissed = { [weak self] controller in
+            self?.nativeFullscreenControllerDidDismiss(controller)
+        }
+        nativeFullscreenController = controller
+        presenter.present(controller, animated: true)
+    }
+
+    private func nativeFullscreenControllerDidPresent(_ controller: IOSFullscreenWebViewController) {
+        guard nativeFullscreenController === controller,
+              fullscreenPresentationState == .handoffPending else {
+            return
+        }
+        fullscreenPresentationState = .nativeContainer
+        inFullscreen = true
+        fullscreenWindow = nil
+        channelDelegate?.onEnterFullscreen()
+    }
+
+    private func nativeFullscreenPresentationFailed(_ controller: IOSFullscreenWebViewController) {
+        guard nativeFullscreenController === controller else { return }
+        fallbackToWebKitFullscreen()
+        controller.dismissWithoutCallback()
+        nativeFullscreenController = nil
+    }
+
+    private func exitNativeFullscreenVideo() {
+        guard let videoID = nativeFullscreenVideoID else { return }
+        evaluateNativeFullscreenVideo(
+            source: IOSFullscreenVideoJS.exitSource(videoID: videoID),
+            frameInfo: nativeFullscreenFrameInfo
+        )
+    }
+
+    private func nativeFullscreenControllerDidDismiss(_ controller: IOSFullscreenWebViewController) {
+        guard nativeFullscreenController === controller else { return }
+        nativeFullscreenController = nil
+        nativeFullscreenVideoID = nil
+        nativeFullscreenFrameInfo = nil
+        lastSeekedVideoID = nil
+        lastSeekedFrameInfo = nil
+        lastSeekedAt = nil
+        fullscreenPresentationState = .none
+        fullscreenWindow = nil
+        if inFullscreen {
+            inFullscreen = false
+            channelDelegate?.onExitFullscreen()
+        }
+    }
+
+    private func fallbackToWebKitFullscreen() {
+        guard let videoID = nativeFullscreenVideoID else {
+            fullscreenPresentationState = .none
+            return
+        }
+        evaluateNativeFullscreenVideo(
+            source: IOSFullscreenVideoJS.fallbackSource(videoID: videoID),
+            frameInfo: nativeFullscreenFrameInfo
+        )
+        fullscreenPresentationState = .none
+        nativeFullscreenVideoID = nil
+        nativeFullscreenFrameInfo = nil
+    }
+
+    private func enterWebKitFullscreen(window: UIWindow?) {
+        guard fullscreenPresentationState != .handoffPending,
+              fullscreenPresentationState != .nativeContainer,
+              !inFullscreen else {
+            return
+        }
+        fullscreenPresentationState = .webKit
+        fullscreenWindow = window
+        inFullscreen = true
+        channelDelegate?.onEnterFullscreen()
+    }
+
+    private func exitWebKitFullscreen() {
+        guard fullscreenPresentationState == .webKit || inFullscreen else { return }
+        guard fullscreenPresentationState != .handoffPending,
+              fullscreenPresentationState != .nativeContainer else {
+            return
+        }
+        fullscreenPresentationState = .none
+        fullscreenWindow = nil
+        if inFullscreen {
+            inFullscreen = false
+            channelDelegate?.onExitFullscreen()
+        }
+    }
+
+    @objc func onEnterFullscreen(_ notification: Notification) {
+        if beginNativeFullscreenFromRecentSeek() {
+            return
+        }
+        if isFullscreenMediaWindow(notification.object as AnyObject?) {
+            enterWebKitFullscreen(window: notification.object as? UIWindow)
+        }
+    }
+
     @objc func onExitFullscreen(_ notification: Notification) {
-        // Check if not in fullscreen to avoid double-firing
-        // (both KVO observer and UIWindow notification might trigger this)
-        guard inFullscreen else { return }
-        
-        // Check if this is the same window that entered fullscreen
-        // or if it's a fullscreen-like media window being hidden
+        guard fullscreenPresentationState == .webKit || inFullscreen else { return }
         let hiddenWindow = notification.object as? UIWindow
         let isTrackedFullscreenWindow = fullscreenWindow != nil && fullscreenWindow === hiddenWindow
         let isLikelyFullscreenExit = isTrackedFullscreenWindow || isFullscreenMediaWindow(notification.object as AnyObject?)
-        
         if isLikelyFullscreenExit {
-            fullscreenWindow = nil
-            channelDelegate?.onExitFullscreen()
-            inFullscreen = false
+            exitWebKitFullscreen()
         }
     }
     
@@ -3008,8 +3242,45 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 //        let arguments: [String: Any?] = ["linkURL": linkURL]
 //        channel?.invokeMethod("onContextMenuWillPresentForElement", arguments: arguments)
 //    }
-    
+
+    private func handleIOSFullscreenVideoMessage(_ message: WKScriptMessage) -> Bool {
+        guard message.name == IOSFullscreenVideoJS.messageHandlerName,
+              let body = message.body as? [String: Any?],
+              body["secret"] as? String == iosFullscreenVideoSecret,
+              let type = body["type"] as? String else {
+            return message.name == IOSFullscreenVideoJS.messageHandlerName
+        }
+
+        guard let videoID = body["videoId"] as? String else {
+            return true
+        }
+
+        switch type {
+        case "seeked":
+            rememberSeekedVideo(videoID: videoID, frameInfo: message.frameInfo)
+        case "fullscreenWillBegin":
+            let hasSeeked = body["hasSeeked"] as? Bool ?? false
+            if hasSeeked {
+                rememberSeekedVideo(videoID: videoID, frameInfo: message.frameInfo)
+            }
+            if nativeFullscreenContainerEnabled(), (hasSeeked || hasRecentSeek(for: videoID)) {
+                beginNativeFullscreenContainer(videoID: videoID, frameInfo: message.frameInfo)
+            }
+        case "fullscreenDidEnd":
+            if fullscreenPresentationState == .webKit {
+                exitWebKitFullscreen()
+            }
+        default:
+            break
+        }
+        return true
+    }
+
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if handleIOSFullscreenVideoMessage(message) {
+            return
+        }
+
         guard javaScriptBridgeEnabled else {
             return
         }
@@ -3592,8 +3863,19 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         }
         windowBeforeCreatedCallbacks.removeAll()
     }
-    
+
     public func dispose() {
+        if nativeFullscreenVideoID != nil {
+            exitNativeFullscreenVideo()
+        }
+        if let nativeFullscreenController = nativeFullscreenController {
+            nativeFullscreenController.dismissWithoutCallback()
+            self.nativeFullscreenController = nil
+        }
+        nativeFullscreenVideoID = nil
+        nativeFullscreenFrameInfo = nil
+        fullscreenPresentationState = .none
+        inFullscreen = false
         channelDelegate?.dispose()
         channelDelegate = nil
         runWindowBeforeCreatedCallbacks()

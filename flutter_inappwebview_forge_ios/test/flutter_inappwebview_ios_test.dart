@@ -87,4 +87,53 @@ void main() {
     ),
     'popup async JavaScript does not use the page content world fallback',
   );
+
+  _assert(
+    source.contains('IOSFullscreenVideoJS.messageHandlerName'),
+    'iOS 26 fullscreen video message handler is not wired',
+  );
+  _assert(
+    source.contains('beginNativeFullscreenContainer'),
+    'iOS 26 native fullscreen handoff is missing',
+  );
+  _assert(
+    source.contains(
+      'closeAllMediaPresentations(completionHandler: presentContainer)',
+    ),
+    'iOS 26 handoff does not close the WebKit media presentation',
+  );
+  _assert(
+    source.contains('useNativeFullscreenContainer'),
+    'iOS 26 fullscreen opt-out setting is not consumed by the native implementation',
+  );
+
+  final fullscreenScript = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PluginScriptsJS/IOSFullscreenVideoJS.swift',
+  ).readAsStringSync();
+  _assert(
+    fullscreenScript.contains('webkitEnterFullscreen'),
+    'iOS fullscreen interception script is missing the video API hook',
+  );
+  _assert(
+    fullscreenScript.contains('MutationObserver'),
+    'iOS fullscreen interception script does not handle dynamically added videos',
+  );
+  _assert(
+    fullscreenScript.contains('messageSecret'),
+    'iOS fullscreen interception script is missing its private message secret',
+  );
+
+  final fullscreenController = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/IOSFullscreenWebViewController.swift',
+  ).readAsStringSync();
+  _assert(
+    fullscreenController.contains('restoreWebView'),
+    'native fullscreen controller does not restore the Flutter web view',
+  );
+  _assert(
+    fullscreenController.contains('modalPresentationStyle = .fullScreen'),
+    'native fullscreen controller is not presented full screen',
+  );
 }

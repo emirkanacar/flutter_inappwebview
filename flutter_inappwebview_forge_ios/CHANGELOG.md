@@ -1,3 +1,10 @@
+## 2.1.0 - 2026-08-06
+
+- Add an iOS 26+ native fullscreen container that keeps the same `WKWebView` instance alive after a video seek or time change.
+- Intercept the affected HTML5 video fullscreen path without using the public JavaScript bridge, preserve dynamic and iframe video discovery, and authenticate native messages per WebView.
+- Restore the WebView's original superview, constraints, frame, and autoresizing state when fullscreen ends or the WebView is disposed.
+- Add source-level regression coverage for the native fullscreen state machine and controller lifecycle.
+
 ## 2.0.2 - 2026-08-06
 
 - Defer popup WebView JavaScript initialization until Flutter attaches the platform view.
