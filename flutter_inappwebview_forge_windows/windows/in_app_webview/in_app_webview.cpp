@@ -274,6 +274,7 @@ namespace flutter_inappwebview_plugin
     if (succeededOrLog(hrWebView2Settings)) {
       webView2Settings->put_IsScriptEnabled(settings->javaScriptEnabled);
       webView2Settings->put_IsZoomControlEnabled(settings->supportZoom);
+      webViewController->put_ZoomFactor(settings->pageZoom);
       webView2Settings->put_AreDevToolsEnabled(settings->isInspectable);
       webView2Settings->put_AreDefaultContextMenusEnabled(!settings->disableContextMenu);
       webView2Settings->put_IsBuiltInErrorPageEnabled(!settings->disableDefaultErrorPage);
@@ -3052,6 +3053,9 @@ namespace flutter_inappwebview_plugin
 
       if (fl_map_contains_not_null(newSettingsMap, "supportZoom") && settings->supportZoom != newSettings->supportZoom) {
         webView2Settings->put_IsZoomControlEnabled(newSettings->supportZoom);
+      }
+      if (fl_map_contains_not_null(newSettingsMap, "pageZoom") && settings->pageZoom != newSettings->pageZoom) {
+        webViewController->put_ZoomFactor(newSettings->pageZoom);
       }
 
       if (fl_map_contains_not_null(newSettingsMap, "isInspectable") && settings->isInspectable != newSettings->isInspectable) {

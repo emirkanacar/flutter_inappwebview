@@ -1,3 +1,7 @@
+## 1.0.5 - 2026-08-06
+
+- Apply `InAppWebViewSettings.pageZoom` through WebView2 `ICoreWebView2Controller.ZoomFactor` and report the effective zoom factor in real settings.
+
 ## 1.0.4 - 2026-08-06
 
 - Load Flutter assets through WebView2's restricted virtual HTTPS origin so relative local resources work without an opaque `file:` origin.

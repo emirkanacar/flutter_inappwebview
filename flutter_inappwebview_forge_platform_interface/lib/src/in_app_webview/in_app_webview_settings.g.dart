@@ -1439,6 +1439,7 @@ class InAppWebViewSettings {
   ///**Officially Supported Platforms/Implementations**:
   ///- iOS WKWebView 14.0+ ([Official API - WKWebView.pageZoom](https://developer.apple.com/documentation/webkit/wkwebview/3516411-pagezoom))
   ///- macOS WKWebView 11.0+ ([Official API - WKWebView.pageZoom](https://developer.apple.com/documentation/webkit/wkwebview/3516411-pagezoom))
+  ///- Windows WebView2 ([Official API - ICoreWebView2Controller.ZoomFactor](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#get_zoomfactor))
   double? pageZoom;
 
   ///Specifies whether autosave for password information is enabled.
@@ -4736,6 +4737,7 @@ enum InAppWebViewSettingsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- iOS WKWebView 14.0+ ([Official API - WKWebView.pageZoom](https://developer.apple.com/documentation/webkit/wkwebview/3516411-pagezoom))
   ///- macOS WKWebView 11.0+ ([Official API - WKWebView.pageZoom](https://developer.apple.com/documentation/webkit/wkwebview/3516411-pagezoom))
+  ///- Windows WebView2 ([Official API - ICoreWebView2Controller.ZoomFactor](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#get_zoomfactor))
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -6122,6 +6124,7 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
             [
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.passwordAutosaveEnabled:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

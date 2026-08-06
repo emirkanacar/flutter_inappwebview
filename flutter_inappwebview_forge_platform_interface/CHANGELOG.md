@@ -1,5 +1,7 @@
 ## 1.1.0 - 2026-08-06
 
+- Add `WebAuthenticationSessionSettings.additionalHeaderFields` for iOS 17.4+ and macOS 14.4+.
+- Mark `InAppWebViewSettings.pageZoom` as supported by Windows WebView2 through `ICoreWebView2Controller.ZoomFactor`.
 - Add Android-only `PlatformInAppWebViewController.setBackgroundColor` capability metadata and regenerate the controller method support checks.
 - Add the iOS-only `InAppWebViewSettings.useNativeFullscreenContainer` setting, enabled by default for the iOS 26+ seek-to-fullscreen WebKit workaround.
 - Regenerate settings serialization, capability checks, and API documentation for the new setting.

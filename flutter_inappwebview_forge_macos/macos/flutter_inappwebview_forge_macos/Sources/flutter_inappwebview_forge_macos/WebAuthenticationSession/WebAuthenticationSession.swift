@@ -41,6 +41,9 @@ public class WebAuthenticationSession: NSObject, ASWebAuthenticationPresentation
     public func prepare() {
         if #available(macOS 10.15, *), let session = session as? ASWebAuthenticationSession {
             session.prefersEphemeralWebBrowserSession = settings.prefersEphemeralWebBrowserSession
+            if #available(macOS 14.4, *), let additionalHeaderFields = settings.additionalHeaderFields {
+                session.additionalHeaderFields = additionalHeaderFields
+            }
         }
     }
     

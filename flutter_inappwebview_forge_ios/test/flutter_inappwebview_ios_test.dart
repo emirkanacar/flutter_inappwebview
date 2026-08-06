@@ -107,6 +107,25 @@ void main() {
     'console logging does not serialize object arguments',
   );
 
+  final authenticationSettings = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/WebAuthenticationSession/'
+    'WebAuthenticationSessionSettings.swift',
+  ).readAsStringSync();
+  final authenticationSession = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/WebAuthenticationSession/'
+    'WebAuthenticationSession.swift',
+  ).readAsStringSync();
+  _assert(
+    authenticationSettings.contains('additionalHeaderFields'),
+    'iOS authentication settings do not expose additional headers',
+  );
+  _assert(
+    authenticationSession.contains('session.additionalHeaderFields'),
+    'iOS authentication session does not apply additional headers',
+  );
+
   _assert(
     source.contains('IOSFullscreenVideoJS.messageHandlerName'),
     'iOS 26 fullscreen video message handler is not wired',

@@ -20,6 +20,7 @@ namespace flutter_inappwebview_plugin
     bool javaScriptEnabled = true;
     bool transparentBackground = false;
     bool supportZoom = true;
+    double pageZoom = 1.0;
     bool isInspectable = true;
     bool disableContextMenu = false;
     bool incognito = false;

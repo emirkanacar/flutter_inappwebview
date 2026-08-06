@@ -13,6 +13,7 @@ import SafariServices
 public class WebAuthenticationSessionSettings: ISettings<WebAuthenticationSession> {
     
     var prefersEphemeralWebBrowserSession = false
+    var additionalHeaderFields: [String: String]? = nil
     
     override init(){
         super.init()
@@ -22,6 +23,9 @@ public class WebAuthenticationSessionSettings: ISettings<WebAuthenticationSessio
         var realOptions: [String: Any?] = toMap()
         if #available(macOS 10.15, *), let session = obj?.session as? ASWebAuthenticationSession {
             realOptions["prefersEphemeralWebBrowserSession"] = session.prefersEphemeralWebBrowserSession
+            if #available(macOS 14.4, *) {
+                realOptions["additionalHeaderFields"] = session.additionalHeaderFields
+            }
         }
         return realOptions
     }

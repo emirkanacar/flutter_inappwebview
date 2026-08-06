@@ -21,6 +21,9 @@ void main() {
   final nativeViewSource = _sourceFile(
     'windows/in_app_webview/in_app_webview.cpp',
   ).readAsStringSync();
+  final settingsSource = _sourceFile(
+    'windows/in_app_webview/in_app_webview_settings.cpp',
+  ).readAsStringSync();
   final dartViewSource = _sourceFile(
     'lib/src/in_app_webview/custom_platform_view.dart',
   ).readAsStringSync();
@@ -80,5 +83,15 @@ void main() {
     nativeViewSource,
     'isSafeFlutterAssetPath',
     'the relative asset path validation',
+  );
+  _expectContains(
+    nativeViewSource,
+    'put_ZoomFactor',
+    'the WebView2 page zoom setter',
+  );
+  _expectContains(
+    settingsSource,
+    'get_ZoomFactor',
+    'the WebView2 page zoom getter',
   );
 }

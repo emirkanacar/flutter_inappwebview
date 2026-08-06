@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Thirty-two issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
+The export contains 125 issues and 73 PRs. Thirty-four issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
 | Bugs | 76 | Technical work, validation, or reproduction required |
-| Enhancements | 12 | API/design decision and implementation required |
+| Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining export records** | **93** | **90 technical records after excluding showcase entries** |
+| **Total remaining export records** | **91** | **88 technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -28,7 +28,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Already excluded from this plan
 
-These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, and `#2863`.
+These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, and `#2812`.
 
 Their remaining device/build checks are included below only when they block release confidence. Do not reopen their implementation without new evidence.
 
@@ -86,9 +86,7 @@ These items must not be implemented by copying an upstream PR directly. Each one
 | Issue | Requested capability | Design step | Implementation boundary |
 | --- | --- | --- | --- |
 | [#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846) | AGP 9 built-in Kotlin | Finish the migration tracked in [the Android plan](android-kotlin-kts-migration-plan.md) after the Flutter `>=3.47.0` toolchain decision. | Android Gradle files, examples, CI, namespace/registrant checks, and release builds. |
-| [#2835](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2835) | Additional `WebAuthenticationSession` headers | Define supported OS versions and header filtering/security rules. | Platform interface, iOS/macOS Swift implementation, SPM/CocoaPods tests, and docs. |
 | [#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834) | Sec-CH-UA and Client Hints control | Confirm which headers the native engines permit and document that browser/WebView policy may override them. | Per-platform settings only where supported; no false cross-platform guarantee. |
-| [#2812](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2812) | Windows `pageZoom` | Map the existing shared setting to WebView2 and define supported runtime/version behavior. | Windows native settings, capability metadata, and Windows integration test. |
 | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | WebAssembly support | Define whether this means browser WASM compilation, embedded WASM execution, or a native backend requirement. | Reproduce with a minimal WASM page before changing plugin code; likely a support/documentation item. |
 | [#2805](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2805) | Windows WebView2 `ProxyController` | Audit the existing platform-interface proxy contract and WebView2 proxy APIs. | Windows native implementation, capability checks, proxy reset, and process-lifetime tests. |
 | [#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793) | Typed `bridgeEvents` API | Define event ordering, backpressure, payload typing, and compatibility with current JavaScript handlers. | Additive platform-interface API, all bridge implementations, generated metadata, and integration tests. |

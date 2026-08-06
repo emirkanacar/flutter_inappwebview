@@ -33,8 +33,20 @@ class WebAuthenticationSessionSettings_ {
   )
   bool? prefersEphemeralWebBrowserSession;
 
+  ///Additional HTTP headers sent with the authentication request when the native API supports them.
+  ///
+  ///This property is available on iOS 17.4+ and macOS 14.4+.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(available: '17.4'),
+      MacOSPlatform(available: '14.4'),
+    ],
+  )
+  Map<String, String>? additionalHeaderFields;
+
   WebAuthenticationSessionSettings_({
     this.prefersEphemeralWebBrowserSession = false,
+    this.additionalHeaderFields,
   });
 
   ///Check if the given [property] is supported by the [defaultTargetPlatform] or a specific [platform].

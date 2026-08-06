@@ -1,5 +1,6 @@
 ## 2.1.0 - 2026-08-06
 
+- Support `WebAuthenticationSessionSettings.additionalHeaderFields` on iOS 17.4+.
 - Preserve object data and Error stack/message content when forwarding console arguments to Dart ([#2850](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2850)).
 - Add an iOS 26+ native fullscreen container that keeps the same `WKWebView` instance alive after a video seek or time change.
 - Intercept the affected HTML5 video fullscreen path without using the public JavaScript bridge, preserve dynamic and iframe video discovery, and authenticate native messages per WebView.

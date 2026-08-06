@@ -1,5 +1,6 @@
 ## 1.1.0 - 2026-08-06
 
+- Support `WebAuthenticationSessionSettings.additionalHeaderFields` on macOS 14.4+.
 - Complete the macOS Swift Package Manager manifest with FlutterFramework, Swift Collections, and processed resources while retaining CocoaPods support.
 - Update the Swift Collections SPM baseline and lock to `1.6.0` for current Xcode package-trait resolution.
 

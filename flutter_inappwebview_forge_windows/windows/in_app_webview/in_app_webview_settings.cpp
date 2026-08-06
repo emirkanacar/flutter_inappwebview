@@ -21,6 +21,7 @@ namespace flutter_inappwebview_plugin
     javaScriptEnabled = get_fl_map_value(encodableMap, "javaScriptEnabled", javaScriptEnabled);
     transparentBackground = get_fl_map_value(encodableMap, "transparentBackground", transparentBackground);
     supportZoom = get_fl_map_value(encodableMap, "supportZoom", supportZoom);
+    pageZoom = get_fl_map_value(encodableMap, "pageZoom", pageZoom);
     isInspectable = get_fl_map_value(encodableMap, "isInspectable", isInspectable);
     disableContextMenu = get_fl_map_value(encodableMap, "disableContextMenu", disableContextMenu);
     incognito = get_fl_map_value(encodableMap, "incognito", incognito);
@@ -64,6 +65,7 @@ namespace flutter_inappwebview_plugin
       {"javaScriptEnabled", javaScriptEnabled},
       {"transparentBackground", transparentBackground},
       {"supportZoom", supportZoom},
+      {"pageZoom", pageZoom},
       {"isInspectable", isInspectable},
       {"disableContextMenu", disableContextMenu},
       {"incognito", incognito},
@@ -103,6 +105,12 @@ namespace flutter_inappwebview_plugin
         BOOL realSupportZoom;
         if (SUCCEEDED(settings->get_IsZoomControlEnabled(&realSupportZoom))) {
           settingsMap["supportZoom"] = (bool)realSupportZoom;
+        }
+        if (inAppWebView->webViewController) {
+          double realPageZoom;
+          if (SUCCEEDED(inAppWebView->webViewController->get_ZoomFactor(&realPageZoom))) {
+            settingsMap["pageZoom"] = realPageZoom;
+          }
         }
         BOOL realIsInspectable;
         if (SUCCEEDED(settings->get_AreDevToolsEnabled(&realIsInspectable))) {

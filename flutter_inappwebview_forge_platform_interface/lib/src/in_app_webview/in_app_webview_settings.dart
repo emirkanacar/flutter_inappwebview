@@ -1830,6 +1830,11 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
         apiUrl:
             "https://developer.apple.com/documentation/webkit/wkwebview/3516411-pagezoom",
       ),
+      WindowsPlatform(
+        apiName: "ICoreWebView2Controller.ZoomFactor",
+        apiUrl:
+            "https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2controller#get_zoomfactor",
+      ),
     ],
   )
   double? pageZoom;
