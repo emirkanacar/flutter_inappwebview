@@ -32,4 +32,35 @@ void main() {
       isFalse,
     );
   });
+
+  test('native WebView background color uses a dedicated channel method', () {
+    final controller =
+        File(
+          'lib/src/in_app_webview/in_app_webview_controller.dart',
+        ).existsSync()
+        ? File('lib/src/in_app_webview/in_app_webview_controller.dart')
+        : File(
+            'flutter_inappwebview_forge_android/lib/src/in_app_webview/in_app_webview_controller.dart',
+          );
+    final delegate =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/WebViewChannelDelegate.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/WebViewChannelDelegate.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/WebViewChannelDelegate.kt',
+          );
+
+    expect(
+      controller.readAsStringSync(),
+      contains("invokeMethod('setBackgroundColor'"),
+    );
+    expect(
+      delegate.readAsStringSync(),
+      contains('WebViewChannelDelegateMethods.setBackgroundColor'),
+    );
+    expect(delegate.readAsStringSync(), contains('view.setBackgroundColor'));
+  });
 }

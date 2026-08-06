@@ -1418,6 +1418,26 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
     );
   }
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setBackgroundColor}
+  ///Sets the native WebView background [color].
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setBackgroundColor.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'View.setBackgroundColor',
+        apiUrl:
+            'https://developer.android.com/reference/android/view/View#setBackgroundColor(int)',
+      ),
+    ],
+  )
+  Future<void> setBackgroundColor(Color color) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.setBackgroundColor.name} is not implemented on the current platform',
+    );
+  }
+
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.getSettings}
   ///Gets the current WebView settings. Returns `null` if it wasn't able to get them.
   ///{@endtemplate}

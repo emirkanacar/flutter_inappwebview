@@ -2385,6 +2385,12 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
   }
 
   @override
+  Future<void> setBackgroundColor(Color color) async {
+    final args = <String, dynamic>{'color': color.toHex()};
+    await channel?.invokeMethod('setBackgroundColor', args);
+  }
+
+  @override
   Future<InAppWebViewSettings?> getSettings() async {
     Map<String, dynamic> args = <String, dynamic>{};
 

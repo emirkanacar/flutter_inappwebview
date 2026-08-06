@@ -301,6 +301,12 @@ class InAppWebViewController {
   Future<void> setSettings({required InAppWebViewSettings settings}) =>
       platform.setSettings(settings: settings);
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setBackgroundColor}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setBackgroundColor.supported_platforms}
+  Future<void> setBackgroundColor(Color color) =>
+      platform.setBackgroundColor(color);
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.getSettings}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.getSettings.supported_platforms}

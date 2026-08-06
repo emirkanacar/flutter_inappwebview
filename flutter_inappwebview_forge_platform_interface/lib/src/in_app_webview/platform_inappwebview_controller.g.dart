@@ -2193,6 +2193,20 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   setAllMediaPlaybackSuspended,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.setBackgroundColor] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setBackgroundColor.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - View.setBackgroundColor](https://developer.android.com/reference/android/view/View#setBackgroundColor(int)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [color]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  setBackgroundColor,
+
   ///Can be used to check if the [PlatformInAppWebViewController.setCameraCaptureState] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setCameraCaptureState.supported_platforms}
@@ -3579,6 +3593,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.setBackgroundColor:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setCameraCaptureState:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

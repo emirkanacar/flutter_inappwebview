@@ -23,6 +23,7 @@ enum class WebViewChannelDelegateMethods {
     isLoading,
     takeScreenshot,
     setSettings,
+    setBackgroundColor,
     getSettings,
     close,
     show,

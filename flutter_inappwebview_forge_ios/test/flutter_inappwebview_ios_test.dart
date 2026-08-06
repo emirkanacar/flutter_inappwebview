@@ -88,6 +88,25 @@ void main() {
     'popup async JavaScript does not use the page content world fallback',
   );
 
+  final consoleScript = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PluginScriptsJS/ConsoleLogJS.swift',
+  ).readAsStringSync();
+  _assert(
+    consoleScript.contains('value instanceof Error'),
+    'console logging does not preserve Error values',
+  );
+  _assert(
+    consoleScript.contains(
+      "value.stack || (value.name + ': ' + value.message)",
+    ),
+    'console logging does not preserve Error stack/message data',
+  );
+  _assert(
+    consoleScript.contains('argument = JSON.stringify(value)'),
+    'console logging does not serialize object arguments',
+  );
+
   _assert(
     source.contains('IOSFullscreenVideoJS.messageHandlerName'),
     'iOS 26 fullscreen video message handler is not wired',

@@ -1,5 +1,7 @@
 ## 2.1.0 - 2026-08-06
 
+- Android: add `InAppWebViewController.setBackgroundColor` for changing the native WebView background color ([#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863)).
+- iOS: preserve object data and Error stack/message content when forwarding console arguments ([#2850](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2850)).
 - iOS: keep the existing `WKWebView` in a native fullscreen container on iOS 26+ after a video seek or time change, avoiding the WebKit fullscreen surface that can become black or unresponsive.
 - iOS: add the `InAppWebViewSettings.useNativeFullscreenContainer` setting, enabled by default, with an opt-out for applications that need the standard WebKit fullscreen path.
 - Platform interface: expose and document the iOS-only fullscreen-container setting, including generated capability metadata.

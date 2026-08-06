@@ -1,5 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview
 
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.webkit.ValueCallback
@@ -231,6 +232,21 @@ open class WebViewChannelDelegate(
           view.setSettings(settings, HashMap(settingsMap))
         }
         result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.setBackgroundColor -> {
+        val view = webView
+        val color = call.argument<String>("color")
+        if (view == null || color == null) {
+          result.error("invalid_arguments", "A WebView and color are required", null)
+        } else {
+          try {
+            view.setBackgroundColor(Color.parseColor(color))
+            result.success(true)
+          } catch (e: IllegalArgumentException) {
+            result.error("invalid_color", "The color value is invalid", null)
+          }
+        }
       }
 
       WebViewChannelDelegateMethods.getSettings -> {

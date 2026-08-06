@@ -33,9 +33,20 @@ public class ConsoleLogJS {
             function _callHandler(logLevel, args) {
                 var message = '';
                 for (var i in args) {
+                    var argument = '';
                     try {
-                        message += message === '' ? args[i] : ' ' + args[i];
-                    } catch(_) {}
+                        var value = args[i];
+                        if (value instanceof Error) {
+                            argument = value.stack || (value.name + ': ' + value.message);
+                        } else if (value !== null && typeof value === 'object') {
+                            argument = JSON.stringify(value);
+                        } else {
+                            argument = String(value);
+                        }
+                    } catch(_) {
+                        try { argument = String(args[i]); } catch(_) {}
+                    }
+                    message += message === '' ? argument : ' ' + argument;
                 }
                 try {
                     window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME()).callHandler('onConsoleMessage', {'level': logLevel, 'message': message})
