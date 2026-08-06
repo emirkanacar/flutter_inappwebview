@@ -96,4 +96,15 @@ void main() {
     expect(source, contains('setCompoundDrawablesRelative'));
     expect(source, contains('if (!hasMeaningfulTitle && itemIcon == null)'));
   });
+
+  test('Android invalidates the WebView after window visibility returns', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('override fun onWindowVisibilityChanged'));
+    expect(source, contains('postInvalidateOnAnimation()'));
+    expect(source, contains('requestLayout()'));
+  });
 }

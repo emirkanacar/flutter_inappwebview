@@ -2506,9 +2506,17 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       if (visibility != View.GONE) {
         super.onWindowVisibilityChanged(View.VISIBLE)
       }
+      if (visibility != View.GONE) {
+        postInvalidateOnAnimation()
+        requestLayout()
+      }
       return
     }
     super.onWindowVisibilityChanged(visibility)
+    if (visibility != View.GONE) {
+      postInvalidateOnAnimation()
+      requestLayout()
+    }
   }
 
   override fun getZoomScale(): Float = zoomScale

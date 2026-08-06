@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Thirty-eight issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
+The export contains 125 issues and 73 PRs. Thirty-nine issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
-| Bugs | 72 | Technical work, validation, or reproduction required |
+| Bugs | 71 | Technical work, validation, or reproduction required |
 | Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining export records** | **87** | **84 technical records after excluding showcase entries** |
+| **Total remaining export records** | **86** | **83 technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -28,7 +28,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Already excluded from this plan
 
-These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, `#2725`, `#2741`, and `#2852`.
+These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, `#2725`, `#2741`, `#2852`, and `#2837`.
 
 Their remaining device/build checks are included below only when they block release confidence. Do not reopen their implementation without new evidence.
 
@@ -59,7 +59,7 @@ Their remaining device/build checks are included below only when they block rele
 | Issues | Work package | Plan |
 | --- | --- | --- |
 | [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594) | System WebView crashes and implementation-specific casts | Capture exact Android API, WebView package/version, provider, stack trace, and settings path. Keep all provider-specific casts behind feature checks; add a fallback for unsupported implementations. |
-| [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837), [#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659) | Android renderer, multi-window, startup, network, and input regressions | Test API 19/21/23/29/35/36, low-memory devices, OEM WebViews, lock/resume, multi-window, mobile data, HTML input, and repeated navigation. Add only reproducible lifecycle guards or fallback paths. |
+| [#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659) | Android renderer, multi-window, startup, network, and input regressions | Test API 19/21/23/29/35/36, low-memory devices, OEM WebViews, lock/resume, multi-window, mobile data, HTML input, and repeated navigation. Add only reproducible lifecycle guards or fallback paths. |
 | [#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | Multi-window, activity result, plugin registration, and path-handler lifecycle | Trace attach/detach/reattach and activity result ownership. Verify channel registration is idempotent and path handlers reject invalid/traversal input. |
 | [#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783), [#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Android/Windows input, cookies, scroll, and client-certificate callbacks | Build focused channel tests for nullable callbacks and native ownership, then run physical-device/desktop integration tests. Do not broaden callback payloads without platform-interface updates. |
 
