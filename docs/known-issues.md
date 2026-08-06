@@ -17,9 +17,9 @@ The confidence labels below describe the evidence available during this review:
 | Resolved | [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) | Android 2.0.2 keeps universal file-URL access disabled at the native boundary; migrate local resources to a controlled origin. |
 | Resolved | [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) | Android 2.0.2 coordinates provider startup and platform-view attach before bridge/document-start registration. |
 | Resolved | [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | Android 2.0.2 restores the Flutter IME connection after fullscreen exit and keeps the renderer/surface fallback. |
-| P1 | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows native lifetime failures can terminate the process during WebView creation or shutdown. |
-| P1 | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android callback blocking, cookie cleanup, and IME lifecycle paths have freeze/ANR/crash reports. |
-| P1 | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Navigation interception can destroy `window.opener`, referrer, and payment-popup flows. |
+| Mitigated | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows 1.0.2 removes static WinRT/Composition release during DLL unload and guards the reported Dart lifecycle races; affected-machine native creation still needs Windows validation. |
+| Fixed | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android 1.0.4 bounds interception/cookie waits and avoids IME calls against detached views. |
+| Fixed | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Android 1.0.4 preserves native HTTP/HTTPS main-frame navigation context when the Dart policy allows it. |
 | P2 | [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) | iOS lifecycle and Flutter-engine compatibility gaps that should be handled before the next platform transition. |
 | P2 | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android Play/target-SDK compatibility requirements can block releases or create policy warnings. |
 | P2 | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | Cross-platform navigation, keyboard/scroll, and fullscreen behavior affects user-visible functionality. |
@@ -158,27 +158,33 @@ The Android Forge implementation now preserves the Dart setting for federated AP
 
 ### #2840 and #2733 — Windows native lifetime crashes
 
-**Impact:** Process termination during WebView creation or application shutdown. **Confidence:** Strong reports; exact root cause needs native repro.
+**Status:** Mitigated in release 2.0.3 (Windows 1.0.2); run the affected-machine native matrix before calling the creation crash fully resolved. **Impact:** Process termination during WebView creation or application shutdown. **Confidence:** Strong reports; #2733 has a confirmed static lifetime path, while #2840 still needs an affected Windows machine for native confirmation.
 
 Issue [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840) reports deterministic `MSVCP140.dll` access violations during `InAppWebView` creation on affected machines. Issue [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) reports an exit-time access violation while static WinRT Composition objects are destroyed. The repository has a process-wide static compositor in `InAppWebViewManager`, so creation and shutdown deserve a shared native lifetime audit.
 
-**Recommended action:** reproduce with matching Windows/WebView2/VC runtime matrices, remove process-lifetime COM objects where possible, and make teardown explicit before DLL detach. Add create/destroy/recreate/exit tests rather than relying only on Dart `dispose` tests.
+The Forge Windows implementation now keeps shared WinRT/Composition pointers out of static RAII destruction, tracks the last live manager, detaches shared resources before DLL teardown, and shuts down the dispatcher queue without releasing process-lifetime objects during unload. The Dart custom platform view also checks `mounted` after async initialization and `RenderBox.attached` after awaits before reporting size or position.
+
+**Remaining validation:** reproduce #2840 with the reported WebView2/VC runtime matrix and run create/destroy/recreate/exit tests on Windows.
 
 ### #2580, #2718, and #2555 — Android blocking callback and lifecycle failures
 
-**Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
+**Status:** Fixed in release 2.0.3 (Android 1.0.4); retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
 
 For [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), the native `shouldInterceptRequest` path can synchronously wait for a Dart result through `Util.invokeMethodAndWaitResult`, which posts to the main looper and then blocks on a latch. This is a plausible deadlock when WebView resource callbacks and UI-thread work depend on each other. [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) shows a Play Console native trace through `MyCookieManager.deleteAllCookies`, where `removeAllCookies` is followed immediately by `flush`. [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) reports an `InputMethodManager` null crash on Android 10 and is related to the same general focus/lifecycle surface as #2878.
 
-**Recommended action:** make resource interception non-blocking or bounded by timeout, ensure null/default responses do not hold WebView threads, serialize cookie operations and completion callbacks, and harden IME calls against detached `ViewRootImpl` state.
+The Forge implementation now caps concurrent synchronous resource-interception callbacks at two and uses a 250 ms callback timeout for this path; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal, and the input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection.
+
+**Remaining validation:** run rapid back/forward navigation with `shouldInterceptRequest`, Play Console cookie-clear scenarios, and Android 10 text-input tests on physical devices.
 
 ### #2791 — `shouldOverrideUrlLoading` breaks browsing context
 
-**Impact:** Payment and popup flows can lose `window.opener`, `Referer`, and `Sec-Fetch-Site` even when Dart returns `NavigationActionPolicy.ALLOW`. **Confidence:** Confirmed path.
+**Status:** Fixed in release 2.0.3 (Android 1.0.4); validate popup/payment and cancellation behavior on Android WebView versions in the release matrix. **Impact:** Payment and popup flows can lose `window.opener`, `Referer`, and `Sec-Fetch-Site` even when Dart returns `NavigationActionPolicy.ALLOW`. **Confidence:** Confirmed path.
 
-Issue [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) identifies the Android interception pattern: the original navigation is cancelled, then `allowShouldOverrideUrlLoading()` starts a new `loadUrl()`. The repository contains that same path in both `InAppWebViewClient.java` and `InAppWebViewClientCompat.java`. A new navigation cannot preserve all browser context from the cancelled one.
+Issue [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) identifies the Android interception pattern: the original navigation is cancelled, then `allowShouldOverrideUrlLoading()` starts a new `loadUrl()`. The repository contained that same path in both `InAppWebViewClient.kt` and `InAppWebViewClientCompat.kt`. A new navigation cannot preserve all browser context from the cancelled one.
 
-**Recommended action:** allow native HTTP(S) navigation to continue when the Dart policy is `ALLOW`, or provide a documented compatibility mode that explicitly trades context preservation for header rewriting. Add a popup/payment regression test covering `window.opener` and request headers.
+The Forge Android client now lets HTTP/HTTPS main-frame navigations continue through WebView when the Dart policy returns `ALLOW`, so the original browsing context remains intact. If Dart returns `CANCEL`, the current native navigation is stopped when its navigation token is still current. Non-HTTP(S) schemes retain the asynchronous reload path needed by the existing API contract.
+
+**Remaining validation:** add a device integration test covering `window.opener`, `Referer`, `Sec-Fetch-Site`, POST navigation, and cancellation.
 
 ### #2703 and #2728 — Android release-policy compatibility
 

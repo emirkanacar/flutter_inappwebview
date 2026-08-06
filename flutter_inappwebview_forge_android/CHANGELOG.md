@@ -1,3 +1,11 @@
+## 1.0.4 - 2026-08-06
+
+- Bound synchronous `shouldInterceptRequest` waits and concurrent callback pressure so repeated resource interception cannot indefinitely occupy WebView threads.
+- Stop flushing cookies synchronously immediately after asynchronous `removeAllCookies` and `removeSessionCookies` operations.
+- Guard custom input-connection and fullscreen recovery operations until the Flutter/container and target views are attached to a window.
+- Preserve native HTTP/HTTPS main-frame navigation context when `shouldOverrideUrlLoading` returns `ALLOW`; use `stopLoading` for a current native navigation when Dart returns `CANCEL`.
+- Add static regression coverage for interception, cookie, IME, and navigation lifecycle boundaries.
+
 ## 1.0.3 - 2026-08-06
 
 - Harden Android file-origin security by ignoring `allowUniversalAccessFromFileURLs=true` instead of enabling the deprecated WebSettings sink; use `WebViewAssetLoader` or a controlled HTTPS origin for local resources.

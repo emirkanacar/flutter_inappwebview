@@ -1,3 +1,8 @@
+## 1.0.3 - 2026-08-06
+
+- Document that Android Forge preserves the original HTTP/HTTPS main-frame navigation when `shouldOverrideUrlLoading` returns `ALLOW`, while non-HTTP(S) URLs retain the asynchronous reload behavior.
+- Regenerate the platform WebView and in-app browser navigation callback documentation.
+
 ## 1.0.2 - 2026-08-06
 
 - Document that the Android Forge implementation ignores `allowUniversalAccessFromFileURLs=true` to preserve file-origin isolation and recommends `WebViewAssetLoader` or a controlled HTTPS origin.

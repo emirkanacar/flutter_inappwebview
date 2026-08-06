@@ -85,7 +85,8 @@ class Util private constructor() {
             channel: MethodChannel,
             method: String,
             arguments: Any?,
-            callback: SyncBaseCallbackResultImpl<T>
+            callback: SyncBaseCallbackResultImpl<T>,
+            timeoutMillis: Long = SYNC_METHOD_CHANNEL_TIMEOUT_MILLIS
         ): T? {
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 channel.invokeMethod(method, arguments, callback)
@@ -97,7 +98,7 @@ class Util private constructor() {
                 channel.invokeMethod(method, arguments, callback)
             }
             if (!callback.latch.await(
-                    SYNC_METHOD_CHANNEL_TIMEOUT_MILLIS,
+                    timeoutMillis,
                     TimeUnit.MILLISECONDS
                 )
             ) {

@@ -1,3 +1,11 @@
+## 2.0.3 - 2026-08-06
+
+- Windows: prevent process-exit crashes from static WinRT/Composition COM releases during DLL unload and guard platform-view callbacks against disposed widgets and detached render boxes.
+- Android: bound synchronous `shouldInterceptRequest` waits and concurrent callbacks, avoid synchronous cookie flushes after asynchronous deletion, and guard IME operations until their views are attached to a window.
+- Android: let HTTP/HTTPS main-frame navigations continue natively when `shouldOverrideUrlLoading` returns `ALLOW`, preserving popup and request context while retaining cancellation for the active navigation.
+- Platform interface: document the Android navigation-context behavior and update the implementation dependency versions.
+- Add regression coverage for the Android lifecycle/interception boundaries and update the Windows/Android issue triage documentation.
+
 ## 2.0.2 - 2026-08-06
 
 - Android: ignore `allowUniversalAccessFromFileURLs=true` at the native WebSettings boundary to preserve file-origin isolation; use `WebViewAssetLoader` or a controlled HTTPS origin for local resources.

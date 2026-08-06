@@ -1,6 +1,6 @@
 name: flutter_inappwebview_forge_windows
 description: Windows implementation of the flutter_inappwebview_forge plugin.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/emirkanacar/flutter_inappwebview
 issue_tracker: https://github.com/emirkanacar/flutter_inappwebview/issues
 topics:
@@ -17,7 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inappwebview_forge_platform_interface: ^1.0.1
+  flutter_inappwebview_forge_platform_interface: ^1.0.3
     # path: ../flutter_inappwebview_forge_platform_interface
 
 dev_dependencies:

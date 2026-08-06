@@ -970,9 +970,11 @@ abstract class PlatformInAppBrowserEvents {
 However, if you want to cancel requests for subframes, you can use the [InAppWebViewSettings.regexToCancelSubFramesLoading] setting
 to write a Regular Expression that, if the url request of a subframe matches, then the request of that subframe is canceled.
 Instead, the [InAppWebViewSettings.regexToAllowSyncUrlLoading] setting could
-be used to allow navigation requests synchronously, as this event is synchronous on native side
-and the current plugin implementation will always cancel the current request and load a new request if
-this event returns [NavigationActionPolicy.ALLOW] because Flutter method channels work only asynchronously.
+be used to allow navigation requests synchronously. On Android Forge, HTTP/HTTPS main-frame
+navigations continue through WebView when this event returns [NavigationActionPolicy.ALLOW],
+preserving the original browsing context. Returning [NavigationActionPolicy.CANCEL] attempts to
+stop that in-flight navigation; non-HTTP(S) URLs are reloaded after an [ALLOW] because Flutter
+method channels work asynchronously.
 Also, this event is not called for POST requests and is not called on the first page load.""",
       ),
       IOSPlatform(

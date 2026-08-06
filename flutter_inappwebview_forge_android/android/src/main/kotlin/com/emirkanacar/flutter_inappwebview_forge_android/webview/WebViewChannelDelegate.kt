@@ -83,6 +83,7 @@ open class WebViewChannelDelegate(
 ) : ChannelDelegateImpl(channel) {
   companion object {
     @JvmField val LOG_TAG = "WebViewChannelDelegate"
+    private const val SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS = 250L
   }
 
   @Suppress("UNCHECKED_CAST")
@@ -1138,7 +1139,8 @@ open class WebViewChannelDelegate(
       channel,
       "shouldInterceptRequest",
       request.toMap(),
-      callback
+      callback,
+      SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS
     )
   }
 

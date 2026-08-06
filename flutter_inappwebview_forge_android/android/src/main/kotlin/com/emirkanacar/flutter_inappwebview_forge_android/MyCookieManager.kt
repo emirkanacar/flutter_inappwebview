@@ -336,7 +336,6 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             manager.removeAllCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
-            manager.flush()
         } else {
             val context = plugin?.applicationContext
             if (context != null) {
@@ -362,7 +361,6 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             manager.removeSessionCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
-            manager.flush()
         } else {
             val context = plugin?.applicationContext
             if (context != null) {

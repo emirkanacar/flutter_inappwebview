@@ -51,6 +51,8 @@ import com.emirkanacar.flutter_inappwebview_forge_android.webview.WebViewChannel
 import java.io.ByteArrayInputStream
 import java.net.URI
 import java.net.URISyntaxException
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import java.util.regex.Matcher
 
 open class InAppWebViewClient(
@@ -66,7 +68,12 @@ open class InAppWebViewClient(
 
     @JvmField
     protected var credentialsProposed: MutableList<URLCredential>? = null
+
+    private const val MAX_CONCURRENT_SYNC_INTERCEPT_REQUESTS = 2
   }
+
+  private val synchronousInterceptRequestsInFlight = AtomicInteger(0)
+  private val nativeNavigationSequence = AtomicLong(0)
 
   @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -79,6 +86,8 @@ open class InAppWebViewClient(
     }
 
     if (webView.customSettings.useShouldOverrideUrlLoading == true) {
+      val nativeNavigationContinues =
+        request.isForMainFrame && isHttpOrHttpsUrl(requestUrl)
       var isRedirect = false
       if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_RESOURCE_REQUEST_IS_REDIRECT)) {
         isRedirect = WebResourceRequestCompat.isRedirect(request)
@@ -92,7 +101,9 @@ open class InAppWebViewClient(
         request.requestHeaders,
         request.isForMainFrame,
         request.hasGesture(),
-        isRedirect
+        isRedirect,
+        nativeNavigationContinues,
+        nativeNavigationSequence.incrementAndGet()
       )
     }
     if (!request.isForMainFrame) {
@@ -103,7 +114,7 @@ open class InAppWebViewClient(
     if (webView.customSettings.useShouldOverrideUrlLoading == true) {
       // There isn't any way to load an URL for a frame that is not the main frame,
       // so if the request is not for the main frame, the navigation is allowed.
-      return request.isForMainFrame
+      return request.isForMainFrame && !isHttpOrHttpsUrl(requestUrl)
     }
 
     return false
@@ -118,10 +129,27 @@ open class InAppWebViewClient(
     }
 
     if (webView.customSettings.useShouldOverrideUrlLoading == true) {
-      onShouldOverrideUrlLoading(webView, url, "GET", null, true, false, false)
-      return true
+      val nativeNavigationContinues = isHttpOrHttpsUrl(url)
+      onShouldOverrideUrlLoading(
+        webView,
+        url,
+        "GET",
+        null,
+        true,
+        false,
+        false,
+        nativeNavigationContinues,
+        nativeNavigationSequence.incrementAndGet()
+      )
+      return !nativeNavigationContinues
     }
     return false
+  }
+
+  private fun isHttpOrHttpsUrl(url: String): Boolean {
+    val scheme = Uri.parse(url).scheme ?: return false
+    return scheme.equals("http", ignoreCase = true) ||
+      scheme.equals("https", ignoreCase = true)
   }
 
   private fun allowSyncUrlLoading(webView: InAppWebView, url: String): Boolean {
@@ -160,7 +188,9 @@ open class InAppWebViewClient(
     headers: MutableMap<String, String>?,
     isForMainFrame: Boolean,
     hasGesture: Boolean,
-    isRedirect: Boolean
+    isRedirect: Boolean,
+    nativeNavigationContinues: Boolean = false,
+    nativeNavigationId: Long? = null
   ) {
     val request = URLRequest(url, method, null, headers)
     val navigationAction = NavigationAction(request, isForMainFrame, hasGesture, isRedirect)
@@ -169,14 +199,24 @@ open class InAppWebViewClient(
       override fun nonNullSuccess(result: NavigationActionPolicy): Boolean {
         when (result) {
           NavigationActionPolicy.ALLOW ->
-            allowShouldOverrideUrlLoading(webView, url, headers, isForMainFrame)
-          NavigationActionPolicy.CANCEL -> Unit
+            if (!nativeNavigationContinues) {
+              allowShouldOverrideUrlLoading(webView, url, headers, isForMainFrame)
+            }
+          NavigationActionPolicy.CANCEL ->
+            if (nativeNavigationContinues &&
+              (nativeNavigationId == null ||
+                nativeNavigationSequence.get() == nativeNavigationId)
+            ) {
+              webView.stopLoading()
+            }
         }
         return false
       }
 
       override fun defaultBehaviour(result: NavigationActionPolicy?) {
-        allowShouldOverrideUrlLoading(webView, url, headers, isForMainFrame)
+        if (!nativeNavigationContinues) {
+          allowShouldOverrideUrlLoading(webView, url, headers, isForMainFrame)
+        }
       }
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
@@ -630,11 +670,27 @@ open class InAppWebViewClient(
       var response: WebResourceResponseExt? = null
       val channelDelegate = webView.channelDelegate
       if (channelDelegate != null) {
+        if (
+          synchronousInterceptRequestsInFlight.incrementAndGet() >
+          MAX_CONCURRENT_SYNC_INTERCEPT_REQUESTS
+        ) {
+          synchronousInterceptRequestsInFlight.decrementAndGet()
+          Log.w(
+            LOG_TAG,
+            "Too many synchronous shouldInterceptRequest callbacks are pending; " +
+              "allowing the resource request to continue."
+          )
+          return null
+        }
+
         try {
           response = channelDelegate.shouldInterceptRequest(request)
         } catch (e: InterruptedException) {
+          Thread.currentThread().interrupt()
           Log.e(LOG_TAG, "", e)
           return null
+        } finally {
+          synchronousInterceptRequestsInFlight.decrementAndGet()
         }
       }
 

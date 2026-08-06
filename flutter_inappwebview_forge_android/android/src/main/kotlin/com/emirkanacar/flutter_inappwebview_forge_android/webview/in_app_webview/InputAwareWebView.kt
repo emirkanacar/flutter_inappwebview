@@ -44,7 +44,10 @@ open class InputAwareWebView : WebView {
 
         val currentProxyAdapterView = proxyAdapterView ?: return
         Log.w(LOG_TAG, "The containerView has changed while the proxyAdapterView exists.")
-        if (containerView != null) {
+        if (containerView != null &&
+            isViewReady(containerView) &&
+            isViewReady(currentProxyAdapterView)
+        ) {
             setInputConnectionTarget(currentProxyAdapterView)
         }
     }
@@ -52,8 +55,11 @@ open class InputAwareWebView : WebView {
     /** Restores Flutter's input target after Android removes a fullscreen custom view. */
     fun restoreInputConnectionAfterFullscreen() {
         val currentContainerView = containerView ?: return
+        if (!isViewReady(currentContainerView)) {
+            return
+        }
         currentContainerView.post {
-            if (containerView !== currentContainerView) {
+            if (containerView !== currentContainerView || !isViewReady(currentContainerView)) {
                 return@post
             }
 
@@ -105,7 +111,10 @@ open class InputAwareWebView : WebView {
         }
 
         val currentContainerView = containerView
-        if (currentContainerView == null) {
+        if (currentContainerView == null ||
+            !isViewReady(currentContainerView) ||
+            !isViewReady(view)
+        ) {
             Log.e(
                 LOG_TAG,
                 "Can't create a proxy view because there's no container view. " +
@@ -151,6 +160,9 @@ open class InputAwareWebView : WebView {
             )
             return
         }
+        if (!isViewReady(currentContainerView)) {
+            return
+        }
         setInputConnectionTarget(currentContainerView)
     }
 
@@ -167,11 +179,17 @@ open class InputAwareWebView : WebView {
             )
             return
         }
+        if (!isViewReady(currentContainerView) || !isViewReady(targetView)) {
+            return
+        }
 
         targetView.requestFocus()
         currentContainerView.post {
             val postedContainerView = containerView
-            if (postedContainerView == null) {
+            if (postedContainerView == null ||
+                !isViewReady(postedContainerView) ||
+                !isViewReady(targetView)
+            ) {
                 Log.e(
                     LOG_TAG,
                     "Can't set the input connection target because there is no containerView " +
@@ -191,6 +209,9 @@ open class InputAwareWebView : WebView {
             }
         }
     }
+
+    private fun isViewReady(view: View): Boolean =
+        view.isAttachedToWindow && view.windowToken != null
 
     override fun onFocusChanged(
         focused: Boolean,
