@@ -26,13 +26,17 @@ class WebsiteDataRecord {
     final instance = WebsiteDataRecord(
       dataTypes: map['dataTypes'] != null
           ? Set<WebsiteDataType>.from(
-              map['dataTypes'].map(
-                (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
-                  EnumMethod.nativeValue => WebsiteDataType.fromNativeValue(e),
-                  EnumMethod.value => WebsiteDataType.fromValue(e),
-                  EnumMethod.name => WebsiteDataType.byName(e),
-                }!,
-              ),
+              map['dataTypes']
+                  .map(
+                    (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
+                      EnumMethod.nativeValue => WebsiteDataType.fromNativeValue(
+                        e,
+                      ),
+                      EnumMethod.value => WebsiteDataType.fromValue(e),
+                      EnumMethod.name => WebsiteDataType.byName(e),
+                    },
+                  )
+                  .whereType<WebsiteDataType>(),
             )
           : null,
       displayName: map['displayName'],
@@ -92,14 +96,16 @@ class IOSWKWebsiteDataRecord {
     final instance = IOSWKWebsiteDataRecord(
       dataTypes: map['dataTypes'] != null
           ? Set<IOSWKWebsiteDataType>.from(
-              map['dataTypes'].map(
-                (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
-                  EnumMethod.nativeValue =>
-                    IOSWKWebsiteDataType.fromNativeValue(e),
-                  EnumMethod.value => IOSWKWebsiteDataType.fromValue(e),
-                  EnumMethod.name => IOSWKWebsiteDataType.byName(e),
-                }!,
-              ),
+              map['dataTypes']
+                  .map(
+                    (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
+                      EnumMethod.nativeValue =>
+                        IOSWKWebsiteDataType.fromNativeValue(e),
+                      EnumMethod.value => IOSWKWebsiteDataType.fromValue(e),
+                      EnumMethod.name => IOSWKWebsiteDataType.byName(e),
+                    },
+                  )
+                  .whereType<IOSWKWebsiteDataType>(),
             )
           : null,
       displayName: map['displayName'],

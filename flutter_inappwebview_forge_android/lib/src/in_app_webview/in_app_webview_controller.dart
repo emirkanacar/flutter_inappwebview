@@ -501,7 +501,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     webviewParams!.androidOnGeolocationPermissionsShowPrompt !=
                         null)) ||
             _inAppBrowserEventHandler != null) {
-          String origin = call.arguments["origin"];
+          final String? origin = call.arguments["origin"];
+          if (origin == null) {
+            break;
+          }
 
           if (webviewParams != null) {
             if (webviewParams!.onGeolocationPermissionsShowPrompt != null)
@@ -781,8 +784,11 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnReceivedTouchIconUrl != null)) ||
             _inAppBrowserEventHandler != null) {
-          String url = call.arguments["url"];
-          bool precomposed = call.arguments["precomposed"];
+          final String? url = call.arguments["url"];
+          if (url == null) {
+            break;
+          }
+          final bool precomposed = call.arguments["precomposed"] == true;
           WebUri uri = WebUri(url);
 
           if (webviewParams != null) {
@@ -907,7 +913,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnSafeBrowsingHit != null)) ||
             _inAppBrowserEventHandler != null) {
-          String url = call.arguments["url"];
+          final String? url = call.arguments["url"];
+          if (url == null) {
+            break;
+          }
           SafeBrowsingThreat? threatType = SafeBrowsingThreat.fromNativeValue(
             call.arguments["threatType"],
           );
@@ -1132,8 +1141,15 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnPermissionRequest != null)) ||
             _inAppBrowserEventHandler != null) {
-          String origin = call.arguments["origin"];
-          List<String> resources = call.arguments["resources"].cast<String>();
+          final String? origin = call.arguments["origin"];
+          if (origin == null) {
+            break;
+          }
+          final List<String> resources =
+              (call.arguments["resources"] as List<dynamic>? ??
+                    const <dynamic>[])
+                .whereType<String>()
+                .toList();
 
           Map<String, dynamic> arguments = call.arguments
               .cast<String, dynamic>();
@@ -1386,7 +1402,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
           int? androidId = call.arguments["androidId"];
           String? iosId = call.arguments["iosId"];
           dynamic id = call.arguments["id"];
-          String title = call.arguments["title"];
+          final String title = call.arguments["title"] ?? "";
 
           ContextMenuItem menuItemClicked = ContextMenuItem(
             id: id,
@@ -1495,7 +1511,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onInjectedScriptLoaded":
-        String id = call.arguments[0];
+        final String? id = call.arguments[0];
+        if (id == null) {
+          break;
+        }
         var onLoadCallback = _injectedScriptsFromURL[id]?.onLoad;
         if ((webviewParams != null || _inAppBrowserEventHandler != null) &&
             onLoadCallback != null) {
@@ -1503,7 +1522,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onInjectedScriptError":
-        String id = call.arguments[0];
+        final String? id = call.arguments[0];
+        if (id == null) {
+          break;
+        }
         var onErrorCallback = _injectedScriptsFromURL[id]?.onError;
         if ((webviewParams != null || _inAppBrowserEventHandler != null) &&
             onErrorCallback != null) {
@@ -1607,9 +1629,12 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onCallJsHandler":
-        String handlerName = call.arguments["handlerName"];
-        Map<String, dynamic> handlerDataMap = call.arguments["data"]
-            .cast<String, dynamic>();
+        final String? handlerName = call.arguments["handlerName"];
+        final Map<String, dynamic>? handlerDataMap =
+            (call.arguments["data"] as Map?)?.cast<String, dynamic>();
+        if (handlerName == null || handlerDataMap == null) {
+          break;
+        }
         // decode args to json
         handlerDataMap["args"] = jsonDecode(handlerDataMap["args"]);
         final handlerData = JavaScriptHandlerFunctionData.fromMap(

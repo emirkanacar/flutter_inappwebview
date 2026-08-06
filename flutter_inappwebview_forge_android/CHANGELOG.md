@@ -1,3 +1,9 @@
+## 1.0.2 - 2026-08-06
+
+- Guard nullable Android MethodChannel event fields before constructing non-null WebView callback values; malformed security-sensitive payloads now use native default behavior and omitted context-menu titles are represented as empty text.
+- Add regression coverage for null geolocation, permission, safe-browsing, and context-menu payload fields.
+- Clean up active fullscreen state before disposing a WebView and emit a guarded exit callback when native surface failures bypass `onHideCustomView`.
+
 ## 1.0.1 - 2026-08-06
 
 - Android: release the complete migration of the native implementation to Kotlin and the Android hosts to Kotlin DSL.

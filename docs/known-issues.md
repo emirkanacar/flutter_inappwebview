@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-05
+Last reviewed: 2026-08-06
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; promoted items use the issue body and local code evidence where available. Only issues with a plausible effect on stability, security, compatibility, or release documentation are promoted below. Issue status and platform behavior can change, so each item should be rechecked before implementation.
 
@@ -14,10 +14,8 @@ The confidence labels below describe the evidence available during this review:
 
 | Priority | Issues | Reason |
 | --- | --- | --- |
-| P0 | [#2873](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2873) | Security hardening: the `FileProvider` currently exposes the entire external storage root. |
 | P0 | [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) | Security review: universal file-URL access is exposed as a WebView setting and can weaken origin isolation. |
 | P1 | [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) | Android cold-start initialization can crash or prevent `onWebViewCreated` from firing in release builds. |
-| P1 | [#2875](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2875), [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) | Runtime crashes caused by forward-incompatible native values and nullable platform-channel payloads. |
 | P1 | [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | Android fullscreen failures can leave the app-wide keyboard or the WebView surface unusable. |
 | P1 | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows native lifetime failures can terminate the process during WebView creation or shutdown. |
 | P1 | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android callback blocking, cookie cleanup, and IME lifecycle paths have freeze/ANR/crash reports. |
@@ -32,41 +30,41 @@ The confidence labels below describe the evidence available during this review:
 
 ### #2873 — Restrict `FileProvider` paths
 
-**Impact:** Security finding; no crash is required for this to matter. **Confidence:** Confirmed path.
+**Status:** Resolved in commit `9eaa2b791`. **Impact:** Security finding; no crash is required for this to matter. **Confidence:** Confirmed path.
 
-The issue identifies this current configuration in `flutter_inappwebview_forge_android/android/src/main/res/xml/provider_paths.xml`:
+The broad external-storage mapping has been removed from `flutter_inappwebview_forge_android/android/src/main/res/xml/provider_paths.xml`. The provider now exposes only the app-owned `Captures/` directory through `external-files-path`, plus the legacy public `Pictures/` and `Movies/` directories used on pre-N Android releases.
 
 ```xml
-<external-path name="external_files" path="."/>
+<external-files-path name="app_captures" path="Captures/"/>
+<external-path name="pictures" path="Pictures/"/>
+<external-path name="movies" path="Movies/"/>
 ```
 
-This grants the provider a broad external-storage root instead of only the files the plugin needs to share. Android’s [FileProvider security guidance](https://developer.android.com/privacy-and-security/risks/file-providers) recommends exposing the smallest possible directory set. The plugin uses the provider for download/file-chooser flows, so this is a shared security boundary rather than an isolated test configuration.
-
-**Recommended action:** identify the exact download and chooser paths, replace the root mapping with narrow `cache-path`/`external-files-path` mappings, and add tests proving that files outside those directories cannot be shared. Verify upgrade behavior for applications that already depend on the current provider authority.
+The Android test suite covers all three mappings and asserts that the broad `path="."` mapping is absent. Android’s [FileProvider security guidance](https://developer.android.com/privacy-and-security/risks/file-providers) remains the reference for future path additions.
 
 ### #2875 — Windows crash on an unknown WebView2 permission resource
 
-**Impact:** Process-level crash on a normal website permission request. **Confidence:** Confirmed path.
+**Status:** Fixed in release 2.0.1 (platform interface 1.0.1). **Impact:** Process-level crash on a normal website permission request. **Confidence:** Confirmed path.
 
 WebView2 can provide a permission resource ID that this package does not know yet. In `flutter_inappwebview_forge_platform_interface/lib/src/types/permission_request.g.dart`, `PermissionResourceType.fromNativeValue(e)` is nullable, but the generated conversion force-unwraps the result. Issue [#2875](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2875) reports resource ID `13` reaching this path and crashing a Windows application.
 
-This is a forward-compatibility bug: the WebView2 enum can grow independently of the Dart enum. An unknown permission should not take down the host application.
+This was a forward-compatibility bug: the WebView2 enum can grow independently of the Dart enum. The exchangeable-object generator now filters only unsupported values from non-null enum collections, so known permission resources remain usable while a newly introduced native value is ignored. The same generated behavior is applied consistently to the other exchangeable enum collections.
 
-**Recommended action:** filter unknown values or preserve them as an explicit `unknown` value; keep the known resources usable; add a platform-interface regression test with an unknown numeric resource ID. Audit other generated enum conversions for the same force-unwrap pattern.
+The platform-interface regression test parses a request containing a known camera resource and native value `13`; it verifies that parsing succeeds and retains the known resource. The platform-interface analyzer and full test suite pass. A Windows native build still needs to be run on Windows before release.
 
 ### #2856 — Android `null` values cast to non-null `String`
 
-**Impact:** Runtime crash after upgrading to the 6.2 beta line. **Confidence:** Confirmed path.
+**Status:** Fixed in release 2.0.1 (Android 1.0.2). **Impact:** Runtime crash after upgrading to the 6.2 beta line. **Confidence:** Confirmed path.
 
 Issue [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) reports `type 'Null' is not a subtype of type 'String'`. The Android event handlers currently read platform-channel values as non-null strings, for example `origin` and `resources` in `InAppWebViewController`’s `onPermissionRequest` handler, and `url` in the safe-browsing handler. Native WebView callbacks can omit or change optional fields across OS/WebView versions.
 
-**Recommended action:** define nullability at the platform-channel boundary, validate payloads before constructing public types, and test missing `origin`, `url`, `title`, and enum fields. This should be treated as a compatibility fix, not only as an application-side workaround.
+The Android Dart event dispatcher now validates nullable `origin` and `url` values before constructing non-null public types, filters malformed permission-resource entries, and uses an empty title for a context-menu item when Android omits its optional title. Missing data in geolocation, permission, and safe-browsing callbacks returns control to the native default behavior. Regression coverage exercises the reported null title and representative nullable callback payloads.
 
 ### #2878 — Keyboard remains unavailable after exiting HTML5 fullscreen
 
 **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
 
-The issue reproduces after `onShowCustomView`/`onHideCustomView` fullscreen cycles with hybrid composition. The native path removes the custom view, restores system UI/orientation, invokes `onExitFullscreen`, and clears fullscreen state in `InAppWebViewChromeClient.onHideCustomView()`. The repository also has custom IME proxy/focus handling in `InputAwareWebView.java`. Together, this points to an IME/window association that is not restored when the fullscreen view is detached.
+The issue reproduces after `onShowCustomView`/`onHideCustomView` fullscreen cycles with hybrid composition. The native path removes the custom view, restores system UI/orientation, invokes `onExitFullscreen`, and clears fullscreen state in `InAppWebViewChromeClient.onHideCustomView()`. The repository also has custom IME proxy/focus handling in `InputAwareWebView.kt`. Together, this points to an IME/window association that is not restored when the fullscreen view is detached.
 
 The reported workaround is invoking Flutter’s `TextInput.show` after exiting fullscreen, but that only masks the native lifecycle problem.
 
@@ -74,11 +72,11 @@ The reported workaround is invoking Flutter’s `TextInput.show` after exiting f
 
 ### #2819 — MediaTek fullscreen surface failure leaves a frozen WebView
 
-**Impact:** On affected MediaTek devices, a GPU/gralloc failure during fullscreen video can remove the native surface without firing the normal exit/error callbacks. The screen then remains black/white and fullscreen state is stale. **Confidence:** Strong report.
+**Status:** Fixed in release 2.0.1 (Android 1.0.2). **Impact:** On affected MediaTek devices, a GPU/gralloc failure during fullscreen video can remove the native surface without firing the normal exit/error callbacks. The screen then remains black/white and fullscreen state is stale. **Confidence:** Strong report.
 
 Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) includes native gralloc errors and reports that neither `onExitFullscreen`, `onRenderProcessGone`, nor `onReceivedError` is delivered. This is a different failure mode from a normal `onHideCustomView` callback: cleanup must also be robust when the renderer or surface disappears first.
 
-**Recommended action:** detect WebView/surface disposal while fullscreen, restore the host view and notify Dart exactly once, and test the path on MediaTek hardware with network loss during H.264/HLS playback.
+`FlutterWebView.dispose()` now checks the fullscreen state before destroying the WebView, asks the chrome client to remove the custom view, and emits the exit callback/state reset fallback if the activity or custom-view callback is already unavailable. The fallback is guarded by the fullscreen flag so normal exits notify Dart only once. A MediaTek device test with network loss during H.264/HLS playback is still required before release.
 
 ### #2880 — iOS UIScene migration
 
@@ -156,7 +154,7 @@ This is directly relevant to the dependency update: the issue proposes the stabl
 
 The repository applies `allowUniversalAccessFromFileURLs` directly to `WebSettings` during WebView setup and when settings change. Issues [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848) and [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) are the same security theme: universal file-URL access can weaken origin isolation and was flagged by security assessments.
 
-**Recommended action:** identify which supported feature actually needs this setting, keep it disabled by default, document the risk when explicitly enabled, and prefer `WebViewAssetLoader`/controlled app origins for local resources. Treat the two issues as one security work item rather than two independent fixes.
+Current behavior is explicitly opt-in: the Dart and Android defaults are `false`, and the Android setting is changed only when the caller supplies `true`. The public setting documentation describes the origin-isolation risk and recommends `WebViewAssetLoader`/controlled app origins for local resources. No breaking removal was made; removing the setting would require an explicit API decision for existing applications that knowingly depend on it.
 
 ### #2840 and #2733 — Windows native lifetime crashes
 

@@ -2336,13 +2336,15 @@ class InAppWebViewSettings {
       iframeRole: map['iframeRole'],
       iframeSandbox: map['iframeSandbox'] != null
           ? Set<Sandbox>.from(
-              map['iframeSandbox'].map(
-                (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
-                  EnumMethod.nativeValue => Sandbox.fromNativeValue(e),
-                  EnumMethod.value => Sandbox.fromValue(e),
-                  EnumMethod.name => Sandbox.byName(e),
-                }!,
-              ),
+              map['iframeSandbox']
+                  .map(
+                    (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
+                      EnumMethod.nativeValue => Sandbox.fromNativeValue(e),
+                      EnumMethod.value => Sandbox.fromValue(e),
+                      EnumMethod.name => Sandbox.byName(e),
+                    },
+                  )
+                  .whereType<Sandbox>(),
             )
           : null,
       javaScriptBridgeForMainFrameOnly: map['javaScriptBridgeForMainFrameOnly'],
@@ -2496,13 +2498,17 @@ class InAppWebViewSettings {
     instance.cursiveFontFamily = map['cursiveFontFamily'];
     instance.dataDetectorTypes = map['dataDetectorTypes'] != null
         ? List<DataDetectorTypes>.from(
-            map['dataDetectorTypes'].map(
-              (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
-                EnumMethod.nativeValue => DataDetectorTypes.fromNativeValue(e),
-                EnumMethod.value => DataDetectorTypes.fromValue(e),
-                EnumMethod.name => DataDetectorTypes.byName(e),
-              }!,
-            ),
+            map['dataDetectorTypes']
+                .map(
+                  (e) => switch (enumMethod ?? EnumMethod.nativeValue) {
+                    EnumMethod.nativeValue => DataDetectorTypes.fromNativeValue(
+                      e,
+                    ),
+                    EnumMethod.value => DataDetectorTypes.fromValue(e),
+                    EnumMethod.name => DataDetectorTypes.byName(e),
+                  },
+                )
+                .whereType<DataDetectorTypes>(),
           )
         : null;
     instance.databaseEnabled = map['databaseEnabled'];

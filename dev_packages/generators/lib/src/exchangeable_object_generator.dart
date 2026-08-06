@@ -794,12 +794,31 @@ class ExchangeableObjectGenerator
           : null;
       if (genericType != null && !Util.isDartCoreType(genericType)) {
         final genericTypeFieldName = 'e';
+        final genericTypeElement = genericType.element;
+        final isExchangeableEnum =
+            genericTypeElement != null &&
+            (hasFromValueMethod(genericTypeElement) ||
+                hasFromNativeValueMethod(genericTypeElement) ||
+                hasByNameMethod(genericTypeElement));
+        var mappedValue = getFromMapValue(
+          '$genericTypeFieldName',
+          genericType,
+        );
+        var mappedValues =
+            '$value.map(($genericTypeFieldName) => $mappedValue)';
+        if (isExchangeableEnum && !Util.typeIsNullable(genericType)) {
+          // Native enum values can grow independently of the Dart enum. Do
+          // not let an unknown value reach a generated non-null assertion;
+          // preserve all known values and ignore only the unsupported one.
+          mappedValue = mappedValue.replaceFirst(RegExp(r'!$'), '');
+          mappedValues =
+              '$value.map(($genericTypeFieldName) => $mappedValue)'
+              '.whereType<$genericTypeReplaced>()';
+        }
         return (isNullable ? '$value != null ? ' : '') +
             "${elementType.isDartCoreSet ? 'Set' : 'List'}<$genericTypeReplaced>.from(" +
-            value +
-            '.map(($genericTypeFieldName) => ' +
-            getFromMapValue('$genericTypeFieldName', genericType) +
-            '))' +
+            mappedValues +
+            ')' +
             (isNullable ? ' : null' : '');
       } else {
         if (genericType != null) {

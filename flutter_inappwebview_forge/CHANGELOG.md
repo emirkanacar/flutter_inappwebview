@@ -1,3 +1,11 @@
+## 2.0.1 - 2026-08-06
+
+- Platform interface: ignore unknown native values when decoding non-null exchangeable-enum collections, preventing forward-incompatible WebView2 permission resources from crashing the host application while preserving known resources.
+- Platform interface: add regression coverage for unknown WebView2 permission resource values.
+- Android: guard nullable MethodChannel event fields before constructing non-null WebView callback values, preventing malformed geolocation, permission, safe-browsing, touch-icon, and context-menu payloads from crashing the Dart dispatcher.
+- Android: add regression coverage for omitted callback fields, including the reported null context-menu title.
+- Android: clean up an active fullscreen custom view before WebView disposal and send a guarded `onExitFullscreen` fallback when renderer/GPU failures skip `onHideCustomView`.
+
 ## 2.0.0 - 2026-08-06
 
 - iOS: add UIScene-aware plugin registration and replace AppDelegate window access with active `UIWindowScene` resolution for iOS 15+.

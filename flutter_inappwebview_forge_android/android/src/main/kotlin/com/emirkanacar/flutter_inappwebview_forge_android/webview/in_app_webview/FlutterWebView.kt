@@ -190,6 +190,18 @@ open class FlutterWebView : PlatformWebView {
         if (keepAliveId == null) {
             val currentWebView = webView
             if (currentWebView != null) {
+                // A renderer/GPU failure can dispose the platform view without
+                // delivering WebChromeClient.onHideCustomView(). Clean up the
+                // fullscreen state before destroying the WebView so Flutter
+                // still receives the exit event and the custom view is removed
+                // when the activity is available.
+                if (currentWebView.isInFullscreen()) {
+                    currentWebView.inAppWebViewChromeClient?.onHideCustomView()
+                    if (currentWebView.isInFullscreen()) {
+                        currentWebView.channelDelegate?.onExitFullscreen()
+                        currentWebView.setInFullscreen(false)
+                    }
+                }
                 currentWebView.dispose()
                 webView = null
 
