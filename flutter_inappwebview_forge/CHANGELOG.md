@@ -1,3 +1,12 @@
+## 2.0.6 - 2026-08-06
+
+- Windows: load Flutter assets through a restricted WebView2 virtual HTTPS origin so `loadFile` can resolve relative CSS, JavaScript, media, and fetch/XHR resources without relying on an opaque `file:` origin; update the integration expectation to `https`.
+- Windows: validate relative asset paths, reject traversal outside `data/flutter_assets`, and percent-encode virtual asset URLs.
+- Linux: improve WPE WebKit CMake diagnostics with supported `pkg-config` names, backend alternatives, and an absolute link to `WPE_BACKEND.md`.
+- Android: add a release-artifact checker for 16 KB ELF and APK/AAB alignment, and document that final host artifacts must be validated for transitive native libraries.
+- Example Android host: retain Flutter's `android.builtInKotlin=false` and `android.newDsl=false` compatibility flags after the Flutter tool migration.
+- Add regression coverage and update the issue triage documentation for [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), and [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872).
+
 ## 2.0.5 - 2026-08-06
 
 - Android: prevent Samsung One UI icon-only selection actions from rendering the placeholder text `false`; native icons are preserved when available and invalid resource metadata is skipped safely.

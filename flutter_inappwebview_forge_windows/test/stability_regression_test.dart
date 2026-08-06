@@ -55,4 +55,30 @@ void main() {
     '_setVisibility(true)',
     'the restore callback',
   );
+
+  _expectContains(
+    nativeViewSource,
+    'SetVirtualHostNameToFolderMapping',
+    'the WebView2 virtual asset origin',
+  );
+  _expectContains(
+    nativeViewSource,
+    'COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_DENY_CORS',
+    'the restricted virtual asset mapping',
+  );
+  _expectContains(
+    nativeViewSource,
+    'kFlutterAssetsHostName',
+    'the stable virtual asset host',
+  );
+  _expectContains(
+    nativeViewSource,
+    'std::wstring(L"https://")',
+    'the virtual HTTPS asset URL',
+  );
+  _expectContains(
+    nativeViewSource,
+    'isSafeFlutterAssetPath',
+    'the relative asset path validation',
+  );
 }

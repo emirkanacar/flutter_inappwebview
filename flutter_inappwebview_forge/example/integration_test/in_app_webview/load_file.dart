@@ -39,7 +39,12 @@ void loadFile() {
 
     final Uri? url = await controller.getUrl();
     expect(url, isNotNull);
-    expect(url!.scheme, kIsWeb ? 'http' : 'file');
+    final expectedScheme = kIsWeb
+        ? 'http'
+        : Platform.isWindows
+        ? 'https'
+        : 'file';
+    expect(url!.scheme, expectedScheme);
     expect(
       url.path,
       endsWith("test_assets/in_app_webview_initial_file_test.html"),

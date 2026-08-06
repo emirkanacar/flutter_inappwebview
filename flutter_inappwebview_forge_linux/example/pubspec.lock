@@ -96,7 +96,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.1"
+    version: "1.0.2"
   flutter_inappwebview_forge_platform_interface:
     dependency: "direct main"
     description:

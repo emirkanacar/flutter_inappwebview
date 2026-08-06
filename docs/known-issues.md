@@ -22,12 +22,14 @@ The confidence labels below describe the evidence available during this review:
 | Fixed | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Android 1.0.4 preserves native HTTP/HTTPS main-frame navigation context when the Dart policy allows it. |
 | Fixed (validation pending) | [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) | iOS 2.0.0 provides scene-aware lifecycle handling; Forge now requires Flutter 3.38.6+ for the fixed iOS platform-view gesture behavior. |
 | Mitigated | [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android 1.0.5 skips the plugin's deprecated status-bar color call on Android 15+; remaining Play Console warnings may originate in Flutter or the host app. |
-| P2 | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 16 KB page-size support still needs a produced-AAB and native dependency audit. |
+| Mitigated (validation pending) | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 1.0.7 / root 2.0.6 adds final APK/AAB ELF and packaging alignment checks; validate every host application's release artifact. |
 | Fixed (validation pending) | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) | iOS 2.0.1 restores scroll insets after UIKit finishes keyboard dismissal; validate on iOS 17.2+ devices. |
 | P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | iOS fullscreen/WebKit and Web iframe URL reporting still require platform-specific reproductions. |
 | Fixed (validation pending) | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) | Android OEM selection-menu rendering and Windows minimized-window hit testing now have guarded platform paths; validate on affected devices. |
 | Fixed (build validation pending) | [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) | Linux theme-color access is compiled only for WPE WebKit 2.50+, with a no-theme-color fallback on older versions. |
-| P2 | [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux installation/rendering and Windows local-file compatibility issues still require platform-specific work. |
+| Mitigated (build validation pending) | [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862) | Linux CMake now lists every WPE `pkg-config` candidate, diagnostic command, and backend-specific prerequisite document. |
+| Fixed (validation pending) | [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) | Windows `loadFile` now maps Flutter assets to a restricted virtual HTTPS origin so relative resources do not depend on opaque `file:` origins. |
+| P2 | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux Intel/X11 GPU fallback still requires a platform-specific reproduction before changing the default renderer. |
 | Monitor | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS/Xcode-specific memory failure with insufficient symbolicated evidence. |
 
 ## Detailed findings
@@ -114,7 +116,9 @@ The custom action-mode implementation in `InAppWebView.kt` clears the native men
 
 `flutter_inappwebview_forge_linux/linux/CMakeLists.txt` intentionally searches for WPE WebKit and stops with a fatal error when no supported package is found. Issue [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862) shows that this is not obvious on newer Ubuntu installations.
 
-**Recommended action:** add a distro/version prerequisite matrix to the Linux README and CI, include the exact package names and `pkg-config` checks, and make the CMake error point to the backend-specific installation document (`WPE_BACKEND.md`).
+**Implementation:** Linux 1.0.2 adds a prerequisite matrix and `pkg-config` commands to the README. CMake now reports all supported WPE WebKit package names, the recommended and legacy backend package names, and the absolute path to `WPE_BACKEND.md` when configuration fails. This makes missing packages and mismatched `pkg-config` installations actionable on newer Ubuntu releases.
+
+**Remaining validation:** run the generated example on Ubuntu 24.04/26.04 with both the WPEPlatform and legacy FDO configurations.
 
 ### #2861 — Linux Intel/X11 GPU fallback can render white or transparent
 
@@ -126,11 +130,13 @@ The reported workaround combines `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` with 
 
 ### #2872 — Windows `loadFile` and WebView2 file-origin semantics
 
-**Impact:** `loadFile("assets/.../index.html")` can produce an unusable page because local subresources are blocked under the `file:` origin. **Confidence:** Needs reproduction; implementation mismatch is visible.
+**Status:** Fixed in Windows 1.0.4; validate on a Windows WebView2 runtime. **Impact:** `loadFile("assets/.../index.html")` can produce an unusable page because local subresources are blocked under the `file:` origin. **Confidence:** Strong report; the original file-navigation path is confirmed.
 
 The Windows implementation resolves the Flutter asset to `data/flutter_assets/...` and passes the filesystem path to WebView2 `Navigate`. Issue [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) reports that the resulting `file:` page has a unique security origin and cannot load the expected resources.
 
-**Recommended action:** reproduce with a minimal asset tree and clarify the API contract. If local assets are supported, use an app-controlled virtual origin/resource mapping or an equivalent controlled loader; if not, correct the Windows documentation and return an actionable error.
+**Implementation:** Windows now validates that the requested Flutter asset is relative and stays inside `data/flutter_assets`, maps that directory to `https://flutter-inappwebview-forge.local` with WebView2's `DENY_CORS` access mode, percent-encodes the asset URL, and navigates through the virtual origin. Relative CSS, JavaScript, media, and fetch/XHR references therefore stay within a normal origin. Older WebView2 runtimes without `ICoreWebView2_3` retain the legacy file-navigation fallback and emit a diagnostic log.
+
+**Remaining validation:** load an asset tree containing relative CSS, JavaScript, images, and nested URLs on Windows 10/11 with the supported WebView2 runtime.
 
 ### #2867 — iOS/Xcode-specific `EXC_BAD_ACCESS` in multi-window navigation
 
@@ -202,11 +208,13 @@ The Forge `InAppBrowserActivity` no longer emits a direct `statusBarColor` assig
 
 ### #2703 — Android 16 KB page-size support
 
-**Impact:** A Play submission can be rejected or restricted if its native libraries are not compatible with 16 KB pages. **Confidence:** Needs validation against the produced AAB.
+**Status:** Mitigated in Android 1.0.7 and root 2.0.6; validate each host application's produced AAB before submission. **Impact:** A Play submission can be rejected or restricted if its native libraries are not compatible with 16 KB pages. **Confidence:** The package-owned Android code has no JNI/NDK library; the final application's transitive native libraries still require artifact validation.
 
 Issue [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) tracks Android's 16 KB page-size policy. The Forge Android module does not currently ship its own NDK-built library, so support must be verified across the Flutter engine, transitive AARs, and the final application bundle rather than assumed from Kotlin compilation.
 
-**Recommended action:** add AAB inspection to CI for 16 KB alignment and record the Flutter/AGP/NDK/native dependency versions used for each release.
+**Implementation:** `tool/check_android_16k_alignment.sh` checks every `.so` in a release APK/AAB for 16 KB ELF `PT_LOAD` alignment. It also runs `zipalign -P 16` for APKs and requires an AAB `PAGE_ALIGNMENT_16K` bundle configuration through `bundletool`. The Android README records the host-app responsibility for AGP, NDK, Flutter-engine, and device validation.
+
+**Remaining validation:** run the checker against the release AAB produced by every consuming application and test the artifact on a 16 KB Android 15/16 emulator or device.
 
 ### #2859 — iOS keyboard dismissal leaves a stale scroll inset
 

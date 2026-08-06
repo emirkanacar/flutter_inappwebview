@@ -1,6 +1,6 @@
 name: flutter_inappwebview_forge
 description: A Flutter plugin that allows you to add an inline webview, to use an headless webview, and to open an in-app browser window.
-version: 2.0.5
+version: 2.0.6
 repository: https://github.com/emirkanacar/flutter_inappwebview
 issue_tracker: https://github.com/emirkanacar/flutter_inappwebview/issues
 topics:
@@ -19,7 +19,7 @@ dependencies:
     sdk: flutter
   flutter_inappwebview_forge_platform_interface: ^1.0.3
     # path: ../flutter_inappwebview_forge_platform_interface
-  flutter_inappwebview_forge_android: ^1.0.6
+  flutter_inappwebview_forge_android: ^1.0.7
     # path: ../flutter_inappwebview_forge_android
   flutter_inappwebview_forge_ios: ^2.0.1
     # path: ../flutter_inappwebview_forge_ios
@@ -27,9 +27,9 @@ dependencies:
     # path: ../flutter_inappwebview_forge_macos
   flutter_inappwebview_forge_web: ^1.0.0
     # path: ../flutter_inappwebview_forge_web
-  flutter_inappwebview_forge_windows: ^1.0.3
+  flutter_inappwebview_forge_windows: ^1.0.4
     # path: ../flutter_inappwebview_forge_windows
-  flutter_inappwebview_forge_linux: ^1.0.1
+  flutter_inappwebview_forge_linux: ^1.0.2
     # path: ../flutter_inappwebview_forge_linux
 
 dev_dependencies:

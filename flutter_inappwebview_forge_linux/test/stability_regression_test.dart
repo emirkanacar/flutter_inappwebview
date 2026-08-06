@@ -18,6 +18,10 @@ void main() {
   final source = _sourceFile(
     'linux/in_app_webview/in_app_webview.cc',
   ).readAsStringSync();
+  final cmakeSource = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
+  final readmeSource = _sourceFile(
+    'flutter_inappwebview_forge_linux/README.md',
+  ).readAsStringSync();
 
   _expectContains(
     source,
@@ -33,5 +37,25 @@ void main() {
     source,
     'return std::nullopt;',
     'the older-WebKit theme-color fallback',
+  );
+  _expectContains(
+    cmakeSource,
+    'WPE_BACKEND_DOC',
+    'the backend-specific CMake documentation path',
+  );
+  _expectContains(
+    cmakeSource,
+    'wpe-webkit-2.0, wpe-webkit-1.1, and wpe-webkit-1.0',
+    'the supported WebKit pkg-config names',
+  );
+  _expectContains(
+    cmakeSource,
+    'pkg-config --list-all',
+    'the WPE dependency diagnostic command',
+  );
+  _expectContains(
+    readmeSource,
+    'WPE_BACKEND.md',
+    'the Linux prerequisite documentation link',
   );
 }

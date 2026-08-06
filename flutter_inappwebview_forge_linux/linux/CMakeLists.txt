@@ -33,6 +33,8 @@ set(NLOHMANN_JSON_VERSION "3.12.0")
 #
 # See WPE_BACKEND.md for installation instructions.
 
+set(WPE_BACKEND_DOC "${CMAKE_CURRENT_LIST_DIR}/../WPE_BACKEND.md")
+
 find_package(PkgConfig REQUIRED)
 
 # Always require epoxy for OpenGL support
@@ -60,8 +62,13 @@ else()
 endif()
 
 if(NOT WPE_WEBKIT_FOUND)
-  message(FATAL_ERROR "WPE WebKit not found. Please install libwpewebkit-1.0-dev (Ubuntu/Debian) or wpe-webkit package.\n"
-                      "See WPE_BACKEND.md or https://wpewebkit.org/about/get-wpe.html")
+  message(FATAL_ERROR
+    "WPE WebKit development files were not found via pkg-config. Checked: "
+    "wpe-webkit-2.0, wpe-webkit-1.1, and wpe-webkit-1.0.\n"
+    "Install the package that provides one of those names (often "
+    "libwpewebkit-1.0-dev on Debian/Ubuntu), or build WPE WebKit from source.\n"
+    "Diagnose with: pkg-config --list-all | grep -E 'wpe-webkit|wpe-platform|wpebackend-fdo'\n"
+    "Read ${WPE_BACKEND_DOC} or https://wpewebkit.org/about/get-wpe.html")
 endif()
 
 # === WPE Platform API Detection (NEW - default) ===
@@ -112,17 +119,20 @@ endif()
 
 # Require at least one backend
 if(NOT HAVE_WPE_PLATFORM AND NOT HAVE_WPE_FDO)
-  message(FATAL_ERROR "Neither WPEPlatform (wpe-platform-2.0) nor WPEBackend-FDO (wpebackend-fdo-1.0) found.\n"
-                      "Please install one of:\n"
-                      "  - WPE WebKit 2.40+ with WPEPlatform support (recommended)\n"
-                      "  - wpebackend-fdo-1.0-dev (legacy fallback)\n"
-                      "See WPE_BACKEND.md for installation instructions.")
+  message(FATAL_ERROR
+    "No supported WPE rendering backend was found via pkg-config.\n"
+    "Install wpe-platform-2.0 and wpe-platform-headless-2.0 (recommended), "
+    "or wpebackend-fdo-1.0 (legacy fallback).\n"
+    "Read ${WPE_BACKEND_DOC} for distro package names and source-build flags.")
 endif()
 
 # Check for libwpe
 pkg_check_modules(LIBWPE QUIET IMPORTED_TARGET wpe-1.0)
 if(NOT LIBWPE_FOUND)
-  message(FATAL_ERROR "libwpe (wpe-1.0) not found. Please install libwpe-1.0-dev.")
+  message(FATAL_ERROR
+    "libwpe development files (pkg-config name wpe-1.0) were not found.\n"
+    "Install libwpe-1.0-dev or make the WPE installation visible through PKG_CONFIG_PATH.\n"
+    "Read ${WPE_BACKEND_DOC} for the complete Linux prerequisite list.")
 endif()
 
 # Check for libsecret for secure credential storage

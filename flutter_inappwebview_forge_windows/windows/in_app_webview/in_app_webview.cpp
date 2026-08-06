@@ -55,6 +55,49 @@ namespace flutter_inappwebview_plugin
 {
   using namespace Microsoft::WRL;
 
+  namespace {
+    constexpr wchar_t kFlutterAssetsHostName[] = L"flutter-inappwebview-forge.local";
+
+    bool isSafeFlutterAssetPath(const std::filesystem::path& path)
+    {
+      if (path.empty() || path.is_absolute() || path.has_root_name() || path.has_root_directory()) {
+        return false;
+      }
+
+      for (const auto& component : path) {
+        if (component == L"..") {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    std::string encodeFlutterAssetPath(const std::string& assetFilePath)
+    {
+      constexpr char hex[] = "0123456789ABCDEF";
+      std::string encodedPath;
+      encodedPath.reserve(assetFilePath.size());
+
+      for (const unsigned char character : assetFilePath) {
+        const bool isUnreserved =
+          (character >= 'A' && character <= 'Z') ||
+          (character >= 'a' && character <= 'z') ||
+          (character >= '0' && character <= '9') ||
+          character == '-' || character == '.' || character == '_' || character == '~';
+
+        if (isUnreserved || character == '/') {
+          encodedPath.push_back(static_cast<char>(character));
+        }
+        else {
+          encodedPath.push_back('%');
+          encodedPath.push_back(hex[(character >> 4) & 0x0F]);
+          encodedPath.push_back(hex[character & 0x0F]);
+        }
+      }
+      return encodedPath;
+    }
+  }
+
   InAppWebView::InAppWebView(const FlutterInappwebviewWindowsPlugin* plugin, const InAppWebViewCreationParams& params, const HWND parentWindow, wil::com_ptr<ICoreWebView2Environment> webViewEnv,
     wil::com_ptr<ICoreWebView2Controller> webViewController,
     wil::com_ptr<ICoreWebView2CompositionController> webViewCompositionController)
@@ -2112,14 +2155,45 @@ namespace flutter_inappwebview_plugin
     std::filesystem::path exeAbsPath = std::wstring(buf);
     delete[] buf;
 
-    std::filesystem::path flutterAssetPath("data/flutter_assets/" + assetFilePath);
-    auto absAssetFilePath = exeAbsPath.parent_path() / flutterAssetPath;
+    const auto flutterAssetsRoot = exeAbsPath.parent_path() / L"data" / L"flutter_assets";
+    const auto assetRelativePath = std::filesystem::path(utf8_to_wide(assetFilePath));
+    if (!isSafeFlutterAssetPath(assetRelativePath)) {
+      debugLog("The Flutter asset path must be relative and cannot contain '..': " + assetFilePath);
+      return;
+    }
 
-    if (!std::filesystem::exists(absAssetFilePath)) {
+    const auto absAssetFilePath = flutterAssetsRoot / assetRelativePath;
+    std::error_code fileError;
+
+    if (!std::filesystem::is_regular_file(absAssetFilePath, fileError)) {
       debugLog(absAssetFilePath.native() + L" asset file cannot be found!");
       return;
     }
-    failedLog(webView->Navigate(absAssetFilePath.c_str()));
+
+    // A file: document has an opaque security origin in WebView2. Map the
+    // Flutter asset directory to a stable virtual HTTPS origin so relative
+    // stylesheets, scripts, media, and fetch/XHR requests keep working.
+    auto webView3 = webView.try_query<ICoreWebView2_3>();
+    if (!webView3) {
+      // Keep compatibility with old WebView2 runtimes that predate the
+      // virtual-host API. Current runtimes use the origin-safe path above.
+      debugLog("WebView2 virtual host mapping is unavailable; falling back to file navigation.");
+      failedLog(webView->Navigate(absAssetFilePath.c_str()));
+      return;
+    }
+
+    const auto mapResult = webView3->SetVirtualHostNameToFolderMapping(
+      kFlutterAssetsHostName,
+      flutterAssetsRoot.c_str(),
+      COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_DENY_CORS);
+    if (failedAndLog(mapResult)) {
+      return;
+    }
+
+    const auto normalizedAssetPath = wide_to_utf8(assetRelativePath.generic_wstring());
+    const auto encodedAssetPath = encodeFlutterAssetPath(normalizedAssetPath);
+    const auto assetUrl = std::wstring(L"https://") + kFlutterAssetsHostName + L"/" + utf8_to_wide(encodedAssetPath);
+    failedLog(webView->Navigate(assetUrl.c_str()));
   }
 
   void InAppWebView::loadData(const std::string& data) const

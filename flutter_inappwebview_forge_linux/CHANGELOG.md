@@ -1,3 +1,9 @@
+## 1.0.2 - 2026-08-06
+
+- Improve WPE WebKit CMake errors with all supported `pkg-config` candidates, backend alternatives, diagnostic commands, and an absolute link to `WPE_BACKEND.md`.
+- Add Linux README prerequisite guidance for WPEPlatform and the legacy FDO backend across distro package layouts.
+- Add static regression coverage for the dependency diagnostics and update the issue triage documentation for [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862).
+
 ## 1.0.1 - 2026-08-06
 
 - Guard `webkit_web_view_get_theme_color` with `WEBKIT_CHECK_VERSION(2, 50, 0)` so Linux builds using older WPE WebKit headers and libraries no longer fail with an undefined reference.
