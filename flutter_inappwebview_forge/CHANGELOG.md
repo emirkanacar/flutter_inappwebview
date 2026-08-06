@@ -1,3 +1,22 @@
+## 2.1.5 - 2026-08-07
+
+- Android: reuse a shared main-looper dispatcher for synchronous resource callbacks and cap concurrent waits across WebView, service-worker, and custom asset paths.
+- Android: return the existing default `null` response immediately when the bounded callback capacity is exhausted or the dispatcher is unavailable.
+- Add regression coverage for shared dispatch capacity and timeout-bounded callback handling.
+
+## 2.1.4 - 2026-08-07
+
+- Android: coalesce scroll channel updates to the next animation frame while preserving the latest position and skip duplicate progress values.
+- iOS: skip duplicate progress channel values and coalesce content-size KVO callbacks to one main-loop update while preserving the latest size.
+- Add Android and iOS source-level regression coverage for event coalescing and lifecycle cleanup.
+
+## 2.1.3 - 2026-08-07
+
+- Android: stop re-injecting document-start scripts from every progress callback and suppress duplicate progress and scroll channel events.
+- Android: make deferred native registration retries and disposal idempotent so startup callbacks cannot target a disposed WebView.
+- iOS: complete pending legacy asynchronous JavaScript callbacks with a structured disposal error instead of dropping them during WebView teardown.
+- Add Android and iOS source-level regression coverage for the performance and lifecycle changes.
+
 ## 2.1.2 - 2026-08-06
 
 - iOS: return a structured error instead of entering WebKit's unsafe content-world evaluation path when the target frame is nil ([#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771)).

@@ -1,3 +1,22 @@
+## 1.0.12 - 2026-08-07
+
+- Reuse one main-looper dispatcher for synchronous resource callbacks instead of allocating a `Handler` per request.
+- Cap concurrent synchronous channel callbacks across WebView, service-worker, and custom asset paths; return the safe default when capacity is exhausted.
+- Keep method-specific timeout bounds and add static regression coverage for the shared dispatcher.
+
+## 1.0.11 - 2026-08-07
+
+- Coalesce scroll channel updates to the next animation frame and preserve only the latest pending position.
+- Continue suppressing duplicate progress and unchanged scroll-position events without dispatching after disposal.
+- Add static regression coverage for frame-based scroll dispatch and callback cleanup.
+
+## 1.0.10 - 2026-08-07
+
+- Avoid re-injecting document-start scripts from every `onProgressChanged` callback on providers without native document-start support.
+- Suppress duplicate progress and unchanged scroll-position channel events to reduce platform-channel pressure.
+- Make deferred native registration retries and disposal idempotent for cold-start and teardown paths.
+- Add static regression coverage for progress, scroll, registration, and disposal behavior.
+
 ## 1.0.9 - 2026-08-06
 
 - Add a JavaScript bridge fallback for `WebMessageListener` when the AndroidX WebView provider does not expose `WEB_MESSAGE_LISTENER` ([#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474)).

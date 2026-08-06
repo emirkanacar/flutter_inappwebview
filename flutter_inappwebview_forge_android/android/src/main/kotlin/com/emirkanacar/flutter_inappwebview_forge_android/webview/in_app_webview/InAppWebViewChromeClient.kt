@@ -117,6 +117,7 @@ open class InAppWebViewChromeClient(
   private var filePathCallback: ValueCallback<Array<Uri>>? = null
   private var videoOutputFileUri: Uri? = null
   private var imageOutputFileUri: Uri? = null
+  private var lastProgress: Int? = null
 
   init {
     inAppBrowserDelegate?.getActivityResultListeners()?.add(this)
@@ -614,10 +615,12 @@ open class InAppWebViewChromeClient(
 
   override fun onProgressChanged(view: WebView, progress: Int) {
     super.onProgressChanged(view, progress)
-    inAppBrowserDelegate?.didChangeProgress(progress)
     val webView = view as InAppWebView
-    webView.inAppWebViewClientCompat?.loadCustomJavaScriptOnPageStarted(view)
-      ?: webView.inAppWebViewClient?.loadCustomJavaScriptOnPageStarted(view)
+    if (lastProgress == progress) {
+      return
+    }
+    lastProgress = progress
+    inAppBrowserDelegate?.didChangeProgress(progress)
     webView.channelDelegate?.onProgressChanged(progress)
   }
 

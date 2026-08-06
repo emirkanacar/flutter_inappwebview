@@ -40,6 +40,7 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.HashMap
 import java.util.Objects
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 import javax.net.ssl.SSLHandshakeException
@@ -55,6 +56,9 @@ class Util private constructor() {
         val ANDROID_ASSET_URL = "file:///android_asset/"
 
         private const val SYNC_METHOD_CHANNEL_TIMEOUT_MILLIS = 500L
+        private const val MAX_CONCURRENT_SYNC_METHOD_CHANNEL_CALLS = 4
+        private val mainLooperHandler = Handler(Looper.getMainLooper())
+        private val synchronousMethodChannelCallsInFlight = AtomicInteger(0)
 
         @JvmStatic
         @Throws(IOException::class)
@@ -93,18 +97,38 @@ class Util private constructor() {
                 return null
             }
 
-            val handler = Handler(Looper.getMainLooper())
-            handler.post {
-                channel.invokeMethod(method, arguments, callback)
-            }
-            if (!callback.latch.await(
-                    timeoutMillis,
-                    TimeUnit.MILLISECONDS
-                )
+            if (
+                synchronousMethodChannelCallsInFlight.incrementAndGet() >
+                MAX_CONCURRENT_SYNC_METHOD_CHANNEL_CALLS
             ) {
-                Log.w(LOG_TAG, "Timed out waiting for synchronous method channel callback: $method")
+                synchronousMethodChannelCallsInFlight.decrementAndGet()
+                Log.w(
+                    LOG_TAG,
+                    "Too many synchronous method channel callbacks are pending; " +
+                        "returning the default response for $method"
+                )
+                return null
             }
-            return callback.result
+
+            try {
+                if (!mainLooperHandler.post {
+                        channel.invokeMethod(method, arguments, callback)
+                    }
+                ) {
+                    Log.w(LOG_TAG, "Unable to dispatch synchronous method channel callback: $method")
+                    return null
+                }
+                if (!callback.latch.await(
+                        timeoutMillis,
+                        TimeUnit.MILLISECONDS
+                    )
+                ) {
+                    Log.w(LOG_TAG, "Timed out waiting for synchronous method channel callback: $method")
+                }
+                return callback.result
+            } finally {
+                synchronousMethodChannelCallsInFlight.decrementAndGet()
+            }
         }
 
         @JvmStatic

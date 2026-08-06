@@ -126,6 +126,26 @@ void main() {
     'legacy callAsyncJavaScript result messages are not handled natively',
   );
   _assert(
+    source.contains('finishPendingAsyncJavaScriptCallsOnDispose'),
+    'pending legacy callAsyncJavaScript callbacks are not completed on dispose',
+  );
+  _assert(
+    source.contains('"error": "WebView disposed"'),
+    'pending legacy callAsyncJavaScript callbacks do not receive a disposal error',
+  );
+  _assert(
+    source.contains('_lastReportedProgress'),
+    'iOS progress callbacks are not deduplicated before crossing the channel',
+  );
+  _assert(
+    source.contains('scheduleContentSizeChangedUpdate'),
+    'iOS content-size callbacks are not coalesced on the main queue',
+  );
+  _assert(
+    source.contains('_contentSizeChangedUpdatePending'),
+    'iOS content-size pending state is missing',
+  );
+  _assert(
     webViewDelegateSource.contains('contentWorldName == "page"'),
     'iOS 15-17 page-world callAsyncJavaScript fallback is missing',
   );

@@ -168,7 +168,21 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   private var nativeRegistrationsRegistered = false
   private var nativeRegistrationRequestScheduled = false
   private var nativeRegistrationAttempts = 0
+  private var isDisposed = false
   private val nativeRegistrationCallbacks: MutableList<() -> Unit> = ArrayList()
+  private var pendingScrollX: Int? = null
+  private var pendingScrollY: Int? = null
+  private var scrollChangedDispatchScheduled = false
+  private val dispatchPendingScrollChanged = Runnable {
+    val x = pendingScrollX
+    val y = pendingScrollY
+    pendingScrollX = null
+    pendingScrollY = null
+    scrollChangedDispatchScheduled = false
+    if (!isDisposed && x != null && y != null) {
+      channelDelegate?.onScrollChanged(x, y)
+    }
+  }
 
   constructor(context: Context) : super(context)
 
@@ -246,6 +260,12 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   @SuppressLint("RestrictedApi")
   fun prepare(deferNativeRegistrations: Boolean) {
+    isDisposed = false
+    mainLooperHandler.removeCallbacks(dispatchPendingScrollChanged)
+    removeCallbacks(dispatchPendingScrollChanged)
+    pendingScrollX = null
+    pendingScrollY = null
+    scrollChangedDispatchScheduled = false
     nativeRegistrationsDeferred = deferNativeRegistrations
     nativeRegistrationsRegistered = false
     nativeRegistrationAttempts = 0
@@ -683,12 +703,15 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
    * callback until they are later surfaced.
    */
   fun onPlatformViewAttached() {
-    if (nativeRegistrationsDeferred) {
+    if (!isDisposed && nativeRegistrationsDeferred) {
       requestNativeRegistrations()
     }
   }
 
   fun whenNativeRegistrationsReady(callback: () -> Unit) {
+    if (isDisposed) {
+      return
+    }
     if (nativeRegistrationsRegistered) {
       post { callback() }
     } else {
@@ -697,13 +720,21 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   private fun requestNativeRegistrations() {
-    if (nativeRegistrationsRegistered || nativeRegistrationRequestScheduled) {
+    if (isDisposed || nativeRegistrationsRegistered || nativeRegistrationRequestScheduled) {
       return
     }
 
     nativeRegistrationRequestScheduled = true
     WebViewStartupCoordinator.runWhenReady(context) {
+      if (isDisposed) {
+        nativeRegistrationRequestScheduled = false
+        return@runWhenReady
+      }
       post {
+        if (isDisposed) {
+          nativeRegistrationRequestScheduled = false
+          return@post
+        }
         nativeRegistrationRequestScheduled = false
         registerNativeWebViewInterfaces()
       }
@@ -711,7 +742,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   private fun registerNativeWebViewInterfaces() {
-    if (nativeRegistrationsRegistered || plugin == null) {
+    if (isDisposed || nativeRegistrationsRegistered || plugin == null) {
       return
     }
 
@@ -759,7 +790,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
 
     mainLooperHandler.postDelayed(
-      { requestNativeRegistrations() },
+      {
+        nativeRegistrationRequestScheduled = false
+        requestNativeRegistrations()
+      },
       NATIVE_REGISTRATION_RETRY_DELAY_MS
     )
   }
@@ -1862,7 +1896,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       it.alpha = 0f
       it.visibility = View.GONE
     }
-    channelDelegate?.onScrollChanged(x, y)
+    if (x != oldX || y != oldY) {
+      pendingScrollX = x
+      pendingScrollY = y
+      if (!scrollChangedDispatchScheduled) {
+        scrollChangedDispatchScheduled = true
+        if (isAttachedToWindow) {
+          postOnAnimation(dispatchPendingScrollChanged)
+        } else {
+          mainLooperHandler.post(dispatchPendingScrollChanged)
+        }
+      }
+    }
   }
 
   override fun scrollTo(x: Int?, y: Int?, animated: Boolean?) {
@@ -2653,6 +2698,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   override fun dispose() {
+    isDisposed = true
+    nativeRegistrationsRegistered = true
+    nativeRegistrationRequestScheduled = false
+    nativeRegistrationCallbacks.clear()
     channelDelegate?.dispose()
     channelDelegate = null
     super.dispose()
@@ -2694,6 +2743,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     removeAllViews()
     checkContextMenuShouldBeClosedTask?.let { removeCallbacks(it) }
     checkScrollStoppedTask?.let { removeCallbacks(it) }
+    mainLooperHandler.removeCallbacks(dispatchPendingScrollChanged)
+    removeCallbacks(dispatchPendingScrollChanged)
+    pendingScrollX = null
+    pendingScrollY = null
+    scrollChangedDispatchScheduled = false
     callAsyncJavaScriptCallbacks.clear()
     evaluateJavaScriptContentWorldCallbacks.clear()
     inAppBrowserDelegate = null

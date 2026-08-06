@@ -1,17 +1,24 @@
 # iOS and Android Performance & WebView Upgrade Plan
 
-Last reviewed: 2026-08-05  
-Status: In progress — Phase 1  
+Last reviewed: 2026-08-07
+Status: Phase 1 source slice complete; first Android and iOS Phase 2/3 fixes landed, with profiling and device validation pending
 Scope: iOS and Android first
 
-Phase 1 implementation started in this workspace:
+Current state in this workspace:
 
 - AndroidX Browser is now `1.10.0`; AndroidX WebKit remains at `1.14.0` while the minSdk 19 compatibility contract is preserved.
-- Android synchronous platform callbacks are bounded and never block the main looper.
+- Android asynchronous provider startup is coordinated by `WebViewStartupCoordinator`, with a safe fallback for older or overridden WebKit providers.
+- Android synchronous platform callbacks use a shared main-looper dispatcher, bounded in-flight capacity, and method-specific timeouts; they never block the main looper indefinitely.
 - Android bridge/document-start registration and the first renderer load are ordered after platform-view attach; activity-free headless WebViews retain a direct path.
 - Cold document-start registration failures are logged and degraded to the existing in-memory script path instead of crashing the app.
-- iOS keyboard-dismissal inset restoration and scroll callback coalescing are implemented as the first lifecycle/performance slice.
+- Android progress callbacks no longer re-inject document-start scripts; duplicate progress and unchanged scroll positions are not sent across the platform channel, and scroll updates are coalesced to one pending frame dispatch.
+- Android native-registration retries clear their scheduled state and stop pending callbacks when a WebView is disposed.
+- iOS keyboard-dismissal inset restoration, scroll callback coalescing, progress de-duplication, and content-size callback coalescing are implemented as the first lifecycle/performance slice; device profiling and edge-case validation remain open.
+- iOS pre-iOS 18 asynchronous JavaScript routing and nil-frame guards are implemented; fallback latency, disposal, and popup stress validation remain open.
+- iOS pending legacy asynchronous JavaScript callbacks now complete with a disposal error during teardown.
 - iOS UIScene and Swift Package Manager migration is tracked in [`ios-uiscene-spm-migration-plan.md`](ios-uiscene-spm-migration-plan.md); the implementation slice is complete and device validation remains.
+
+The source-level slice is complete for this checkpoint. The next release decision must be based on release/profile measurements, not on dependency version numbers alone.
 
 ## Executive decision
 
@@ -20,13 +27,31 @@ The first release should focus on native startup, platform-channel pressure, inp
 Recommended first implementation sequence:
 
 1. Establish a release/profile performance baseline and collect the device WebView version.
-2. Upgrade `androidx.browser` from `1.9.0` to stable `1.10.0`.
+2. Keep the landed `androidx.browser` `1.10.0` upgrade isolated and revalidate it against the Android regression matrix.
 3. Keep `androidx.webkit` at `1.14.0` on the compatibility-preserving branch while auditing the package's effective minimum SDK.
 4. Implement the Android startup and blocking-callback changes suggested by [PR #2844](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2844) and issues [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)/[#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849).
 5. Implement the iOS `contentInset`, focus, JavaScript-evaluation, and disposal/lifecycle fixes.
 6. Evaluate `androidx.webkit:1.15.0` and `1.16.0` on explicit minSdk branches rather than changing the main compatibility contract implicitly.
 
 This document is an implementation plan, not an approval to cherry-pick open upstream PRs wholesale.
+
+## Near-term execution plan
+
+The next milestone is deliberately split into four bounded work packages. Each package must have a before/after profile result and a focused regression test before it is included in a release candidate.
+
+| Package | Platform | Priority | Scope | Release gate |
+| --- | --- | --- | --- | --- |
+| A-P1 | Android | P0 | Measure provider startup, platform-view attach, bridge readiness, document-start registration, and first usable frame. Then make readiness/retry state explicit and idempotent. | 100/100 cold starts on the selected API/device matrix; no duplicate registration and no callback loss. |
+| A-P2 | Android | P0/P1 | Audit the bounded request-interception waits, measure scroll/progress/console channel pressure, and benchmark hybrid versus surface composition. | No UI/WebView freeze under slow Dart; event coalescing reduces channel load without changing terminal events or final scroll position. |
+| I-P1 | iOS | P0 | Profile keyboard, content-inset, scroll KVO, scene transitions, and fullscreen/IME handoff on iOS 15 through the latest supported release. | No stale inset or scroll backlog; p95 frame time and final-position behavior do not regress. |
+| I-P2 | iOS | P0/P1 | Profile `callAsyncJavaScript`/Promise fallback, `windowId`, popup teardown, message-handler cleanup, and repeated create/dispose cycles. | No lost completion callback, bounded pending handlers, and no native crash across 100 repeated lifecycle cycles. |
+
+Implementation order:
+
+1. Capture the shared baseline and record OS, device, WebView/WebKit, Flutter, Xcode, and plugin versions.
+2. Land Android A-P1 and A-P2 independently so startup and channel changes can be rolled back separately.
+3. Land iOS I-P1 and I-P2 independently so layout and JavaScript fallback behavior remain attributable.
+4. Re-run the dependency matrix and decide whether an AndroidX WebKit branch is justified. Do not combine a minSdk increase with runtime behavior changes.
 
 ## Evidence and inputs
 
@@ -36,10 +61,10 @@ This document is an implementation plan, not an approval to cherry-pick open ups
 
 The most relevant local paths are:
 
-- Android dependency and SDK contract: `flutter_inappwebview_forge_android/android/build.gradle`
-- Android startup: `flutter_inappwebview_forge_android/android/src/main/java/.../webview/in_app_webview/InAppWebView.java`
-- Android document-start scripts: `.../types/UserContentController.java`
-- Android channel callbacks: `.../webview/WebViewChannelDelegate.java`
+- Android startup: `flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/WebViewStartupCoordinator.kt` and `.../webview/in_app_webview/InAppWebView.kt`
+- Android document-start scripts: `.../types/UserContentController.kt`
+- Android channel callbacks: `.../webview/WebViewChannelDelegate.kt` and `.../webview/in_app_webview/InAppWebViewClient.kt`
+- Android dependency and SDK contract: `flutter_inappwebview_forge_android/android/build.gradle.kts`
 - iOS layout, keyboard, scroll, JavaScript, and disposal lifecycle: `flutter_inappwebview_forge_ios/ios/flutter_inappwebview_forge_ios/Sources/flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift`
 - iOS dependency/deployment contract: `flutter_inappwebview_forge_ios/ios/flutter_inappwebview_forge_ios.podspec`
 
@@ -49,16 +74,16 @@ There are three different version surfaces. They must be tracked separately.
 
 | Surface | Current repository state | Upgrade model | Plan |
 | --- | --- | --- | --- |
-| AndroidX WebKit | `androidx.webkit:webkit:1.14.0` | Bundled compatibility library; latest stable is `1.16.0` | Do not move the main branch to 1.16 until the minSdk decision is explicit. |
-| AndroidX Browser | `androidx.browser:browser:1.10.0` | Bundled AndroidX library; latest stable is `1.10.0` | Completed in Phase 1; run the Android regression matrix before release. |
+| AndroidX WebKit | `androidx.webkit:webkit:1.14.0` | Bundled compatibility library; 1.15 and 1.16 are candidate upgrade lines | Re-check the official release notes and effective API floor during Phase 0; do not move the main branch until the minSdk decision is explicit. |
+| AndroidX Browser | `androidx.browser:browser:1.10.0` | Bundled AndroidX library | Completed in Phase 1; run the Android regression matrix before release. |
 | Android System WebView | Device-provided | Updated independently on user devices | Record `WebViewCompat.getCurrentWebViewPackage()` where available; do not treat AndroidX upgrades as engine upgrades. |
 | iOS `WKWebView` | System WebKit; minimum deployment target is iOS 15 | Delivered with the iOS runtime and SDK | Do not look for a package version bump; test OS/Xcode/WebKit behavior across supported iOS 15+ versions. |
 
-The official AndroidX WebKit release notes state that `1.15.0` raises the library minimum from API 21 to API 23, while `1.16.0` requires API 24 and makes async WebView startup and navigation-listener APIs stable: [AndroidX WebKit release notes](https://developer.android.com/jetpack/androidx/releases/webkit). The official Browser release notes list `1.10.0` as the stable release: [AndroidX Browser release notes](https://developer.android.com/jetpack/androidx/releases/browser).
+The AndroidX WebKit candidate lines must be checked against the official release notes at implementation time because their API floor and available startup/navigation APIs determine whether a branch can retain the current minSdk contract: [AndroidX WebKit release notes](https://developer.android.com/jetpack/androidx/releases/webkit). Browser dependency changes should remain isolated from WebKit changes: [AndroidX Browser release notes](https://developer.android.com/jetpack/androidx/releases/browser).
 
 AndroidX WebKit is a compatibility layer over the separately updated WebView APK. The application controls the AndroidX library version, but not the WebView APK version installed on each device: [Jetpack WebKit overview](https://developer.android.com/develop/ui/views/layout/webapps/jetpack-webkit-overview). The Android WebView package can be read for telemetry using the platform/compatibility API: [WebView API reference](https://developer.android.com/reference/android/webkit/WebView#getCurrentWebViewPackage()).
 
-The current `minSdkVersion 19` declaration therefore needs an effective-minimum audit: the AndroidX WebKit release notes describe the 1.15 transition as API 21 → API 23, which implies that the 1.14 line is not a full API 19 compatibility guarantee. No minSdk increase should be made until the supported-user distribution and the built AAR/manifest behavior are verified.
+The current `minSdkVersion 19` declaration therefore needs an effective-minimum audit. No minSdk increase should be made until the supported-user distribution, resolved dependency graph, built AAR/manifest behavior, and installability on the retained API matrix are verified.
 
 ### Version tracks
 
@@ -119,13 +144,24 @@ All performance decisions require release/profile measurements. Debug-only measu
 - Current and previous supported Xcode/Flutter toolchains.
 - Keyboard show/hide, scroll-to-bottom, fullscreen video, `window.open`, KeepAlive reuse, `callAsyncJavaScript`, `evaluateJavaScript` with `windowId`, focus, and repeated disposal.
 
+### Measurement implementation
+
+- Dart: add opt-in `Timeline` spans around platform-view creation, platform-view readiness, first load callbacks, JavaScript completion, and disposal. Do not add a continuously enabled public telemetry stream for the first milestone.
+- Android: use `android.os.Trace` spans and Perfetto/Android Studio profiling for provider startup, platform-view attach, bridge registration, request interception, event dispatch, and composition. Include `WebViewCompat.getCurrentWebViewPackage()` in captured samples.
+- iOS: use `os_signpost` and Instruments Points of Interest/Time Profiler for WebView creation, navigation, KVO scheduling, keyboard transitions, JavaScript fallback, popup teardown, and disposal.
+- Every sample must include package version, Flutter/Dart version, OS, device model, Android API or iOS version, Android System WebView package when available, Xcode/SDK for Apple builds, composition mode, page fixture, and run number.
+- Store baseline and candidate results as review artifacts; a single median is insufficient. Report p50, p95, worst case, dropped frames, allocations/memory, and error or timeout counts.
+- Keep instrumentation removable or disabled by default so measurement code does not become a permanent channel or frame-time cost.
+
 ## Android work packages
 
 ### A1 — Startup and bridge readiness (P0)
 
 Problem at the review baseline: `InAppWebView.prepare()` registered the native JavaScript bridge and document-start scripts synchronously. `UserContentController` called `WebViewCompat.addDocumentStartJavaScript` directly. This matches the failure pattern in [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849).
 
-Phase 1 status: platform-view registrations and the first load are now ordered through `View.post()`. Activity-free headless WebViews use the direct path so they do not wait for an attach that will never happen, and document-start registration exceptions degrade to a logged fallback. An explicit readiness/retry state and AndroidX async-startup comparison remain for the next validation track.
+Phase 1 status: platform-view registrations and the first load are now ordered through `View.post()`. Activity-free headless WebViews use the direct path so they do not wait for an attach that will never happen, and document-start registration exceptions degrade to a logged fallback. Registration retry scheduling and disposal guards are now explicit; AndroidX async-startup comparison remains for the next validation track.
+
+The current source slice also removes progress-driven duplicate script injection, coalesces Android scroll dispatches, suppresses duplicate progress/scroll payloads, and makes registration retry/disposal state idempotent. These changes require release-device profiling before further callback-policy changes.
 
 Plan:
 
@@ -146,13 +182,14 @@ Exit criteria:
 
 Problem at the review baseline: `shouldInterceptRequest` reached `Util.invokeMethodAndWaitResult`, which waited synchronously for Dart. This aligns with the freeze/deadlock report in [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580).
 
-Phase 1 status: the main looper no longer waits synchronously, and background request callbacks have a 500 ms upper bound with a safe null fallback. Timeout telemetry and a fully asynchronous interception contract remain open work.
+Phase 1 status: the main looper no longer waits synchronously. Background resource callbacks use a shared main-looper dispatcher, bounded in-flight capacity, and method-specific timeouts (250 ms for WebView request interception and 500 ms by default) with a safe null fallback. Timeout telemetry and a fully asynchronous interception contract remain open work.
 
 Plan:
 
 - Map the full request-interception call graph and identify which callbacks truly require a synchronous response.
 - Remove unbounded latch waits from the WebView callback path.
 - Use a bounded response strategy with a safe default, or make Dart interception opt-in when the WebView API cannot be made asynchronous without changing behavior.
+- Reuse one main-looper dispatcher and cap all synchronous channel-backed resource callbacks so service-worker and custom asset paths cannot create an unbounded native wait set.
 - Record timeout/fallback counters so applications can detect degraded interception.
 - Add slow-Dart, nested-navigation, redirect, and concurrent-resource tests.
 
@@ -166,7 +203,7 @@ Exit criteria:
 
 Problem: scroll, progress, and console callbacks allocate payload maps and cross the platform channel at high frequency.
 
-Phase 1 status: iOS scroll-change callbacks are coalesced once per main-loop turn while preserving the latest offset and user-scroll signal. Android scroll/progress/console event-rate measurement remains before changing Android semantics.
+Phase 1 status: iOS scroll-change callbacks are coalesced once per main-loop turn while preserving the latest offset and user-scroll signal; progress and content-size updates are also de-duplicated/coalesced. Android now drops duplicate progress and unchanged scroll payloads and coalesces scroll updates to the next animation frame; event-rate and terminal-event validation remain open.
 
 Plan:
 
@@ -202,13 +239,16 @@ Exit criteria:
 
 ### I1 — Keyboard/contentInset and scroll scheduling (P0)
 
-Problem: the current `frame` setter and keyboard callbacks apply negative content-inset compensation, while scroll offset KVO dispatches a main-queue task for each change. This matches [issue #2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) and [PR #2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860).
+Problem: the current `frame` setter and keyboard callbacks apply negative content-inset compensation, while scroll and content-size KVO changes can enqueue main-queue work during layout. This matches [issue #2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) and [PR #2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860).
+
+Current status: the initial inset restoration, scroll coalescing, progress de-duplication, and content-size coalescing slice is implemented. Device validation for keyboard animation, rotation, safe-area changes, and nested Flutter scrolling remains open.
 
 Plan:
 
 - Make content-inset adjustment idempotent and separate the base inset from keyboard compensation.
 - Restore the exact pre-keyboard inset on `keyboardWillHide`.
 - Coalesce KVO scroll changes with a pending-update flag or display-link-style scheduler.
+- Coalesce content-size KVO changes while preserving the first old size and latest current size in each main-loop turn.
 - Do not replace KVO with `scrollViewDidScroll` without reproducing the existing white-space rendering issue documented in the source.
 - Test rotations, safe-area changes, keyboard animation, nested Flutter scrolling, and scroll-to-bottom after keyboard dismissal.
 
@@ -221,6 +261,8 @@ Exit criteria:
 ### I2 — JavaScript evaluation compatibility (P0)
 
 Use [PR #2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), [PR #2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776), [PR #2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), and [PR #2574](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2574) as compatibility inputs.
+
+Current status: the pre-iOS 18 routing, nil-frame safety, and disposal completion fixes are implemented. Latency, Promise serialization, popup teardown, and device-side handler-cleanup measurements remain open.
 
 - Keep native `callAsyncJavaScript` only where the OS/content-world combination is verified.
 - Use a tested Promise/`evaluateJavaScript` fallback before iOS 18 where required.
@@ -258,7 +300,8 @@ Open PRs are evidence and design input, not release-ready commits.
 
 | Action | PRs | Rule |
 | --- | --- | --- |
-| Port the idea after local tests | #2844, #2860, #2853, #2871, #2776, #2771, #2574, #2614, #2558 | Re-implement against the current branch and add regression coverage. |
+| Port the idea after local tests | #2844, #2860, #2853, #2776, #2574, #2614, #2558 | Re-implement against the current branch and add regression coverage. |
+| Validate the local implementation | #2871, #2771, #2474 | These PR-only compatibility fixes are present locally; use device/provider tests to verify behavior and avoid re-porting them. |
 | Benchmark before adoption | #2794, #2851, #2864, #2390 | Measure channel, payload, render, or first-frame effects before changing public behavior. |
 | Do not cherry-pick wholesale | #2548 | The branch contains unrelated commits and unresolved follow-up reports. |
 | Maintenance batch | #2879, #2870, #2817, #2729 | Land with build/deprecation verification, separate from runtime performance changes. |
@@ -273,6 +316,8 @@ Open PRs are evidence and design input, not release-ready commits.
 - Verify effective Android minSdk for WebKit 1.14 and test API 19/21/23/24 installation/build behavior.
 - Capture Android System WebView package versions and the complete iOS/Xcode/Flutter matrix.
 
+Status: next prerequisite for the performance release; source changes must not be judged without this baseline.
+
 Deliverable: baseline report and a go/no-go decision for Tracks A, B, and C.
 
 ### Phase 1 — Safe dependency and observability update
@@ -281,6 +326,8 @@ Deliverable: baseline report and a go/no-go decision for Tracks A, B, and C.
 - Keep AndroidX WebKit at `1.14.0` on the compatibility branch.
 - Add WebView package telemetry and feature-availability logging.
 - Add performance regression test scaffolding without changing public callback semantics.
+
+Status: source-level dependency and observability slice is complete; baseline comparison and release-device validation remain.
 
 Deliverable: isolated dependency commit plus baseline comparison.
 
@@ -291,6 +338,8 @@ Deliverable: isolated dependency commit plus baseline comparison.
 - Add slow-Dart and request-interception fallback tests.
 - Benchmark hybrid/surface composition and event coalescing.
 
+Status: first source fixes landed; the full callback and composition work remains queued after the Phase 0 baseline.
+
 Deliverable: Android P0 performance/stability patch with no minSdk change.
 
 ### Phase 3 — iOS layout and lifecycle pipeline
@@ -298,6 +347,8 @@ Deliverable: Android P0 performance/stability patch with no minSdk change.
 - Implement I1 and I2.
 - Implement I3 lifecycle tests and fixes.
 - Validate bridge-disabled, content-world, popup, keyboard, and fullscreen paths.
+
+Status: first source fixes landed; the existing iOS fixes require device and stress validation before additional changes.
 
 Deliverable: iOS P0/P1 patch with iOS 15–latest compatibility evidence.
 

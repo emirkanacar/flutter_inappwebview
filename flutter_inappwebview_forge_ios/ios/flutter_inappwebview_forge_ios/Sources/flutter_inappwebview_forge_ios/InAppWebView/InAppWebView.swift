@@ -154,6 +154,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     private var _scrollChangedUpdatePending = false
     private var _pendingScrollStartedByUser = false
     private var _pendingOldContentOffset: CGPoint?
+    private var _contentSizeChangedUpdatePending = false
+    private var _pendingOldContentSize: CGSize?
+    private var _lastReportedProgress: Int?
     @objc func keyboardWillShow(notification: NSNotification) {
         // UIResponder.keyboardWillShowNotification will be fired also
         // when changing focus between HTML inputs with the keyboard already open
@@ -224,6 +227,25 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             self._pendingScrollStartedByUser = false
             self._pendingOldContentOffset = nil
             self.onScrollChanged(startedByUser: startedByUser, oldContentOffset: oldContentOffset)
+        }
+    }
+
+    private func scheduleContentSizeChangedUpdate(oldContentSize: CGSize) {
+        if _contentSizeChangedUpdatePending {
+            return
+        }
+        _contentSizeChangedUpdatePending = true
+        _pendingOldContentSize = oldContentSize
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, self._contentSizeChangedUpdatePending else {
+                return
+            }
+            self._contentSizeChangedUpdatePending = false
+            let pendingOldContentSize = self._pendingOldContentSize
+            self._pendingOldContentSize = nil
+            if let pendingOldContentSize = pendingOldContentSize {
+                self.onContentSizeChanged(oldContentSize: pendingOldContentSize)
+            }
         }
     }
     
@@ -852,7 +874,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
             initializeWindowIdJS()
             let progress = Int(estimatedProgress * 100)
-            channelDelegate?.onProgressChanged(progress: progress)
+            if _lastReportedProgress != progress {
+                _lastReportedProgress = progress
+                channelDelegate?.onProgressChanged(progress: progress)
+            }
             inAppBrowserDelegate?.didChangeProgress(progress: estimatedProgress)
         } else if keyPath == #keyPath(WKWebView.url) && change?[.newKey] is URL {
             initializeWindowIdJS()
@@ -878,9 +903,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             if let newContentSize = change?[.newKey] as? CGSize,
                let oldContentSize = change?[.oldKey] as? CGSize,
                newContentSize != oldContentSize {
-                DispatchQueue.main.async {
-                    self.onContentSizeChanged(oldContentSize: oldContentSize)
-                }
+                scheduleContentSizeChangedUpdate(oldContentSize: oldContentSize)
             }
         }
         else {
@@ -3908,6 +3931,17 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         windowBeforeCreatedCallbacks.removeAll()
     }
 
+    private func finishPendingAsyncJavaScriptCallsOnDispose() {
+        let pendingCallbacks = Array(callAsyncJavaScriptBelowIOS14Results.values)
+        callAsyncJavaScriptBelowIOS14Results.removeAll()
+        pendingCallbacks.forEach { callback in
+            callback([
+                "value": NSNull(),
+                "error": "WebView disposed"
+            ])
+        }
+    }
+
     public func dispose() {
         if nativeFullscreenVideoID != nil {
             exitNativeFullscreenVideo()
@@ -3980,10 +4014,13 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         scrollView.delegate = nil
         isPausedTimersCompletionHandler = nil
         SharedLastTouchPointTimestamp.removeValue(forKey: self)
-        callAsyncJavaScriptBelowIOS14Results.removeAll()
+        finishPendingAsyncJavaScriptCallsOnDispose()
         _scrollChangedUpdatePending = false
         _pendingScrollStartedByUser = false
         _pendingOldContentOffset = nil
+        _contentSizeChangedUpdatePending = false
+        _pendingOldContentSize = nil
+        _lastReportedProgress = nil
         plugin = nil
     }
     

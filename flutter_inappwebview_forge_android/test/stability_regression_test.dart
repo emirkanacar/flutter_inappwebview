@@ -30,6 +30,24 @@ void main() {
     expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
   });
 
+  test('Android synchronous channel callbacks share bounded dispatch capacity', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'Util.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('MAX_CONCURRENT_SYNC_METHOD_CHANNEL_CALLS'));
+    expect(source, contains('synchronousMethodChannelCallsInFlight'));
+    expect(source, contains('private val mainLooperHandler = Handler(Looper.getMainLooper())'));
+    expect(source, contains('mainLooperHandler.post'));
+    expect(source, contains('callback.latch.await'));
+    expect(source, contains('TimeUnit.MILLISECONDS'));
+    expect(
+      source,
+      isNot(contains('val handler = Handler(Looper.getMainLooper())')),
+    );
+  });
+
   test(
     'Android cookie clearing does not flush synchronously after async deletion',
     () {
@@ -106,6 +124,55 @@ void main() {
     expect(source, contains('override fun onWindowVisibilityChanged'));
     expect(source, contains('postInvalidateOnAnimation()'));
     expect(source, contains('requestLayout()'));
+  });
+
+  test('Android progress callbacks do not re-inject document-start scripts', () {
+    final chromeClientSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    final webViewClientSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewClient.kt',
+    ).readAsStringSync();
+
+    expect(chromeClientSource, contains('lastProgress'));
+    expect(
+      chromeClientSource,
+      isNot(contains('loadCustomJavaScriptOnPageStarted')),
+    );
+    expect(
+      webViewClientSource,
+      contains('loadCustomJavaScriptOnPageStarted(webView)'),
+    );
+  });
+
+  test('Android native registration retries clear their scheduled state', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('private var isDisposed = false'));
+    expect(source, contains('if (isDisposed || nativeRegistrationsRegistered'));
+    expect(source, contains('nativeRegistrationRequestScheduled = false'));
+    expect(source, contains('nativeRegistrationCallbacks.clear()'));
+  });
+
+  test('Android scroll callbacks skip unchanged positions', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('if (x != oldX || y != oldY)'));
+    expect(source, contains('pendingScrollX = x'));
+    expect(source, contains('pendingScrollY = y'));
+    expect(source, contains('postOnAnimation(dispatchPendingScrollChanged)'));
+    expect(source, contains('if (isAttachedToWindow)'));
+    expect(source, contains('mainLooperHandler.post(dispatchPendingScrollChanged)'));
+    expect(source, contains('mainLooperHandler.removeCallbacks(dispatchPendingScrollChanged)'));
+    expect(source, contains('removeCallbacks(dispatchPendingScrollChanged)'));
   });
 
   test('Android WebMessageListener falls back when WebKit lacks the native API', () {
