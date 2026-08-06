@@ -24,13 +24,14 @@ The confidence labels below describe the evidence available during this review:
 | Mitigated | [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android 1.0.5 skips the plugin's deprecated status-bar color call on Android 15+; remaining Play Console warnings may originate in Flutter or the host app. |
 | Mitigated (validation pending) | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 1.0.7 / root 2.0.6 adds final APK/AAB ELF and packaging alignment checks; validate every host application's release artifact. |
 | Fixed (validation pending) | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) | iOS 2.0.1 restores scroll insets after UIKit finishes keyboard dismissal; validate on iOS 17.2+ devices. |
-| P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | iOS fullscreen/WebKit and Web iframe URL reporting still require platform-specific reproductions. |
+| P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | iOS 26 fullscreen video can remain black or unresponsive after seeking; the report is still consistent with an upstream WebKit/GPU issue and needs device validation. |
+| Mitigated (validation pending) | [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | Web now reports the exact same-origin iframe URL and returns `null` when browser same-origin policy prevents reading a cross-origin URL, avoiding stale initial data. |
 | Fixed (validation pending) | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789) | Android OEM selection-menu rendering and Windows minimized-window hit testing now have guarded platform paths; validate on affected devices. |
 | Fixed (build validation pending) | [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780) | Linux theme-color access is compiled only for WPE WebKit 2.50+, with a no-theme-color fallback on older versions. |
 | Mitigated (build validation pending) | [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862) | Linux CMake now lists every WPE `pkg-config` candidate, diagnostic command, and backend-specific prerequisite document. |
 | Fixed (validation pending) | [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) | Windows `loadFile` now maps Flutter assets to a restricted virtual HTTPS origin so relative resources do not depend on opaque `file:` origins. |
 | P2 | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux Intel/X11 GPU fallback still requires a platform-specific reproduction before changing the default renderer. |
-| Monitor | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS/Xcode-specific memory failure with insufficient symbolicated evidence. |
+| Mitigated (validation pending) | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS 14–17 popup WebViews avoid the shared content-world evaluation path and detached popups skip early JavaScript; iOS 18/Xcode 26 still needs device validation. |
 
 ## Detailed findings
 
@@ -140,11 +141,13 @@ The Windows implementation resolves the Flutter asset to `data/flutter_assets/..
 
 ### #2867 — iOS/Xcode-specific `EXC_BAD_ACCESS` in multi-window navigation
 
-**Impact:** Potential native crash during `window.open`/multi-window flows. **Confidence:** Needs reproduction.
+**Status:** Mitigated for the known iOS 14–17 popup content-world path in iOS 2.0.2; iOS 18/Xcode 26 device validation remains. **Impact:** Potential native crash during `window.open`/multi-window flows. **Confidence:** The issue identifies a plausible evaluation path, but the report still lacks a usable symbolicated stack trace.
 
-Issue [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) reports different behavior across Xcode 16/26 and iOS 18/26, but the report does not include a usable symbolicated stack trace. The affected flow also overrides JavaScript evaluation and manages a second WebView, so changing the shared evaluation API without a minimal reproducer would be risky.
+Issue [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) reports different behavior across Xcode 16/26 and iOS 18/26 while a popup WebView overrides JavaScript evaluation and handles `shouldOverrideUrlLoading`. The affected popup can receive KVO/navigation callbacks before Flutter attaches its platform view, and iOS 14–17 can crash when a shared popup configuration evaluates JavaScript in an uninitialized custom content world.
 
-**Recommended action:** request a symbolicated crash, exact Xcode/SDK/Flutter/plugin matrix, and a minimal multi-window sample. Then audit WebView/controller lifetime and callback ownership before making an iOS code change.
+**Implementation:** popup window-ID JavaScript initialization now stops until the platform view is attached. On iOS 14–17, popup `evaluateJavaScript` and `callAsyncJavaScript` use the initialized page-world overload, following the upstream workaround in [PR #2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776). This is a targeted mitigation, not proof that every Xcode 26/iOS 18 crash is resolved.
+
+**Remaining validation:** run `window.open` with popup navigation, `shouldOverrideUrlLoading`, both JavaScript APIs, and popup disposal across iOS 14–18 with Xcode 16 and 26; collect a symbolicated crash if the failure persists.
 
 ## Additional findings from the full CSV review
 
@@ -230,17 +233,17 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and `onCreateWindow` results can be ignored. **Confidence:** Strong symptoms; several are likely iOS/WebKit/Flutter-version dependent.
 
-[Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) reports the fullscreen family through the iOS WebKit/GPU path. [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) and [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) need OS/SDK-specific reproductions before changing shared navigation or permission code.
+[Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) now has a concrete iOS 26 report: after an inline HTML5 video is scrubbed and enters native fullscreen, playback can become black or unresponsive. The report also reproduces with `webview_flutter` and remains after testing the available inline/PiP/fullscreen settings, which points to the WebKit/GPU layer rather than a package-only path. No reliable plugin workaround has been validated; forcing inline playback or using a native player/Safari remains an application-level workaround.
 
-**Recommended action:** maintain an iOS matrix for Flutter, Xcode, iOS, keyboard, fullscreen, and multi-window flows; add targeted regression tests around content insets and callback completion; avoid presenting these as one common root cause until each has a minimal reproducer.
+[#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) and [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) still need OS/SDK-specific reproductions before changing shared navigation or permission code. Maintain an iOS matrix for Flutter, Xcode, iOS, keyboard, fullscreen, and multi-window flows; do not present these as one common root cause.
 
 ### #2737 — Web platform reports stale navigation URLs
 
-**Impact:** Applications cannot reliably track the current page on the web platform. **Confidence:** Strong report; source path needs a browser test.
+**Status:** Mitigated in Web 1.0.1; browser integration validation remains. **Impact:** Applications cannot reliably track the current page on the web platform. **Confidence:** Strong report; the source path and browser limitation are now explicit.
 
-Issue [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) reports that iframe-based `onLoadStart`, `onLoadStop`, `onProgressChanged`, and `getUrl()` continue to expose the initial URL after navigation. The web element currently forwards URLs from its iframe event bridge, so this should be tested with redirects, history navigation, and cross-origin pages rather than assumed to be an Android/iOS parity problem.
+Issue [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) reports that iframe-based `onLoadStart`, `onLoadStop`, `onProgressChanged`, and `getUrl()` continue to expose the initial URL after navigation. The Web implementation now reads `contentWindow.location.href` for same-origin documents and forwards that value through load/history events and `getUrl()`.
 
-**Recommended action:** add a web integration test that compares iframe `location`, event payloads, and `getUrl()` after navigation; document any cross-origin limitation if the browser sandbox prevents a fully reliable value.
+For a cross-origin document, the browser's same-origin policy can make `contentWindow.location.href` unreadable to the parent page. The implementation returns `null` in that case instead of repeating the iframe's initial `src`; an exact cross-origin URL still requires cooperation from the embedded page. Add a browser integration test covering same-origin redirects/history and cross-origin privacy behavior.
 
 ### #2789 and #2780 — Windows overlay and Linux WPE compatibility
 

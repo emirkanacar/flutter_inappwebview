@@ -99,7 +99,7 @@ class PlatformWebViewCreationParams<T> {
       ),
       WebPlatform(
         note:
-            "It will be dispatched at the same time of [onLoadStop] event because there isn't any way to capture the real load start event from an iframe. If `window.location.href` isn't accessible inside the iframe, the [url] parameter will have the current value of the `iframe.src` attribute.",
+            "It will be dispatched at the same time of [onLoadStop] event because there isn't any way to capture the real load start event from an iframe. If the current iframe location isn't accessible because of the browser's same-origin policy, the [url] parameter will be null.",
       ),
       WindowsPlatform(
         apiName: 'ICoreWebView2.add_NavigationStarting',
@@ -143,7 +143,7 @@ class PlatformWebViewCreationParams<T> {
         apiUrl:
             'https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event',
         note:
-            "If `window.location.href` isn't accessible inside the iframe, the [url] parameter will have the current value of the `iframe.src` attribute.",
+            "If the current iframe location isn't accessible because of the browser's same-origin policy, the [url] parameter will be null.",
       ),
       WindowsPlatform(
         apiName: 'ICoreWebView2.add_NavigationCompleted',

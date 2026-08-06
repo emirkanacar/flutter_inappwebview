@@ -1,3 +1,8 @@
+## 1.0.4 - 2026-08-06
+
+- Clarify that Web iframe load callbacks and `getUrl()` report the current same-origin URL, while an inaccessible cross-origin URL is `null` after the document loads instead of the iframe's requested `src`.
+- Regenerate the Web navigation callback and controller capability documentation for the same-origin limitation.
+
 ## 1.0.3 - 2026-08-06
 
 - Document that Android Forge preserves the original HTTP/HTTPS main-frame navigation when `shouldOverrideUrlLoading` returns `ALLOW`, while non-HTTP(S) URLs retain the asynchronous reload behavior.

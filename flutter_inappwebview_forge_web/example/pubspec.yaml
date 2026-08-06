@@ -35,6 +35,12 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.9
 
+dependency_overrides:
+  flutter_inappwebview_forge_internal_annotations:
+    path: ../../dev_packages/flutter_inappwebview_forge_internal_annotations
+  flutter_inappwebview_forge_platform_interface:
+    path: ../../flutter_inappwebview_forge_platform_interface
+
 dev_dependencies:
   integration_test:
     sdk: flutter

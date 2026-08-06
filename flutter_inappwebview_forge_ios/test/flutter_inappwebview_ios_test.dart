@@ -68,4 +68,23 @@ void main() {
     !windowSource.contains('UIApplication.shared.delegate?.window'),
     'legacy AppDelegate window lookup is still present',
   );
+
+  _assert(
+    source.contains('guard windowCreated else { return }'),
+    'popup JavaScript is evaluated before the Flutter platform view is attached',
+  );
+  _assert(
+    source.contains('if #unavailable(iOS 18.0), windowId != nil'),
+    'popup content-world compatibility guard is missing',
+  );
+  _assert(
+    source.contains('super.evaluateJavaScript(javaScript) { result, error in'),
+    'popup JavaScript does not use the page-world fallback',
+  );
+  _assert(
+    source.contains(
+      'in: WKContentWorld.page, completionHandler: completionHandler',
+    ),
+    'popup async JavaScript does not use the page content world fallback',
+  );
 }

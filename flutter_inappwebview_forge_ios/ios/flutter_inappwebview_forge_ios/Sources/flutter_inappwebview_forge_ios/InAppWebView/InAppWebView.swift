@@ -883,6 +883,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     public func initializeWindowIdJS() {
         if let windowId = windowId {
+            // Popup WebViews are created by WebKit before Flutter attaches their
+            // platform view. Do not evaluate JavaScript against that transient
+            // object; its shared configuration/content worlds are not ready yet.
+            guard windowCreated else { return }
             if #available(iOS 14.0, *) {
                 let contentWorlds = configuration.userContentController.getContentWorlds(with: windowId)
                 for contentWorld in contentWorlds {
@@ -1609,6 +1613,20 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
+        // Popup WebViews reuse the parent's WKWebViewConfiguration. On iOS 14–17
+        // WebKit can dereference an uninitialized content world in that state.
+        // Use the page-world overload until iOS 18, where WebKit fixed the
+        // underlying popup/content-world interaction.
+        if #unavailable(iOS 18.0), windowId != nil {
+            super.evaluateJavaScript(javaScript) { result, error in
+                if let error = error {
+                    completionHandler?(.failure(error))
+                } else {
+                    completionHandler?(.success(result as Any))
+                }
+            }
+            return
+        }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
     }
     
@@ -1624,6 +1642,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     @available(iOS 14.0, *)
     public func callAsyncJavaScript(_ functionBody: String, arguments: [String : Any] = [:], frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
+            return
+        }
+        // Keep popup async evaluation on the initialized page world for the
+        // same iOS 14–17 WebKit crash path handled above.
+        if #unavailable(iOS 18.0), windowId != nil {
+            super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: completionHandler)
             return
         }
         super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: completionHandler)

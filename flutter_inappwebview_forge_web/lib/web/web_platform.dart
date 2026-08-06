@@ -124,15 +124,15 @@ String? _dartNativeSyncCommunication(
     try {
       switch (method) {
         case 'onLoadStart':
-          String url = args![0];
+          String? url = args?[0] as String?;
           webViewHtmlElement.onLoadStart(url);
           break;
         case 'onLoadStop':
-          String url = args![0];
+          String? url = args?[0] as String?;
           webViewHtmlElement.onLoadStop(url);
           break;
         case 'onUpdateVisitedHistory':
-          String url = args![0];
+          String? url = args?[0] as String?;
           webViewHtmlElement.onUpdateVisitedHistory(url);
           break;
         case 'onScrollChanged':

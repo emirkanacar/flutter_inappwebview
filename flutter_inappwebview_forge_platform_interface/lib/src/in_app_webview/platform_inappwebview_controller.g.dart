@@ -1131,7 +1131,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///- iOS WKWebView ([Official API - WKWebView.url](https://developer.apple.com/documentation/webkit/wkwebview/1415005-url))
   ///- macOS WKWebView ([Official API - WKWebView.url](https://developer.apple.com/documentation/webkit/wkwebview/1415005-url))
   ///- Web \<iframe\> but requires same origin:
-  ///    - If `window.location.href` isn't accessible inside the iframe, it will return the current value of the `iframe.src` attribute.
+  ///    - For a same-origin iframe it returns the current location. After the first document loads, it returns null when the browser's same-origin policy prevents reading a cross-origin location.
   ///- Windows WebView2 ([Official API - ICoreWebView2.get_Source](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2?view=webview2-1.0.2210.55#get_source))
   ///- Linux WPE WebKit ([Official API - webkit_web_view_get_uri](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebView.get_uri.html))
   ///

@@ -957,7 +957,7 @@ enum PlatformWebViewCreationParamsProperty {
   ///- iOS WKWebView ([Official API - WKNavigationDelegate.webView](https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455621-webview))
   ///- macOS WKWebView ([Official API - WKNavigationDelegate.webView](https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455621-webview))
   ///- Web \<iframe\> but requires same origin:
-  ///    - It will be dispatched at the same time of [onLoadStop] event because there isn't any way to capture the real load start event from an iframe. If `window.location.href` isn't accessible inside the iframe, the [url] parameter will have the current value of the `iframe.src` attribute.
+  ///    - It will be dispatched at the same time of [onLoadStop] event because there isn't any way to capture the real load start event from an iframe. If the current iframe location isn't accessible because of the browser's same-origin policy, the [url] parameter will be null.
   ///- Windows WebView2 ([Official API - ICoreWebView2.add_NavigationStarting](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/iwebview2webview?view=webview2-0.8.355#add_navigationstarting))
   ///- Linux WPE WebKit ([Official API - WebKitWebView::load-changed](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/signal.WebView.load-changed.html)):
   ///    - Fired when WebKitLoadEvent is WEBKIT_LOAD_STARTED.
@@ -978,7 +978,7 @@ enum PlatformWebViewCreationParamsProperty {
   ///- iOS WKWebView ([Official API - WKNavigationDelegate.webView](https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455629-webview))
   ///- macOS WKWebView ([Official API - WKNavigationDelegate.webView](https://developer.apple.com/documentation/webkit/wknavigationdelegate/1455629-webview))
   ///- Web \<iframe\> but requires same origin ([Official API - Window.onload](https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event)):
-  ///    - If `window.location.href` isn't accessible inside the iframe, the [url] parameter will have the current value of the `iframe.src` attribute.
+  ///    - If the current iframe location isn't accessible because of the browser's same-origin policy, the [url] parameter will be null.
   ///- Windows WebView2 ([Official API - ICoreWebView2.add_NavigationCompleted](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/iwebview2webview?view=webview2-0.8.355#add_navigationcompleted))
   ///- Linux WPE WebKit ([Official API - WebKitWebView::load-changed](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/signal.WebView.load-changed.html)):
   ///    - Fired when WebKitLoadEvent is WEBKIT_LOAD_FINISHED.

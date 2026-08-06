@@ -39,6 +39,7 @@ class InAppWebViewWebElement implements Disposable {
   InAppWebViewSettings? settings;
   JSWebView? jsWebView;
   bool isLoading = false;
+  bool _hasLoadedDocument = false;
 
   late final String _expectedBridgeSecret;
 
@@ -425,7 +426,8 @@ class InAppWebViewWebElement implements Disposable {
 
   Future<String?> getUrl() async {
     String? url = jsWebView?.getUrl()?.toDart;
-    if (url == null || url.isEmpty || url == 'about:blank') {
+    if (!_hasLoadedDocument &&
+        (url == null || url.isEmpty || url == 'about:blank')) {
       url = iframe.src;
     }
     return url;
@@ -607,21 +609,22 @@ class InAppWebViewWebElement implements Disposable {
     return settings!.toMap();
   }
 
-  void onLoadStart(String url) async {
+  void onLoadStart(String? url) async {
     isLoading = true;
 
     var obj = {"url": url};
     await _channel?.invokeMethod("onLoadStart", obj);
   }
 
-  void onLoadStop(String url) async {
+  void onLoadStop(String? url) async {
     isLoading = false;
+    _hasLoadedDocument = true;
 
     var obj = {"url": url};
     await _channel?.invokeMethod("onLoadStop", obj);
   }
 
-  void onUpdateVisitedHistory(String url) async {
+  void onUpdateVisitedHistory(String? url) async {
     var obj = {"url": url};
     await _channel?.invokeMethod("onUpdateVisitedHistory", obj);
   }

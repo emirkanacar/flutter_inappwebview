@@ -6,6 +6,18 @@
   window.flutter_inappwebview_plugin = {
     createFlutterInAppWebView: function(viewId, iframe, iframeContainer, bridgeSecret) {
       const iframeId = iframe.id;
+      // The iframe element's `src` attribute is only the requested URL. It does
+      // not change when the embedded page navigates itself. Reading the actual
+      // location is also subject to the browser's same-origin policy, so return
+      // null instead of exposing a stale URL for cross-origin documents.
+      const getIFrameUrl = function(iframeElement) {
+        try {
+          const url = iframeElement?.contentWindow?.location?.href;
+          return typeof url === "string" && url.length > 0 ? url : null;
+        } catch (_) {
+          return null;
+        }
+      };
       const webView = {
         viewId,
         iframeId,
@@ -109,12 +121,7 @@
                 }
                 webView.evaluateJavascript(ifStatement.length > 4 ? `${ifStatement}) { ${source} }` : source);
               }
-              let url = iframe.src;
-              try {
-                url = iframe.contentWindow.location.href;
-              } catch (e) {
-                console.log(e);
-              }
+              const url = getIFrameUrl(iframe);
               _nativeCommunication("onLoadStart", viewId, [url]);
               try {
                 const oldLogs = {
@@ -147,23 +154,13 @@
                 const originalPushState = iframe.contentWindow.history.pushState;
                 iframe.contentWindow.history.pushState = function(state, unused, url2) {
                   originalPushState.call(iframe.contentWindow.history, state, unused, url2);
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication("onUpdateVisitedHistory", viewId, [iframeUrl]);
                 };
                 const originalReplaceState = iframe.contentWindow.history.replaceState;
                 iframe.contentWindow.history.replaceState = function(state, unused, url2) {
                   originalReplaceState.call(iframe.contentWindow.history, state, unused, url2);
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication("onUpdateVisitedHistory", viewId, [iframeUrl]);
                 };
                 const originalClose = iframe.contentWindow.close;
@@ -183,12 +180,7 @@
                 };
                 const originalPrint = iframe.contentWindow.print;
                 iframe.contentWindow.print = function() {
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication("onPrintRequest", viewId, [iframeUrl]);
                   originalPrint.call(iframe.contentWindow);
                 };
@@ -220,12 +212,7 @@
                   }
                 });
                 iframe.contentWindow.addEventListener("popstate", function(event2) {
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication("onUpdateVisitedHistory", viewId, [iframeUrl]);
                 });
                 iframe.contentWindow.addEventListener("scroll", function(event2) {
@@ -429,13 +416,7 @@
         },
         getUrl: function() {
           const iframe2 = webView.iframe;
-          let url = iframe2?.src;
-          try {
-            url = iframe2?.contentWindow?.location.href;
-          } catch (e) {
-            console.log(e);
-          }
-          return url;
+          return getIFrameUrl(iframe2);
         },
         getTitle: function() {
           const iframe2 = webView.iframe;

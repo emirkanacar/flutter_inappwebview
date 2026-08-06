@@ -197,7 +197,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
       ),
       WebPlatform(
         note:
-            "If `window.location.href` isn't accessible inside the iframe, it will return the current value of the `iframe.src` attribute.",
+            "For a same-origin iframe it returns the current location. After the first document loads, it returns null when the browser's same-origin policy prevents reading a cross-origin location.",
       ),
       WindowsPlatform(
         apiName: 'ICoreWebView2.get_Source',

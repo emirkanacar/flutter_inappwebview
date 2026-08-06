@@ -1,3 +1,10 @@
+## 2.0.2 - 2026-08-06
+
+- Defer popup WebView JavaScript initialization until Flutter attaches the platform view.
+- Use the page-world fallback for popup `evaluateJavaScript` and `callAsyncJavaScript` on iOS 14–17 to avoid the known shared-configuration `WKContentWorld` crash path during multi-window navigation.
+- Add regression coverage and document the remaining iOS 18/Xcode 26 validation for [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867); keep [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) tracked as an upstream WebKit fullscreen issue.
+- Refresh the iOS example lockfile for implementation 2.0.2 and platform interface 1.0.4.
+
 ## 2.0.1 - 2026-08-06
 
 - Restore scroll-view content insets from `keyboardDidHide` after UIKit finishes its keyboard layout pass, preventing the stale-negative-inset regression reported for iOS 17.2+.

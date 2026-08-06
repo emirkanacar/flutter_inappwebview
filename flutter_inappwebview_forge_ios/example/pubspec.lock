@@ -88,14 +88,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.0.0"
+    version: "2.0.2"
   flutter_inappwebview_forge_platform_interface:
     dependency: "direct main"
     description:
       path: "../../flutter_inappwebview_forge_platform_interface"
       relative: true
     source: path
-    version: "1.0.0"
+    version: "1.0.4"
   flutter_lints:
     dependency: "direct overridden"
     description:
@@ -371,4 +371,4 @@ packages:
     version: "3.0.3"
 sdks:
   dart: ">=3.10.0 <4.0.0"
-  flutter: ">=3.38.0"
+  flutter: ">=3.38.6"

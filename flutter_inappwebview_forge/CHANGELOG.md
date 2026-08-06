@@ -1,3 +1,12 @@
+## 2.0.7 - 2026-08-06
+
+- Web: report the current same-origin iframe URL after navigation instead of the requested `src`; inaccessible cross-origin URLs are reported as `null` rather than stale data.
+- Platform interface: document the Web iframe URL nullability and raise the federated dependency to 1.0.4.
+- iOS: defer popup WebView JavaScript initialization until Flutter attaches the platform view and use the page-world fallback for popup `evaluateJavaScript` and `callAsyncJavaScript` on iOS 14–17.
+- iOS: keep the iOS 26 fullscreen-video report as an upstream WebKit issue pending device validation; no speculative fullscreen workaround was added.
+- Add Web and iOS regression coverage and update issue triage for [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737), and [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867).
+- Refresh the iOS and Web example lockfiles to the new implementation and platform-interface versions.
+
 ## 2.0.6 - 2026-08-06
 
 - Windows: load Flutter assets through a restricted WebView2 virtual HTTPS origin so `loadFile` can resolve relative CSS, JavaScript, media, and fetch/XHR resources without relying on an opaque `file:` origin; update the integration expectation to `https`.
