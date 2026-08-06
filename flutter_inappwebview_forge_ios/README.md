@@ -15,4 +15,4 @@ should add it to your `pubspec.yaml` as usual.
 ## Requirements
 
 - iOS 15.0 or newer
-- Flutter 3.38.0 or newer
+- Flutter 3.38.6 or newer

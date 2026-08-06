@@ -129,12 +129,12 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
     windowId = bundle.getInt("windowId")
 
     setContentView(R.layout.activity_web_view)
+    // Android 15 enforces edge-to-edge and disables legacy status-bar color
+    // APIs. WindowCompat and the toolbar inset listener provide the supported
+    // system-bar behavior across the supported Android range.
     WindowCompat.setDecorFitsSystemWindows(window, false)
     toolbar = findViewById(R.id.toolbar)
     setSupportActionBar(toolbar)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      window.statusBarColor = Color.TRANSPARENT
-    }
 
     toolbar?.let { currentToolbar ->
       ViewCompat.setOnApplyWindowInsetsListener(currentToolbar) { view, insets ->

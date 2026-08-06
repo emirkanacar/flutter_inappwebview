@@ -149,9 +149,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     @objc func keyboardWillHide(notification: NSNotification) {
         _scrollViewContentInsetAdjusted = false
-        // adjustedContentInset still contains the keyboard inset during the
-        // will-hide notification. Restore it on the next main-loop turn, after
-        // UIKit has recomputed the post-keyboard inset.
+    }
+
+    @objc func keyboardDidHide(notification: NSNotification) {
+        // Wait for UIKit's final keyboard layout pass before reading
+        // adjustedContentInset. Restoring from keyboardWillHide can capture the
+        // stale keyboard inset and leave the WebView scrolled short of its end.
         DispatchQueue.main.async { [weak self] in
             guard let self = self, !self._scrollViewContentInsetAdjusted else {
                 return
@@ -415,6 +418,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                                                    object: nil)
             NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification:)),
                                                    name: UIResponder.keyboardWillHideNotification,
+                                                   object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(keyboardDidHide(notification:)),
+                                                   name: UIResponder.keyboardDidHideNotification,
                                                    object: nil)
         }
         

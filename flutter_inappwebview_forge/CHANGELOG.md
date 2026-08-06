@@ -1,3 +1,10 @@
+## 2.0.4 - 2026-08-06
+
+- iOS: restore WebView scroll insets after the keyboard has fully hidden, preventing stale negative insets from stopping scrolling before the bottom.
+- iOS: require Flutter 3.38.6 or newer, where the Flutter engine fix for WKWebView gesture conflicts is available.
+- Android: remove the deprecated status-bar color API call and continue using edge-to-edge window insets.
+- Add iOS and Android regression coverage and update the issue triage documentation.
+
 ## 2.0.3 - 2026-08-06
 
 - Windows: prevent process-exit crashes from static WinRT/Composition COM releases during DLL unload and guard platform-view callbacks against disposed widgets and detached render boxes.

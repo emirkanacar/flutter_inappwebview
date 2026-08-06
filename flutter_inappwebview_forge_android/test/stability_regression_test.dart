@@ -70,4 +70,17 @@ void main() {
     expect(source, contains('nativeNavigationContinues'));
     expect(source, contains('webView.stopLoading()'));
   });
+
+  test('Android 15 skips the deprecated status-bar color API', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'in_app_browser/InAppBrowserActivity.kt',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains('WindowCompat.setDecorFitsSystemWindows(window, false)'),
+    );
+    expect(source, isNot(contains('statusBarColor')));
+  });
 }

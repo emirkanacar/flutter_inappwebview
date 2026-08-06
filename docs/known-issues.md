@@ -20,9 +20,11 @@ The confidence labels below describe the evidence available during this review:
 | Mitigated | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows 1.0.2 removes static WinRT/Composition release during DLL unload and guards the reported Dart lifecycle races; affected-machine native creation still needs Windows validation. |
 | Fixed | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android 1.0.4 bounds interception/cookie waits and avoids IME calls against detached views. |
 | Fixed | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Android 1.0.4 preserves native HTTP/HTTPS main-frame navigation context when the Dart policy allows it. |
-| P2 | [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) | iOS lifecycle and Flutter-engine compatibility gaps that should be handled before the next platform transition. |
-| P2 | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android Play/target-SDK compatibility requirements can block releases or create policy warnings. |
-| P2 | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | Cross-platform navigation, keyboard/scroll, and fullscreen behavior affects user-visible functionality. |
+| Fixed (validation pending) | [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) | iOS 2.0.0 provides scene-aware lifecycle handling; Forge now requires Flutter 3.38.6+ for the fixed iOS platform-view gesture behavior. |
+| Mitigated | [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) | Android 1.0.5 skips the plugin's deprecated status-bar color call on Android 15+; remaining Play Console warnings may originate in Flutter or the host app. |
+| P2 | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) | Android 16 KB page-size support still needs a produced-AAB and native dependency audit. |
+| Fixed (validation pending) | [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) | iOS 2.0.1 restores scroll insets after UIKit finishes keyboard dismissal; validate on iOS 17.2+ devices. |
+| P2 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | iOS fullscreen/WebKit and Web iframe URL reporting still require platform-specific reproductions. |
 | P2 | [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | OEM-specific UI, Linux installation/rendering, and Windows local-file compatibility issues. |
 | Monitor | [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | iOS/Xcode-specific memory failure with insufficient symbolicated evidence. |
 
@@ -80,19 +82,19 @@ Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/281
 
 ### #2880 — iOS UIScene migration
 
-**Impact:** Future iOS SDK/lifecycle changes can leave the plugin without a valid window or prevent launch. **Confidence:** Confirmed path for legacy API usage; future impact.
+**Status:** Fixed in iOS 2.0.0; the scene/window regression is covered by the iOS static regression suite in 2.0.1. **Impact:** Future iOS SDK/lifecycle changes can leave the plugin without a valid window or prevent launch. **Confidence:** Confirmed path for legacy API usage; device validation remains.
 
 Issue [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880) calls out legacy `UIApplication.shared.delegate?.window` access. The Forge implementation now replaces those lookups with an active-scene key-window helper, registers the plugin with Flutter's scene lifecycle delegate, and raises the iOS minimum to 15.0. Flutter’s [UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) documents the same plugin migration contract.
 
-**Recommended action:** keep the scene-aware implementation, document the minimum Flutter/iOS versions, and add an iOS multi-scene regression test to the release matrix.
+**Remaining validation:** run the scene-aware example on multiple active/inactive iOS scenes and confirm browser presentation and authentication-session anchoring on physical devices.
 
 ### #2762 — Flutter engine gesture conflict on older Flutter versions
 
-**Impact:** iOS taps can be ignored or pass through the WebView on Flutter versions before the engine fix. **Confidence:** Strong report with an external dependency cause.
+**Status:** Fixed in root 2.0.4 and iOS 2.0.1 by requiring Flutter `>=3.38.6`. **Impact:** iOS taps can be ignored or pass through the WebView on Flutter versions before the engine fix. **Confidence:** Strong report with an external dependency cause.
 
-The root and iOS packages now declare `flutter: ">=3.38.0"`, while issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) identifies the fix as landing in Flutter 3.38.6. The remaining platform packages should be aligned before a single package-wide Flutter minimum is advertised.
+Issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) identifies the fix as landing in Flutter 3.38.6. The root package, iOS implementation, and their example applications now declare that minimum explicitly, so incompatible Flutter versions fail dependency resolution instead of reaching the broken gesture path.
 
-**Recommended action:** either raise the minimum Flutter version or add an explicit compatibility warning and a tested `gestureRecognizers` workaround. Keep this separate from plugin-only gesture fixes because the underlying conflict is in the Flutter engine.
+**Remaining validation:** test taps, scroll gestures, and gesture recognizers on Flutter 3.38.6 and the current stable release across iOS 15+ devices.
 
 ### #2868 — Samsung One UI custom selection toolbar renders `false`
 
@@ -186,19 +188,39 @@ The Forge Android client now lets HTTP/HTTPS main-frame navigations continue thr
 
 **Remaining validation:** add a device integration test covering `window.opener`, `Referer`, `Sec-Fetch-Site`, POST navigation, and cancellation.
 
-### #2703 and #2728 — Android release-policy compatibility
+### #2728 — Android 15 deprecated system-bar APIs
 
-**Impact:** Store compliance warnings or installation/runtime compatibility failures on newer Android targets. **Confidence:** Needs validation against the package’s produced AAB.
+**Status:** Mitigated in Android 1.0.5. **Impact:** Play Console can report deprecated edge-to-edge/status-bar APIs in Android 15 builds. **Confidence:** Confirmed plugin call site; the complete warning may also include Flutter or host-app code.
 
-Issue [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) tracks Android 16 KB page-size support, while [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) reports Android 15 deprecated edge-to-edge/status-bar APIs in Play Console. These are release blockers even when the WebView appears to work locally, and they can come from Flutter or transitive native artifacts rather than this package alone.
+Issue [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728) reports `Window.setStatusBarColor` and related system-bar APIs in a target-SDK 35 release. Android 15 enforces edge-to-edge, makes status-bar color ineffective, and deprecates the legacy color APIs; the [Android 15 behavior-change documentation](https://developer.android.com/about/versions/15/behavior-changes-15) recommends applying system-bar insets instead.
 
-**Recommended action:** add AAB inspection to CI for 16 KB alignment and Android 15 API warnings, identify whether the warnings originate in this package, Flutter, or Chrome Custom Tabs, and document the minimum Flutter/AGP/target SDK matrix.
+The Forge `InAppBrowserActivity` no longer emits a direct `statusBarColor` assignment. The existing `WindowCompat` edge-to-edge setup and toolbar `WindowInsetsCompat` listener remain responsible for safe top-bar layout without putting the deprecated API in the plugin bytecode.
 
-### #2859, #2710, #2831, and #2763 — iOS keyboard, fullscreen, prompt, and multi-window behavior
+**Remaining validation:** inspect a target-SDK 35/36 AAB in Play Console and separate plugin warnings from Flutter framework and host-application warnings.
 
-**Impact:** User-visible iOS regressions: scrolling can stop before the bottom after keyboard dismissal, fullscreen video can turn black/unresponsive, location prompts may not close, and `onCreateWindow` results can be ignored. **Confidence:** Strong symptoms; several are likely iOS/WebKit/Flutter-version dependent.
+### #2703 — Android 16 KB page-size support
 
-The local iOS implementation has explicit keyboard-driven negative `contentInset` compensation in `InAppWebView.swift`, making [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) a concrete regression target. [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) reports the same fullscreen family as the Android fullscreen issues but through the iOS WebKit/GPU path. [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) and [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) need OS/SDK-specific reproductions before changing shared navigation or permission code.
+**Impact:** A Play submission can be rejected or restricted if its native libraries are not compatible with 16 KB pages. **Confidence:** Needs validation against the produced AAB.
+
+Issue [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703) tracks Android's 16 KB page-size policy. The Forge Android module does not currently ship its own NDK-built library, so support must be verified across the Flutter engine, transitive AARs, and the final application bundle rather than assumed from Kotlin compilation.
+
+**Recommended action:** add AAB inspection to CI for 16 KB alignment and record the Flutter/AGP/NDK/native dependency versions used for each release.
+
+### #2859 — iOS keyboard dismissal leaves a stale scroll inset
+
+**Status:** Fixed in iOS 2.0.1; validate on iOS 17.2+ devices. **Impact:** After dismissing the keyboard, scrolling can stop before the bottom because the WebView retains a negative keyboard compensation inset. **Confidence:** Confirmed local path and static regression coverage.
+
+Issue [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859) identifies a regression of the keyboard/content-inset workaround originally added for #1947. The old restoration point ran from `keyboardWillHide`, while UIKit could still report the keyboard-inclusive `adjustedContentInset`; copying that value back produced a stale negative bottom inset.
+
+The Forge implementation now only clears the keyboard-adjusted state in `keyboardWillHide` and restores the WebView inset after `keyboardDidHide`, with one main-queue turn for UIKit's final layout pass. The iOS regression test asserts that restoration is not performed from the early notification.
+
+**Remaining validation:** exercise keyboard show/hide, focus changes between HTML inputs, interactive dismissal, and scroll-to-bottom on iOS 17.2 through the latest supported iOS release.
+
+### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
+
+**Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and `onCreateWindow` results can be ignored. **Confidence:** Strong symptoms; several are likely iOS/WebKit/Flutter-version dependent.
+
+[Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) reports the fullscreen family through the iOS WebKit/GPU path. [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) and [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) need OS/SDK-specific reproductions before changing shared navigation or permission code.
 
 **Recommended action:** maintain an iOS matrix for Flutter, Xcode, iOS, keyboard, fullscreen, and multi-window flows; add targeted regression tests around content insets and callback completion; avoid presenting these as one common root cause until each has a minimal reproducer.
 

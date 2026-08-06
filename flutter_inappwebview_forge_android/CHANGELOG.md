@@ -1,3 +1,8 @@
+## 1.0.5 - 2026-08-06
+
+- Remove the direct `Window.statusBarColor` call, avoiding Android 15 system-bar API warnings while retaining edge-to-edge toolbar inset handling.
+- Add a regression assertion for the Android 15 API guard.
+
 ## 1.0.4 - 2026-08-06
 
 - Bound synchronous `shouldInterceptRequest` waits and concurrent callback pressure so repeated resource interception cannot indefinitely occupy WebView threads.

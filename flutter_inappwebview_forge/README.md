@@ -13,6 +13,9 @@ dependencies:
 
 Platform implementations are included automatically through Flutter's federated plugin mechanism.
 
+The iOS implementation requires Flutter 3.38.6 or newer. Earlier Flutter
+versions can still dispatch WebView gestures incorrectly on iOS.
+
 ## Documentation
 
 See the [project repository](https://github.com/emirkanacar/flutter_inappwebview) for setup guidance, issue tracking, and release notes.

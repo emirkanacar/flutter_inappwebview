@@ -1,3 +1,9 @@
+## 2.0.1 - 2026-08-06
+
+- Restore scroll-view content insets from `keyboardDidHide` after UIKit finishes its keyboard layout pass, preventing the stale-negative-inset regression reported for iOS 17.2+.
+- Require Flutter 3.38.6 or newer for the fixed iOS platform-view gesture behavior.
+- Add static regression coverage for keyboard restoration and scene-aware window resolution.
+
 ## 2.0.0 - 2026-08-06
 
 - Add UIScene-compatible Flutter plugin registration for both application and scene lifecycle forwarding.
