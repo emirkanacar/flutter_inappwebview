@@ -30,6 +30,7 @@ public enum WebViewChannelDelegateMethods: String {
     case isLoading = "isLoading"
     case takeScreenshot = "takeScreenshot"
     case setSettings = "setSettings"
+    case setContextMenu = "setContextMenu"
     case getSettings = "getSettings"
     case close = "close"
     case show = "show"

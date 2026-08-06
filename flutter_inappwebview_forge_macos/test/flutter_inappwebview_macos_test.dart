@@ -54,6 +54,15 @@ void main() {
       'macOS upgradeKnownHostsToHTTPS is not guarded in real settings',
     );
   }
+  if (!webViewSource.contains('override func willOpenMenu')) {
+    throw StateError('macOS custom context menu hook is missing');
+  }
+  if (!webViewSource.contains('NSMenuItem')) {
+    throw StateError('macOS custom context menu items are not created');
+  }
+  if (!webViewSource.contains('contextMenuActionTargets')) {
+    throw StateError('macOS custom context menu targets are not retained');
+  }
 
   final printScript = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'

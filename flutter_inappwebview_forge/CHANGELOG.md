@@ -1,5 +1,7 @@
 ## 2.1.1 - 2026-08-06
 
+- macOS: render custom `ContextMenu.menuItems` through the native WebKit `NSMenu` hook and forward item actions to Dart ([#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855)).
+
 - macOS: guard `upgradeKnownHostsToHTTPS` for macOS 11.3 and newer to avoid an unavailable-selector crash ([#2741](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2741)).
 - Android: invalidate and relayout WebViews when window visibility returns after a long screen-lock period ([#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)).
 - Android: protect the optimized ProGuard filename from regressing to the unavailable legacy filename ([#2852](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852)).

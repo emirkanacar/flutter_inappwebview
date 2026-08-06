@@ -1,5 +1,7 @@
 ## 1.1.1 - 2026-08-06
 
+- Render custom `ContextMenu.menuItems` through the native `NSMenu` hook and forward item actions to Dart ([#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855)).
+
 - Guard `upgradeKnownHostsToHTTPS` for macOS 11.3 and newer to avoid an unavailable-selector crash ([#2741](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2741)).
 - Terminate the injected `window.print` assignment with a semicolon for strict JavaScript parsers ([#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879)).
 - Prefer the active key window when presenting `WebAuthenticationSession`, with visible-window fallbacks ([#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813)).

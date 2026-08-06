@@ -9,6 +9,22 @@ import FlutterMacOS
 import Foundation
 @preconcurrency import WebKit
 
+private final class ContextMenuActionTarget: NSObject {
+    weak var webView: InAppWebView?
+    let id: Any
+    let title: String
+
+    init(webView: InAppWebView, id: Any, title: String) {
+        self.webView = webView
+        self.id = id
+        self.title = title
+    }
+
+    @objc func invoke(_ sender: NSMenuItem) {
+        webView?.channelDelegate?.onContextMenuActionItemClicked(id: id, title: title)
+    }
+}
+
 public class InAppWebView: WKWebView, WKUIDelegate,
                             WKNavigationDelegate, WKScriptMessageHandler,
                             WKDownloadDelegate,
@@ -22,6 +38,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     var windowBeforeCreatedCallbacks: [() -> ()] = []
     var inAppBrowserDelegate: InAppBrowserDelegate?
     var channelDelegate: WebViewChannelDelegate?
+    var contextMenu: [String: Any?]?
     var settings: InAppWebViewSettings?
     var findInteractionController: FindInteractionController?
     var webMessageChannels: [String:WebMessageChannel] = [:]
@@ -30,6 +47,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     var inFullscreen = false
     weak var fullscreenWindow: NSWindow? // Track the window that entered fullscreen
     private var printJobCompletionHandler: PrintJobController.CompletionHandler?
+    private var contextMenuActionTargets: [ContextMenuActionTarget] = []
     
     static var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
     static var credentialsProposed: [URLCredential] = []
@@ -55,6 +73,40 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     private var javaScriptBridgeEnabled = true
     
     public override var acceptsFirstResponder: Bool { return true }
+
+    public override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        super.willOpenMenu(menu, with: event)
+        contextMenuActionTargets.removeAll()
+
+        guard let contextMenu else { return }
+        if let settings = contextMenu["settings"] as? [String: Any?],
+           settings["hideDefaultSystemContextMenuItems"] as? Bool == true {
+            menu.removeAllItems()
+        }
+
+        guard let menuItems = contextMenu["menuItems"] as? [[String: Any?]] else {
+            return
+        }
+        for item in menuItems {
+            guard let id = item["id"], let title = item["title"] as? String else {
+                continue
+            }
+            let target = ContextMenuActionTarget(webView: self, id: id, title: title)
+            let menuItem = NSMenuItem(
+                title: title,
+                action: #selector(ContextMenuActionTarget.invoke(_:)),
+                keyEquivalent: ""
+            )
+            menuItem.target = target
+            contextMenuActionTargets.append(target)
+            menu.addItem(menuItem)
+        }
+    }
+
+    public override func didCloseMenu(_ menu: NSMenu, with event: NSEvent?) {
+        super.didCloseMenu(menu, with: event)
+        contextMenuActionTargets.removeAll()
+    }
     
     init(id: Any?, plugin: InAppWebViewFlutterPlugin?, frame: CGRect, configuration: WKWebViewConfiguration,
          userScripts: [UserScript] = []) {
