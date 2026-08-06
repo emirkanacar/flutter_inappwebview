@@ -24,6 +24,7 @@ import android.widget.AbsoluteLayout
 import androidx.annotation.RequiresApi
 import androidx.webkit.*
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
+import com.emirkanacar.flutter_inappwebview_forge_android.WebViewStartupCoordinator
 import com.emirkanacar.flutter_inappwebview_forge_android.R
 import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import com.emirkanacar.flutter_inappwebview_forge_android.content_blocker.*
@@ -52,6 +53,8 @@ import org.json.JSONObject
 class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   companion object {
     private const val LOG_TAG = "InAppWebView"
+    private const val MAX_NATIVE_REGISTRATION_ATTEMPTS = 8
+    private const val NATIVE_REGISTRATION_RETRY_DELAY_MS = 100L
 
     @JvmField
     val METHOD_CHANNEL_NAME_PREFIX =
@@ -160,6 +163,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   private val expectedBridgeSecret: String = UUID.randomUUID().toString()
 
   private var javaScriptBridgeEnabled: Boolean = true
+  private var nativeRegistrationsDeferred = false
+  private var nativeRegistrationsRegistered = false
+  private var nativeRegistrationRequestScheduled = false
+  private var nativeRegistrationAttempts = 0
+  private val nativeRegistrationCallbacks: MutableList<() -> Unit> = ArrayList()
 
   constructor(context: Context) : super(context)
 
@@ -237,6 +245,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   @SuppressLint("RestrictedApi")
   fun prepare(deferNativeRegistrations: Boolean) {
+    nativeRegistrationsDeferred = deferNativeRegistrations
+    nativeRegistrationsRegistered = false
+    nativeRegistrationAttempts = 0
+
     customSettings.alpha?.let { setAlpha(it.toFloat()) }
 
     javaScriptBridgeEnabled = customSettings.javaScriptBridgeEnabled == true
@@ -273,28 +285,8 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       WebViewCompat.setWebViewRenderProcessClient(this, inAppWebViewRenderProcessClient)
     }
 
-    val registerNativeWebViewInterfaces = Runnable {
-      if (plugin == null) return@Runnable
-
-      if (javaScriptBridgeEnabled && javaScriptBridgeInterface == null) {
-        javaScriptBridgeInterface = JavaScriptBridgeInterface(this, expectedBridgeSecret)
-        javaScriptBridgeInterface?.let {
-          addJavascriptInterface(it, JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())
-        }
-      }
-
-      if (
-        windowId == null ||
-        !WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
-      ) {
-        prepareAndAddUserScripts()
-      }
-    }
-
-    if (deferNativeRegistrations) {
-      post(registerNativeWebViewInterfaces)
-    } else {
-      registerNativeWebViewInterfaces.run()
+    if (!deferNativeRegistrations) {
+      requestNativeRegistrations()
     }
 
     if (customSettings.useOnDownloadStart == true) {
@@ -384,8 +376,13 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     settings.allowFileAccess = customSettings.allowFileAccess == true
     settings.allowFileAccessFromFileURLs =
       customSettings.allowFileAccessFromFileURLs == true
-    settings.allowUniversalAccessFromFileURLs =
-      customSettings.allowUniversalAccessFromFileURLs == true
+    if (customSettings.allowUniversalAccessFromFileURLs == true) {
+      Log.w(
+        LOG_TAG,
+        "Ignoring allowUniversalAccessFromFileURLs on Android; use WebViewAssetLoader or a " +
+          "controlled HTTPS origin for local resources."
+      )
+    }
 
     setCacheEnabled(customSettings.cacheEnabled == true)
     customSettings.appCachePath
@@ -677,6 +674,93 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       hitTestResult?.let { channelDelegate?.onLongPressHitTestResult(it) }
       false
     }
+  }
+
+  /**
+   * Starts bridge/script registration after the platform view has been attached to Flutter.
+   * Headless WebViews call this from [prepare] instead, because they have no platform-view attach
+   * callback until they are later surfaced.
+   */
+  fun onPlatformViewAttached() {
+    if (nativeRegistrationsDeferred) {
+      requestNativeRegistrations()
+    }
+  }
+
+  fun whenNativeRegistrationsReady(callback: () -> Unit) {
+    if (nativeRegistrationsRegistered) {
+      post { callback() }
+    } else {
+      nativeRegistrationCallbacks.add(callback)
+    }
+  }
+
+  private fun requestNativeRegistrations() {
+    if (nativeRegistrationsRegistered || nativeRegistrationRequestScheduled) {
+      return
+    }
+
+    nativeRegistrationRequestScheduled = true
+    WebViewStartupCoordinator.runWhenReady(context) {
+      post {
+        nativeRegistrationRequestScheduled = false
+        registerNativeWebViewInterfaces()
+      }
+    }
+  }
+
+  private fun registerNativeWebViewInterfaces() {
+    if (nativeRegistrationsRegistered || plugin == null) {
+      return
+    }
+
+    nativeRegistrationAttempts += 1
+    var bridgeReady = true
+
+    if (javaScriptBridgeEnabled && javaScriptBridgeInterface == null) {
+      val bridge = JavaScriptBridgeInterface(this, expectedBridgeSecret)
+      try {
+        addJavascriptInterface(bridge, JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())
+        javaScriptBridgeInterface = bridge
+      } catch (error: RuntimeException) {
+        bridgeReady = false
+        Log.e(LOG_TAG, "Unable to register the JavaScript bridge", error)
+      }
+    }
+
+    if (
+      windowId == null ||
+      !WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+    ) {
+      prepareAndAddUserScripts()
+    }
+    userContentController.retryPendingScriptRegistrations()
+
+    if (bridgeReady && !userContentController.hasPendingScriptRegistrations()) {
+      nativeRegistrationsRegistered = true
+      val callbacks = nativeRegistrationCallbacks.toList()
+      nativeRegistrationCallbacks.clear()
+      callbacks.forEach { callback -> post { callback() } }
+      return
+    }
+
+    if (nativeRegistrationAttempts >= MAX_NATIVE_REGISTRATION_ATTEMPTS) {
+      Log.e(
+        LOG_TAG,
+        "WebView bridge or document-start scripts could not be registered after " +
+          "$MAX_NATIVE_REGISTRATION_ATTEMPTS attempts; continuing without blocking the first load."
+      )
+      nativeRegistrationsRegistered = true
+      val callbacks = nativeRegistrationCallbacks.toList()
+      nativeRegistrationCallbacks.clear()
+      callbacks.forEach { callback -> post { callback() } }
+      return
+    }
+
+    mainLooperHandler.postDelayed(
+      { requestNativeRegistrations() },
+      NATIVE_REGISTRATION_RETRY_DELAY_MS
+    )
   }
 
   fun prepareAndAddUserScripts() {
@@ -1202,8 +1286,13 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         newCustomSettings.allowUniversalAccessFromFileURLs
       )
     ) {
-      settings.allowUniversalAccessFromFileURLs =
-        newCustomSettings.allowUniversalAccessFromFileURLs == true
+      if (newCustomSettings.allowUniversalAccessFromFileURLs == true) {
+        Log.w(
+          LOG_TAG,
+          "Ignoring allowUniversalAccessFromFileURLs on Android; use WebViewAssetLoader or a " +
+            "controlled HTTPS origin for local resources."
+        )
+      }
     }
     if (changed("cacheEnabled", customSettings.cacheEnabled, newCustomSettings.cacheEnabled)) {
       setCacheEnabled(newCustomSettings.cacheEnabled == true)

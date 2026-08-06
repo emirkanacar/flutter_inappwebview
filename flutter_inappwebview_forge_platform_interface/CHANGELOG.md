@@ -1,3 +1,8 @@
+## 1.0.2 - 2026-08-06
+
+- Document that the Android Forge implementation ignores `allowUniversalAccessFromFileURLs=true` to preserve file-origin isolation and recommends `WebViewAssetLoader` or a controlled HTTPS origin.
+- Regenerate the settings API documentation after the Android security behavior was clarified.
+
 ## 1.0.1 - 2026-08-06
 
 - Prevent unknown native exchangeable-enum values from reaching generated non-null assertions when decoding collection fields.

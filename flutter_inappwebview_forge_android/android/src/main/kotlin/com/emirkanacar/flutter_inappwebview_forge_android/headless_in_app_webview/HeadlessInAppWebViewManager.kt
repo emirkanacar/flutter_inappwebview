@@ -53,7 +53,7 @@ open class HeadlessInAppWebViewManager(
             context,
             id,
             params,
-            deferNativeOperationsUntilAttach
+            false
         )
         val headlessInAppWebView = HeadlessInAppWebView(currentPlugin, id, flutterWebView)
         webViews[id] = headlessInAppWebView

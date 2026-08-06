@@ -148,6 +148,7 @@ open class InAppWebViewChromeClient(
     inAppWebView?.let { webView ->
       webView.channelDelegate?.onExitFullscreen()
       webView.setInFullscreen(false)
+      webView.restoreInputConnectionAfterFullscreen()
     }
   }
 

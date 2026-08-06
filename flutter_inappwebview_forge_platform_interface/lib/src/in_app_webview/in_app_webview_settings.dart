@@ -536,6 +536,9 @@ because there isn't any way to make the website data store non-persistent for th
   ///Enabling this setting allows malicious scripts loaded in a `file://` context to launch cross-site scripting attacks,
   ///either accessing arbitrary local files including WebView cookies, app private data or even credentials used on arbitrary web sites.
   ///
+  ///On Android, Flutter InAppWebView Forge intentionally ignores `true` and keeps universal file access disabled.
+  ///Use [webViewAssetLoader] or a controlled HTTPS origin when local resources need cross-origin access.
+  ///
   ///The default value is `false`.
   @SupportedPlatforms(
     platforms: [
@@ -3717,6 +3720,9 @@ class InAppWebViewOptions
   ///Don't enable this setting if you open files that may be created or altered by external sources.
   ///Enabling this setting allows malicious scripts loaded in a `file://` context to launch cross-site scripting attacks,
   ///either accessing arbitrary local files including WebView cookies, app private data or even credentials used on arbitrary web sites.
+  ///
+  ///On Android, Flutter InAppWebView Forge intentionally ignores `true` and keeps universal file access disabled.
+  ///Use [webViewAssetLoader] or a controlled HTTPS origin when local resources need cross-origin access.
   ///
   ///The default value is `false`.
   bool allowUniversalAccessFromFileURLs;

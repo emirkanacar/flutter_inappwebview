@@ -115,6 +115,9 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
     private val contentWorlds: MutableSet<ContentWorld> = hashSetOf(ContentWorld.PAGE)
     private val scriptHandlerMap: MutableMap<UserScript, ScriptHandler> = HashMap()
     private var contentWorldsCreatorScript: ScriptHandler? = null
+    private val pendingUserOnlyScriptRegistrations: MutableSet<UserScript> = LinkedHashSet()
+    private val pendingPluginScriptRegistrations: MutableSet<PluginScript> = LinkedHashSet()
+    private var contentWorldsCreatorScriptPending = false
 
     private val userOnlyScripts: MutableMap<UserScriptInjectionTime, LinkedHashSet<UserScript>> =
         hashMapOf(
@@ -256,9 +259,12 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
         val source = generateContentWorldsCreatorCode()
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             contentWorldsCreatorScript?.remove()
+            contentWorldsCreatorScript = null
+            contentWorldsCreatorScriptPending = false
             val currentWebView = webView
             if (source.isNotEmpty() && currentWebView != null) {
                 contentWorldsCreatorScript = addDocumentStartJavaScript(source, setOf("*"))
+                contentWorldsCreatorScriptPending = contentWorldsCreatorScript == null
             }
         }
     }
@@ -294,6 +300,9 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
             )
             if (scriptHandler != null) {
                 scriptHandlerMap[userOnlyScript] = scriptHandler
+                pendingUserOnlyScriptRegistrations.remove(userOnlyScript)
+            } else {
+                pendingUserOnlyScriptRegistrations.add(userOnlyScript)
             }
         }
         return userScriptsAt(userOnlyScript.injectionTime).add(userOnlyScript)
@@ -306,6 +315,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
     fun removeUserOnlyScript(userOnlyScript: UserScript): Boolean {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             scriptHandlerMap.remove(userOnlyScript)?.remove()
+            pendingUserOnlyScriptRegistrations.remove(userOnlyScript)
             updateContentWorldsCreatorScript()
         }
         return userScriptsAt(userOnlyScript.injectionTime).remove(userOnlyScript)
@@ -325,6 +335,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
                 scriptHandlerMap.remove(it)?.remove()
             }
         }
+        pendingUserOnlyScriptRegistrations.clear()
         userScriptsAt(UserScriptInjectionTime.AT_DOCUMENT_START).clear()
         userScriptsAt(UserScriptInjectionTime.AT_DOCUMENT_END).clear()
     }
@@ -355,6 +366,9 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
             )
             if (scriptHandler != null) {
                 scriptHandlerMap[pluginScript] = scriptHandler
+                pendingPluginScriptRegistrations.remove(pluginScript)
+            } else {
+                pendingPluginScriptRegistrations.add(pluginScript)
             }
         }
         return pluginScriptsAt(pluginScript.injectionTime).add(pluginScript)
@@ -367,6 +381,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
     fun removePluginScript(pluginScript: PluginScript): Boolean {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             scriptHandlerMap.remove(pluginScript)?.remove()
+            pendingPluginScriptRegistrations.remove(pluginScript)
             updateContentWorldsCreatorScript()
         }
         return pluginScriptsAt(pluginScript.injectionTime).remove(pluginScript)
@@ -381,6 +396,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
                 scriptHandlerMap.remove(it)?.remove()
             }
         }
+        pendingPluginScriptRegistrations.clear()
         pluginScriptsAt(UserScriptInjectionTime.AT_DOCUMENT_START).clear()
         pluginScriptsAt(UserScriptInjectionTime.AT_DOCUMENT_END).clear()
     }
@@ -422,6 +438,23 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
         getUserOnlyScriptAsList()
             .filter { Util.objEquals(groupName, it.groupName) }
             .forEach { removeUserOnlyScript(it) }
+    }
+
+    fun hasPendingScriptRegistrations(): Boolean =
+        contentWorldsCreatorScriptPending ||
+            pendingUserOnlyScriptRegistrations.isNotEmpty() ||
+            pendingPluginScriptRegistrations.isNotEmpty()
+
+    fun retryPendingScriptRegistrations() {
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            return
+        }
+
+        if (contentWorldsCreatorScriptPending) {
+            updateContentWorldsCreatorScript()
+        }
+        pendingUserOnlyScriptRegistrations.toList().forEach { addUserOnlyScript(it) }
+        pendingPluginScriptRegistrations.toList().forEach { addPluginScript(it) }
     }
 
     fun getContentWorlds(): LinkedHashSet<ContentWorld> = LinkedHashSet(contentWorlds)
@@ -475,6 +508,8 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
             contentWorldsCreatorScript?.remove()
         }
+        contentWorldsCreatorScript = null
+        contentWorldsCreatorScriptPending = false
         removeAllUserOnlyScripts()
         removeAllPluginScripts()
         webView = null

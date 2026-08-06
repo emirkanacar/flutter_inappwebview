@@ -14,9 +14,9 @@ The confidence labels below describe the evidence available during this review:
 
 | Priority | Issues | Reason |
 | --- | --- | --- |
-| P0 | [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) | Security review: universal file-URL access is exposed as a WebView setting and can weaken origin isolation. |
-| P1 | [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) | Android cold-start initialization can crash or prevent `onWebViewCreated` from firing in release builds. |
-| P1 | [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | Android fullscreen failures can leave the app-wide keyboard or the WebView surface unusable. |
+| Resolved | [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) | Android 2.0.2 keeps universal file-URL access disabled at the native boundary; migrate local resources to a controlled origin. |
+| Resolved | [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) | Android 2.0.2 coordinates provider startup and platform-view attach before bridge/document-start registration. |
+| Resolved | [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | Android 2.0.2 restores the Flutter IME connection after fullscreen exit and keeps the renderer/surface fallback. |
 | P1 | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733) | Windows native lifetime failures can terminate the process during WebView creation or shutdown. |
 | P1 | [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | Android callback blocking, cookie cleanup, and IME lifecycle paths have freeze/ANR/crash reports. |
 | P1 | [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791) | Navigation interception can destroy `window.opener`, referrer, and payment-popup flows. |
@@ -62,13 +62,13 @@ The Android Dart event dispatcher now validates nullable `origin` and `url` valu
 
 ### #2878 — Keyboard remains unavailable after exiting HTML5 fullscreen
 
-**Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
+**Status:** Fixed in release 2.0.2 (Android 1.0.3); validate on the affected Samsung/WebView combinations. **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
 
 The issue reproduces after `onShowCustomView`/`onHideCustomView` fullscreen cycles with hybrid composition. The native path removes the custom view, restores system UI/orientation, invokes `onExitFullscreen`, and clears fullscreen state in `InAppWebViewChromeClient.onHideCustomView()`. The repository also has custom IME proxy/focus handling in `InputAwareWebView.kt`. Together, this points to an IME/window association that is not restored when the fullscreen view is detached.
 
-The reported workaround is invoking Flutter’s `TextInput.show` after exiting fullscreen, but that only masks the native lifecycle problem.
+The reported workaround is invoking Flutter’s `TextInput.show` after exiting fullscreen, but that only masks the native lifecycle problem. The Forge implementation now retains the Flutter container view for hybrid composition and, after custom-view removal, requests focus and restarts the input connection on that actual Flutter view. The existing non-hybrid input proxy is reset as part of the same path.
 
-**Recommended action:** add a native cleanup/reattachment path for the input connection after custom-view removal, make it safe when callbacks are skipped, and add an Android regression test covering fullscreen → exit → text input in a different Flutter widget.
+**Remaining validation:** run a real-device regression covering fullscreen → exit → text input in a different Flutter widget, especially Samsung One UI and WebView 150+.
 
 ### #2819 — MediaTek fullscreen surface failure leaves a frozen WebView
 
@@ -140,21 +140,21 @@ Issue [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/286
 
 ### #2849 and #2843 — Android cold-start initialization race
 
-**Impact:** A headless WebView can crash with `Must be started before we block!`; a release/AOT build can also fail to fire `onWebViewCreated` on roughly half of cold starts. **Confidence:** Strong report; the relevant synchronous initialization path is present in the repository.
+**Status:** Fixed in release 2.0.2 (Android 1.0.3); retain real-device and release/AOT validation. **Impact:** A headless WebView can crash with `Must be started before we block!`; a release/AOT build can also fail to fire `onWebViewCreated` on roughly half of cold starts. **Confidence:** Strong report; the relevant synchronous initialization path is present in the repository.
 
 Issue [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) identifies `WebViewCompat.addDocumentStartJavaScript` being called before the Chromium engine is ready. In the review baseline, `InAppWebView.prepare()` synchronously registered the JavaScript bridge and called `prepareAndAddUserScripts()`, while `UserContentController` invoked `addDocumentStartJavaScript` directly. Issue [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) additionally reports that this synchronous platform-view work can prevent the Dart platform-view-created callback from arriving in release builds when the JavaScript bridge is enabled.
 
 This is directly relevant to the dependency update: the issue proposes the stable asynchronous startup API from `androidx.webkit:webkit:1.16.0`, but that would require a `minSdk` decision because this package still declares `minSdkVersion 19` and currently uses WebKit `1.14.0`.
 
-**Phase 1 implementation:** platform-view bridge/script registration and the first load are now ordered through `View.post()`, activity-free headless WebViews retain a direct path, and document-start registration failures are logged instead of crashing. **Remaining validation:** test HeadlessInAppWebView and release/AOT cold starts on real Android devices; do not upgrade to WebKit 1.16.0 without deciding whether the minimum SDK can change.
+**Implementation:** the Android plugin now requests AndroidX WebKit’s asynchronous provider startup at engine attach, waits for that callback before headless bridge/document-start registration, defers regular platform-view registration until Flutter attaches the view, retries transient script-registration failures, and waits for registration before the first load. The WebKit dependency remains `1.14.0` so the package can keep its `minSdkVersion 19`; do not upgrade to 1.16.0 without deciding whether the minimum SDK can change. **Remaining validation:** test HeadlessInAppWebView and release/AOT cold starts on real Android devices.
 
 ### #2848 and #2700 — universal access from file URLs
 
-**Impact:** Security risk if enabled for untrusted or mixed local content. **Confidence:** Confirmed setting path; security impact requires an explicit use-case review.
+**Status:** Fixed in release 2.0.2 (Android 1.0.3). **Impact:** Security risk if enabled for untrusted or mixed local content. **Confidence:** Confirmed setting path.
 
-The repository applies `allowUniversalAccessFromFileURLs` directly to `WebSettings` during WebView setup and when settings change. Issues [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848) and [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) are the same security theme: universal file-URL access can weaken origin isolation and was flagged by security assessments.
+The repository previously applied `allowUniversalAccessFromFileURLs` directly to `WebSettings` during WebView setup and when settings changed. Issues [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848) and [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700) are the same security theme: universal file-URL access can weaken origin isolation and was flagged by security assessments.
 
-Current behavior is explicitly opt-in: the Dart and Android defaults are `false`, and the Android setting is changed only when the caller supplies `true`. The public setting documentation describes the origin-isolation risk and recommends `WebViewAssetLoader`/controlled app origins for local resources. No breaking removal was made; removing the setting would require an explicit API decision for existing applications that knowingly depend on it.
+The Android Forge implementation now preserves the Dart setting for federated API compatibility but ignores `true` at the native boundary, so the deprecated setter cannot be reached. The public setting documentation explains this Android behavior and recommends `WebViewAssetLoader`/controlled app origins for local resources. Applications that intentionally depended on universal file access must migrate to a controlled origin.
 
 ### #2840 and #2733 — Windows native lifetime crashes
 

@@ -1,3 +1,10 @@
+## 1.0.3 - 2026-08-06
+
+- Harden Android file-origin security by ignoring `allowUniversalAccessFromFileURLs=true` instead of enabling the deprecated WebSettings sink; use `WebViewAssetLoader` or a controlled HTTPS origin for local resources.
+- Coordinate AndroidX WebView provider startup before bridge/document-start registration, defer normal platform-view registration until attach, and retry transient script-registration failures during cold starts.
+- Restore the Flutter container focus and IME input connection after HTML5 fullscreen exits, including hybrid composition.
+- Add a regression test that prevents the universal file-access WebSettings assignment from returning.
+
 ## 1.0.2 - 2026-08-06
 
 - Guard nullable Android MethodChannel event fields before constructing non-null WebView callback values; malformed security-sensitive payloads now use native default behavior and omitted context-menu titles are represented as empty text.

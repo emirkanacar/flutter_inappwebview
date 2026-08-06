@@ -49,6 +49,29 @@ open class InputAwareWebView : WebView {
         }
     }
 
+    /** Restores Flutter's input target after Android removes a fullscreen custom view. */
+    fun restoreInputConnectionAfterFullscreen() {
+        val currentContainerView = containerView ?: return
+        currentContainerView.post {
+            if (containerView !== currentContainerView) {
+                return@post
+            }
+
+            currentContainerView.requestFocus()
+            if (!useHybridComposition) {
+                resetInputConnection()
+            }
+
+            val inputMethodManager =
+                getContext().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+            try {
+                inputMethodManager?.restartInput(currentContainerView)
+            } catch (error: RuntimeException) {
+                Log.w(LOG_TAG, "Unable to restore the Flutter input connection after fullscreen.", error)
+            }
+        }
+    }
+
     /** Sets the proxy adapter view to use its cached input connection. */
     fun lockInputConnection() {
         proxyAdapterView?.setLocked(true)

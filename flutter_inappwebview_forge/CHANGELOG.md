@@ -1,3 +1,11 @@
+## 2.0.2 - 2026-08-06
+
+- Android: ignore `allowUniversalAccessFromFileURLs=true` at the native WebSettings boundary to preserve file-origin isolation; use `WebViewAssetLoader` or a controlled HTTPS origin for local resources.
+- Android: coordinate WebView provider startup with AndroidX WebKit before bridge and document-start script registration, and defer normal platform-view registration until Flutter attaches the view.
+- Android: retry transient document-start registration failures without blocking the first load indefinitely, preventing cold-start crashes and missing `onWebViewCreated` callbacks.
+- Android: restore the Flutter container focus and input connection after HTML5 fullscreen exits, including hybrid-composition WebViews.
+- Add regression coverage for the Android universal file-access sink and document the three stability/security fixes.
+
 ## 2.0.1 - 2026-08-06
 
 - Platform interface: ignore unknown native values when decoding non-null exchangeable-enum collections, preventing forward-incompatible WebView2 permission resources from crashing the host application while preserving known resources.

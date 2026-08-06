@@ -126,15 +126,15 @@ open class FlutterWebView : PlatformWebView {
     ) {
         val currentWebView = webView ?: return
 
-        // Keep the first renderer IPC behind the bridge/document-start registrations
-        // queued by InAppWebView.prepare().
         val initialLoad = Runnable {
             makeInitialLoadAfterPlatformViewAttach(params)
         }
-        if (deferUntilPlatformViewAttach) {
-            currentWebView.post(initialLoad)
-        } else {
-            initialLoad.run()
+        currentWebView.whenNativeRegistrationsReady {
+            if (deferUntilPlatformViewAttach) {
+                currentWebView.post(initialLoad)
+            } else {
+                initialLoad.run()
+            }
         }
     }
 
@@ -233,15 +233,12 @@ open class FlutterWebView : PlatformWebView {
 
     override fun onFlutterViewAttached(flutterView: View) {
         val currentWebView = webView ?: return
-        if (currentWebView.customSettings.useHybridComposition != true) {
-            currentWebView.setContainerView(flutterView)
-        }
+        currentWebView.setContainerView(flutterView)
+        currentWebView.onPlatformViewAttached()
     }
 
     override fun onFlutterViewDetached() {
         val currentWebView = webView ?: return
-        if (currentWebView.customSettings.useHybridComposition != true) {
-            currentWebView.setContainerView(null)
-        }
+        currentWebView.setContainerView(null)
     }
 }

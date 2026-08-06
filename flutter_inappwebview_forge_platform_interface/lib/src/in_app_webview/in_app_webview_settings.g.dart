@@ -110,6 +110,9 @@ class InAppWebViewSettings {
   ///Enabling this setting allows malicious scripts loaded in a `file://` context to launch cross-site scripting attacks,
   ///either accessing arbitrary local files including WebView cookies, app private data or even credentials used on arbitrary web sites.
   ///
+  ///On Android, Flutter InAppWebView Forge intentionally ignores `true` and keeps universal file access disabled.
+  ///Use [webViewAssetLoader] or a controlled HTTPS origin when local resources need cross-origin access.
+  ///
   ///The default value is `false`.
   ///
   ///**Officially Supported Platforms/Implementations**:

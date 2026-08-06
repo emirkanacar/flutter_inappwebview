@@ -127,6 +127,9 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
         this.messenger = messenger
         this.flutterView = flutterView
 
+        // Warm up Chromium before the first WebView performs bridge or document-start IPC.
+        WebViewStartupCoordinator.start(applicationContext)
+
         inAppBrowserManager = InAppBrowserManager(this)
         headlessInAppWebViewManager = HeadlessInAppWebViewManager(this)
         chromeSafariBrowserManager = ChromeSafariBrowserManager(this)
