@@ -1,19 +1,61 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview
 
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
+import androidx.webkit.WebMessageCompat
 import com.emirkanacar.flutter_inappwebview_forge_android.plugin_scripts_js.JavaScriptBridgeJS
 import com.emirkanacar.flutter_inappwebview_forge_android.print_job.PrintJobController
 import com.emirkanacar.flutter_inappwebview_forge_android.print_job.PrintJobSettings
 import com.emirkanacar.flutter_inappwebview_forge_android.types.JavaScriptHandlerFunctionData
+import com.emirkanacar.flutter_inappwebview_forge_android.types.WebMessageCompatExt
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview.InAppWebView
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.regex.Pattern
+
+private fun jsonValueToKotlin(value: Any?): Any? = when (value) {
+    JSONObject.NULL -> null
+    is JSONObject -> jsonObjectToMutableMap(value)
+    is JSONArray -> {
+        val values = ArrayList<Any?>(value.length())
+        for (index in 0 until value.length()) {
+            values.add(jsonValueToKotlin(value.opt(index)))
+        }
+        values
+    }
+    else -> value
+}
+
+private fun jsonObjectToMutableMap(value: JSONObject): MutableMap<String, Any?> {
+    val map = mutableMapOf<String, Any?>()
+    val keys = value.keys()
+    while (keys.hasNext()) {
+        val key = keys.next()
+        map[key] = jsonValueToKotlin(value.opt(key))
+    }
+    return map
+}
+
+private fun webMessageFromJson(value: JSONObject): WebMessageCompatExt? {
+    val map = jsonObjectToMutableMap(value)
+    val type = (map["type"] as? Number)?.toInt() ?: return null
+    if (type == WebMessageCompat.TYPE_ARRAY_BUFFER) {
+        val data = map["data"]
+        val values = data as? List<*> ?: return null
+        val bytes = ByteArray(values.size)
+        for (index in values.indices) {
+            val number = values[index] as? Number ?: return null
+            bytes[index] = number.toInt().toByte()
+        }
+        map["data"] = bytes
+    }
+    return WebMessageCompatExt.fromMap(map)
+}
 
 class JavaScriptBridgeInterface(
     initialInAppWebView: InAppWebView,
@@ -146,6 +188,40 @@ class JavaScriptBridgeInterface(
                         }
                     } catch (e: JSONException) {
                         Log.e(LOG_TAG, "", e)
+                    }
+                }
+
+                "onWebMessageListenerPostMessageReceived" -> {
+                    try {
+                        val arguments = JSONArray(args)
+                        val jsonObject = arguments.optJSONObject(0)
+                        if (jsonObject != null) {
+                            val jsObjectName = jsonObject.optString("jsObjectName")
+                            val listener = currentWebView.webMessageListeners.firstOrNull {
+                                it.jsObjectName == jsObjectName
+                            }
+                            if (listener != null) {
+                                val webMessage = jsonObject.optJSONObject("message")?.let {
+                                    webMessageFromJson(it)
+                                }
+                                val sourceOrigin = origin.takeUnless {
+                                    it.isEmpty() || it == "null"
+                                }
+                                val sourceUri = sourceOrigin?.let { Uri.parse(it) }
+                                val sourceScheme = sourceUri?.scheme
+                                val sourceHost = sourceUri?.host
+                                val sourcePort = sourceUri?.port ?: -1
+                                if (listener.isOriginAllowed(sourceScheme, sourceHost, sourcePort)) {
+                                    listener.channelDelegate?.onPostMessage(
+                                        webMessage,
+                                        sourceOrigin,
+                                        isMainFrame
+                                    )
+                                }
+                            }
+                        }
+                    } catch (e: JSONException) {
+                        Log.e(LOG_TAG, "Cannot decode WebMessageListener payload", e)
                     }
                 }
 

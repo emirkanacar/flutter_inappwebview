@@ -1,3 +1,9 @@
+## 1.0.9 - 2026-08-06
+
+- Add a JavaScript bridge fallback for `WebMessageListener` when the AndroidX WebView provider does not expose `WEB_MESSAGE_LISTENER` ([#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474)).
+- Preserve listener origin rules and convert JavaScript ArrayBuffer payloads to Dart-compatible byte arrays.
+- Add static regression coverage for the fallback registration, bridge dispatch, and payload conversion path.
+
 ## 1.0.8 - 2026-08-06
 
 - Protect the optimized ProGuard filename with a regression test ([#2852](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852)).

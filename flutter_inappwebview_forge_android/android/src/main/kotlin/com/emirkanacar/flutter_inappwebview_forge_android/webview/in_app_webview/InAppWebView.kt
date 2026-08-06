@@ -2459,14 +2459,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   @Throws(Exception::class)
   override fun addWebMessageListener(webMessageListener: WebMessageListener) {
     if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+      val nativeListener = webMessageListener.listener ?: return
       WebViewCompat.addWebMessageListener(
         this,
         webMessageListener.jsObjectName,
         webMessageListener.allowedOriginRules,
-        webMessageListener.listener ?: return
+        nativeListener
       )
-      webMessageListeners.add(webMessageListener)
+    } else {
+      if (!javaScriptBridgeEnabled) return
+      webMessageListener.initJsInstance()
     }
+    webMessageListeners.add(webMessageListener)
   }
 
   override fun disposeWebMessageChannels() {

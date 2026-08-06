@@ -354,6 +354,7 @@ class JavaScriptBridgeJS private constructor() {
             "  })(window);" +
             "}" +
             "if (window." + get_JAVASCRIPT_BRIDGE_NAME() + " != null) {" +
+            "  " + WebMessageListenerJS.WEB_MESSAGE_LISTENER_JS_SOURCE() +
             "  " + UTIL_JS_SOURCE() +
             "}";
   }

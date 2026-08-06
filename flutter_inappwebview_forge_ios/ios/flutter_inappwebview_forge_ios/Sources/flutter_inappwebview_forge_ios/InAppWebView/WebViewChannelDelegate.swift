@@ -431,27 +431,88 @@ public class WebViewChannelDelegate: ChannelDelegate {
             result(true)
             break
         case .callAsyncJavaScript:
-            if let webView = webView, #available(iOS 10.3, *) {
-                if #available(iOS 14.3, *) { // on iOS 14.0, for some reason, it crashes
-                    let functionBody = arguments!["functionBody"] as! String
-                    let functionArguments = arguments!["arguments"] as! [String:Any]
-                    var contentWorld = WKContentWorld.page
-                    if let contentWorldMap = arguments!["contentWorld"] as? [String:Any?] {
-                        contentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId)!
-                    }
-                    webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
-                        result(value)
-                    }
-                } else {
-                    let functionBody = arguments!["functionBody"] as! String
-                    let functionArguments = arguments!["arguments"] as! [String:Any]
-                    webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { (value) in
-                        result(value)
-                    }
-                }
-            }
-            else {
+            guard let webView = webView,
+                  #available(iOS 10.3, *),
+                  let arguments = arguments,
+                  let functionBody = arguments["functionBody"] as? String,
+                  let functionArguments = arguments["arguments"] as? [String:Any] else {
                 result(nil)
+                break
+            }
+
+            let contentWorldMap = arguments["contentWorld"] as? [String:Any?]
+            let contentWorldName = contentWorldMap?["name"] as? String ?? "page"
+
+            if #available(iOS 18.0, *) {
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result([
+                            "value": NSNull(),
+                            "error": "Invalid content world"
+                        ])
+                        break
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
+                    result(value)
+                }
+            } else if #available(iOS 14.3, *), webView.windowId != nil {
+                // Popup documents do not expose window.webkit, so the legacy result
+                // handler cannot be used. Keep the page-world fallback for shared
+                // popup configurations on iOS 14-17.
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: WKContentWorld.page) { (value) in
+                    result(value)
+                }
+            } else if contentWorldName == "page" {
+                // The native content-world overload can crash on iOS 14-17 for a
+                // regular WebView. The legacy shim uses the page world safely.
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { (value) in
+                    result(value)
+                }
+            } else if #available(iOS 16.1, *) {
+                // Preserve native isolation for custom worlds on supported releases.
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result([
+                            "value": NSNull(),
+                            "error": "Invalid content world"
+                        ])
+                        break
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
+                    result(value)
+                }
+            } else if #available(iOS 16.0, *) {
+                // iOS 16.0.x cannot safely execute custom content worlds through
+                // the native async API and the legacy shim only supports page.
+                result([
+                    "value": NSNull(),
+                    "error": "Custom content worlds are not supported by callAsyncJavaScript on iOS 16.0.x"
+                ])
+            } else if #available(iOS 14.3, *) {
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result([
+                            "value": NSNull(),
+                            "error": "Invalid content world"
+                        ])
+                        break
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
+                    result(value)
+                }
+            } else {
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { (value) in
+                    result(value)
+                }
             }
             break
         case .createPdf:

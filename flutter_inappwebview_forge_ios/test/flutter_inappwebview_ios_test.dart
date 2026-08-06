@@ -51,6 +51,10 @@ void main() {
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/InAppWebViewFlutterPlugin.swift',
   ).readAsStringSync();
+  final webViewDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebViewChannelDelegate.swift',
+  ).readAsStringSync();
 
   _assert(
     windowSource.contains('activeKeyWindow'),
@@ -86,6 +90,50 @@ void main() {
       'in: WKContentWorld.page, completionHandler: completionHandler',
     ),
     'popup async JavaScript does not use the page content world fallback',
+  );
+  _assert(
+    source.contains('if frame == nil'),
+    'evaluateJavaScript does not guard a nil frame',
+  );
+  _assert(
+    source.contains('Frame is nil'),
+    'nil-frame evaluateJavaScript does not return a structured error',
+  );
+
+  final asyncWrapper = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PluginScriptsJS/'
+    'CallAsyncJavaScriptBelowIOS14WrapperJS.swift',
+  ).readAsStringSync();
+  _assert(
+    asyncWrapper.contains('RESULT_MESSAGE_HANDLER_NAME'),
+    'legacy callAsyncJavaScript result handler is not registered',
+  );
+  _assert(
+    asyncWrapper.contains('windowId'),
+    'legacy callAsyncJavaScript result does not preserve the window id',
+  );
+  _assert(
+    source.contains(
+      'removeScriptMessageHandler(\n                forName: CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME',
+    ),
+    'legacy callAsyncJavaScript result handler is not removed on dispose',
+  );
+  _assert(
+    source.contains(
+      'message.name == CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME',
+    ),
+    'legacy callAsyncJavaScript result messages are not handled natively',
+  );
+  _assert(
+    webViewDelegateSource.contains('contentWorldName == "page"'),
+    'iOS 15-17 page-world callAsyncJavaScript fallback is missing',
+  );
+  _assert(
+    webViewDelegateSource.contains(
+      'Custom content worlds are not supported by callAsyncJavaScript on iOS 16.0.x',
+    ),
+    'iOS 16.0 custom content-world failure is not explicit',
   );
 
   final consoleScript = _sourceFile(

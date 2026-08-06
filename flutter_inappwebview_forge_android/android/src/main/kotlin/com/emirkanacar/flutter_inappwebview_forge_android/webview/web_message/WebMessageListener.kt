@@ -7,7 +7,7 @@ import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.emirkanacar.flutter_inappwebview_forge_android.Util
-import com.emirkanacar.flutter_inappwebview_forge_android.plugin_scripts_js.JavaScriptBridgeJS
+import com.emirkanacar.flutter_inappwebview_forge_android.plugin_scripts_js.WebMessageListenerJS
 import com.emirkanacar.flutter_inappwebview_forge_android.types.Disposable
 import com.emirkanacar.flutter_inappwebview_forge_android.types.PluginScript
 import com.emirkanacar.flutter_inappwebview_forge_android.types.UserScriptInjectionTime
@@ -110,13 +110,14 @@ open class WebMessageListener(
         }
         val allowedOriginRulesString = allowedOriginRulesStringList.joinToString(", ")
         val source = "(function() {" +
+            WebMessageListenerJS.IS_ORIGIN_ALLOWED_JS_SOURCE() +
             "  var allowedOriginRules = [" + allowedOriginRulesString + "];" +
             "  var isPageBlank = window.location.href === 'about:blank';" +
             "  var scheme = !isPageBlank ? window.location.protocol.replace(':', '') : null;" +
             "  var host = !isPageBlank ? window.location.hostname : null;" +
             "  var port = !isPageBlank ? window.location.port : null;" +
-            "  if (window." + JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
-            "._isOriginAllowed(allowedOriginRules, scheme, host, port)) {" +
+            "  if (" +
+            "FlutterInAppWebViewWebMessageListenerIsOriginAllowed(allowedOriginRules, scheme, host, port)) {" +
             "      window['" + jsObjectNameEscaped + "'] = new FlutterInAppWebViewWebMessageListener('" +
             jsObjectNameEscaped + "');" +
             "  }" +

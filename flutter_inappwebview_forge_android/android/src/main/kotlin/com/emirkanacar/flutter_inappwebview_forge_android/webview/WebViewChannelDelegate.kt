@@ -603,9 +603,7 @@ open class WebViewChannelDelegate(
         } else {
           null
         }
-        if (view == null || listener == null ||
-          !WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)
-        ) {
+        if (view == null || listener == null) {
           result.success(true)
         } else {
           try {

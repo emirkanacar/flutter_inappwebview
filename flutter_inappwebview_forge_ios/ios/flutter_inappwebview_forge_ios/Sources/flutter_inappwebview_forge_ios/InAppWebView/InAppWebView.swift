@@ -680,6 +680,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
+
+        let callAsyncJavaScriptResultHandlerName = CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME
+        configuration.userContentController.removeScriptMessageHandler(forName: callAsyncJavaScriptResultHandlerName)
+        configuration.userContentController.add(self, name: callAsyncJavaScriptResultHandlerName)
         
         if javaScriptBridgeEnabled {
             let pluginScriptsOriginAllowList = settings?.pluginScriptsOriginAllowList
@@ -1679,6 +1683,15 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
             return
         }
+        if frame == nil {
+            let error = NSError(
+                domain: "flutter_inappwebview_forge",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Frame is nil"]
+            )
+            completionHandler?(.failure(error))
+            return
+        }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
     }
     
@@ -1740,6 +1753,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func callAsyncJavaScript(functionBody: String, arguments: [String:Any], completionHandler: ((Any?) -> Void)? = nil) {
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             completionHandler?(nil)
+            return
         }
         
         var jsToInject = functionBody
@@ -1766,6 +1780,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             .replacingOccurrences(of: PluginScriptsUtil.VAR_FUNCTION_ARGUMENTS_OBJ, with: Util.JSONStringify(value: arguments))
             .replacingOccurrences(of: PluginScriptsUtil.VAR_FUNCTION_BODY, with: jsToInject)
             .replacingOccurrences(of: PluginScriptsUtil.VAR_RESULT_UUID, with: resultUuid)
+            .replacingOccurrences(
+                of: CallAsyncJavaScriptBelowIOS14WrapperJS.VAR_WINDOW_ID,
+                with: windowId.map { String($0) } ?? "null"
+            )
         
         evaluateJavaScript(jsToInject) { (value, error) in
             if let error = error {
@@ -1774,7 +1792,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                                    userInfo["NSLocalizedDescription"] as? String ??
                                    error.localizedDescription
                 self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
-                completionHandler?(nil)
+                completionHandler?([
+                    "value": NSNull(),
+                    "error": errorMessage
+                ])
                 self.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid)
             }
         }
@@ -3281,6 +3302,29 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             return
         }
 
+        if message.name == CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME {
+            guard let messageBody = message.body as? String,
+                  let data = messageBody.data(using: .utf8),
+                  let jsonData = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: Any],
+                  let resultUuid = jsonData["resultUuid"] as? String else {
+                return
+            }
+
+            var targetWebView = message.webView as? InAppWebView ?? self
+            if let windowIdNumber = jsonData["windowId"] as? NSNumber,
+               let webViewTransport = plugin?.inAppWebViewManager?.windowWebViews[windowIdNumber.int64Value] {
+                targetWebView = webViewTransport.webView
+            }
+
+            if let result = targetWebView.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid) {
+                result([
+                    "value": jsonData["value"],
+                    "error": jsonData["error"]
+                ])
+            }
+            return
+        }
+
         guard javaScriptBridgeEnabled else {
             return
         }
@@ -3901,6 +3945,9 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         webMessageListeners.removeAll()
         interceptOnlyAsyncAjaxRequestsPluginScript = nil
         if windowId == nil {
+            configuration.userContentController.removeScriptMessageHandler(
+                forName: CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME
+            )
             configuration.userContentController.removeAllPluginScriptMessageHandlers()
             configuration.userContentController.removeAllUserScripts()
             if #available(iOS 11.0, *) {

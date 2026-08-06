@@ -1,3 +1,10 @@
+## 2.1.2 - 2026-08-06
+
+- iOS: return a structured error instead of entering WebKit's unsafe content-world evaluation path when the target frame is nil ([#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771)).
+- iOS: route page-world `callAsyncJavaScript` calls through the legacy shim on iOS 15-17, preserve custom-world isolation where supported, and report the iOS 16.0.x limitation explicitly ([#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871)).
+- Android: add a JavaScript bridge fallback for `WebMessageListener` on WebView providers without `WEB_MESSAGE_LISTENER`, including origin checks and ArrayBuffer conversion ([#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474)).
+- Add Android and iOS source-level regression coverage for the three compatibility paths.
+
 ## 2.1.1 - 2026-08-06
 
 - macOS: support `ContextMenu` across initial creation and runtime `setContextMenu` updates, including lifecycle callbacks and Dart item actions ([#2683](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2683)).

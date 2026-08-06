@@ -107,4 +107,30 @@ void main() {
     expect(source, contains('postInvalidateOnAnimation()'));
     expect(source, contains('requestLayout()'));
   });
+
+  test('Android WebMessageListener falls back when WebKit lacks the native API', () {
+    final listenerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/web_message/WebMessageListener.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final bridgeSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/JavaScriptBridgeInterface.kt',
+    ).readAsStringSync();
+    final scriptSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'plugin_scripts_js/JavaScriptBridgeJS.kt',
+    ).readAsStringSync();
+
+    expect(webViewSource, contains('webMessageListener.initJsInstance()'));
+    expect(listenerSource, contains('IS_ORIGIN_ALLOWED_JS_SOURCE()'));
+    expect(listenerSource, contains('FlutterInAppWebViewWebMessageListener'));
+    expect(scriptSource, contains('WEB_MESSAGE_LISTENER_JS_SOURCE()'));
+    expect(bridgeSource, contains('onWebMessageListenerPostMessageReceived'));
+    expect(bridgeSource, contains('TYPE_ARRAY_BUFFER'));
+  });
 }

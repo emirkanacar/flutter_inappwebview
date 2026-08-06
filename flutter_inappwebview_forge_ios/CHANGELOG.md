@@ -8,6 +8,13 @@
 - Restore the WebView's original superview, constraints, frame, and autoresizing state when fullscreen ends or the WebView is disposed.
 - Add source-level regression coverage for the native fullscreen state machine and controller lifecycle.
 
+## 2.1.2 - 2026-08-06
+
+- Return a structured error when `evaluateJavaScript` receives a nil frame instead of calling the unsafe WebKit content-world overload ([#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771)).
+- Route page-world `callAsyncJavaScript` calls through the legacy result-handler shim on iOS 15-17, preserve custom content-world isolation where supported, and report the iOS 16.0.x limitation explicitly ([#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871)).
+- Register and dispose the native legacy async-JavaScript result handler safely for regular and popup WebViews.
+- Add static regression coverage for nil frames, result routing, popup handling, and content-world availability.
+
 ## 2.0.2 - 2026-08-06
 
 - Defer popup WebView JavaScript initialization until Flutter attaches the platform view.
