@@ -2564,7 +2564,9 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.contextMenu.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+  )
   final ContextMenu? contextMenu;
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.initialUserScripts}

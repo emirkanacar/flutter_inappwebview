@@ -2072,7 +2072,9 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setContextMenu.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+  )
   Future<void> setContextMenu(ContextMenu? contextMenu) {
     throw UnimplementedError(
       '${PlatformInAppWebViewControllerMethod.setContextMenu.name} is not implemented on the current platform',

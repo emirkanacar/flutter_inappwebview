@@ -1,5 +1,6 @@
 ## 2.1.1 - 2026-08-06
 
+- macOS: support `ContextMenu` across initial creation and runtime `setContextMenu` updates, including lifecycle callbacks and Dart item actions ([#2683](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2683)).
 - macOS: render custom `ContextMenu.menuItems` through the native WebKit `NSMenu` hook and forward item actions to Dart ([#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855)).
 
 - macOS: guard `upgradeKnownHostsToHTTPS` for macOS 11.3 and newer to avoid an unavailable-selector crash ([#2741](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2741)).

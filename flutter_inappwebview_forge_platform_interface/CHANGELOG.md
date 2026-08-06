@@ -1,5 +1,6 @@
 ## 1.1.1 - 2026-08-06
 
+- Mark `ContextMenu` and `PlatformInAppWebViewController.setContextMenu` as supported on macOS.
 - Add `WebAuthenticationSessionSettings.additionalHeaderFields` for iOS 17.4+ and macOS 14.4+.
 - Mark `InAppWebViewSettings.pageZoom` as supported by Windows WebView2 through `ICoreWebView2Controller.ZoomFactor`.
 - Add Android-only `PlatformInAppWebViewController.setBackgroundColor` capability metadata and regenerate the controller method support checks.

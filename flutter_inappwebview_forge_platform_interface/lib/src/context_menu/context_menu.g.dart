@@ -12,6 +12,7 @@ part of 'context_menu.dart';
 ///- Android WebView:
 ///    - To make it work properly on Android, JavaScript should be enabled!
 ///- iOS WKWebView
+///- macOS WKWebView
 class ContextMenu {
   ///List of the custom [ContextMenuItem].
   final List<ContextMenuItem> menuItems;
@@ -41,6 +42,7 @@ class ContextMenu {
   ///- Android WebView:
   ///    - To make it work properly on Android, JavaScript should be enabled!
   ///- iOS WKWebView
+  ///- macOS WKWebView
   ContextMenu({
     this.menuItems = const [],
     this.onCreateContextMenu,

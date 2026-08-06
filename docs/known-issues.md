@@ -121,7 +121,7 @@ When the WebView window becomes visible again, the Android implementation now sc
 
 **Status:** Fixed in macOS 1.1.1; validate on macOS 10.14+ with native right-click menus. **Impact:** Dart-provided `ContextMenu.menuItems` were never added to the native `WKWebView` menu and their actions could not reach Dart. **Confidence:** Confirmed missing native hook.
 
-The macOS `WKWebView` now uses AppKit’s `willOpenMenu`/`didCloseMenu` hooks to add custom `NSMenuItem` instances. Targets are retained only while the menu is open, and each action forwards its id/title through `onContextMenuActionItemClicked`. The optional setting to hide default menu items is also honored.
+The macOS `WKWebView` now receives the initial and runtime `ContextMenu` configuration, uses AppKit’s `willOpenMenu`/`didCloseMenu` hooks to add custom `NSMenuItem` instances, and forwards `onCreateContextMenu`/`onHideContextMenu` lifecycle events. Targets are retained only while the menu is open, each action forwards its id/title through `onContextMenuActionItemClicked`, and numeric item identifiers are normalized without force-casting. The optional setting to hide default menu items is also honored.
 
 ### #2878 — Keyboard remains unavailable after exiting HTML5 fullscreen
 

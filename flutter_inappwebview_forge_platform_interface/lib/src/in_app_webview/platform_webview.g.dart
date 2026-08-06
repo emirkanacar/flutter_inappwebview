@@ -254,6 +254,7 @@ enum PlatformWebViewCreationParamsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- macOS WKWebView
   ///
   ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -1805,6 +1806,7 @@ extension _PlatformWebViewCreationParamsPropertySupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty.findInteractionController:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

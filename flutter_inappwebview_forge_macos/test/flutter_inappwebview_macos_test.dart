@@ -63,6 +63,57 @@ void main() {
   if (!webViewSource.contains('contextMenuActionTargets')) {
     throw StateError('macOS custom context menu targets are not retained');
   }
+  if (!webViewSource.contains('onCreateContextMenu') ||
+      !webViewSource.contains('onHideContextMenu')) {
+    throw StateError(
+      'macOS context menu lifecycle callbacks are not forwarded',
+    );
+  }
+  if (!webViewSource.contains('HitTestResult(type: .unknownType')) {
+    throw StateError(
+      'macOS context menu creation callback has no hit-test fallback',
+    );
+  }
+  final controllerSource = _sourceFile(
+    'lib/src/in_app_webview/in_app_webview_controller.dart',
+  ).readAsStringSync();
+  if (!controllerSource.contains("setContextMenu', args")) {
+    throw StateError(
+      'macOS Dart controller does not send context menu updates',
+    );
+  }
+  if (!controllerSource.contains(
+    '_inAppBrowser?.setContextMenu(contextMenu)',
+  )) {
+    throw StateError(
+      'macOS InAppBrowser context menu updates are not retained',
+    );
+  }
+  if (!controllerSource.contains('_contextMenuWasSet = true') ||
+      !controllerSource.contains('if (_contextMenuWasSet)')) {
+    throw StateError(
+      'macOS context menu clearing does not override initial settings',
+    );
+  }
+  final factorySource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/InAppWebView/FlutterWebViewController.swift',
+  ).readAsStringSync();
+  if (!factorySource.contains('params["contextMenu"]') ||
+      !factorySource.contains('webView!.contextMenu = contextMenu')) {
+    throw StateError(
+      'macOS initial context menu is not passed to the native WebView',
+    );
+  }
+  final delegateSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/InAppWebView/WebViewChannelDelegate.swift',
+  ).readAsStringSync();
+  if (!delegateSource.contains('case let id as NSNumber')) {
+    throw StateError(
+      'macOS context menu item identifiers are not normalized safely',
+    );
+  }
 
   final printScript = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'

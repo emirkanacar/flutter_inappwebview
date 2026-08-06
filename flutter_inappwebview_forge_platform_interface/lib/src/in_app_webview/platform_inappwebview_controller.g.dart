@@ -2231,6 +2231,7 @@ enum PlatformInAppWebViewControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- macOS WKWebView
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [contextMenu]: all platforms
@@ -3611,6 +3612,7 @@ extension _PlatformInAppWebViewControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setInputMethodEnabled:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

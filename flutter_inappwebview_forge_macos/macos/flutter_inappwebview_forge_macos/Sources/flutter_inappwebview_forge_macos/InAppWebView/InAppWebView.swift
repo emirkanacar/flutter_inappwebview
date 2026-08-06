@@ -48,6 +48,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     weak var fullscreenWindow: NSWindow? // Track the window that entered fullscreen
     private var printJobCompletionHandler: PrintJobController.CompletionHandler?
     private var contextMenuActionTargets: [ContextMenuActionTarget] = []
+    private var contextMenuIsShowing = false
     
     static var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
     static var credentialsProposed: [URLCredential] = []
@@ -79,6 +80,10 @@ public class InAppWebView: WKWebView, WKUIDelegate,
         contextMenuActionTargets.removeAll()
 
         guard let contextMenu else { return }
+        contextMenuIsShowing = true
+        channelDelegate?.onCreateContextMenu(
+            hitTestResult: HitTestResult(type: .unknownType, extra: nil)
+        )
         if let settings = contextMenu["settings"] as? [String: Any?],
            settings["hideDefaultSystemContextMenuItems"] as? Bool == true {
             menu.removeAllItems()
@@ -106,6 +111,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     public override func didCloseMenu(_ menu: NSMenu, with event: NSEvent?) {
         super.didCloseMenu(menu, with: event)
         contextMenuActionTargets.removeAll()
+        guard contextMenuIsShowing else { return }
+        contextMenuIsShowing = false
+        channelDelegate?.onHideContextMenu()
     }
     
     init(id: Any?, plugin: InAppWebViewFlutterPlugin?, frame: CGRect, configuration: WKWebViewConfiguration,

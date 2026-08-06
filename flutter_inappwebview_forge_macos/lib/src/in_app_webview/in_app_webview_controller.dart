@@ -67,6 +67,8 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
   _keepAliveMap = {};
 
   MacOSInAppBrowser? _inAppBrowser;
+  ContextMenu? _contextMenu;
+  bool _contextMenuWasSet = false;
 
   PlatformInAppBrowserEvents? get _inAppBrowserEventHandler =>
       _inAppBrowser?.eventHandler;
@@ -150,6 +152,7 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
   }
 
   void _init(PlatformInAppWebViewControllerCreationParams params) {
+    _contextMenu = params.webviewParams?.contextMenu;
     _controllerFromPlatform =
         params.webviewParams?.controllerFromPlatform?.call(this) ?? this;
 
@@ -189,6 +192,20 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
         }
       }
     }
+  }
+
+  ContextMenu? _contextMenuForEventHandlers() {
+    if (_contextMenuWasSet) {
+      return _contextMenu;
+    }
+    if (webviewParams?.contextMenu != null) {
+      return webviewParams!.contextMenu;
+    }
+    if (_inAppBrowserEventHandler != null &&
+        _inAppBrowser!.contextMenu != null) {
+      return _inAppBrowser!.contextMenu;
+    }
+    return null;
   }
 
   _debugLog(String method, dynamic args) {
@@ -1351,13 +1368,7 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onCreateContextMenu":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        final contextMenu = _contextMenuForEventHandlers();
 
         if (contextMenu != null && contextMenu.onCreateContextMenu != null) {
           Map<String, dynamic> arguments = call.arguments
@@ -1369,26 +1380,14 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onHideContextMenu":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        final contextMenu = _contextMenuForEventHandlers();
 
         if (contextMenu != null && contextMenu.onHideContextMenu != null) {
           contextMenu.onHideContextMenu!();
         }
         break;
       case "onContextMenuActionItemClicked":
-        ContextMenu? contextMenu;
-        if (webviewParams != null && webviewParams!.contextMenu != null) {
-          contextMenu = webviewParams!.contextMenu;
-        } else if (_inAppBrowserEventHandler != null &&
-            _inAppBrowser!.contextMenu != null) {
-          contextMenu = _inAppBrowser!.contextMenu;
-        }
+        final contextMenu = _contextMenuForEventHandlers();
 
         if (contextMenu != null) {
           int? androidId = call.arguments["androidId"];
@@ -2337,6 +2336,15 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
 
     args.putIfAbsent('settings', () => settings.toMap());
     await channel?.invokeMethod('setSettings', args);
+  }
+
+  @override
+  Future<void> setContextMenu(ContextMenu? contextMenu) async {
+    _contextMenu = contextMenu;
+    _contextMenuWasSet = true;
+    final args = <String, dynamic>{'contextMenu': contextMenu?.toMap()};
+    await channel?.invokeMethod('setContextMenu', args);
+    _inAppBrowser?.setContextMenu(contextMenu);
   }
 
   @override

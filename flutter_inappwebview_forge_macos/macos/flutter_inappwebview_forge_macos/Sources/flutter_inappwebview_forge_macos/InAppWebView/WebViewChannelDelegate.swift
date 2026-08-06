@@ -721,9 +721,22 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onContextMenuActionItemClicked(id: Any, title: String) {
+        let iosId: String?
+        switch id {
+        case let id as String:
+            iosId = id
+        case let id as Int:
+            iosId = String(id)
+        case let id as Int64:
+            iosId = String(id)
+        case let id as NSNumber:
+            iosId = id.stringValue
+        default:
+            iosId = nil
+        }
         let arguments: [String: Any?] = [
             "id": id,
-            "iosId": id is Int64 ? String(id as! Int64) : id as! String,
+            "iosId": iosId,
             "androidId": nil,
             "title": title
         ]

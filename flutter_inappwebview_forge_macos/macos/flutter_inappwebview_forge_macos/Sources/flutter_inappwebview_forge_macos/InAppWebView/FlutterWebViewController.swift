@@ -19,6 +19,7 @@ public class FlutterWebViewController: NSView, Disposable {
         keepAliveId = params["keepAliveId"] as? String
         
         let initialSettings = params["initialSettings"] as! [String: Any?]
+        let contextMenu = params["contextMenu"] as? [String: Any?]
         let windowId = params["windowId"] as? Int64
         let initialUserScripts = params["initialUserScripts"] as? [[String: Any]]
         
@@ -51,6 +52,8 @@ public class FlutterWebViewController: NSView, Disposable {
                                    configuration: preWebviewConfiguration,
                                    userScripts: userScripts)
         }
+
+        webView!.contextMenu = contextMenu
 
         let findInteractionController = FindInteractionController(
             plugin: plugin,
