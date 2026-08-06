@@ -37,6 +37,8 @@ dependencies:
     path: ../
 
 dependency_overrides:
+  flutter_inappwebview_forge_internal_annotations:
+    path: ../../dev_packages/flutter_inappwebview_forge_internal_annotations
   flutter_inappwebview_forge_platform_interface:
     path: ../../flutter_inappwebview_forge_platform_interface
   flutter_inappwebview_forge_android:

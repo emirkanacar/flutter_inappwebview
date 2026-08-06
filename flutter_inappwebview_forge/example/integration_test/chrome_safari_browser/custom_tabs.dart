@@ -128,13 +128,13 @@ void customTabs() {
         ChromeSafariBrowserSecondaryToolbar(
           layout: AndroidResource.layout(
             name: "remote_view",
-            defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+            defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
           ),
           clickableIDs: [
             ChromeSafariBrowserSecondaryToolbarClickableID(
               id: AndroidResource.id(
                 name: "button1",
-                defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+                defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
               ),
               onClick: (WebUri? url) {
                 print("Button 1 with $url");
@@ -143,7 +143,7 @@ void customTabs() {
             ChromeSafariBrowserSecondaryToolbarClickableID(
               id: AndroidResource.id(
                 name: "button2",
-                defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+                defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
               ),
               onClick: (WebUri? url) {
                 print("Button 2 with $url");
@@ -163,13 +163,13 @@ void customTabs() {
         ChromeSafariBrowserSecondaryToolbar(
           layout: AndroidResource.layout(
             name: "remote_view_2",
-            defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+            defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
           ),
           clickableIDs: [
             ChromeSafariBrowserSecondaryToolbarClickableID(
               id: AndroidResource.id(
                 name: "button3",
-                defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+                defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
               ),
               onClick: (WebUri? url) {
                 print("Button 3 with $url");

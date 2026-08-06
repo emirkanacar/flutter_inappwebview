@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:clickable="true"
     android:focusableInTouchMode="true"
-    tools:context="com.pichillilorenzo.flutter_inappwebview_android.in_app_browser.InAppBrowserActivity"
+    tools:context="com.emirkanacar.flutter_inappwebview_forge_android.in_app_browser.InAppBrowserActivity"
     android:focusable="true">
 
     <androidx.appcompat.widget.Toolbar
@@ -21,16 +21,16 @@
         android:elevation="4dp"
         />
 
-    <com.pichillilorenzo.flutter_inappwebview_android.pull_to_refresh.PullToRefreshLayout
+    <com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh.PullToRefreshLayout
         android:id="@+id/pullToRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar">
-        <com.pichillilorenzo.flutter_inappwebview_android.webview.in_app_webview.InAppWebView
+        <com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview.InAppWebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </com.pichillilorenzo.flutter_inappwebview_android.pull_to_refresh.PullToRefreshLayout>
+    </com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh.PullToRefreshLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"

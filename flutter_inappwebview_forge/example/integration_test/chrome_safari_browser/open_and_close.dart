@@ -20,11 +20,11 @@ void openAndClose() {
         exitAnimations: [
           AndroidResource.anim(
             name: "abc_slide_in_top",
-            defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+            defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
           ),
           AndroidResource.anim(
             name: "abc_slide_out_top",
-            defPackage: "com.pichillilorenzo.flutter_inappwebviewexample",
+            defPackage: "com.emirkanacar.flutter_inappwebview_forge_example",
           ),
         ],
         keepAliveEnabled: true,
