@@ -35,4 +35,14 @@ void main() {
       'macOS authentication session does not prefer the active key window',
     );
   }
+
+  final printScript = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/PluginScriptsJS/PrintJS.swift',
+  ).readAsStringSync();
+  if (!printScript.contains('window.location.href);\n        };')) {
+    throw StateError(
+      'macOS print override is missing its terminating semicolon',
+    );
+  }
 }

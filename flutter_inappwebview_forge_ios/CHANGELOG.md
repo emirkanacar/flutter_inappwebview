@@ -1,5 +1,6 @@
-## 2.1.0 - 2026-08-06
+## 2.1.1 - 2026-08-06
 
+- Terminate the injected `window.print` assignment with a semicolon for strict JavaScript parsers ([#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879)).
 - Support `WebAuthenticationSessionSettings.additionalHeaderFields` on iOS 17.4+.
 - Preserve object data and Error stack/message content when forwarding console arguments to Dart ([#2850](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2850)).
 - Add an iOS 26+ native fullscreen container that keeps the same `WKWebView` instance alive after a video seek or time change.

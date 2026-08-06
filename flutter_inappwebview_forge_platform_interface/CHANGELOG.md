@@ -1,4 +1,4 @@
-## 1.1.0 - 2026-08-06
+## 1.1.1 - 2026-08-06
 
 - Add `WebAuthenticationSessionSettings.additionalHeaderFields` for iOS 17.4+ and macOS 14.4+.
 - Mark `InAppWebViewSettings.pageZoom` as supported by Windows WebView2 through `ICoreWebView2Controller.ZoomFactor`.

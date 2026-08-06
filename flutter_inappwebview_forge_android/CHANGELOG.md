@@ -1,4 +1,4 @@
-## 1.0.7 - 2026-08-06
+## 1.0.8 - 2026-08-06
 
 - Add `InAppWebViewController.setBackgroundColor` for changing the native WebView background color ([#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863)).
 - Document that the Kotlin/Java-only plugin has no package-owned JNI/NDK library, while the consuming application must validate Flutter-engine and transitive native libraries for Android 16 KB page-size support.

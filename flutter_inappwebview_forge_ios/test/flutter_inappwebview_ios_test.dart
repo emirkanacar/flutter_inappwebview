@@ -126,6 +126,15 @@ void main() {
     'iOS authentication session does not apply additional headers',
   );
 
+  final printScript = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PluginScriptsJS/PrintJS.swift',
+  ).readAsStringSync();
+  _assert(
+    printScript.contains('window.location.href);\n        };'),
+    'iOS print override is missing its terminating semicolon',
+  );
+
   _assert(
     source.contains('IOSFullscreenVideoJS.messageHandlerName'),
     'iOS 26 fullscreen video message handler is not wired',

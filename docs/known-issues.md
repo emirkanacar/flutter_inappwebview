@@ -65,37 +65,37 @@ The Android Dart event dispatcher now validates nullable `origin` and `url` valu
 
 ### #2850 — iOS console arguments lose object and Error data
 
-**Status:** Fixed in iOS 2.1.0. **Impact:** `console.log` converted objects to `[object Object]` and omitted useful `Error` message/stack data. **Confidence:** Confirmed local JavaScript bridge path.
+**Status:** Fixed in iOS 2.1.1. **Impact:** `console.log` converted objects to `[object Object]` and omitted useful `Error` message/stack data. **Confidence:** Confirmed local JavaScript bridge path.
 
 The iOS console plugin script now serializes object arguments with `JSON.stringify` and preserves `Error.stack` or the error name/message fallback. Primitive values retain their string representation, and serialization failures fall back safely instead of preventing the console callback. Source-level regression assertions cover object and Error handling.
 
 ### #2863 — Android native WebView background color
 
-**Status:** Fixed in Android 1.0.7 and root 2.1.0. **Impact:** Applications could not change the native Android WebView background independently of the page content. **Confidence:** Confirmed API gap.
+**Status:** Fixed in Android 1.0.8 and root 2.1.1. **Impact:** Applications could not change the native Android WebView background independently of the page content. **Confidence:** Confirmed API gap.
 
 `InAppWebViewController.setBackgroundColor` is now exposed through the platform interface and root controller, with Android-only capability metadata. The Android implementation sends the color through the per-WebView channel and calls `View.setBackgroundColor`; missing or malformed values return structured platform errors. Android channel regression coverage and the plugin Kotlin compilation pass.
 
 ### #2835 — WebAuthenticationSession additional headers
 
-**Status:** Fixed in iOS 2.1.0 and macOS 1.1.0. **Impact:** Authentication requests could not attach provider-specific HTTP headers on supported Apple OS versions. **Confidence:** Confirmed API capability.
+**Status:** Fixed in iOS 2.1.1 and macOS 1.1.1. **Impact:** Authentication requests could not attach provider-specific HTTP headers on supported Apple OS versions. **Confidence:** Confirmed API capability.
 
 `WebAuthenticationSessionSettings.additionalHeaderFields` is now available on iOS 17.4+ and macOS 14.4+. The native sessions apply the map only on OS versions exposing `ASWebAuthenticationSession.additionalHeaderFields` and report the effective values through real-settings inspection. Older Apple versions retain the existing behavior without attempting the unavailable API.
 
 ### #2812 — Windows WebView2 page zoom
 
-**Status:** Fixed in Windows 1.0.5 and root 2.1.0. **Impact:** The shared `pageZoom` setting was unavailable on Windows even though WebView2 exposes a controller zoom factor. **Confidence:** Confirmed capability gap.
+**Status:** Fixed in Windows 1.0.5 and root 2.1.1. **Impact:** The shared `pageZoom` setting was unavailable on Windows even though WebView2 exposes a controller zoom factor. **Confidence:** Confirmed capability gap.
 
 Windows now maps `InAppWebViewSettings.pageZoom` to `ICoreWebView2Controller.ZoomFactor` during creation and settings updates, and reads the effective factor from WebView2 in `getRealSettings`. Static Windows regression coverage checks both setter and getter paths.
 
 ### #2813 — macOS WebAuthenticationSession presentation anchor
 
-**Status:** Fixed in macOS 1.1.0. **Impact:** Tahoe/Xcode authentication sessions could be presented from an invalid or stale window when the key window was not the first window returned by AppKit. **Confidence:** Confirmed lifecycle path.
+**Status:** Fixed in macOS 1.1.1. **Impact:** Tahoe/Xcode authentication sessions could be presented from an invalid or stale window when the key window was not the first window returned by AppKit. **Confidence:** Confirmed lifecycle path.
 
 The presentation anchor now prefers `NSApp.keyWindow`, then a visible main window, then any visible window, and finally an empty anchor. The fallback chain avoids force-unwrapping AppKit window state while preserving the existing macOS 10.15 availability boundary.
 
 ### #2725 — Windows WebView2 title lookup
 
-**Status:** Fixed in the current Windows implementation and covered by Windows regression assertions. **Impact:** Calling `getTitle()` could return the current URL instead of the document title. **Confidence:** Confirmed native method path.
+**Status:** Fixed in Windows 1.0.5 and covered by Windows regression assertions. **Impact:** Calling `getTitle()` could return the current URL instead of the document title. **Confidence:** Confirmed native method path.
 
 The native implementation uses `ICoreWebView2.get_DocumentTitle` and converts the result to the Dart response. Static Windows coverage now protects this method from regressing to URL lookup.
 

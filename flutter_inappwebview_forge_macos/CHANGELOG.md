@@ -1,5 +1,6 @@
-## 1.1.0 - 2026-08-06
+## 1.1.1 - 2026-08-06
 
+- Terminate the injected `window.print` assignment with a semicolon for strict JavaScript parsers ([#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879)).
 - Prefer the active key window when presenting `WebAuthenticationSession`, with visible-window fallbacks ([#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813)).
 - Support `WebAuthenticationSessionSettings.additionalHeaderFields` on macOS 14.4+.
 - Complete the macOS Swift Package Manager manifest with FlutterFramework, Swift Collections, and processed resources while retaining CocoaPods support.
