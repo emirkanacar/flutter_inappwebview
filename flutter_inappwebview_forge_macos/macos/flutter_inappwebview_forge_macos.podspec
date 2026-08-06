@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_inappwebview_forge_macos'
-  s.version          = '1.0.0'
+  s.version          = '1.1.0'
   s.summary          = 'Maintained Flutter InAppWebView fork for macOS.'
   s.description      = <<-DESC
 Maintained fork of Flutter InAppWebView, originally created by Lorenzo Pichilli.

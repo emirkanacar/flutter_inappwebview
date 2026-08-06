@@ -9,8 +9,25 @@ import UIKit
 
 extension UIApplication {
 
+    /// Returns the key window belonging to the active window scene.
+    ///
+    /// `UIApplicationDelegate.window` is not populated for scene-based apps.
+    var activeKeyWindow: UIWindow? {
+        let windowScenes = connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .filter {
+                $0.activationState == .foregroundActive ||
+                $0.activationState == .foregroundInactive
+            }
+
+        return windowScenes
+            .flatMap { $0.windows }
+            .first { $0.isKeyWindow }
+            ?? windowScenes.flatMap { $0.windows }.first
+    }
+
     var visibleViewController: UIViewController? {
-        guard let rootViewController = keyWindow?.rootViewController else {
+        guard let rootViewController = activeKeyWindow?.rootViewController else {
             return nil
         }
         return getVisibleViewController(rootViewController)

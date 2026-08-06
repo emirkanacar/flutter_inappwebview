@@ -1,3 +1,15 @@
+## 2.0.0 - 2026-08-06
+
+- iOS: add UIScene-aware plugin registration and replace AppDelegate window access with active `UIWindowScene` resolution for iOS 15+.
+- iOS: raise the minimum deployment target to iOS 15.0 and remove pre-scene window and legacy authentication-session compatibility paths.
+- iOS: add Swift Package Manager support through the FlutterFramework package while preserving CocoaPods and existing resources.
+- Apple packages: update the Swift Collections SPM baseline to `1.6.0` for current Xcode package-trait resolution.
+- iOS examples: migrate AppDelegate registration to `FlutterImplicitEngineDelegate` and add the Flutter SceneDelegate configuration.
+- macOS: complete the Swift Package Manager manifest while preserving the existing CocoaPods dependency path.
+- Raise the Flutter baseline to `>=3.38.0`, where the UIScene plugin registration APIs are available.
+
+- Breaking: the root package now requires iOS 15.0 or newer.
+
 ## 1.0.1 - 2026-08-06
 
 - Android: release the complete Java-to-Kotlin and Kotlin DSL migration for the Forge implementation, preserving public Dart/channel contracts and WebView behavior.

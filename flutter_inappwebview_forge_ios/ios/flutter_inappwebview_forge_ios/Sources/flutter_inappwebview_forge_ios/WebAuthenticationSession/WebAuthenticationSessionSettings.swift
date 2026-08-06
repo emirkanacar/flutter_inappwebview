@@ -7,7 +7,6 @@
 
 import Foundation
 import AuthenticationServices
-import SafariServices
 
 @objcMembers
 public class WebAuthenticationSessionSettings: ISettings<WebAuthenticationSession> {
@@ -20,10 +19,8 @@ public class WebAuthenticationSessionSettings: ISettings<WebAuthenticationSessio
     
     override func getRealSettings(obj: WebAuthenticationSession?) -> [String: Any?] {
         var realOptions: [String: Any?] = toMap()
-        if #available(iOS 12.0, *), let session = obj?.session as? ASWebAuthenticationSession {
-            if #available(iOS 13.0, *) {
-                realOptions["prefersEphemeralWebBrowserSession"] = session.prefersEphemeralWebBrowserSession
-            }
+        if let session = obj?.session as? ASWebAuthenticationSession {
+            realOptions["prefersEphemeralWebBrowserSession"] = session.prefersEphemeralWebBrowserSession
         }
         return realOptions
     }

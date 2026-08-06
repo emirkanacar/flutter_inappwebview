@@ -11,6 +11,7 @@ Phase 1 implementation started in this workspace:
 - Android bridge/document-start registration and the first renderer load are ordered after platform-view attach; activity-free headless WebViews retain a direct path.
 - Cold document-start registration failures are logged and degraded to the existing in-memory script path instead of crashing the app.
 - iOS keyboard-dismissal inset restoration and scroll callback coalescing are implemented as the first lifecycle/performance slice.
+- iOS UIScene and Swift Package Manager migration is tracked in [`ios-uiscene-spm-migration-plan.md`](ios-uiscene-spm-migration-plan.md); the implementation slice is complete and device validation remains.
 
 ## Executive decision
 
@@ -51,7 +52,7 @@ There are three different version surfaces. They must be tracked separately.
 | AndroidX WebKit | `androidx.webkit:webkit:1.14.0` | Bundled compatibility library; latest stable is `1.16.0` | Do not move the main branch to 1.16 until the minSdk decision is explicit. |
 | AndroidX Browser | `androidx.browser:browser:1.10.0` | Bundled AndroidX library; latest stable is `1.10.0` | Completed in Phase 1; run the Android regression matrix before release. |
 | Android System WebView | Device-provided | Updated independently on user devices | Record `WebViewCompat.getCurrentWebViewPackage()` where available; do not treat AndroidX upgrades as engine upgrades. |
-| iOS `WKWebView` | System WebKit; deployment target currently iOS 12 | Delivered with the iOS runtime and SDK | Do not look for a package version bump; test OS/Xcode/WebKit behavior and keep deployment target 12 until adoption data says otherwise. |
+| iOS `WKWebView` | System WebKit; minimum deployment target is iOS 15 | Delivered with the iOS runtime and SDK | Do not look for a package version bump; test OS/Xcode/WebKit behavior across supported iOS 15+ versions. |
 
 The official AndroidX WebKit release notes state that `1.15.0` raises the library minimum from API 21 to API 23, while `1.16.0` requires API 24 and makes async WebView startup and navigation-listener APIs stable: [AndroidX WebKit release notes](https://developer.android.com/jetpack/androidx/releases/webkit). The official Browser release notes list `1.10.0` as the stable release: [AndroidX Browser release notes](https://developer.android.com/jetpack/androidx/releases/browser).
 
@@ -113,7 +114,7 @@ All performance decisions require release/profile measurements. Debug-only measu
 
 ### iOS matrix
 
-- iOS 12/13, 14.0–14.2, 14.3, 15.x, 16.x, 17.x, 18.x, and the latest supported iOS version available to CI/devices.
+- iOS 15.x, 16.x, 17.x, 18.x, and the latest supported iOS version available to CI/devices.
 - A low-memory device and a recent high-performance device; simulator coverage is not a substitute for device coverage.
 - Current and previous supported Xcode/Flutter toolchains.
 - Keyboard show/hide, scroll-to-bottom, fullscreen video, `window.open`, KeepAlive reuse, `callAsyncJavaScript`, `evaluateJavaScript` with `windowId`, focus, and repeated disposal.
@@ -230,7 +231,7 @@ Use [PR #2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871
 
 Exit criteria:
 
-- Promise resolution/rejection and JSON serialization are covered on iOS 12–18 test targets.
+- Promise resolution/rejection and JSON serialization are covered on iOS 15–18 test targets.
 - No completion callback is lost during disposal or popup teardown.
 - Pending fallback calls do not grow without bound.
 
@@ -241,7 +242,7 @@ Exit criteria:
 - Test `window.open`/`onCreateWindow` ownership, popup disposal, and `windowId` JavaScript evaluation.
 - Test KeepAlive URL restoration and multiple WebView instances.
 - Audit `dispose()` ordering so KVO observers, message handlers, delegates, and pending callbacks are released exactly once.
-- Keep the current iOS 12 deployment target until the compatibility matrix and adoption data support a change.
+- Keep the iOS 15 deployment target and validate the scene-based lifecycle on every supported iOS release.
 
 ### I4 — iOS toolchain and system WebKit compatibility (P1)
 
@@ -298,7 +299,7 @@ Deliverable: Android P0 performance/stability patch with no minSdk change.
 - Implement I3 lifecycle tests and fixes.
 - Validate bridge-disabled, content-world, popup, keyboard, and fullscreen paths.
 
-Deliverable: iOS P0/P1 patch with iOS 12–latest compatibility evidence.
+Deliverable: iOS P0/P1 patch with iOS 15–latest compatibility evidence.
 
 ### Phase 4 — Optional WebKit 1.15/1.16 branch
 

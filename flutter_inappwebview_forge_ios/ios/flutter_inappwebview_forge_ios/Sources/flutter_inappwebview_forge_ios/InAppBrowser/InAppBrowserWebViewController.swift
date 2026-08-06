@@ -428,11 +428,11 @@ public class InAppBrowserWebViewController: UIViewController, InAppBrowserDelega
             isHidden = true
             navigationController.dismiss(animated: true) {
                 completion?()
-                UIApplication.shared.delegate?.window??.makeKeyAndVisible()
+                UIApplication.shared.activeKeyWindow?.makeKeyAndVisible()
             }
         } else {
             completion?()
-            UIApplication.shared.delegate?.window??.makeKeyAndVisible()
+            UIApplication.shared.activeKeyWindow?.makeKeyAndVisible()
         }
     }
     

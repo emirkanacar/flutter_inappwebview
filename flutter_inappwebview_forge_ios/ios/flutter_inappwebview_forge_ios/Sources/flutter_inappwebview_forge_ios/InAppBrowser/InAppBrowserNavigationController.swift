@@ -11,6 +11,6 @@ import UIKit
 public class InAppBrowserNavigationController: UINavigationController {
     deinit {
         debugPrint("InAppBrowserNavigationController - dealloc")
-        UIApplication.shared.delegate?.window??.makeKeyAndVisible()
+        UIApplication.shared.activeKeyWindow?.makeKeyAndVisible()
     }
 }

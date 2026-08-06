@@ -170,8 +170,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     // BVC KVO events for all changes on the webview will call this.
     // It is called frequently during a page load (particularly on progress changes and URL changes).
-    // As of iOS 12, WKContentView gesture setup is async, but it has been called by the time
-    // the webview is ready to load an URL. After this has happened, we can override the gesture.
+    // WKContentView gesture setup is asynchronous, but it has completed by the time
+    // the webview is ready to load a URL. After this has happened, we can override the gesture.
     func replaceGestureHandlerIfNeeded() {
         DispatchQueue.main.async {
             if self.gestureRecognizerWithDescriptionFragment("InAppWebView") == nil {

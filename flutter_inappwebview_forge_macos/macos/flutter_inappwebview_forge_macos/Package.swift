@@ -9,20 +9,22 @@ let package = Package(
         .macOS("10.14"),
     ],
     products: [
-        .library(name: "flutter-inappwebview-forge-macos", targets: ["flutter_inappwebview_forge_macos"])
+        .library(name: "flutter-inappwebview-forge-macos", targets: ["flutter_inappwebview_forge_macos"]),
     ],
     dependencies: [
-      .package(url: "https://github.com/apple/swift-collections.git", from: "1.3.0")
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.6.0"),
     ],
     targets: [
         .target(
             name: "flutter_inappwebview_forge_macos",
             dependencies: [
-                .product(name: "Collections", package: "swift-collections")
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
+                .product(name: "Collections", package: "swift-collections"),
             ],
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
-        )
+        ),
     ]
 )

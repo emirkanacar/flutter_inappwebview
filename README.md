@@ -44,9 +44,9 @@ Project repository: [github.com/emirkanacar/flutter_inappwebview](https://github
 ## Requirements
 
 - Dart sdk: "^3.8.0"
-- Flutter: ">=3.32.0"
+- Flutter: ">=3.38.0"
 - Android: `minSdkVersion >= 19`, [AGP](https://developer.android.com/build/releases/gradle-plugin) version `>= 7.3.0` (use [Android Studio - Android Gradle plugin Upgrade Assistant](https://developer.android.com/build/agp-upgrade-assistant) for help)
-- iOS 12.0+, Xcode version `>= 15.0`
+- iOS 15.0+, Xcode version `>= 15.0`
 - MacOS 10.14+: Xcode version `>= 15.0`
 - Windows: [NuGet CLI](https://learn.microsoft.com/en-us/nuget/install-nuget-client-tools?tabs=windows#nugetexe-cli) available on your PATH environment variable
 - Linux: WPE 2.0 WebKit built

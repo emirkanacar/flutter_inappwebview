@@ -6,23 +6,25 @@ import PackageDescription
 let package = Package(
     name: "flutter_inappwebview_forge_ios",
     platforms: [
-        .iOS("12.0"),
+        .iOS("15.0"),
     ],
     products: [
-        .library(name: "flutter-inappwebview-forge-ios", targets: ["flutter_inappwebview_forge_ios"])
+        .library(name: "flutter-inappwebview-forge-ios", targets: ["flutter_inappwebview_forge_ios"]),
     ],
     dependencies: [
-      .package(url: "https://github.com/apple/swift-collections.git", from: "1.3.0")
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.6.0"),
     ],
     targets: [
         .target(
             name: "flutter_inappwebview_forge_ios",
             dependencies: [
-                .product(name: "Collections", package: "swift-collections")
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
+                .product(name: "Collections", package: "swift-collections"),
             ],
             resources: [
-                .process("Resources")
+                .process("Resources"),
             ]
-        )
+        ),
     ]
 )

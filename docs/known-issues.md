@@ -84,15 +84,15 @@ Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/281
 
 **Impact:** Future iOS SDK/lifecycle changes can leave the plugin without a valid window or prevent launch. **Confidence:** Confirmed path for legacy API usage; future impact.
 
-Issue [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880) calls out legacy `UIApplication.shared.delegate?.window` access. The same pattern is present in `InAppBrowserWebViewController.swift` and `InAppBrowserNavigationController.swift`. Flutter’s [UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) says new SDK requirements need scene lifecycle support and documents the plugin migration contract.
+Issue [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880) calls out legacy `UIApplication.shared.delegate?.window` access. The Forge implementation now replaces those lookups with an active-scene key-window helper, registers the plugin with Flutter's scene lifecycle delegate, and raises the iOS minimum to 15.0. Flutter’s [UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) documents the same plugin migration contract.
 
-**Recommended action:** migrate window discovery and lifecycle registration to scene-aware APIs, support the Flutter scene lifecycle delegate, and document the minimum Flutter version required by the migration. Add an iOS multi-scene test before changing the minimum deployment/toolchain requirements.
+**Recommended action:** keep the scene-aware implementation, document the minimum Flutter/iOS versions, and add an iOS multi-scene regression test to the release matrix.
 
 ### #2762 — Flutter engine gesture conflict on older Flutter versions
 
 **Impact:** iOS taps can be ignored or pass through the WebView on Flutter versions before the engine fix. **Confidence:** Strong report with an external dependency cause.
 
-The repository currently declares `flutter: ">=3.32.0"` in the package platform pubspecs, while issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) identifies the fix as landing in Flutter 3.38.6. This means the package’s declared minimum does not guarantee the engine behavior required for reliable WebView gestures.
+The root and iOS packages now declare `flutter: ">=3.38.0"`, while issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762) identifies the fix as landing in Flutter 3.38.6. The remaining platform packages should be aligned before a single package-wide Flutter minimum is advertised.
 
 **Recommended action:** either raise the minimum Flutter version or add an explicit compatibility warning and a tested `gestureRecognizers` workaround. Keep this separate from plugin-only gesture fixes because the underlying conflict is in the Flutter engine.
 

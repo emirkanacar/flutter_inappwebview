@@ -10,7 +10,6 @@ import UIKit
 import WebKit
 import Foundation
 import AVFoundation
-import SafariServices
 
 public class WebAuthenticationSessionManager: ChannelDelegate {
     static let METHOD_CHANNEL_NAME = "com.emirkanacar/flutter_webauthenticationsession"
@@ -34,11 +33,7 @@ public class WebAuthenticationSessionManager: ChannelDelegate {
                 create(id: id, url: url, callbackURLScheme: callbackURLScheme, settings: initialSettings, result: result)
                 break
             case "isAvailable":
-                if #available(iOS 11.0, *) {
-                    result(true)
-                } else {
-                    result(false)
-                }
+                result(true)
                 break
             default:
                 result(FlutterMethodNotImplemented)
@@ -47,7 +42,7 @@ public class WebAuthenticationSessionManager: ChannelDelegate {
     }
     
     public func create(id: String, url: String, callbackURLScheme: String?, settings: [String: Any?], result: @escaping FlutterResult) {
-        if #available(iOS 11.0, *), let plugin = plugin {
+        if let plugin = plugin {
             let sessionUrl = URL(string: url) ?? URL(string: "about:blank")!
             let initialSettings = WebAuthenticationSessionSettings()
             let _ = initialSettings.parse(settings: settings)

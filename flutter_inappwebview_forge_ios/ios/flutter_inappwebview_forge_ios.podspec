@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'flutter_inappwebview_forge_ios'
-  s.version          = '1.0.0'
+  s.version          = '2.0.0'
   s.summary          = 'Maintained Flutter InAppWebView fork for iOS.'
   s.description      = <<-DESC
 Maintained fork of Flutter InAppWebView, originally created by Lorenzo Pichilli.
@@ -30,11 +30,11 @@ Maintained fork of Flutter InAppWebView, originally created by Lorenzo Pichilli.
 
   s.swift_version = '5.0'
 
-  s.platforms = { :ios => '12.0' }
+  s.platforms = { :ios => '15.0' }
 
   s.default_subspec = 'Core'
 
   s.subspec 'Core' do |core|
-    core.platform = :ios, '12.0'
+    core.platform = :ios, '15.0'
   end
 end

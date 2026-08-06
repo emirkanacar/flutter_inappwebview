@@ -6,7 +6,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
   sdk: ^3.8.0
-  flutter: ">=3.32.0"
+  flutter: ">=3.38.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -40,6 +40,12 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+
+dependency_overrides:
+  flutter_inappwebview_forge_internal_annotations:
+    path: ../../dev_packages/flutter_inappwebview_forge_internal_annotations
+  flutter_inappwebview_forge_platform_interface:
+    path: ../../flutter_inappwebview_forge_platform_interface
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

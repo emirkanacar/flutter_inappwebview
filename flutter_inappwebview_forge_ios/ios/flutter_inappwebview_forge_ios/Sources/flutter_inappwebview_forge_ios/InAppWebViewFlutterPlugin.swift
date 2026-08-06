@@ -22,7 +22,7 @@ import Foundation
 import AVFoundation
 import SafariServices
 
-public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
+public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     
     var registrar: FlutterPluginRegistrar
     var platformUtil: PlatformUtil?
@@ -67,7 +67,9 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let _ = InAppWebViewFlutterPlugin(with: registrar)
+        let instance = InAppWebViewFlutterPlugin(with: registrar)
+        registrar.addApplicationDelegate(instance)
+        registrar.addSceneDelegate(instance)
     }
     
     public func detachFromEngine(for registrar: FlutterPluginRegistrar) {
