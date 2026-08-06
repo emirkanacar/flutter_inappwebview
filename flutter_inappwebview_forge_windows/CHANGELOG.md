@@ -1,5 +1,6 @@
 ## 1.0.5 - 2026-08-06
 
+- Add regression coverage confirming `getTitle()` uses the WebView2 document title ([#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725)).
 - Apply `InAppWebViewSettings.pageZoom` through WebView2 `ICoreWebView2Controller.ZoomFactor` and report the effective zoom factor in real settings.
 
 ## 1.0.4 - 2026-08-06

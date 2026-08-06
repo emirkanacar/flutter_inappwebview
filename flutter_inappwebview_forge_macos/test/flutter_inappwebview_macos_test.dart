@@ -30,4 +30,9 @@ void main() {
       'macOS authentication session does not apply additional headers',
     );
   }
+  if (!session.contains('NSApp.keyWindow')) {
+    throw StateError(
+      'macOS authentication session does not prefer the active key window',
+    );
+  }
 }

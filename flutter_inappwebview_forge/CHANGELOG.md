@@ -1,5 +1,7 @@
 ## 2.1.0 - 2026-08-06
 
+- macOS: prefer the active key window when presenting `WebAuthenticationSession` and fall back to a visible main window ([#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813)).
+- Windows: verify `getTitle()` reads the WebView2 document title ([#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725)).
 - iOS/macOS: add `WebAuthenticationSessionSettings.additionalHeaderFields` on iOS 17.4+ and macOS 14.4+.
 - Windows: apply `InAppWebViewSettings.pageZoom` through WebView2 `ZoomFactor`.
 - Android: add `InAppWebViewController.setBackgroundColor` for changing the native WebView background color ([#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863)).

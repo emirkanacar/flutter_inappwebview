@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Thirty-four issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
+The export contains 125 issues and 73 PRs. Thirty-six issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
-| Bugs | 76 | Technical work, validation, or reproduction required |
+| Bugs | 74 | Technical work, validation, or reproduction required |
 | Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining export records** | **91** | **88 technical records after excluding showcase entries** |
+| **Total remaining export records** | **89** | **86 technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -28,7 +28,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Already excluded from this plan
 
-These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, and `#2812`.
+These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, and `#2725`.
 
 Their remaining device/build checks are included below only when they block release confidence. Do not reopen their implementation without new evidence.
 
@@ -49,7 +49,7 @@ Their remaining device/build checks are included below only when they block rele
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855), [#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813), [#2707](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2707) | macOS menu, authentication, and browser-window crashes | Reproduce on macOS 11/Tahoe and Xcode 26; audit AppKit teardown, `WebAuthenticationSession` presentation anchors, toolbar disposal, and native window ownership. Add static tests first, then a native create/present/dismiss/release matrix. |
+| [#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855), [#2707](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2707) | macOS menu and browser-window crashes | Reproduce on macOS 11/Tahoe and Xcode 26; audit AppKit teardown, toolbar disposal, and native window ownership. Add static tests first, then a native create/present/dismiss/release matrix. |
 | [#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826), [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787), [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721) | Apple frame, keyboard viewport, and accessibility layout | Measure fractional platform-view frames, safe-area/inset changes, keyboard transitions, and display-size changes. Apply geometry fixes only after capturing before/after frames on iOS 17+ and macOS 11+. |
 | [#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619), [#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636) | iOS/macOS JavaScript, popup, window-ID, startup, and disposal crashes | Run symbolicated tests for `evaluateJavaScript`, `callAsyncJavaScript`, `windowId`, popup navigation, and dispose/recreate. Check frame/content-world initialization and main-actor ownership. Merge only targeted fixes with source-level regression coverage. |
 | [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/Drawer/modal transitions, local HTML resume, form autofill, and navigation headers. Separate Flutter-engine regressions from plugin channel behavior. |
@@ -68,7 +68,7 @@ Their remaining device/build checks are included below only when they block rele
 | Issues | Work package | Plan |
 | --- | --- | --- |
 | [#2778](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2778), [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752), [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2807](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2807) | Native startup and renderer failures | Reproduce on Arch Linux/WPE and affected Windows machines with full native logs. Test create/destroy/recreate, graphics-context invalidation, bundled/system WPE, and WebView2 runtime versions. |
-| [#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736), [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642) | Windows focus, transparency, hit testing, release, and native method correctness | Add a Windows native smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, release packaging, and `getTitle`. Verify C++ child-window state after every async callback. |
+| [#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736), [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642) | Windows focus, transparency, hit testing, and release behavior | Add a Windows native smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Verify C++ child-window state after every async callback. |
 | [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot/video and missing-plugin behavior | Reproduce with hardware video frames and generated plugin registrants. Define whether the native backend can capture video surfaces; otherwise return a documented unsupported result instead of a black image or missing method. |
 
 ### P1: Build, packaging, and release gates

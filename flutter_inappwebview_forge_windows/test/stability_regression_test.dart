@@ -94,4 +94,9 @@ void main() {
     'get_ZoomFactor',
     'the WebView2 page zoom getter',
   );
+  _expectContains(
+    nativeViewSource,
+    'get_DocumentTitle',
+    'the WebView2 document title getter',
+  );
 }
