@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Thirty-six issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
+The export contains 125 issues and 73 PRs. Thirty-eight issue records are already resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
-| Bugs | 74 | Technical work, validation, or reproduction required |
+| Bugs | 72 | Technical work, validation, or reproduction required |
 | Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining export records** | **89** | **86 technical records after excluding showcase entries** |
+| **Total remaining export records** | **87** | **84 technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -28,7 +28,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Already excluded from this plan
 
-These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, and `#2725`.
+These records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, `#2725`, `#2741`, and `#2852`.
 
 Their remaining device/build checks are included below only when they block release confidence. Do not reopen their implementation without new evidence.
 
@@ -75,7 +75,7 @@ Their remaining device/build checks are included below only when they block rele
 
 | Issues | Plan | Exit criterion |
 | --- | --- | --- |
-| [#2852](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852), [#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830), [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce Android ProGuard, MSVC `/await`, Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
+| [#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830), [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce MSVC `/await`, Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
 | [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757), [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687), [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685), [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641), [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize generated Pigeon/build artifacts, pub.dev analysis, Java 17/Flutter deprecation warnings, and release JAR synchronization. | `flutter analyze`, `pana`/publish dry-run, Android release build, and all generated metadata checks pass without package-owned warnings. |
 | [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2788](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2788), [#2695](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2695), [#2686](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2686), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682) | Triage vague initialization, Windows warning/release, network, Safari, and packaging reports | Require a reproducible command, environment, and stack trace. Close as host/application-specific in the local log when no package path exists. |
 

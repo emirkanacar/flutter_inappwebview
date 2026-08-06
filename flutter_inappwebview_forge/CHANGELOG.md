@@ -1,5 +1,7 @@
 ## 2.1.1 - 2026-08-06
 
+- macOS: guard `upgradeKnownHostsToHTTPS` for macOS 11.3 and newer to avoid an unavailable-selector crash ([#2741](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2741)).
+- Android: protect the optimized ProGuard filename from regressing to the unavailable legacy filename ([#2852](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852)).
 - iOS/macOS: terminate the injected `window.print` assignment with a semicolon for strict JavaScript parsers ([#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879)).
 - macOS: prefer the active key window when presenting `WebAuthenticationSession` and fall back to a visible main window ([#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813)).
 - Windows: verify `getTitle()` reads the WebView2 document title ([#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725)).

@@ -63,4 +63,14 @@ void main() {
     );
     expect(delegate.readAsStringSync(), contains('view.setBackgroundColor'));
   });
+
+  test('Android release builds use the available optimized ProGuard file', () {
+    final buildFile = File('android/build.gradle.kts').existsSync()
+        ? File('android/build.gradle.kts')
+        : File('flutter_inappwebview_forge_android/android/build.gradle.kts');
+    final source = buildFile.readAsStringSync();
+
+    expect(source, contains('proguard-android-optimize.txt'));
+    expect(source, isNot(contains('proguard-android.txt')));
+  });
 }

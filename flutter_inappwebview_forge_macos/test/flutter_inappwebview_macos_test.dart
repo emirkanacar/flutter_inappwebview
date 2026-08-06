@@ -36,6 +36,25 @@ void main() {
     );
   }
 
+  final webViewSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/InAppWebView/InAppWebView.swift',
+  ).readAsStringSync();
+  final settingsSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/InAppWebView/InAppWebViewSettings.swift',
+  ).readAsStringSync();
+  if (!webViewSource.contains('if #available(macOS 11.3, *)')) {
+    throw StateError(
+      'macOS upgradeKnownHostsToHTTPS is not guarded in WebView settings',
+    );
+  }
+  if (!settingsSource.contains('if #available(macOS 11.3, *)')) {
+    throw StateError(
+      'macOS upgradeKnownHostsToHTTPS is not guarded in real settings',
+    );
+  }
+
   final printScript = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'
     'flutter_inappwebview_forge_macos/PluginScriptsJS/PrintJS.swift',
