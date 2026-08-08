@@ -1,3 +1,9 @@
+## 2.1.20 - 2026-08-08
+
+- Android: guard ChromeClient callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+- iOS: validate WebMessageChannel port indices and payloads before message operations ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- Update root dependencies to Android 1.0.24 and iOS 2.1.13.
+
 ## 2.1.19 - 2026-08-08
 
 - Android: guard page lifecycle callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

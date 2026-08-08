@@ -104,6 +104,14 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 **Local status:** Implemented and source-validated; iOS 17+ proxy runtime validation pending. **Affected package:** iOS proxy manager. **Impact:** malformed proxy settings or rules could force-cast rule lists/URLs or unwrap invalid rule objects. **Fix:** proxy settings use optional map decoding and discard malformed rules safely. **Required evidence:** valid, empty, malformed, and mixed proxy rule lists on iOS 17+.
 
+#### #2584 - iOS WebMessageChannel payload and index validation
+
+**Local status:** Implemented and source-validated; iOS WebKit runtime validation pending. **Affected package:** iOS WebMessageChannel delegate. **Impact:** malformed port indices or message maps could index outside the ports array or force-cast channel payloads. **Fix:** indices are bounds-checked and malformed messages return structured argument errors. **Required evidence:** valid/invalid port indices, null messages, closed ports, and disposal during message delivery.
+
+#### #2697 - Android Chrome callback ownership
+
+**Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android WebChromeClient. **Impact:** progress, title, icon, or touch-icon callbacks could force-cast unrelated WebViews. **Fix:** callbacks now ignore non-Forge WebViews safely. **Required evidence:** provider callback flows during navigation, renderer restart, and teardown.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

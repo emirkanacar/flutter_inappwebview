@@ -22,7 +22,10 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
         switch call.method {
         case "setWebMessageCallback":
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                guard let index = arguments?["index"] as? Int, ports.indices.contains(index) else {
+                    result(FlutterError(code: "invalid_arguments", message: "Invalid port index.", details: nil))
+                    return
+                }
                 let port = ports[index]
                 do {
                     try port.setWebMessageCallback { (_) in
@@ -38,9 +41,14 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             break
         case "postMessage":
             if let webView = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                guard let index = arguments?["index"] as? Int,
+                      ports.indices.contains(index),
+                      let messageMap = arguments?["message"] as? [String: Any?],
+                      let message = WebMessage.fromMap(map: messageMap) else {
+                    result(FlutterError(code: "invalid_arguments", message: "Invalid port message.", details: nil))
+                    return
+                }
                 let port = ports[index]
-                let message = WebMessage.fromMap(map: arguments!["message"] as! [String: Any?])
                 
                 var ports: [WebMessagePort] = []
                 if let notConnectedPorts = message.ports {
@@ -65,7 +73,10 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             break
         case "close":
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                guard let index = arguments?["index"] as? Int, ports.indices.contains(index) else {
+                    result(FlutterError(code: "invalid_arguments", message: "Invalid port index.", details: nil))
+                    return
+                }
                 let port = ports[index]
                 do {
                     try port.close { (_) in

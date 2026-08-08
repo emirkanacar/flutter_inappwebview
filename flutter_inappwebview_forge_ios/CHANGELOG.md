@@ -1,3 +1,7 @@
+## 2.1.13 - 2026-08-08
+
+- Validate iOS WebMessageChannel port indices and message payloads before accessing ports or dispatching messages ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+
 ## 2.1.12 - 2026-08-08
 
 - Validate iOS proxy settings and rules before constructing proxy configurations, ignoring malformed rule entries ([#2805](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2805)).

@@ -103,6 +103,15 @@ void main() {
     expect(source, contains('view as? InAppWebView ?: return'));
   });
 
+  test('Android Chrome callbacks ignore non-plugin WebViews safely', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    expect(source, contains('view as? InAppWebView ?: return'));
+    expect(source, contains('(view as? InAppWebView)?.channelDelegate'));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

@@ -79,6 +79,15 @@ void main() {
         proxySource.contains('guard let url = map["url"] as? String'),
     'iOS proxy payloads are still force-cast',
   );
+  final messageChannelSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebMessage/WebMessageChannelChannelDelegate.swift',
+  ).readAsStringSync();
+  _assert(
+    messageChannelSource.contains('ports.indices.contains(index)') &&
+        messageChannelSource.contains('Invalid port index'),
+    'iOS WebMessageChannel does not validate port indices',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',

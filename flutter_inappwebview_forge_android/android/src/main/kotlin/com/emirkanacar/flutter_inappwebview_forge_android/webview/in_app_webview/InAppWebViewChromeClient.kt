@@ -614,7 +614,7 @@ open class InAppWebViewChromeClient(
 
   override fun onProgressChanged(view: WebView, progress: Int) {
     super.onProgressChanged(view, progress)
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
     if (lastProgress == progress) {
       return
     }
@@ -626,7 +626,7 @@ open class InAppWebViewChromeClient(
   override fun onReceivedTitle(view: WebView, title: String) {
     super.onReceivedTitle(view, title)
     inAppBrowserDelegate?.didChangeTitle(title)
-    (view as InAppWebView).channelDelegate?.onTitleChanged(title)
+    (view as? InAppWebView)?.channelDelegate?.onTitleChanged(title)
   }
 
   override fun onReceivedIcon(view: WebView, icon: Bitmap) {
@@ -639,12 +639,12 @@ open class InAppWebViewChromeClient(
       Log.e(LOG_TAG, "", e)
     }
     icon.recycle()
-    (view as InAppWebView).channelDelegate?.onReceivedIcon(byteArrayOutputStream.toByteArray())
+    (view as? InAppWebView)?.channelDelegate?.onReceivedIcon(byteArrayOutputStream.toByteArray())
   }
 
   override fun onReceivedTouchIconUrl(view: WebView, url: String, precomposed: Boolean) {
     super.onReceivedTouchIconUrl(view, url, precomposed)
-    (view as InAppWebView).channelDelegate?.onReceivedTouchIconUrl(url, precomposed)
+    (view as? InAppWebView)?.channelDelegate?.onReceivedTouchIconUrl(url, precomposed)
   }
 
   protected fun getRootView(): ViewGroup? {
