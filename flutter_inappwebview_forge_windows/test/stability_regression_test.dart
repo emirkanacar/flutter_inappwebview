@@ -99,4 +99,9 @@ void main() {
     'get_DocumentTitle',
     'the WebView2 document title getter',
   );
+  _expectContains(
+    _sourceFile('windows/in_app_browser/in_app_browser.cpp').readAsStringSync(),
+    'webView && webView->webViewController',
+    'the guarded browser resize callback',
+  );
 }

@@ -1,3 +1,7 @@
+## 1.0.16 - 2026-08-08
+
+- Snapshot Android activity-result listeners before dispatch so a listener can unregister itself without invalidating the iteration ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).
+
 ## 1.0.15 - 2026-08-08
 
 - Ignore renderer callbacks delivered for non-plugin WebView instances instead of throwing a cast exception during renderer lifecycle events ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

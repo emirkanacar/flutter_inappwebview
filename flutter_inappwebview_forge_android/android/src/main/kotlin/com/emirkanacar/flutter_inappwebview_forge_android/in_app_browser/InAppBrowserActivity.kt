@@ -566,7 +566,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    for (listener in activityResultListeners) {
+    for (listener in activityResultListeners.toList()) {
       if (listener.onActivityResult(requestCode, resultCode, data)) {
         return
       }

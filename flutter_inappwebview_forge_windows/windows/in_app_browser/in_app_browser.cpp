@@ -230,7 +230,7 @@ namespace flutter_inappwebview_plugin
     case WM_SIZE: {
       RECT bounds;
       GetClientRect(hwnd, &bounds);
-      if (webView) {
+      if (webView && webView->webViewController) {
         webView->webViewController->put_Bounds(bounds);
       }
       return 0;

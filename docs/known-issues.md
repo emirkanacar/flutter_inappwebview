@@ -36,6 +36,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Source-validated mitigation; device reproduction and validation pending. **Affected package:** iOS prompt presentation. **Impact:** a location prompt cannot complete safely if scene transitions leave no visible presenter. **Fix reviewed:** prompt presentation paths already guard missing visible view controllers; no broader permission change is justified without an iOS 26 reproduction. **Required evidence:** minimal geolocation page across active/inactive scenes, popup presentation, dismissal, and app background/foreground transitions.
 
+#### #2814, #2797, #2711, #2709 - Android activity-result listener lifecycle
+
+**Local status:** Implemented and source-validated; Android activity/provider validation pending. **Affected package:** Android InAppBrowser activity result dispatch. **Impact:** a listener unregistering itself during callback dispatch could mutate the active listener list and invalidate iteration or skip later callbacks. **Fix:** dispatch uses a snapshot of the listener list, preserving callback ownership while allowing safe registration teardown. **Required evidence:** activity result flows across create, rotate, detach, reattach, and dispose transitions.
+
+#### #2736 - Windows InAppBrowser resize after teardown
+
+**Local status:** Implemented and source-validated; Windows native validation pending. **Affected package:** Windows InAppBrowser. **Impact:** a late `WM_SIZE` callback could reach a released WebView2 controller during focus/resize or window teardown. **Fix:** the resize path now checks both the browser wrapper and WebView2 controller before updating bounds. **Required evidence:** minimize/restore, close/resize races, focus transitions, and release builds on supported Windows/WebView2 versions.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

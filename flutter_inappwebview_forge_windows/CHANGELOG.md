@@ -1,3 +1,7 @@
+## 1.0.6 - 2026-08-08
+
+- Guard the InAppBrowser resize callback when the WebView2 controller has already been released during window teardown ([#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736)).
+
 ## 1.0.5 - 2026-08-06
 
 - Add regression coverage confirming `getTitle()` uses the WebView2 document title ([#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725)).

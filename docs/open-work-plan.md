@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Forty-eight issue records are now resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). Three additional PR-only records (`#2771`, `#2871`, and `#2474`) are implemented locally; they are tracked separately and do not change the issue counts below. The remaining issue records are:
+The export contains 125 issues and 73 PRs. Fifty-three issue records are now resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). Three additional PR-only records (`#2771`, `#2871`, and `#2474`) are implemented locally; they are tracked separately and do not change the issue counts below. The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
-| Bugs | 65 | Technical work, validation, or reproduction required |
+| Bugs | 60 | Technical work, validation, or reproduction required |
 | Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining issue records** | **77** | **74 technical issue records after excluding showcase entries** |
+| **Total remaining issue records** | **72** | **69 technical issue records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -28,7 +28,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Already excluded from this plan
 
-These issue records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, `#2725`, `#2741`, `#2852`, `#2837`, `#2855`, `#2698`, `#2673`, `#2594`, `#2707`, `#2697`, and `#2831`.
+These issue records are not open implementation tasks because the local repository contains a fix or mitigation: `#2873`, `#2875`, `#2856`, `#2878`, `#2819`, `#2880`, `#2762`, `#2868`, `#2872`, `#2849`, `#2843`, `#2848`, `#2700`, `#2580`, `#2718`, `#2555`, `#2791`, `#2728`, `#2703`, `#2859`, `#2737`, `#2789`, `#2780`, `#2867`, `#2840`, `#2733`, `#2862`, `#2710`, `#2842`, `#2841`, `#2850`, `#2863`, `#2835`, `#2812`, `#2813`, `#2725`, `#2741`, `#2852`, `#2837`, `#2855`, `#2698`, `#2673`, `#2594`, `#2707`, `#2697`, `#2831`, `#2814`, `#2797`, `#2711`, `#2709`, and `#2736`.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
@@ -167,7 +167,7 @@ The PR export is also marked `OPEN`; do not merge or copy it without checking th
 
 ## Definition of done
 
-The 2026-08-08 source-validation pass addressed #2856/#2737, hardened Android allow-list parsing for #2698/#2673/#2594, made macOS popup registry cleanup unconditional for #2707, guarded Android renderer callback type boundaries for #2697, and reviewed the existing iOS presenter guard for #2831. The count is now 48 resolved or mitigated issue records and 77 remaining records, with runtime/provider validation retained as release follow-up.
+The 2026-08-08 source-validation pass addressed #2856/#2737, hardened Android allow-list parsing for #2698/#2673/#2594, made macOS popup registry cleanup unconditional for #2707, guarded Android renderer callback type boundaries for #2697, reviewed the existing iOS presenter guard for #2831, made Android activity-result dispatch mutation-safe for #2814/#2797/#2711/#2709, and guarded Windows resize teardown for #2736. The count is now 53 resolved or mitigated issue records and 72 remaining records, with runtime/provider validation retained as release follow-up.
 
 An issue leaves this plan only when:
 

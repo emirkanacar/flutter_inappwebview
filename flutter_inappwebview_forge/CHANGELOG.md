@@ -1,3 +1,9 @@
+## 2.1.9 - 2026-08-08
+
+- Android: snapshot activity-result listeners before dispatch to make registration and teardown callbacks mutation-safe ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).
+- Windows: avoid calling WebView2 bounds APIs after the browser controller has been released during resize/teardown ([#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736)).
+- Update root dependencies to Android 1.0.16 and Windows 1.0.6.
+
 ## 2.1.8 - 2026-08-08
 
 - Android: ignore renderer callbacks for non-plugin WebView instances instead of raising a cast exception ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

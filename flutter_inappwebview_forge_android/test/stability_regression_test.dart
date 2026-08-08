@@ -30,6 +30,15 @@ void main() {
     expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
   });
 
+  test('Android activity result dispatch tolerates listener removal during callbacks', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'in_app_browser/InAppBrowserActivity.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('activityResultListeners.toList()'));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
