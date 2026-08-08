@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2636, #2659, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 55 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2636, #2659, #2713, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 54 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -21,8 +21,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 | --- | ---: | --- |
 | Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 3 issues ([#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 55 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 4 issues ([#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 54 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -167,6 +167,14 @@ The supplied stack terminates in Android's `android.widget.TimePickerSpinnerDele
 The upstream report has multiple confirmations that upgrading Flutter to 3.41/3.41.3 restores WebView interaction, while the failure appears across WebView plugins and is linked to Flutter platform-view gesture issues. Forge's iOS WebKit layer cannot safely reset Flutter's gesture arena or platform-view state. The repository keeps its Flutter compatibility baseline at 3.38.6; this record therefore remains a host/engine compatibility boundary rather than a speculative native patch.
 
 **Required evidence:** if the failure is still reported on the supported baseline, capture the exact Flutter/Xcode/iOS versions and compare `flutter_inappwebview_forge` with a minimal native platform-view reproduction before considering a compatibility change.
+
+### #2713 — iOS Drawer dismissal leaves WebView touch unresponsive
+
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Flutter iOS platform-view hit testing and gesture lifecycle. **Impact:** after a Drawer is dismissed, WebView taps and JavaScript-driven interaction can stop responding. **Confidence:** Strong host-boundary evidence from the upstream issue history.
+
+The report aligns with Flutter's iOS platform-view gesture issue chain ([#175099](https://github.com/flutter/flutter/issues/175099), [#158961](https://github.com/flutter/flutter/issues/158961)). The reported PointerInterceptor/overlay workarounds act in Flutter's hit-testing layer, and the symptom is consistent with platform-view gesture state rather than a Forge WebKit callback or channel contract. Forge's iOS native layer cannot safely reset Flutter's gesture arena after a Drawer transition, so no speculative package patch is justified.
+
+**Required evidence:** if the symptom reproduces on the supported Flutter 3.38.6 baseline, capture the exact Flutter/Xcode/iOS versions and a minimal platform-view reproduction, then compare another Flutter platform-view plugin or a native view. Only implement a Forge change if the failure crosses that host boundary and a stable plugin-owned control point is identified.
 
 ## Remaining validation and follow-up
 
@@ -533,7 +541,6 @@ are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752)
 [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
 [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723),
 [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720),
-[#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
