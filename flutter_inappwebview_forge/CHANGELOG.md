@@ -1,3 +1,8 @@
+## 2.1.26 - 2026-08-08
+
+- iOS: defer `loadUrl` requests issued from `shouldOverrideUrlLoading` until the WebKit navigation decision handler has completed, preventing the white-screen/deadlock path when replacing navigation headers ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)). Physical iOS navigation/header validation remains pending.
+- Update the root dependency to iOS 2.1.16.
+
 ## 2.1.25 - 2026-08-08
 
 - Android: refresh hybrid-composition WebView geometry after display-size changes and visibility recovery ([#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)). Android 16/API 36 and OEM WebView runtime validation remains pending.

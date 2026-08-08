@@ -77,6 +77,16 @@ void _runSourceContractAssertions() {
     channelSource.contains('assetFilePath is required'),
     'iOS loadFile channel does not validate asset paths',
   );
+  _assert(
+    source.contains('navigationActionDecisionPending') &&
+        source.contains('pendingNavigationActionLoadRequests.append'),
+    'iOS loadUrl does not defer requests made from navigation callbacks',
+  );
+  _assert(
+    source.contains('flushPendingNavigationActionLoadRequests') &&
+        source.contains('isLoadingPendingNavigationAction'),
+    'iOS deferred navigation loads are not released after the decision handler',
+  );
   final proxySource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/ProxyManager.swift',

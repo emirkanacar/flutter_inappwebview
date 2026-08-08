@@ -22,9 +22,9 @@ tracked separately from that historical export:
 
 | Status | Count | Register |
 | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | 65 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
+| Locally implemented or mitigated; runtime validation pending | 66 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
-| Open implementation or reproduction | 59 issues | [open-work-plan.md](open-work-plan.md) |
+| Open implementation or reproduction | 58 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
 
 The issue inventory below remains the historical 125-record export and is not
@@ -32,6 +32,7 @@ reduced when a record moves between the local status registers.
 
 ## Local resolution history
 
+| 2026-08-08 | iOS navigation decision/load ordering [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568) | No upstream relationship inferred | iOS now queues `loadUrl` requests issued while `shouldOverrideUrlLoading` is waiting for the WebKit policy decision and flushes them after `.allow`/`.cancel` is delivered. The source regression, Flutter analysis, SwiftPM manifest check, and Xcode example build pass; physical navigation/header validation remains pending. |
 | 2026-08-08 | Android display-size WebView geometry [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721) | No upstream relationship inferred | Android now refreshes hybrid-composition WebView geometry after actual size changes and visibility return through an idempotent invalidation/relayout helper. The new source regression, Android focused tests, and example APK/AAR build pass; Android 16/API 36 display-size and OEM provider runtime validation remains pending. |
 | 2026-08-08 | Android activity-extra deserialization [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | No upstream relationship inferred | InAppBrowser and Chrome Custom Tabs maps/lists now cross activity boundaries through a recursive primitive/nested-`Bundle` codec. Android native source contains no `getSerializable`, `putSerializable`, or `java.io.Serializable` references; the static regression test and Android compile pass. API/provider restore and malformed-extra validation remain pending. |
 | 2026-08-08 | iOS popup default handling [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) | No upstream relationship inferred | iOS now removes the pending popup transport without loading the target into the caller WebView when `onCreateWindow` returns `false`, `null`, or is unhandled. Explicit same-window `controller.loadUrl` remains available from the callback; source regression coverage passes and iOS popup-device validation remains pending. |

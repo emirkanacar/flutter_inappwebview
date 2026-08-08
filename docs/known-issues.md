@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 65 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 59 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 58 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -16,9 +16,9 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 65 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Open implementation or reproduction | 59 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 58 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -144,7 +144,7 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-65 locally implemented or mitigated issue records and three PR-only records.
+66 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -435,6 +435,14 @@ Issue [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/285
 The Forge implementation now only clears the keyboard-adjusted state in `keyboardWillHide` and restores the WebView inset after `keyboardDidHide`, with one main-queue turn for UIKit's final layout pass. The iOS regression test asserts that restoration is not performed from the early notification.
 
 **Remaining validation:** exercise keyboard show/hide, focus changes between HTML inputs, interactive dismissal, and scroll-to-bottom on iOS 17.2 through the latest supported iOS release.
+
+### #2568 — iOS `shouldOverrideUrlLoading` header replacement deadlock
+
+**Local status:** Implemented and source-validated; physical iOS navigation/header validation pending. **Affected package:** iOS WebKit navigation delegate and method channel. **Impact:** when `shouldOverrideUrlLoading` cancels a navigation after calling `controller.loadUrl` with replacement headers, the WebView could turn white and remain in a navigation deadlock. **Confidence:** Confirmed callback-ordering path from the upstream reproducer.
+
+While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a nested `loadUrl` call is now queued instead of starting a second WebKit navigation immediately. The queue is flushed only after the original decision handler receives `.allow` or `.cancel`, and queued requests are discarded during disposal. This preserves the existing public callback/policy contract while allowing the reported cancel-and-reload-with-headers flow to release the WebKit decision handler first. The iOS source regression, `flutter analyze`, SwiftPM manifest check, and Xcode example build pass.
+
+**Required evidence:** physical iOS 18+ navigation with `useShouldOverrideUrlLoading`, HTTPS redirects and repeated taps, cancel-then-load with custom headers, normal allow behavior, back/forward, popup/window IDs, and disposal during a pending navigation callback.
 
 ### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
 

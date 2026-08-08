@@ -11,20 +11,20 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Sixty-six issue records have a
-documented local implementation, mitigation, or source-review boundary: 65
+The export contains 125 issues and 73 PRs. Sixty-seven issue records have a
+documented local implementation, mitigation, or source-review boundary: 66
 await real runtime validation and #2745 is closed by source review. The other
-59 issue records remain in this active plan. Three additional PR-only records
+58 issue records remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 51 | 1 | 46 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 52 | 1 | 45 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **65** | **1** | **59** | **56 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **66** | **1** | **58** | **55 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -40,7 +40,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 65 implementation or mitigation records awaiting real validation are
+The 66 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -49,6 +49,12 @@ is closed by source review and has no package runtime gate. Android [#2721](http
 now has an idempotent native WebView geometry refresh for display-size changes
 and visibility recovery; its Android 16/API 36 and OEM provider validation is
 tracked in the runtime register.
+
+iOS [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)
+now defers `loadUrl` calls made during `shouldOverrideUrlLoading` until the
+WebKit navigation decision is released. Source/regression, SwiftPM, and Xcode
+example validation pass; physical iOS navigation/header validation remains in
+the runtime register.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
@@ -72,7 +78,7 @@ are locally implemented and awaiting real validation in the
 | --- | --- | --- |
 | [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Measure safe-area/inset changes and keyboard transitions. Apply geometry fixes only after capturing before/after frames on iOS 17+ and macOS 11+. |
 | [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636) | iOS/macOS startup and disposal crashes | Run symbolicated tests for startup, `windowId`, and dispose/recreate. Check frame/content-world initialization and main-actor ownership. |
-| [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/Drawer/modal transitions, local HTML resume, form autofill, and navigation headers. Separate Flutter-engine regressions from plugin channel behavior. |
+| [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/Drawer/modal transitions, local HTML resume, form autofill, and navigation headers. Separate Flutter-engine regressions from plugin channel behavior. |
 
 #### Android
 
@@ -125,10 +131,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 65 issue records and three PR-only
+items. The complete register contains 66 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 59 issue records that still need implementation, design, or
+keeps only the 58 issue records that still need implementation, design, or
 reproduction.
 
 ## PR queue
@@ -181,13 +187,13 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-08 status pass has 65 locally implemented or mitigated issue
+The 2026-08-08 status pass has 66 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, and 59 active issue records in this plan. The runtime-pending records
+review, and 58 active issue records in this plan. The runtime-pending records
 are deliberately not counted as active implementation work; their release
 gates live in [`runtime-validation-pending.md`](runtime-validation-pending.md).
-The active queue contains 46 bugs, 10 enhancements, 0 unlabelled records, and
-3 showcase records (56 active technical records after excluding showcases).
+The active queue contains 45 bugs, 10 enhancements, 0 unlabelled records, and
+3 showcase records (55 active technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:
 

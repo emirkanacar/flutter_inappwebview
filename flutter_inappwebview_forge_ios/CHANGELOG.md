@@ -1,3 +1,7 @@
+## 2.1.16 - 2026-08-08
+
+- Defer iOS `loadUrl` requests issued from `shouldOverrideUrlLoading` until the WebKit navigation decision is released, preventing a white-screen/deadlock path when replacing navigation headers ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)). Physical iOS navigation/header validation remains pending.
+
 ## 2.1.15 - 2026-08-08
 
 - Bridge iOS 26 `WKUIDelegate` geolocation permission decisions to `onGeolocationPermissionsShowPrompt`, including safe deny fallback and response decoding ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).

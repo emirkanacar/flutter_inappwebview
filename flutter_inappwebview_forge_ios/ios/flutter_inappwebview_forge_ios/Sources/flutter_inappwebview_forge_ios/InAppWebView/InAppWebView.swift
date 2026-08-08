@@ -47,6 +47,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     private var lastSeekedFrameInfo: WKFrameInfo?
     private var lastSeekedAt: Date?
     var preventGestureDelay = false
+    private var navigationActionDecisionPending = false
+    private var pendingNavigationActionLoadRequests: [(URLRequest, URL?)] = []
+    private var isLoadingPendingNavigationAction = false
 
     var isInFullscreenPresentation: Bool {
         if fullscreenPresentationState == .nativeContainer || inFullscreen {
@@ -1097,7 +1100,29 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         })
     }
     
+    private func flushPendingNavigationActionLoadRequests() {
+        let requests = pendingNavigationActionLoadRequests
+        pendingNavigationActionLoadRequests.removeAll()
+        guard !requests.isEmpty else {
+            return
+        }
+
+        isLoadingPendingNavigationAction = true
+        for request in requests {
+            loadUrl(
+                urlRequest: request.0,
+                allowingReadAccessTo: request.1
+            )
+        }
+        isLoadingPendingNavigationAction = false
+    }
+
     public func loadUrl(urlRequest: URLRequest, allowingReadAccessTo: URL?) {
+        if navigationActionDecisionPending && !isLoadingPendingNavigationAction {
+            pendingNavigationActionLoadRequests.append((urlRequest, allowingReadAccessTo))
+            return
+        }
+
         let url = urlRequest.url!
         
         if #available(iOS 9.0, *), let allowingReadAccessTo = allowingReadAccessTo, url.scheme == "file", allowingReadAccessTo.scheme == "file" {
@@ -2115,15 +2140,21 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         var decisionHandlerCalled = false
         let callback = WebViewChannelDelegate.ShouldOverrideUrlLoadingCallback()
-        callback.nonNullSuccess = { (response: WKNavigationActionPolicy) in
-            decisionHandlerCalled = true
-            decisionHandler(response)
-            return false
-        }
-        callback.defaultBehaviour = { (response: WKNavigationActionPolicy?) in
+        callback.nonNullSuccess = { [weak self] (response: WKNavigationActionPolicy) in
             if !decisionHandlerCalled {
                 decisionHandlerCalled = true
+                self?.navigationActionDecisionPending = false
+                decisionHandler(response)
+                self?.flushPendingNavigationActionLoadRequests()
+            }
+            return false
+        }
+        callback.defaultBehaviour = { [weak self] (response: WKNavigationActionPolicy?) in
+            if !decisionHandlerCalled {
+                decisionHandlerCalled = true
+                self?.navigationActionDecisionPending = false
                 decisionHandler(.allow)
+                self?.flushPendingNavigationActionLoadRequests()
             }
         }
         callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
@@ -2132,6 +2163,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
 
         let runCallback = {
+            self.navigationActionDecisionPending = true
             if let useShouldOverrideUrlLoading = self.settings?.useShouldOverrideUrlLoading, useShouldOverrideUrlLoading, let channelDelegate = self.channelDelegate {
                 channelDelegate.shouldOverrideUrlLoading(navigationAction: navigationAction, callback: callback)
             } else {
@@ -4061,6 +4093,9 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         _contentSizeChangedUpdatePending = false
         _pendingOldContentSize = nil
         _lastReportedProgress = nil
+        navigationActionDecisionPending = false
+        pendingNavigationActionLoadRequests.removeAll()
+        isLoadingPendingNavigationAction = false
         plugin = nil
     }
     
