@@ -70,6 +70,15 @@ void main() {
     channelSource.contains('assetFilePath is required'),
     'iOS loadFile channel does not validate asset paths',
   );
+  final proxySource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/ProxyManager.swift',
+  ).readAsStringSync();
+  _assert(
+    proxySource.contains('compactMap { ProxyRule.fromMap') &&
+        proxySource.contains('guard let url = map["url"] as? String'),
+    'iOS proxy payloads are still force-cast',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',
