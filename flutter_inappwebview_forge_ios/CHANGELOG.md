@@ -1,3 +1,7 @@
+## 2.1.9 - 2026-08-08
+
+- Validate iOS WebMessageListener creation payloads before constructing listeners, ignoring malformed IDs, names, or origin-rule lists ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+
 ## 2.1.8 - 2026-08-08
 
 - Decode optional cookie origin properties and website data types safely instead of force-unwrapping provider-controlled values ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).

@@ -25,6 +25,7 @@ internal object WebViewStartupCoordinator {
 
     private var startupRequested = false
     private var startupCompleted = false
+    private var disposed = false
 
     fun start(context: Context) {
         runWhenReady(context) {}
@@ -35,6 +36,9 @@ internal object WebViewStartupCoordinator {
         var runImmediately = false
 
         synchronized(lock) {
+            if (disposed) {
+                return
+            }
             if (startupCompleted) {
                 runImmediately = true
             } else {
@@ -80,7 +84,7 @@ internal object WebViewStartupCoordinator {
 
     private fun complete() {
         val callbacks = synchronized(lock) {
-            if (startupCompleted) {
+            if (disposed || startupCompleted) {
                 return
             }
             startupCompleted = true
@@ -92,5 +96,14 @@ internal object WebViewStartupCoordinator {
         callbacks.forEach { callback ->
             mainHandler.post { callback() }
         }
+    }
+
+    fun dispose() {
+        synchronized(lock) {
+            disposed = true
+            pendingCallbacks.clear()
+        }
+        mainHandler.removeCallbacksAndMessages(null)
+        backgroundExecutor.shutdownNow()
     }
 }

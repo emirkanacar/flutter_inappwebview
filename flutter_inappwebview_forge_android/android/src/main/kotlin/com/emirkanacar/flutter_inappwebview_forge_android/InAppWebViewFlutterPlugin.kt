@@ -158,7 +158,8 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
         processGlobalConfigManager = ProcessGlobalConfigManager(this)
     }
 
-    override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    WebViewStartupCoordinator.dispose()
         platformUtil?.dispose()
         platformUtil = null
         inAppBrowserManager?.dispose()

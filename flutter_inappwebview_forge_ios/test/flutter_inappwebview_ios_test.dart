@@ -48,6 +48,15 @@ void main() {
         cookieSource.contains('websiteDataTypes as? Set<String>'),
     'iOS cookie cleanup still force-casts platform properties',
   );
+  final listenerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebMessage/WebMessageListener.swift',
+  ).readAsStringSync();
+  _assert(
+    listenerSource.contains('guard let id = map["id"] as? String') &&
+        listenerSource.contains('return nil'),
+    'iOS WebMessageListener does not validate creation payloads',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',

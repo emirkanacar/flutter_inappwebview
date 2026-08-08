@@ -72,6 +72,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; iOS WebKit cookie runtime validation pending. **Affected package:** iOS cookie manager. **Impact:** cookie cleanup could force-unwrap or force-cast an absent or provider-specific `originURL` property, or assume the website data type set cast succeeded. **Fix:** origin values and website data types are decoded with optional checks and return a safe failure when the platform shape is unsupported. **Required evidence:** cookie deletion with String/URL/missing origin properties across iOS 15-26.
 
+#### #2584 - iOS WebMessageListener payload validation
+
+**Local status:** Implemented and source-validated; iOS WebKit/provider validation pending. **Affected package:** iOS WebMessageListener creation. **Impact:** malformed platform-channel maps could force-cast listener IDs, JavaScript object names, or origin rules and terminate the app. **Fix:** listener creation now validates all required fields and returns `nil` for malformed payloads. **Required evidence:** listener creation with missing/null/wrong-type fields and disposal during message delivery.
+
+#### #2697 - Android asynchronous startup callback lifetime
+
+**Local status:** Implemented and source-validated; Android cold-start/device validation pending. **Affected package:** Android WebView startup coordinator. **Impact:** callbacks queued for asynchronous WebView provider startup could run after plugin detach and target disposed WebViews. **Fix:** plugin detach marks the coordinator disposed, clears pending callbacks, removes main-handler work, and shuts down the startup executor. **Required evidence:** headless and regular WebView cold start, detach/reattach, and release/AOT cycles.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

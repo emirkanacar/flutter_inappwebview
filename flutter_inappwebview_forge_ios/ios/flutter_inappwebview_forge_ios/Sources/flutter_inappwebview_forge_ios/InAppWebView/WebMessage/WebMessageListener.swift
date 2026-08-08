@@ -128,11 +128,16 @@ public class WebMessageListener: FlutterMethodCallDelegate {
         guard let map = map else {
             return nil
         }
+        guard let id = map["id"] as? String,
+              let jsObjectName = map["jsObjectName"] as? String,
+              let originRules = map["allowedOriginRules"] as? [String] else {
+            return nil
+        }
         return WebMessageListener(
             plugin: plugin,
-            id: map["id"] as! String,
-            jsObjectName: map["jsObjectName"] as! String,
-            allowedOriginRules: Set(map["allowedOriginRules"] as! [String])
+            id: id,
+            jsObjectName: jsObjectName,
+            allowedOriginRules: Set(originRules)
         )
     }
     

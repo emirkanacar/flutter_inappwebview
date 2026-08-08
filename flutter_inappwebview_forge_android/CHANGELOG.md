@@ -1,3 +1,7 @@
+## 1.0.19 - 2026-08-08
+
+- Clear pending asynchronous WebView provider-startup callbacks when the Android plugin detaches, preventing startup work from targeting disposed WebViews ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+
 ## 1.0.18 - 2026-08-08
 
 - Safely cancel Android client-certificate requests delivered for non-Forge WebView instances instead of force-casting the callback view ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

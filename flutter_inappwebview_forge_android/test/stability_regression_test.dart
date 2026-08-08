@@ -58,6 +58,16 @@ void main() {
     expect(source, contains('request.cancel()'));
   });
 
+  test('Android startup coordinator clears pending callbacks during disposal', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'WebViewStartupCoordinator.kt',
+    ).readAsStringSync();
+    expect(source, contains('private var disposed = false'));
+    expect(source, contains('pendingCallbacks.clear()'));
+    expect(source, contains('backgroundExecutor.shutdownNow()'));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

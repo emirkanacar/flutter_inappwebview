@@ -1,3 +1,9 @@
+## 2.1.15 - 2026-08-08
+
+- Android: clear pending asynchronous WebView startup callbacks during plugin detach ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+- iOS: validate WebMessageListener creation payloads before force-free construction ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- Update root dependencies to Android 1.0.19 and iOS 2.1.9.
+
 ## 2.1.14 - 2026-08-08
 
 - iOS: harden cookie cleanup against missing or provider-specific origin properties ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).
