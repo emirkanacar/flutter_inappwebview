@@ -47,17 +47,25 @@ public class WebViewChannelDelegate: ChannelDelegate {
             break
         case .postUrl:
             if let webView = webView {
-                let url = arguments!["url"] as! String
-                let postData = arguments!["postData"] as! FlutterStandardTypedData
-                webView.postUrl(url: URL(string: url)!, postData: postData.data)
+                    guard let url = arguments?["url"] as? String,
+                          let requestURL = URL(string: url),
+                          let postData = arguments?["postData"] as? FlutterStandardTypedData else {
+                        result(FlutterError(code: "invalid_arguments", message: "A valid URL and postData are required.", details: nil))
+                        return
+                    }
+                    webView.postUrl(url: requestURL, postData: postData.data)
             }
             result(true)
             break
         case .loadData:
-            let data = arguments!["data"] as! String
-            let mimeType = arguments!["mimeType"] as! String
-            let encoding = arguments!["encoding"] as! String
-            let baseUrl = URL(string: arguments!["baseUrl"] as! String)!
+                    guard let data = arguments?["data"] as? String,
+                          let mimeType = arguments?["mimeType"] as? String,
+                          let encoding = arguments?["encoding"] as? String,
+                          let baseUrlString = arguments?["baseUrl"] as? String,
+                          let baseUrl = URL(string: baseUrlString) else {
+                        result(FlutterError(code: "invalid_arguments", message: "Invalid loadData arguments.", details: nil))
+                        return
+                    }
             let allowingReadAccessTo = arguments!["allowingReadAccessTo"] as? String
             var allowingReadAccessToURL: URL? = nil
             if let allowingReadAccessTo = allowingReadAccessTo {

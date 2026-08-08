@@ -80,6 +80,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; Android cold-start/device validation pending. **Affected package:** Android WebView startup coordinator. **Impact:** callbacks queued for asynchronous WebView provider startup could run after plugin detach and target disposed WebViews. **Fix:** plugin detach marks the coordinator disposed, clears pending callbacks, removes main-handler work, and shuts down the startup executor. **Required evidence:** headless and regular WebView cold start, detach/reattach, and release/AOT cycles.
 
+#### #2717 - Android WebStorage provider callback entries
+
+**Local status:** Implemented and source-validated; Android provider validation pending. **Affected package:** Android WebStorage manager. **Impact:** provider callback maps containing unexpected entries could throw a cast exception while enumerating origins. **Fix:** entries are decoded with a nullable `WebStorage.Origin` cast and malformed values are skipped. **Required evidence:** origins/quota/usage calls across Android API levels and WebView providers.
+
+#### #2654 - iOS navigation channel payload validation
+
+**Local status:** Implemented and source-validated; iOS device validation pending. **Affected package:** iOS WebView channel delegate. **Impact:** malformed `postUrl` or `loadData` payloads could force-cast typed data or force-unwrap invalid URLs. **Fix:** required values are validated and a structured `invalid_arguments` error is returned. **Required evidence:** malformed/null payloads and valid POST/data navigation across iOS 15-26.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

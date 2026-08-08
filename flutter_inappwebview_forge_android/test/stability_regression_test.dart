@@ -68,6 +68,14 @@ void main() {
     expect(source, contains('backgroundExecutor.shutdownNow()'));
   });
 
+  test('Android WebStorage origin callbacks ignore malformed provider entries', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/MyWebStorage.kt',
+    ).readAsStringSync();
+    expect(source, contains('value[key] as? WebStorage.Origin'));
+    expect(source, contains('return@forEach'));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

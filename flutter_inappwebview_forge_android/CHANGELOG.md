@@ -1,3 +1,7 @@
+## 1.0.20 - 2026-08-08
+
+- Ignore malformed Android WebStorage origin entries instead of force-casting provider callback values ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).
+
 ## 1.0.19 - 2026-08-08
 
 - Clear pending asynchronous WebView provider-startup callbacks when the Android plugin detaches, preventing startup work from targeting disposed WebViews ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

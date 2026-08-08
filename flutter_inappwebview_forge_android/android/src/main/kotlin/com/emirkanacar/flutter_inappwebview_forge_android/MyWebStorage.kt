@@ -73,7 +73,7 @@ class MyWebStorage(plugin: InAppWebViewFlutterPlugin) :
             override fun onReceiveValue(value: Map<*, *>?) {
                 val origins = ArrayList<Map<String, Any?>>()
                 value?.keys?.forEach { key ->
-                    val originObject = value[key] as WebStorage.Origin
+                    val originObject = value[key] as? WebStorage.Origin ?: return@forEach
                     val originInfo = HashMap<String, Any?>()
                     originInfo["origin"] = originObject.origin
                     originInfo["quota"] = originObject.quota

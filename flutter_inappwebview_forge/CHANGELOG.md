@@ -1,3 +1,9 @@
+## 2.1.16 - 2026-08-08
+
+- Android: ignore malformed WebStorage origin callback entries ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).
+- iOS: validate `postUrl` and `loadData` channel arguments before URL and typed-data use ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- Update root dependencies to Android 1.0.20 and iOS 2.1.10.
+
 ## 2.1.15 - 2026-08-08
 
 - Android: clear pending asynchronous WebView startup callbacks during plugin detach ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

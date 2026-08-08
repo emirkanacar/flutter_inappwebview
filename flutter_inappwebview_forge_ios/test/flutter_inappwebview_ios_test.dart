@@ -57,6 +57,15 @@ void main() {
         listenerSource.contains('return nil'),
     'iOS WebMessageListener does not validate creation payloads',
   );
+  final channelSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebViewChannelDelegate.swift',
+  ).readAsStringSync();
+  _assert(
+    channelSource.contains('let requestURL = URL(string: url)') &&
+        channelSource.contains('invalid_arguments'),
+    'iOS navigation channel does not validate URL payloads',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',

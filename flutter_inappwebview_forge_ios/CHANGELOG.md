@@ -1,3 +1,7 @@
+## 2.1.10 - 2026-08-08
+
+- Validate iOS `postUrl` and `loadData` channel arguments before constructing URLs or reading typed post data ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+
 ## 2.1.9 - 2026-08-08
 
 - Validate iOS WebMessageListener creation payloads before constructing listeners, ignoring malformed IDs, names, or origin-rule lists ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
