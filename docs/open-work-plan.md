@@ -13,8 +13,8 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 The export contains 125 issues and 73 PRs. Seventy-five issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 67 await real runtime validation, #2745 is closed by source review,
-and #2570/#2598/#2636/#2659/#2713/#2723/#2727 have no Forge-owned fix because
+boundary: 66 await real runtime validation, #2745 is closed by source review,
+and #2570/#2584/#2598/#2636/#2659/#2713/#2723/#2727 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider, and Flutter engine/platform-view layers.
 The other 50 issue records
@@ -24,11 +24,11 @@ validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 53 | 1 | 7 | 37 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 52 | 1 | 8 | 37 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **67** | **1** | **7** | **50** | **47 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **66** | **1** | **8** | **50** | **47 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -45,7 +45,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 67 implementation or mitigation records awaiting real validation are
+The 66 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -83,6 +83,11 @@ reported as upstream-closed:
   The issue is addressed by newer Simulator/WebKit runtimes or host
   configuration; raising Forge's iOS 15 baseline would be an incompatible
   workaround.
+- [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584):
+  the reported iOS 18.4 startup crash is in Simulator/WebKit's
+  `libswiftWebKit.dylib` boundary and has no reproducible Forge-owned source
+  control point. It remains visible for Xcode/Simulator runtime tracking and
+  must not be conflated with the local WebMessage payload validation work.
 - [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659):
   Android's HTML time input reaches the platform `TimePicker` and the supplied
   stack ends in `TimePickerSpinnerDelegate.updateInputState`. Forge does not
@@ -189,11 +194,11 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 67 issue records and three PR-only
+items. The complete register contains 66 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
 keeps only the 50 issue records that still need implementation, design, or
-reproduction. Seven host/platform boundaries are tracked above and are not
+reproduction. Eight host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
 ## PR queue
@@ -246,10 +251,10 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-08 status pass has 67 locally implemented or mitigated issue
+The 2026-08-08 status pass has 66 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, seven host/platform boundaries (#2570, #2598, #2636, #2659, #2713,
-#2723, and #2727), and 50 active issue records in this plan. The runtime-pending
+review, eight host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
+#2713, #2723, and #2727), and 50 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
 live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and

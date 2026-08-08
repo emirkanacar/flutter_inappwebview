@@ -1,3 +1,12 @@
+## 2.1.28 - 2026-08-08
+
+- Android: make asynchronous WebView startup restartable after engine detach and ignore stale startup callbacks during reattach ([#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)). Real-device release/AOT validation remains pending.
+- Android: retain bounded `shouldInterceptRequest` and non-blocking `deleteAllCookies` safeguards ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)). Provider/device validation remains pending.
+- iOS: harden popup `windowId` KVO and JavaScript lifecycle, including stale-object disposal and page-world fallback ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)).
+- iOS: serialize concurrent navigation-policy decisions before replacement-header loads ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)).
+- iOS: retain the iOS 26 fullscreen and geolocation mitigations ([#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)). Device validation for the iOS/Android runtime paths remains required.
+- Update root dependencies to Android 1.0.28 and iOS 2.1.17.
+
 ## 2.1.27 - 2026-08-08
 
 - Platform interface: clear stale localhost-server references when the underlying request stream closes or errors, keeping `isRunning()` accurate after external lifecycle termination on iOS and Android ([#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)). Full release-mode resume/reload validation remains pending.
@@ -37,7 +46,7 @@
 ## 2.1.20 - 2026-08-08
 
 - Android: guard ChromeClient callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
-- iOS: validate WebMessageChannel port indices and payloads before message operations ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- iOS: validate WebMessageChannel port indices and payloads before message operations (internal boundary hardening; not an upstream #2584 fix).
 - Update root dependencies to Android 1.0.24 and iOS 2.1.13.
 
 ## 2.1.19 - 2026-08-08
@@ -67,12 +76,12 @@
 ## 2.1.15 - 2026-08-08
 
 - Android: clear pending asynchronous WebView startup callbacks during plugin detach ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
-- iOS: validate WebMessageListener creation payloads before force-free construction ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- iOS: validate WebMessageListener creation payloads before force-free construction (internal boundary hardening; not an upstream #2584 fix).
 - Update root dependencies to Android 1.0.19 and iOS 2.1.9.
 
 ## 2.1.14 - 2026-08-08
 
-- iOS: harden cookie cleanup against missing or provider-specific origin properties ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).
+- iOS: harden cookie cleanup against missing or provider-specific origin properties (internal boundary hardening; not an upstream #2600 fix).
 - Update the root dependency to iOS 2.1.8.
 
 ## 2.1.13 - 2026-08-08

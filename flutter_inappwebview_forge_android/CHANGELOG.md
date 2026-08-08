@@ -1,3 +1,9 @@
+## 1.0.28 - 2026-08-08
+
+- Recreate the asynchronous WebView startup executor after engine detach and ignore stale startup generations during reattach, closing the lifecycle gap in release/AOT and headless cold-start flows ([#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)). Real-device validation remains pending.
+- Preserve bounded synchronous `shouldInterceptRequest` backpressure and asynchronous cookie deletion without an immediate blocking flush ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)). Android provider/device validation remains pending.
+- Add source regression coverage for startup reattachment and retryable document-start script registration.
+
 ## 1.0.27 - 2026-08-08
 
 - Refresh native WebView geometry after display-size changes and visibility recovery ([#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)). Android 16/API 36 and OEM WebView runtime validation remains pending.

@@ -47,7 +47,15 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     private var lastSeekedFrameInfo: WKFrameInfo?
     private var lastSeekedAt: Date?
     var preventGestureDelay = false
-    private var navigationActionDecisionPending = false
+    private var isDisposed = false
+    private var windowIdJSInitializationScheduled = false
+    private var windowIdJSInitializationInFlight = false
+    private var windowIdJSInitializedForCurrentNavigation = false
+    private var windowIdJSInitializationGeneration = 0
+    private var pendingNavigationActionDecisionCount = 0
+    private var navigationActionDecisionPending: Bool {
+        pendingNavigationActionDecisionCount > 0
+    }
     private var pendingNavigationActionLoadRequests: [(URLRequest, URL?)] = []
     private var isLoadingPendingNavigationAction = false
 
@@ -462,6 +470,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
 
     public func prepare() {
+        isDisposed = false
+        windowIdJSInitializationGeneration += 1
+        windowIdJSInitializationScheduled = false
+        windowIdJSInitializationInFlight = false
+        windowIdJSInitializedForCurrentNavigation = false
+
         if #available(iOS 17.2, *) {
             // Fix https://github.com/pichillilorenzo/flutter_inappwebview/issues/1947
             NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)),
@@ -874,6 +888,24 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard !isDisposed else { return }
+
+        if keyPath == #keyPath(WKWebView.estimatedProgress) ||
+            keyPath == #keyPath(WKWebView.url) ||
+            keyPath == #keyPath(WKWebView.title) {
+            guard let observedWebView = object as? WKWebView, observedWebView === self else { return }
+        } else if #available(iOS 15.0, *),
+                  (keyPath == #keyPath(WKWebView.cameraCaptureState) ||
+                   keyPath == #keyPath(WKWebView.microphoneCaptureState)) {
+            guard let observedWebView = object as? WKWebView, observedWebView === self else { return }
+        } else if keyPath == #keyPath(UIScrollView.contentOffset) ||
+                    keyPath == #keyPath(UIScrollView.zoomScale) ||
+                    keyPath == #keyPath(UIScrollView.contentSize) {
+            guard let observedScrollView = object as? UIScrollView, observedScrollView === scrollView else { return }
+        } else if #available(iOS 16.0, *), keyPath == #keyPath(WKWebView.fullscreenState) {
+            guard let observedWebView = object as? WKWebView, observedWebView === self else { return }
+        }
+
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
             initializeWindowIdJS()
             let progress = Int(estimatedProgress * 100)
@@ -948,20 +980,35 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func initializeWindowIdJS() {
-        if let windowId = windowId {
-            // Popup WebViews are created by WebKit before Flutter attaches their
-            // platform view. Do not evaluate JavaScript against that transient
-            // object; its shared configuration/content worlds are not ready yet.
-            guard windowCreated else { return }
-            if #available(iOS 14.0, *) {
-                let contentWorlds = configuration.userContentController.getContentWorlds(with: windowId)
-                for contentWorld in contentWorlds {
-                    let source = WindowIdJS.WINDOW_ID_INITIALIZE_JS_SOURCE().replacingOccurrences(of: PluginScriptsUtil.VAR_PLACEHOLDER_VALUE, with: String(windowId))
-                    evaluateJavascript(source: source, contentWorld: contentWorld)
-                }
-            } else {
-                let source = WindowIdJS.WINDOW_ID_INITIALIZE_JS_SOURCE().replacingOccurrences(of: PluginScriptsUtil.VAR_PLACEHOLDER_VALUE, with: String(windowId))
-                evaluateJavascript(source: source)
+        guard let windowId = windowId,
+              windowCreated,
+              !isDisposed,
+              !windowIdJSInitializationScheduled,
+              !windowIdJSInitializationInFlight,
+              !windowIdJSInitializedForCurrentNavigation else { return }
+
+        let source = WindowIdJS.WINDOW_ID_INITIALIZE_JS_SOURCE()
+            .replacingOccurrences(of: PluginScriptsUtil.VAR_PLACEHOLDER_VALUE, with: String(windowId))
+        let initializationGeneration = windowIdJSInitializationGeneration
+        windowIdJSInitializationScheduled = true
+
+        // KVO can fire while WebKit is still constructing a popup's page/content-world
+        // objects. Defer the page-world evaluation until KVO has unwound and never evaluate
+        // against a transient custom content world.
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            guard self.windowIdJSInitializationGeneration == initializationGeneration else { return }
+            self.windowIdJSInitializationScheduled = false
+            guard !self.isDisposed,
+                  self.windowCreated,
+                  self.windowId == windowId else { return }
+
+            self.windowIdJSInitializationInFlight = true
+            self.evaluateJavascript(source: source) { [weak self] _ in
+                guard let self = self else { return }
+                guard self.windowIdJSInitializationGeneration == initializationGeneration else { return }
+                self.windowIdJSInitializationInFlight = false
+                self.windowIdJSInitializedForCurrentNavigation = true
             }
         }
     }
@@ -1101,6 +1148,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     private func flushPendingNavigationActionLoadRequests() {
+        guard pendingNavigationActionDecisionCount == 0 else {
+            return
+        }
+
         let requests = pendingNavigationActionLoadRequests
         pendingNavigationActionLoadRequests.removeAll()
         guard !requests.isEmpty else {
@@ -1108,22 +1159,24 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
 
         isLoadingPendingNavigationAction = true
+        defer { isLoadingPendingNavigationAction = false }
         for request in requests {
             loadUrl(
                 urlRequest: request.0,
                 allowingReadAccessTo: request.1
             )
         }
-        isLoadingPendingNavigationAction = false
     }
 
     public func loadUrl(urlRequest: URLRequest, allowingReadAccessTo: URL?) {
+        guard let url = urlRequest.url else {
+            return
+        }
+
         if navigationActionDecisionPending && !isLoadingPendingNavigationAction {
             pendingNavigationActionLoadRequests.append((urlRequest, allowingReadAccessTo))
             return
         }
-
-        let url = urlRequest.url!
         
         if #available(iOS 9.0, *), let allowingReadAccessTo = allowingReadAccessTo, url.scheme == "file", allowingReadAccessTo.scheme == "file" {
             loadFileURL(url, allowingReadAccessTo: allowingReadAccessTo)
@@ -1658,6 +1711,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.0, *)
     public func injectDeferredObject(source: String, contentWorld: WKContentWorld, withWrapper jsWrapper: String?, completionHandler: ((Any?) -> Void)? = nil) {
+        if windowId != nil && !windowCreated {
+            completionHandler?(nil)
+            return
+        }
+
         var jsToInject = source
         if let wrapper = jsWrapper {
             let jsonData: Data? = try? JSONSerialization.data(withJSONObject: [source], options: [])
@@ -1666,8 +1724,21 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             jsToInject = String(format: wrapper, sourceString!)
         }
         
-        jsToInject = configuration.userContentController.generateCodeForScriptEvaluation(scriptMessageHandler: self, source: jsToInject, contentWorld: contentWorld)
-        
+        // A popup reuses the opener's configuration, but its content-world/frame objects can
+        // still be transient while WebKit is creating the new window. Evaluate popup scripts in
+        // the initialized page world to avoid the iOS 15–26 EXC_BAD_ACCESS path.
+        let evaluationContentWorld = windowId == nil ? contentWorld : WKContentWorld.page
+        jsToInject = configuration.userContentController.generateCodeForScriptEvaluation(
+            scriptMessageHandler: self,
+            source: jsToInject,
+            contentWorld: evaluationContentWorld
+        )
+
+        if windowId != nil {
+            evaluateJavascript(source: jsToInject, completionHandler: completionHandler)
+            return
+        }
+
         evaluateJavaScript(jsToInject, frame: nil, contentWorld: contentWorld) { (evalResult) in
             guard let completionHandler = completionHandler else {
                 return
@@ -1717,11 +1788,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
-        // Popup WebViews reuse the parent's WKWebViewConfiguration. On iOS 14–17
-        // WebKit can dereference an uninitialized content world in that state.
-        // Use the page-world overload until iOS 18, where WebKit fixed the
-        // underlying popup/content-world interaction.
-        if #unavailable(iOS 18.0), windowId != nil {
+        // Popup WebViews reuse the parent's WKWebViewConfiguration. WebKit can dereference an
+        // uninitialized content-world/frame pair during popup creation on multiple iOS releases.
+        // Keep popup evaluation in the initialized page world for the full supported range.
+        if windowId != nil {
+            guard windowCreated else {
+                let error = NSError(
+                    domain: "flutter_inappwebview_forge",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "Popup WebView is not attached"]
+                )
+                completionHandler?(.failure(error))
+                return
+            }
             super.evaluateJavaScript(javaScript) { result, error in
                 if let error = error {
                     completionHandler?(.failure(error))
@@ -1757,9 +1836,18 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
-        // Keep popup async evaluation on the initialized page world for the
-        // same iOS 14–17 WebKit crash path handled above.
-        if #unavailable(iOS 18.0), windowId != nil {
+        // Keep popup async evaluation on the initialized page world for the same
+        // popup/content-world crash path handled above.
+        if windowId != nil {
+            guard windowCreated else {
+                let error = NSError(
+                    domain: "flutter_inappwebview_forge",
+                    code: -2,
+                    userInfo: [NSLocalizedDescriptionKey: "Popup WebView is not attached"]
+                )
+                completionHandler?(.failure(error))
+                return
+            }
             super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: completionHandler)
             return
         }
@@ -2143,7 +2231,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         callback.nonNullSuccess = { [weak self] (response: WKNavigationActionPolicy) in
             if !decisionHandlerCalled {
                 decisionHandlerCalled = true
-                self?.navigationActionDecisionPending = false
+                self?.pendingNavigationActionDecisionCount = max(0, (self?.pendingNavigationActionDecisionCount ?? 1) - 1)
                 decisionHandler(response)
                 self?.flushPendingNavigationActionLoadRequests()
             }
@@ -2152,7 +2240,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         callback.defaultBehaviour = { [weak self] (response: WKNavigationActionPolicy?) in
             if !decisionHandlerCalled {
                 decisionHandlerCalled = true
-                self?.navigationActionDecisionPending = false
+                self?.pendingNavigationActionDecisionCount = max(0, (self?.pendingNavigationActionDecisionCount ?? 1) - 1)
                 decisionHandler(.allow)
                 self?.flushPendingNavigationActionLoadRequests()
             }
@@ -2163,7 +2251,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
 
         let runCallback = {
-            self.navigationActionDecisionPending = true
+            self.pendingNavigationActionDecisionCount += 1
             if let useShouldOverrideUrlLoading = self.settings?.useShouldOverrideUrlLoading, useShouldOverrideUrlLoading, let channelDelegate = self.channelDelegate {
                 channelDelegate.shouldOverrideUrlLoading(navigationAction: navigationAction, callback: callback)
             } else {
@@ -2248,13 +2336,18 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         currentOriginalUrl = url
         lastTouchPoint = nil
+        windowIdJSInitializationGeneration += 1
+        windowIdJSInitializationScheduled = false
+        windowIdJSInitializationInFlight = false
+        windowIdJSInitializedForCurrentNavigation = false
         
         disposeWebMessageChannels()
-        initializeWindowIdJS()
         
         if #available(iOS 14.0, *) {
             configuration.userContentController.resetContentWorlds(windowId: windowId)
         }
+
+        initializeWindowIdJS()
         
         channelDelegate?.onLoadStart(url: url?.absoluteString)
         
@@ -2262,6 +2355,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        windowIdJSInitializedForCurrentNavigation = false
         initializeWindowIdJS()
         
         InAppWebView.credentialsProposed = []
@@ -4015,6 +4109,12 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     public func dispose() {
+        isDisposed = true
+        windowIdJSInitializationGeneration += 1
+        windowIdJSInitializationScheduled = false
+        windowIdJSInitializationInFlight = false
+        windowIdJSInitializedForCurrentNavigation = false
+
         if nativeFullscreenVideoID != nil {
             exitNativeFullscreenVideo()
         }
@@ -4093,7 +4193,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         _contentSizeChangedUpdatePending = false
         _pendingOldContentSize = nil
         _lastReportedProgress = nil
-        navigationActionDecisionPending = false
+        pendingNavigationActionDecisionCount = 0
         pendingNavigationActionLoadRequests.removeAll()
         isLoadingPendingNavigationAction = false
         plugin = nil

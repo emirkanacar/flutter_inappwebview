@@ -65,7 +65,20 @@ void main() {
     ).readAsStringSync();
     expect(source, contains('private var disposed = false'));
     expect(source, contains('pendingCallbacks.clear()'));
-    expect(source, contains('backgroundExecutor.shutdownNow()'));
+    expect(source, contains('executor.shutdownNow()'));
+  });
+
+  test('Android startup coordinator can restart after engine reattachment', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'WebViewStartupCoordinator.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('private var startupGeneration = 0L'));
+    expect(source, contains('if (disposed) {'));
+    expect(source, contains('backgroundExecutor = Executors.newSingleThreadExecutor()'));
+    expect(source, contains('generation != startupGeneration'));
+    expect(source, contains('requestStartup(context.applicationContext, requestGeneration)'));
   });
 
   test('Android WebStorage origin callbacks ignore malformed provider entries', () {
@@ -323,6 +336,23 @@ void main() {
     expect(source, contains('if (isDisposed || nativeRegistrationsRegistered'));
     expect(source, contains('nativeRegistrationRequestScheduled = false'));
     expect(source, contains('nativeRegistrationCallbacks.clear()'));
+  });
+
+  test('Android startup registration keeps failed document-start scripts retryable', () {
+    final controllerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/UserContentController.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(controllerSource, contains('catch (e: RuntimeException)'));
+    expect(controllerSource, contains('pendingPluginScriptRegistrations.add'));
+    expect(controllerSource, contains('retryPendingScriptRegistrations'));
+    expect(webViewSource, contains('whenNativeRegistrationsReady'));
+    expect(webViewSource, contains('onPlatformViewAttached'));
   });
 
   test('Android scroll callbacks skip unchanged positions', () {

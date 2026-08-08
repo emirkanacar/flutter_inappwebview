@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 67 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2598, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 50 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 50 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,9 +19,9 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 67 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 7 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
+| Host/platform-specific boundary | 8 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
 | Open implementation or reproduction | 50 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
@@ -82,13 +82,21 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 **Local status:** Implemented and source-validated; Windows/WebView2 runtime validation pending. **Affected package:** Windows headless WebView. **Impact:** a late size callback could dereference a released WebView2 controller during startup or renderer teardown. **Fix:** size setters/getters now require both the WebView wrapper and controller before accessing bounds. **Required evidence:** create, resize, renderer restart, dispose, and recreate cycles on supported WebView2 runtimes.
 
-#### #2600 - iOS cookie property decoding
+#### #2584 - iOS 18.4 Simulator/WebKit startup crash
 
-**Local status:** Implemented and source-validated; iOS WebKit cookie runtime validation pending. **Affected package:** iOS cookie manager. **Impact:** cookie cleanup could force-unwrap or force-cast an absent or provider-specific `originURL` property, or assume the website data type set cast succeeded. **Fix:** origin values and website data types are decoded with optional checks and return a safe failure when the platform shape is unsupported. **Required evidence:** cookie deletion with String/URL/missing origin properties across iOS 15-26.
+**Local status:** Host/platform boundary; no Forge-owned source fix. **Affected scope:** iOS Simulator, Xcode, and WebKit startup. **Impact:** the upstream report describes an iOS 18.4 Simulator crash while loading `libswiftWebKit.dylib`; issue comments identify newer Simulator/Xcode/WebKit combinations as the relevant variable rather than a Forge call path. **Required evidence:** reproduce with the reported Xcode/iOS Simulator matrix, compare a minimal native `WKWebView` host and a physical device, and retain a symbolicated stack. The record is intentionally excluded from the runtime-validation implementation count and is not related to the internal WebMessage payload checks below.
 
-#### #2584 - iOS WebMessageListener payload validation
+#### #2600 - iOS `windowId` popup `EXC_BAD_ACCESS`
 
-**Local status:** Implemented and source-validated; iOS WebKit/provider validation pending. **Affected package:** iOS WebMessageListener creation. **Impact:** malformed platform-channel maps could force-cast listener IDs, JavaScript object names, or origin rules and terminate the app. **Fix:** listener creation now validates all required fields and returns `nil` for malformed payloads. **Required evidence:** listener creation with missing/null/wrong-type fields and disposal during message delivery.
+**Local status:** Implemented and source-validated; iOS device/Xcode runtime validation pending. **Affected package:** iOS popup `WKWebView` lifecycle. **Impact:** a popup created with `windowId` could receive stale KVO callbacks or evaluate JavaScript through a transient shared content-world/frame and terminate with `EXC_BAD_ACCESS`. **Fix:** popup window-ID initialization is deferred onto the main queue, deduplicated per navigation, protected by `windowCreated`/dispose guards, and routed through the initialized page world; KVO now verifies the observed object before touching WebKit state. **Required evidence:** iOS 15–26 physical devices, Xcode 16/26, `window.open`, popup attach/dispose/recreate, `evaluateJavaScript`, `callAsyncJavaScript`, and navigation callbacks.
+
+#### Internal iOS cookie property decoding (no upstream issue mapping)
+
+**Local status:** Implemented and source-validated; iOS WebKit cookie runtime validation pending. **Affected package:** iOS cookie manager. **Impact:** cookie cleanup could force-unwrap or force-cast an absent or provider-specific `originURL` property, or assume the website data type set cast succeeded. **Fix:** origin values and website data types are decoded with optional checks and return a safe failure when the platform shape is unsupported. **Required evidence:** cookie deletion with String/URL/missing origin properties across iOS 15-26. This internal hardening must not be read as a fix for upstream #2600.
+
+#### Internal iOS WebMessageListener payload validation (no upstream issue mapping)
+
+**Local status:** Implemented and source-validated; iOS WebKit/provider validation pending. **Affected package:** iOS WebMessageListener creation. **Impact:** malformed platform-channel maps could force-cast listener IDs, JavaScript object names, or origin rules and terminate the app. **Fix:** listener creation now validates all required fields and returns `nil` for malformed payloads. **Required evidence:** listener creation with missing/null/wrong-type fields and disposal during message delivery. This internal hardening must not be read as a fix for upstream #2584.
 
 #### #2697 - Android asynchronous startup callback lifetime
 
@@ -118,9 +126,9 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 **Local status:** Implemented and source-validated; iOS 17+ proxy runtime validation pending. **Affected package:** iOS proxy manager. **Impact:** malformed proxy settings or rules could force-cast rule lists/URLs or unwrap invalid rule objects. **Fix:** proxy settings use optional map decoding and discard malformed rules safely. **Required evidence:** valid, empty, malformed, and mixed proxy rule lists on iOS 17+.
 
-#### #2584 - iOS WebMessageChannel payload and index validation
+#### Internal iOS WebMessageChannel payload and index validation (no upstream issue mapping)
 
-**Local status:** Implemented and source-validated; iOS WebKit runtime validation pending. **Affected package:** iOS WebMessageChannel delegate. **Impact:** malformed port indices or message maps could index outside the ports array or force-cast channel payloads. **Fix:** indices are bounds-checked and malformed messages return structured argument errors. **Required evidence:** valid/invalid port indices, null messages, closed ports, and disposal during message delivery.
+**Local status:** Implemented and source-validated; iOS WebKit runtime validation pending. **Affected package:** iOS WebMessageChannel delegate. **Impact:** malformed port indices or message maps could index outside the ports array or force-cast channel payloads. **Fix:** indices are bounds-checked and malformed messages return structured argument errors. **Required evidence:** valid/invalid port indices, null messages, closed ports, and disposal during message delivery. This internal hardening is separate from upstream #2584's Simulator/WebKit startup crash.
 
 #### #2697 - Android Chrome callback ownership
 
@@ -206,7 +214,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-67 locally implemented or mitigated issue records and three PR-only records.
+66 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -386,13 +394,13 @@ The Windows implementation resolves the Flutter asset to `data/flutter_assets/..
 
 ### #2867 — iOS/Xcode-specific `EXC_BAD_ACCESS` in multi-window navigation
 
-**Status:** Mitigated for the known iOS 14–17 popup content-world path in iOS 2.0.2; iOS 18/Xcode 26 device validation remains. **Impact:** Potential native crash during `window.open`/multi-window flows. **Confidence:** The issue identifies a plausible evaluation path, but the report still lacks a usable symbolicated stack trace.
+**Status:** Hardened in iOS 2.1.17; iOS 15–26/Xcode 16/26 device validation remains. **Impact:** Potential native crash during `window.open`/multi-window flows. **Confidence:** The issue identifies a plausible evaluation/KVO path, but the report still lacks a usable symbolicated stack trace.
 
-Issue [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) reports different behavior across Xcode 16/26 and iOS 18/26 while a popup WebView overrides JavaScript evaluation and handles `shouldOverrideUrlLoading`. The affected popup can receive KVO/navigation callbacks before Flutter attaches its platform view, and iOS 14–17 can crash when a shared popup configuration evaluates JavaScript in an uninitialized custom content world.
+Issue [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) reports different behavior across Xcode 16/26 and iOS 18/26 while a popup WebView overrides JavaScript evaluation and handles `shouldOverrideUrlLoading`. The affected popup can receive KVO/navigation callbacks before Flutter attaches its platform view, and shared popup configurations can crash when WebKit evaluates against an uninitialized content world or stale frame.
 
-**Implementation:** popup window-ID JavaScript initialization now stops until the platform view is attached. On iOS 14–17, popup `evaluateJavaScript` and `callAsyncJavaScript` use the initialized page-world overload, following the upstream workaround in [PR #2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776). This is a targeted mitigation, not proof that every Xcode 26/iOS 18 crash is resolved.
+**Implementation:** popup window-ID JavaScript initialization now stops until the platform view is attached, defers evaluation off KVO, deduplicates initialization per navigation, and ignores stale KVO objects after disposal. Popup `evaluateJavaScript`, `callAsyncJavaScript`, and generated content-world injections use the initialized page world across the supported iOS range, following the upstream workaround in [PR #2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776). This is a targeted mitigation, not proof that every Xcode 26/iOS 18 crash is resolved.
 
-**Remaining validation:** run `window.open` with popup navigation, `shouldOverrideUrlLoading`, both JavaScript APIs, and popup disposal across iOS 14–18 with Xcode 16 and 26; collect a symbolicated crash if the failure persists.
+**Remaining validation:** run `window.open` with popup navigation, `shouldOverrideUrlLoading`, both JavaScript APIs, generated content-world scripts, and popup disposal across iOS 15–26 with Xcode 16 and 26; collect a symbolicated crash if the failure persists.
 
 ### #2771 — iOS `evaluateJavaScript` receives a nil frame
 
@@ -422,13 +430,13 @@ When AndroidX WebKit does not expose the native listener feature, the Android im
 
 ### #2849 and #2843 — Android cold-start initialization race
 
-**Status:** Fixed in release 2.0.2 (Android 1.0.3); retain real-device and release/AOT validation. **Impact:** A headless WebView can crash with `Must be started before we block!`; a release/AOT build can also fail to fire `onWebViewCreated` on roughly half of cold starts. **Confidence:** Strong report; the relevant synchronous initialization path is present in the repository.
+**Status:** Hardened in Android 1.0.28; retain real-device and release/AOT validation. **Impact:** A headless WebView can crash with `Must be started before we block!`; a release/AOT build can also fail to fire `onWebViewCreated` on roughly half of cold starts. **Confidence:** Strong report; the relevant synchronous initialization path is present in the repository.
 
 Issue [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) identifies `WebViewCompat.addDocumentStartJavaScript` being called before the Chromium engine is ready. In the review baseline, `InAppWebView.prepare()` synchronously registered the JavaScript bridge and called `prepareAndAddUserScripts()`, while `UserContentController` invoked `addDocumentStartJavaScript` directly. Issue [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) additionally reports that this synchronous platform-view work can prevent the Dart platform-view-created callback from arriving in release builds when the JavaScript bridge is enabled.
 
 This is directly relevant to the dependency update: the issue proposes the stable asynchronous startup API from `androidx.webkit:webkit:1.16.0`, but that would require a `minSdk` decision because this package still declares `minSdkVersion 19` and currently uses WebKit `1.14.0`.
 
-**Implementation:** the Android plugin now requests AndroidX WebKit’s asynchronous provider startup at engine attach, waits for that callback before headless bridge/document-start registration, defers regular platform-view registration until Flutter attaches the view, retries transient script-registration failures, and waits for registration before the first load. The WebKit dependency remains `1.14.0` so the package can keep its `minSdkVersion 19`; do not upgrade to 1.16.0 without deciding whether the minimum SDK can change. **Remaining validation:** test HeadlessInAppWebView and release/AOT cold starts on real Android devices.
+**Implementation:** the Android plugin now requests AndroidX WebKit’s asynchronous provider startup at engine attach, waits for that callback before headless bridge/document-start registration, defers regular platform-view registration until Flutter attaches the view, retries transient script-registration failures, and waits for registration before the first load. The coordinator now also recreates its executor after engine detach and ignores stale startup generations during reattach. The WebKit dependency remains `1.14.0` so the package can keep its `minSdkVersion 19`; do not upgrade to 1.16.0 without deciding whether the minimum SDK can change. **Remaining validation:** test HeadlessInAppWebView and release/AOT cold starts on real Android devices, including detach/reattach cycles.
 
 ### #2848 and #2700 — universal access from file URLs
 
@@ -450,11 +458,11 @@ The Forge Windows implementation now keeps shared WinRT/Composition pointers out
 
 ### #2580, #2718, and #2555 — Android blocking callback and lifecycle failures
 
-**Status:** Fixed in release 2.0.3 (Android 1.0.4); retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
+**Status:** Hardened in Android 1.0.28; retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
 
 For [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), the native `shouldInterceptRequest` path can synchronously wait for a Dart result through `Util.invokeMethodAndWaitResult`, which posts to the main looper and then blocks on a latch. This is a plausible deadlock when WebView resource callbacks and UI-thread work depend on each other. [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) shows a Play Console native trace through `MyCookieManager.deleteAllCookies`, where `removeAllCookies` is followed immediately by `flush`. [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) reports an `InputMethodManager` null crash on Android 10 and is related to the same general focus/lifecycle surface as #2878.
 
-The Forge implementation now caps concurrent synchronous resource-interception callbacks at two and uses a 250 ms callback timeout for this path; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal, and the input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection.
+The Forge implementation now caps concurrent synchronous resource-interception callbacks at two and uses a 250 ms callback timeout for this path; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal, and the input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection. The source regression suite covers the timeout, backpressure, and no-immediate-flush contracts.
 
 **Remaining validation:** run rapid back/forward navigation with `shouldInterceptRequest`, Play Console cookie-clear scenarios, and Android 10 text-input tests on physical devices.
 
@@ -528,15 +536,15 @@ The default server now listens for the `HttpServer` request stream's `onDone` an
 
 ### #2568 — iOS `shouldOverrideUrlLoading` header replacement deadlock
 
-**Local status:** Implemented and source-validated; physical iOS navigation/header validation pending. **Affected package:** iOS WebKit navigation delegate and method channel. **Impact:** when `shouldOverrideUrlLoading` cancels a navigation after calling `controller.loadUrl` with replacement headers, the WebView could turn white and remain in a navigation deadlock. **Confidence:** Confirmed callback-ordering path from the upstream reproducer.
+**Local status:** Hardened in iOS 2.1.17; physical iOS navigation/header validation pending. **Affected package:** iOS WebKit navigation delegate and method channel. **Impact:** when `shouldOverrideUrlLoading` cancels a navigation after calling `controller.loadUrl` with replacement headers, the WebView could turn white and remain in a navigation deadlock. **Confidence:** Confirmed callback-ordering path from the upstream reproducer.
 
-While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a nested `loadUrl` call is now queued instead of starting a second WebKit navigation immediately. The queue is flushed only after the original decision handler receives `.allow` or `.cancel`, and queued requests are discarded during disposal. This preserves the existing public callback/policy contract while allowing the reported cancel-and-reload-with-headers flow to release the WebKit decision handler first. The iOS source regression, `flutter analyze`, SwiftPM manifest check, and Xcode example build pass.
+While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a nested `loadUrl` call is now queued instead of starting a second WebKit navigation immediately. Pending decisions are counted so concurrent policy callbacks cannot release the queue early; malformed URL requests are ignored safely. The queue is flushed only after the final decision handler receives `.allow` or `.cancel`, and queued requests are discarded during disposal. This preserves the existing public callback/policy contract while allowing the reported cancel-and-reload-with-headers flow to release the WebKit decision handler first. The iOS source regression and package tests pass.
 
 **Required evidence:** physical iOS 18+ navigation with `useShouldOverrideUrlLoading`, HTTPS redirects and repeated taps, cancel-then-load with custom headers, normal allow behavior, back/forward, popup/window IDs, and disposal during a pending navigation callback.
 
 ### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
 
-**Status:** #2710 is mitigated in iOS 2.1.0; #2831 has an iOS 26 decision-bridge fix pending physical-device validation and #2763 is fixed in source pending popup-device validation. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The #2831 callback gap is confirmed locally; the original button-tap symptom still requires iOS 26 runtime confirmation.
+**Status:** #2710 is hardened in iOS 2.1.17; #2831 has an iOS 26 decision-bridge fix pending physical-device validation and #2763 is fixed in source pending popup-device validation. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The #2831 callback gap is confirmed locally; the original button-tap symptom still requires iOS 26 runtime confirmation.
 
 [Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) has a concrete iOS 26 report: after an inline HTML5 video is scrubbed and enters native fullscreen, playback can become black or unresponsive. The report also reproduces with `webview_flutter` and remains after testing the available inline/PiP/fullscreen settings, which points to the WebKit/GPU layer rather than a package-only path.
 

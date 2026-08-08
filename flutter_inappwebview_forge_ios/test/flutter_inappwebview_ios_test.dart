@@ -79,13 +79,19 @@ void _runSourceContractAssertions() {
   );
   _assert(
     source.contains('navigationActionDecisionPending') &&
+        source.contains('pendingNavigationActionDecisionCount') &&
         source.contains('pendingNavigationActionLoadRequests.append'),
     'iOS loadUrl does not defer requests made from navigation callbacks',
   );
   _assert(
     source.contains('flushPendingNavigationActionLoadRequests') &&
-        source.contains('isLoadingPendingNavigationAction'),
+        source.contains('isLoadingPendingNavigationAction') &&
+        source.contains('guard pendingNavigationActionDecisionCount == 0'),
     'iOS deferred navigation loads are not released after the decision handler',
+  );
+  _assert(
+    source.contains('guard let url = urlRequest.url'),
+    'iOS navigation loads still force-unwrap malformed URL requests',
   );
   final proxySource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
@@ -198,12 +204,22 @@ void _runSourceContractAssertions() {
   );
 
   _assert(
-    source.contains('guard windowCreated else { return }'),
+    source.contains('windowCreated') &&
+        source.contains('guard !isDisposed'),
     'popup JavaScript is evaluated before the Flutter platform view is attached',
   );
   _assert(
-    source.contains('if #unavailable(iOS 18.0), windowId != nil'),
+    source.contains('if windowId != nil') &&
+        source.contains('windowIdJSInitializationScheduled') &&
+        source.contains('windowIdJSInitializationGeneration') &&
+        source.contains('DispatchQueue.main.async'),
     'popup content-world compatibility guard is missing',
+  );
+  _assert(
+    source.contains('guard !isDisposed else { return }') &&
+        source.contains('observedWebView === self') &&
+        source.contains('observedScrollView === scrollView'),
+    'iOS KVO callbacks are not protected from stale popup/dispose objects',
   );
   _assert(
     source.contains('super.evaluateJavaScript(javaScript) { result, error in'),

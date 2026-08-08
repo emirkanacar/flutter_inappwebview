@@ -1,3 +1,10 @@
+## 2.1.17 - 2026-08-08
+
+- Harden popup `windowId` WebView lifecycle against stale KVO callbacks, pre-attachment JavaScript evaluation, and transient shared content-world/frame objects ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)). iOS device/Xcode validation remains pending.
+- Count pending `shouldOverrideUrlLoading` decisions before flushing replacement-header loads, and ignore malformed URL requests safely ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)). Physical navigation/header validation remains pending.
+- Keep the iOS 26 fullscreen-container mitigation and geolocation decision bridge in the release gate ([#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)). Physical iOS 26 validation remains pending.
+- Add source regression coverage for stale KVO objects, popup page-world evaluation, concurrent navigation decisions, and lifecycle disposal.
+
 ## 2.1.16 - 2026-08-08
 
 - Defer iOS `loadUrl` requests issued from `shouldOverrideUrlLoading` until the WebKit navigation decision is released, preventing a white-screen/deadlock path when replacing navigation headers ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)). Physical iOS navigation/header validation remains pending.
@@ -15,7 +22,7 @@
 
 ## 2.1.13 - 2026-08-08
 
-- Validate iOS WebMessageChannel port indices and message payloads before accessing ports or dispatching messages ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- Validate iOS WebMessageChannel port indices and message payloads before accessing ports or dispatching messages (internal boundary hardening; not an upstream #2584 fix).
 
 ## 2.1.12 - 2026-08-08
 
@@ -31,11 +38,11 @@
 
 ## 2.1.9 - 2026-08-08
 
-- Validate iOS WebMessageListener creation payloads before constructing listeners, ignoring malformed IDs, names, or origin-rule lists ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).
+- Validate iOS WebMessageListener creation payloads before constructing listeners, ignoring malformed IDs, names, or origin-rule lists (internal boundary hardening; not an upstream #2584 fix).
 
 ## 2.1.8 - 2026-08-08
 
-- Decode optional cookie origin properties and website data types safely instead of force-unwrapping provider-controlled values ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).
+- Decode optional cookie origin properties and website data types safely instead of force-unwrapping provider-controlled values (internal boundary hardening; not an upstream #2600 fix).
 
 ## 2.1.7 - 2026-08-08
 

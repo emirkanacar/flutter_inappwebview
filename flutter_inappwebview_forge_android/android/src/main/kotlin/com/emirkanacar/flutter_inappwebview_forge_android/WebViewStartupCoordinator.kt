@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewStartUpConfig
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
@@ -19,21 +20,34 @@ internal object WebViewStartupCoordinator {
     private const val LOG_TAG = "WebViewStartup"
 
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val backgroundExecutor = Executors.newSingleThreadExecutor()
+    private var backgroundExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     private val lock = Any()
     private val pendingCallbacks = ArrayList<() -> Unit>()
 
     private var startupRequested = false
     private var startupCompleted = false
     private var disposed = false
+    private var startupGeneration = 0L
 
     fun start(context: Context) {
+        synchronized(lock) {
+            if (disposed) {
+                // Engine detach disposes the coordinator's executor. A later engine attach must
+                // be able to start a fresh provider initialization cycle.
+                disposed = false
+                startupRequested = false
+                startupCompleted = false
+                backgroundExecutor = Executors.newSingleThreadExecutor()
+                startupGeneration += 1
+            }
+        }
         runWhenReady(context) {}
     }
 
     fun runWhenReady(context: Context, callback: () -> Unit) {
         var shouldStart = false
         var runImmediately = false
+        var requestGeneration = 0L
 
         synchronized(lock) {
             if (disposed) {
@@ -46,6 +60,7 @@ internal object WebViewStartupCoordinator {
                 if (!startupRequested) {
                     startupRequested = true
                     shouldStart = true
+                    requestGeneration = startupGeneration
                 }
             }
         }
@@ -53,14 +68,22 @@ internal object WebViewStartupCoordinator {
         if (runImmediately) {
             mainHandler.post { callback() }
         } else if (shouldStart) {
-            requestStartup(context.applicationContext)
+            requestStartup(context.applicationContext, requestGeneration)
         }
     }
 
     @Suppress("DEPRECATION")
-    private fun requestStartup(context: Context) {
+    private fun requestStartup(context: Context, generation: Long) {
+        val executor = synchronized(lock) {
+            if (disposed || generation != startupGeneration) {
+                null
+            } else {
+                backgroundExecutor
+            }
+        } ?: return
+
         try {
-            val config = WebViewStartUpConfig.Builder(backgroundExecutor)
+            val config = WebViewStartUpConfig.Builder(executor)
                 .setShouldRunUiThreadStartUpTasks(true)
                 .build()
             WebViewCompat.startUpWebView(
@@ -68,23 +91,23 @@ internal object WebViewStartupCoordinator {
                 config,
                 object : WebViewCompat.WebViewStartUpCallback {
                     override fun onSuccess(result: androidx.webkit.WebViewStartUpResult) {
-                        complete()
+                        complete(generation)
                     }
                 }
             )
         } catch (error: RuntimeException) {
             Log.w(LOG_TAG, "Asynchronous WebView startup is unavailable; continuing normally.", error)
-            complete()
+            complete(generation)
         } catch (error: LinkageError) {
             // An application can force an older AndroidX WebKit version at resolution time.
             Log.w(LOG_TAG, "AndroidX WebKit startup API is unavailable; continuing normally.", error)
-            complete()
+            complete(generation)
         }
     }
 
-    private fun complete() {
+    private fun complete(generation: Long) {
         val callbacks = synchronized(lock) {
-            if (disposed || startupCompleted) {
+            if (disposed || generation != startupGeneration || startupCompleted) {
                 return
             }
             startupCompleted = true
@@ -99,11 +122,13 @@ internal object WebViewStartupCoordinator {
     }
 
     fun dispose() {
-        synchronized(lock) {
+        val executor = synchronized(lock) {
             disposed = true
+            startupGeneration += 1
             pendingCallbacks.clear()
+            backgroundExecutor
         }
         mainHandler.removeCallbacksAndMessages(null)
-        backgroundExecutor.shutdownNow()
+        executor.shutdownNow()
     }
 }
