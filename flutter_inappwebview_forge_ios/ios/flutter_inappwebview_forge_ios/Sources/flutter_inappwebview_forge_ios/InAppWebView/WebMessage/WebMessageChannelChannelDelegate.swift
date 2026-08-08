@@ -43,11 +43,11 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             if let webView = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
                 guard let index = arguments?["index"] as? Int,
                       ports.indices.contains(index),
-                      let messageMap = arguments?["message"] as? [String: Any?],
-                      let message = WebMessage.fromMap(map: messageMap) else {
+                      let messageMap = arguments?["message"] as? [String: Any?] else {
                     result(FlutterError(code: "invalid_arguments", message: "Invalid port message.", details: nil))
                     return
                 }
+                let message = WebMessage.fromMap(map: messageMap)
                 let port = ports[index]
                 
                 var ports: [WebMessagePort] = []

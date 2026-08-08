@@ -81,7 +81,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.12"
+    version: "1.0.26"
   flutter_inappwebview_forge_internal_annotations:
     dependency: "direct overridden"
     description:
@@ -95,7 +95,7 @@ packages:
       path: "../../flutter_inappwebview_forge_platform_interface"
       relative: true
     source: path
-    version: "1.1.1"
+    version: "1.1.2"
   flutter_lints:
     dependency: "direct dev"
     description:

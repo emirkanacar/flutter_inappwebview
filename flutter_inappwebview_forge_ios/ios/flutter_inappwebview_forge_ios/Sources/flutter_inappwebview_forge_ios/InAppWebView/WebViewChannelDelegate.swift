@@ -987,6 +987,31 @@ public class WebViewChannelDelegate: ChannelDelegate {
         }
         channel?.invokeMethod("onPermissionRequest", arguments: request.toMap(), callback: callback)
     }
+
+    public class GeolocationPermissionsShowPromptCallback: BaseCallbackResult<GeolocationPermissionShowPromptResponse> {
+        override init() {
+            super.init()
+            self.decodeResult = { (obj: Any?) in
+                return GeolocationPermissionShowPromptResponse.fromMap(map: obj as? [String:Any?])
+            }
+        }
+
+        deinit {
+            self.defaultBehaviour(nil)
+        }
+    }
+
+    public func onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissionsShowPromptCallback) {
+        if channel == nil {
+            callback.defaultBehaviour(nil)
+            return
+        }
+        channel?.invokeMethod(
+            "onGeolocationPermissionsShowPrompt",
+            arguments: ["origin": origin],
+            callback: callback
+        )
+    }
     
     public class ShouldOverrideUrlLoadingCallback: BaseCallbackResult<WKNavigationActionPolicy> {
         override init() {

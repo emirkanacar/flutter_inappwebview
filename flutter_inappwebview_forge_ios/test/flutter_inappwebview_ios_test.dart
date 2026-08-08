@@ -139,6 +139,38 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
 
   _assert(
+    source.contains('#if compiler(>=6.2)') &&
+        source.contains('@available(iOS 26.0, *)') &&
+        source.contains(
+          'requestGeolocationPermissionFor origin: WKSecurityOrigin',
+        ) &&
+        source.contains('channelDelegate.onGeolocationPermissionsShowPrompt') &&
+        source.contains('var decisionHandlerCalled = false') &&
+        source.contains('decisionHandler(response.allow ? .grant : .deny)'),
+    'iOS 26 geolocation permission requests are not bridged to Dart',
+  );
+  _assert(
+    webViewDelegateSource.contains(
+          'GeolocationPermissionsShowPromptCallback',
+        ) &&
+        webViewDelegateSource.contains(
+          'onGeolocationPermissionsShowPrompt(origin:',
+        ),
+    'iOS geolocation permission callback bridge is missing',
+  );
+  final geolocationResponseSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/Types/'
+    'GeolocationPermissionShowPromptResponse.swift',
+  ).readAsStringSync();
+  _assert(
+    geolocationResponseSource.contains('allow') &&
+        geolocationResponseSource.contains('retain') &&
+        geolocationResponseSource.contains('fromMap'),
+    'iOS geolocation permission response decoding is missing',
+  );
+
+  _assert(
     windowSource.contains('activeKeyWindow'),
     'active window helper is missing',
   );

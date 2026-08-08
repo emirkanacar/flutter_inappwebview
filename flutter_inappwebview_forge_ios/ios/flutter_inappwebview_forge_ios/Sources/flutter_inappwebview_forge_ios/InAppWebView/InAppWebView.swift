@@ -2030,7 +2030,43 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             callback.defaultBehaviour(nil)
         }
     }
-    
+
+#if compiler(>=6.2)
+    @available(iOS 26.0, *)
+    public func webView(_ webView: WKWebView,
+                        requestGeolocationPermissionFor origin: WKSecurityOrigin,
+                        initiatedByFrame frame: WKFrameInfo,
+                        decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        let origin = "\(origin.protocol)://\(origin.host)\(origin.port != 0 ? ":" + String(origin.port) : "")"
+
+        var decisionHandlerCalled = false
+        let callback = WebViewChannelDelegate.GeolocationPermissionsShowPromptCallback()
+        callback.nonNullSuccess = { (response: GeolocationPermissionShowPromptResponse) in
+            if !decisionHandlerCalled {
+                decisionHandlerCalled = true
+                decisionHandler(response.allow ? .grant : .deny)
+            }
+            return false
+        }
+        callback.defaultBehaviour = { (_: GeolocationPermissionShowPromptResponse?) in
+            if !decisionHandlerCalled {
+                decisionHandlerCalled = true
+                decisionHandler(.deny)
+            }
+        }
+        callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
+            print(code + ", " + (message ?? ""))
+            callback?.defaultBehaviour(nil)
+        }
+
+        if let channelDelegate = channelDelegate {
+            channelDelegate.onGeolocationPermissionsShowPrompt(origin: origin, callback: callback)
+        } else {
+            callback.defaultBehaviour(nil)
+        }
+    }
+#endif
+
     @available(iOS 13.0, *)
     public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,

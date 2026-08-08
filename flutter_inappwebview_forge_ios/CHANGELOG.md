@@ -1,3 +1,9 @@
+## 2.1.15 - 2026-08-08
+
+- Bridge iOS 26 `WKUIDelegate` geolocation permission decisions to `onGeolocationPermissionsShowPrompt`, including safe deny fallback and response decoding ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+- Add iOS source regression coverage and validate the iOS example build with Xcode 27; physical iOS 26 grant/deny and scene-lifecycle validation remains required.
+- Keep the iOS WebMessageChannel source compatible with Xcode 27 by removing an invalid optional binding around the non-optional `WebMessage.fromMap` result.
+
 ## 2.1.14 - 2026-08-08
 
 - Align the repository Flutter development baseline with 3.44.8 and register the iOS native source assertions as an executable regression test.

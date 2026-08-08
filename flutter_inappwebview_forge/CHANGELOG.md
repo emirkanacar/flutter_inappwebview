@@ -1,3 +1,8 @@
+## 2.1.23 - 2026-08-08
+
+- iOS: bridge iOS 26 geolocation permission decisions to the existing `onGeolocationPermissionsShowPrompt` callback ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+- Update root dependencies to platform interface 1.1.2 and iOS 2.1.15.
+
 ## 2.1.22 - 2026-08-08
 
 - Linux: fall back from failed GtkGLArea initialization to pixel-buffer rendering for GPU/DMA-BUF failures ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).

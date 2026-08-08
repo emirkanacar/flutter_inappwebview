@@ -1,3 +1,7 @@
+## 1.1.2 - 2026-08-08
+
+- Mark `onGeolocationPermissionsShowPrompt` as supported by iOS 26+ and regenerate the platform capability metadata ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+
 ## 1.1.1 - 2026-08-06
 
 - Mark `ContextMenu` and `PlatformInAppWebViewController.setContextMenu` as supported on macOS.

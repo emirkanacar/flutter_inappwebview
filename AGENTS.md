@@ -22,6 +22,7 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 
 - Keep the federated package name `flutter_inappwebview_forge` and the `com.emirkanacar.flutter_inappwebview_forge_android` Android namespace. Do not reintroduce upstream package names in active source.
 - Treat MethodChannel/EventChannel names, method names, event payload maps, platform-view IDs, JavaScript bridge names, and generated capability metadata as compatibility surfaces.
+- Keep the iOS 26 `WKUIDelegate` geolocation decision callback compiler- and availability-guarded for the iOS 15 deployment target, forward `allow` through the existing channel contract, and call WebKit's decision handler exactly once.
 - Change the platform interface before or together with a platform implementation when a public setting, enum, event, or method changes.
 - Native callbacks are versioned and nullable input. Do not force-unwrap values from WebView2, Android WebView, WebKit, WPE, or platform channels.
 - Lifecycle callbacks are not guaranteed during renderer, GPU, surface, process, or window failure. Disposal and fallback paths must be idempotent.
@@ -105,6 +106,15 @@ Follow [docs/issue-resolution-workflow.md](docs/issue-resolution-workflow.md) fo
 8. Review the diff for unrelated or personal files, run git diff --check, and commit/push only with authorization.
 
 An issue must not be marked locally resolved until the source, regression coverage, validation status, changelog, release metadata, and relevant documentation agree. An upstream CSV state remains historical metadata and must not be changed to imply local resolution.
+
+`docs/open-work-plan.md` is the live unresolved-work queue, not a list of
+source patches. Update or remove an issue there only after its acceptance
+criteria and required native/device/runtime evidence are complete. A source-
+only fix, static assertion, or successful host build belongs in
+`docs/known-issues.md` and the validation-only gates until the missing target
+evidence is recorded. If the team does not genuinely have enough evidence to
+call an issue resolved, leave it in the plan and document the next validation
+step instead of counting it as closed.
 
 ## Documentation index
 
