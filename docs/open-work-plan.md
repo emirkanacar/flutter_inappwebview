@@ -14,20 +14,21 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 The export contains 125 issues and 73 PRs. Seventy-three issue records have a
 documented local implementation, mitigation, source-review, or host/platform
 boundary: 66 await real runtime validation, #2745 is closed by source review,
-and #2636/#2659/#2713/#2723/#2727/#2598 have no Forge-owned fix because their
-failures belong to the Apple/WebKit Simulator, Android framework/provider, and
-Flutter engine/platform-view layers respectively. The other 52 issue records
+and #2570/#2598/#2636/#2659/#2713/#2723/#2727 have no Forge-owned fix because
+their failures belong to host app/site configuration, the Apple/WebKit
+Simulator, Android framework/provider, and Flutter engine/platform-view layers.
+The other 51 issue records
 remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 52 | 1 | 6 | 39 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 52 | 1 | 7 | 38 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **66** | **1** | **6** | **52** | **49 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **66** | **1** | **7** | **51** | **48 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -107,6 +108,12 @@ reported as upstream-closed:
   wins hit testing; the plugin does not own the overlay's Flutter gesture arena.
   This is tracked as a host/platform boundary until a reproducible Flutter
   3.38.6+ minimal example identifies a Forge-owned control point.
+- [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570):
+  iCloud Keychain Password AutoFill depends on the host app's Associated
+  Domains entitlement, the site's `apple-app-site-association` response, and
+  semantic HTML `autocomplete` fields. The Forge iOS configuration has no
+  Password AutoFill switch and cannot edit host entitlements or the remote
+  login page, so the record is tracked as a host/application boundary.
 
 ## Priority queue
 
@@ -124,7 +131,7 @@ are locally implemented and awaiting real validation in the
 | Issues | Work package | Plan |
 | --- | --- | --- |
 | [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Use the opt-in iOS diagnostic to capture WebKit viewport metrics and the Flutter WebView frame. The iOS 26.0 simulator build/baseline passes, but automated platform-view input did not open the software keyboard and iOS 17 is unavailable locally; obtain physical/iOS 17 frame, `contentInset`, and `adjustedContentInset` evidence before applying a geometry fix. |
-| [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | The shared localhost server liveness guard is source-validated; complete iOS release resume/restart/reload evidence is still required. Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/modal transitions, local HTML resume, form autofill, and navigation headers. Keep #2598, #2713, and #2723 in the host/platform register and separate Flutter-engine regressions from plugin channel behavior. |
+| [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | The shared localhost server liveness guard is source-validated; complete iOS release resume/restart/reload evidence is still required. Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/modal transitions, local HTML resume, form autofill, and navigation headers. Keep #2570, #2598, #2713, and #2723 in the host/platform register and separate Flutter-engine regressions from plugin/channel and app/site configuration boundaries. |
 
 #### Android
 
@@ -236,13 +243,13 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 The 2026-08-08 status pass has 66 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, six host/platform boundaries (#2598, #2636, #2659, #2713, #2723, and
-#2727), and 52 active issue records in this plan. The runtime-pending records
-and host boundaries are
+review, seven host/platform boundaries (#2570, #2598, #2636, #2659, #2713,
+#2723, and #2727), and 51 active issue records in this plan. The runtime-pending
+records and host boundaries are
 deliberately not counted as active implementation work; their status notes
 live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
-[`known-issues.md`](known-issues.md). The active queue contains 39 bugs, 10
-enhancements, 0 unlabelled records, and 3 showcase records (49 active
+[`known-issues.md`](known-issues.md). The active queue contains 38 bugs, 10
+enhancements, 0 unlabelled records, and 3 showcase records (48 active
 technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:
