@@ -39,6 +39,16 @@ void main() {
     expect(source, contains('activityResultListeners.toList()'));
   });
 
+  test('Android popup creation rejects missing managers before storing a result message', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    expect(source, contains('if (manager == null) {'));
+    expect(source, contains('return false'));
+    expect(source, isNot(contains('windowId = 0')));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

@@ -1,3 +1,7 @@
+## 1.0.17 - 2026-08-08
+
+- Reject Android popup creation when the WebView manager is unavailable instead of synthesizing window ID `0` and retaining an incomplete result message ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
+
 ## 1.0.16 - 2026-08-08
 
 - Snapshot Android activity-result listeners before dispatch so a listener can unregister itself without invalidating the iteration ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).

@@ -52,6 +52,10 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; iOS popup device validation pending. **Affected package:** iOS `WKUIDelegate` popup creation. **Impact:** popup creation could synthesize window ID `0` without a live manager, returning a child that could not be attached to the caller's `CreateWindowAction`. **Fix:** popup creation now returns `nil` when the manager is unavailable. **Required evidence:** `window.open`, returned child attachment, navigation, disposal, and scene transitions on iOS 15-26.
 
+#### #2745 - JavaScript `eval()` security claim
+
+**Local status:** Not established; no implementation change justified. **Affected scope:** JavaScript bridge and generated plugin scripts. **Source review:** repository search did not identify a plugin-owned direct `eval()` or `new Function()` sink receiving remote page data. `evaluateJavascript` is an explicit public API that executes caller-supplied code by design and is not evidence of a package vulnerability by itself. **Required evidence:** a concrete source-to-sink path showing untrusted page data reaching privileged generated code, plus a minimal exploit reproduction and threat model.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

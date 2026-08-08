@@ -1,3 +1,9 @@
+## 2.1.11 - 2026-08-08
+
+- Android: reject popup creation without a live WebView manager before allocating a synthetic window ID or storing a result message ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
+- Record the #2745 JavaScript `eval()` claim as unestablished after source-to-sink review; no plugin-owned direct `eval()` sink was found.
+- Update the root dependency to Android 1.0.17.
+
 ## 2.1.10 - 2026-08-08
 
 - Linux: add an explicit `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` software-rendering fallback ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).

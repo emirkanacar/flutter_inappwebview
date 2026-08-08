@@ -6,15 +6,15 @@ This is the implementation backlog for work that is not yet resolved in the loca
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Fifty-five issue records are now resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). Three additional PR-only records (`#2771`, `#2871`, and `#2474`) are implemented locally; they are tracked separately and do not change the issue counts below. The remaining issue records are:
+The export contains 125 issues and 73 PRs. Fifty-six issue records are now resolved or mitigated locally and are documented in the [resolution log](issue-pr-resolution-log.md). Three additional PR-only records (`#2771`, `#2871`, and `#2474`) are implemented locally; they are tracked separately and do not change the issue counts below. The remaining issue records are:
 
 | Category | Count | Treatment |
 | --- | ---: | --- |
-| Bugs | 58 | Technical work, validation, or reproduction required |
+| Bugs | 57 | Technical work, validation, or reproduction required |
 | Enhancements | 10 | API/design decision and implementation required |
 | Unlabelled | 2 | Triage before implementation |
 | Showcase | 3 | Product examples, not plugin engineering work |
-| **Total remaining issue records** | **70** | **67 technical issue records after excluding showcase entries** |
+| **Total remaining issue records** | **69** | **66 technical issue records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -167,7 +167,7 @@ The PR export is also marked `OPEN`; do not merge or copy it without checking th
 
 ## Definition of done
 
-The 2026-08-08 source-validation pass addressed #2856/#2737, hardened Android allow-list parsing for #2698/#2673/#2594, made macOS popup registry cleanup unconditional for #2707, guarded Android renderer callback type boundaries for #2697, reviewed the existing iOS presenter guard for #2831, made Android activity-result dispatch mutation-safe for #2814/#2797/#2711/#2709, guarded Windows resize teardown for #2736, added the Linux software-rendering switch for #2861, and rejected unattached iOS popup creation for #2763. The count is now 55 resolved or mitigated issue records and 70 remaining records, with runtime/provider validation retained as release follow-up.
+The 2026-08-08 source-validation pass addressed #2856/#2737, hardened Android allow-list parsing for #2698/#2673/#2594, made macOS popup registry cleanup unconditional for #2707, guarded Android renderer callback type boundaries for #2697, reviewed the existing iOS presenter guard for #2831, made Android activity-result dispatch mutation-safe for #2814/#2797/#2711/#2709, guarded Windows resize teardown for #2736, added the Linux software-rendering switch for #2861, rejected unattached iOS popup creation for #2763, and rejected Android popup creation without a live manager for #2763. The count is now 56 resolved or mitigated issue records and 69 remaining records; #2745 remains open pending security evidence.
 
 An issue leaves this plan only when:
 

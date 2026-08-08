@@ -518,12 +518,11 @@ open class InAppWebViewChromeClient(
     resultMsg: Message
   ): Boolean {
     val manager = plugin?.inAppWebViewManager
-    val windowId = if (manager != null) {
-      manager.windowAutoincrementId++
-      manager.windowAutoincrementId
-    } else {
-      0
+    if (manager == null) {
+      return false
     }
+    manager.windowAutoincrementId++
+    val windowId = manager.windowAutoincrementId
 
     val result = view.hitTestResult
     var url = result.extra
@@ -546,7 +545,7 @@ open class InAppWebViewChromeClient(
       isDialog
     )
 
-    manager?.windowWebViewMessages?.set(windowId, resultMsg)
+    manager.windowWebViewMessages?.set(windowId, resultMsg)
 
     val channelDelegate = inAppWebView?.channelDelegate
     if (channelDelegate != null) {
@@ -554,7 +553,7 @@ open class InAppWebViewChromeClient(
         override fun nonNullSuccess(handledByClient: Boolean): Boolean = !handledByClient
 
         override fun defaultBehaviour(handledByClient: Boolean?) {
-          manager?.windowWebViewMessages?.remove(windowId)
+          manager.windowWebViewMessages?.remove(windowId)
         }
 
         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
