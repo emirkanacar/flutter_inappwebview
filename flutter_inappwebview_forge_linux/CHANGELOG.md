@@ -1,3 +1,7 @@
+## 1.0.3 - 2026-08-08
+
+- Add `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` to force the software/pixel-buffer rendering path for GPU/DMA-BUF issues ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).
+
 ## 1.0.2 - 2026-08-06
 
 - Improve WPE WebKit CMake errors with all supported `pkg-config` candidates, backend alternatives, diagnostic commands, and an absolute link to `WPE_BACKEND.md`.

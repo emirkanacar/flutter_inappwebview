@@ -329,7 +329,9 @@ void InAppBrowser::setupToolbar() {
 void InAppBrowser::setupDrawingArea() {
   // Try to use GtkGLArea for hardware-accelerated zero-copy rendering
   // This provides better performance by avoiding GPU->CPU->GPU copies
-  bool canUseGl = InAppWebView::IsWpeWebKitAvailable();
+  const char* disableGl = g_getenv("FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL");
+  bool canUseGl = InAppWebView::IsWpeWebKitAvailable() &&
+                  !(disableGl != nullptr && std::string(disableGl) == "1");
 
   if (canUseGl) {
     // Create GtkGLArea for zero-copy EGL texture rendering

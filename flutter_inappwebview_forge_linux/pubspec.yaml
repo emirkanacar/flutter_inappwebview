@@ -1,6 +1,6 @@
 name: flutter_inappwebview_forge_linux
 description: "Linux implementation of flutter_inappwebview_forge plugin using WPE WebKit."
-version: 1.0.2
+version: 1.0.3
 repository: https://github.com/emirkanacar/flutter_inappwebview
 issue_tracker: https://github.com/emirkanacar/flutter_inappwebview/issues
 topics:

@@ -2809,6 +2809,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let inAppWebViewManager = inAppWebViewManager {
             inAppWebViewManager.windowAutoincrementId += 1
             windowId = inAppWebViewManager.windowAutoincrementId
+        } else {
+            return nil
         }
         
         let windowWebView = InAppWebView(id: nil, plugin: nil, frame: self.bounds, configuration: configuration, contextMenu: nil)

@@ -1,3 +1,7 @@
+## 2.1.6 - 2026-08-08
+
+- Return no popup WebView when the iOS window manager is unavailable instead of creating an unattached child with a synthetic window ID ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
+
 ## 2.1.5 - 2026-08-08
 
 - Keep prompt presentation paths guarded when no visible view controller is available; iOS device reproduction for the location-prompt lifecycle remains required ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).

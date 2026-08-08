@@ -1,3 +1,9 @@
+## 2.1.10 - 2026-08-08
+
+- Linux: add an explicit `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` software-rendering fallback ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).
+- iOS: reject popup WebView creation when the window manager is unavailable ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
+- Update root dependencies to iOS 2.1.6 and Linux 1.0.3.
+
 ## 2.1.9 - 2026-08-08
 
 - Android: snapshot activity-result listeners before dispatch to make registration and teardown callbacks mutation-safe ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).

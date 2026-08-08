@@ -58,4 +58,17 @@ void main() {
     'WPE_BACKEND.md',
     'the Linux prerequisite documentation link',
   );
+  final browserSource = _sourceFile(
+    'linux/in_app_browser/in_app_browser.cc',
+  ).readAsStringSync();
+  _expectContains(
+    browserSource,
+    'FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL',
+    'the explicit software-rendering fallback switch',
+  );
+  _expectContains(
+    browserSource,
+    'setupDrawingAreaFallback()',
+    'the non-GL rendering path',
+  );
 }

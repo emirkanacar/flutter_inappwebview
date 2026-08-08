@@ -44,6 +44,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; Windows native validation pending. **Affected package:** Windows InAppBrowser. **Impact:** a late `WM_SIZE` callback could reach a released WebView2 controller during focus/resize or window teardown. **Fix:** the resize path now checks both the browser wrapper and WebView2 controller before updating bounds. **Required evidence:** minimize/restore, close/resize races, focus transitions, and release builds on supported Windows/WebView2 versions.
 
+#### #2861 - Linux software-rendering fallback
+
+**Local status:** Implemented and source-validated; Fedora/X11/Intel runtime validation pending. **Affected package:** Linux rendering backend. **Impact:** the default GL/DMA-BUF path may produce black, white, or transparent output on affected Intel/X11 configurations. **Fix:** `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` now selects the existing pixel-buffer/SHM fallback. **Required evidence:** Fedora/X11 with Intel i915, backend logs, and before/after frame output.
+
+#### #2763 - iOS popup WebView manager lifecycle
+
+**Local status:** Implemented and source-validated; iOS popup device validation pending. **Affected package:** iOS `WKUIDelegate` popup creation. **Impact:** popup creation could synthesize window ID `0` without a live manager, returning a child that could not be attached to the caller's `CreateWindowAction`. **Fix:** popup creation now returns `nil` when the manager is unavailable. **Required evidence:** `window.open`, returned child attachment, navigation, disposal, and scene transitions on iOS 15-26.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

@@ -31,6 +31,10 @@ void main() {
     'iOS prompt presentation path does not guard missing presenters',
   );
   _assert(
+    source.contains('else {\n            return nil\n        }'),
+    'iOS popup creation does not reject a missing WebView manager',
+  );
+  _assert(
     source.contains('func keyboardDidHide'),
     'keyboardDidHide restoration is missing',
   );
