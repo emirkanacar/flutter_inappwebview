@@ -1,3 +1,7 @@
+## 1.1.2 - 2026-08-08
+
+- Remove popup WebView ownership from the macOS window registry unconditionally during disposal, preventing stale browser-window references during teardown ([#2707](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2707)).
+
 ## 1.1.1 - 2026-08-06
 
 - Support initial and runtime `ContextMenu` updates on macOS, forward create/hide lifecycle callbacks, and normalize numeric item identifiers safely ([#2683](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2683)).

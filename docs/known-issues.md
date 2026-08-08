@@ -20,6 +20,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 | Mitigated locally | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733), [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728), [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | A safe local behavior or targeted workaround exists, but the upstream/runtime boundary or final artifact still needs validation. |
 | Open or needs reproduction | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763), [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745), [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | No additional shared code change is justified from the available evidence. Reproduce on the affected platform or establish a source-to-sink path first. |
 
+#### #2698, #2673, #2594 - Android provider-specific setting casts
+
+**Local status:** Implemented and source-validated; provider/device validation pending. **Affected package:** Android native settings parser. **Impact:** malformed or implementation-specific channel values could throw a `ClassCastException` while parsing allow-list settings. **Fix:** list payloads are treated as unknown provider input and only string entries are retained; invalid entries are ignored without changing channel names or public settings. **Required evidence:** Android API/provider matrix with malformed list values and all supported allow-list settings.
+
+#### #2707 - macOS browser-window teardown ownership
+
+**Local status:** Implemented and source-validated; macOS/Xcode runtime validation pending. **Affected package:** macOS native WebView. **Impact:** a popup WebView could remain in the manager registry when its ownership state changed before disposal, leaving stale references during browser-window teardown. **Fix:** popup window IDs are removed unconditionally before the WebView releases its plugin reference. **Required evidence:** create/present/dismiss/recreate popup windows on macOS 11 through Tahoe with Xcode 26.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

@@ -1,3 +1,7 @@
+## 1.0.14 - 2026-08-08
+
+- Ignore malformed non-string values in Android allow-list settings instead of throwing provider/channel cast errors ([#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)).
+
 ## 1.0.13 - 2026-08-08
 
 - Validate nullable and provider-controlled values before decoding `requestFocusNodeHref` and `requestImageRef` results, preventing malformed payloads from reaching `WebUri` or non-null public fields ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)).

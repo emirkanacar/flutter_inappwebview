@@ -73,4 +73,20 @@ void main() {
     expect(source, contains('proguard-android-optimize.txt'));
     expect(source, isNot(contains('proguard-android.txt')));
   });
+
+  test('Android allow-list parsing filters malformed channel values', () {
+    final source = File(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+    ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+          );
+    final content = source.readAsStringSync();
+
+    expect(content, contains('filterIsInstance<String>()'));
+    expect(content, isNot(contains('HashSet(value as List<String>)')));
+  });
 }

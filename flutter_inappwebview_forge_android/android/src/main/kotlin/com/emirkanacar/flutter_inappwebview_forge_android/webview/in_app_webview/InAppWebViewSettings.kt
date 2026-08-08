@@ -130,7 +130,6 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var alpha: Double? = null
     @JvmField var useOnShowFileChooser: Boolean? = false
 
-    @Suppress("UNCHECKED_CAST")
     override fun parse(settings: MutableMap<String, Any?>): InAppWebViewSettings {
         settings.forEach { (key, value) ->
             if (value == null) return@forEach
@@ -226,17 +225,22 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
                 "defaultVideoPoster" -> defaultVideoPoster = value as ByteArray
-                "requestedWithHeaderOriginAllowList" -> requestedWithHeaderOriginAllowList = HashSet(value as List<String>)
+                "requestedWithHeaderOriginAllowList" -> requestedWithHeaderOriginAllowList =
+                    (value as? List<*>)?.filterIsInstance<String>()?.toMutableSet()
                 "javaScriptHandlersOriginAllowList" -> {
                     javaScriptHandlersOriginAllowList = HashSet<Pattern>().apply {
-                        (value as List<String>).forEach { add(Pattern.compile(it)) }
+                        (value as? List<*>)?.filterIsInstance<String>()?.forEach {
+                            add(Pattern.compile(it))
+                        }
                     }
                 }
                 "javaScriptHandlersForMainFrameOnly" -> javaScriptHandlersForMainFrameOnly = value as Boolean
                 "javaScriptBridgeEnabled" -> javaScriptBridgeEnabled = value as Boolean
-                "javaScriptBridgeOriginAllowList" -> javaScriptBridgeOriginAllowList = HashSet(value as List<String>)
+                "javaScriptBridgeOriginAllowList" -> javaScriptBridgeOriginAllowList =
+                    (value as? List<*>)?.filterIsInstance<String>()?.toMutableSet()
                 "javaScriptBridgeForMainFrameOnly" -> javaScriptBridgeForMainFrameOnly = value as Boolean
-                "pluginScriptsOriginAllowList" -> pluginScriptsOriginAllowList = HashSet(value as List<String>)
+                "pluginScriptsOriginAllowList" -> pluginScriptsOriginAllowList =
+                    (value as? List<*>)?.filterIsInstance<String>()?.toMutableSet()
                 "pluginScriptsForMainFrameOnly" -> pluginScriptsForMainFrameOnly = value as Boolean
                 "isUserInteractionEnabled" -> isUserInteractionEnabled = value as Boolean
                 "alpha" -> alpha = value as Double

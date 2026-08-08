@@ -2888,7 +2888,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
             if #available(macOS 10.13, *) {
                 configuration.userContentController.removeAllContentRuleLists()
             }
-        } else if let wId = windowId, plugin?.inAppWebViewManager?.windowWebViews[wId] != nil {
+        } else if let wId = windowId {
             plugin?.inAppWebViewManager?.windowWebViews.removeValue(forKey: wId)
         }
         configuration.userContentController.dispose(windowId: windowId)

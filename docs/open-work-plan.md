@@ -167,7 +167,7 @@ The PR export is also marked `OPEN`; do not merge or copy it without checking th
 
 ## Definition of done
 
-The 2026-08-08 source-validation pass addressed the Android nullable request-result boundary associated with #2856 and reviewed the existing Web URL mitigation for #2737. Both remain validation-pending until the Android provider matrix and Web browser integration matrix are run.
+The 2026-08-08 source-validation pass addressed the Android nullable request-result boundary associated with #2856, reviewed the existing Web URL mitigation for #2737, hardened Android allow-list parsing for #2698/#2673/#2594, and made macOS popup registry cleanup unconditional for #2707. Runtime/provider validation remains pending for the new fixes.
 
 An issue leaves this plan only when:
 

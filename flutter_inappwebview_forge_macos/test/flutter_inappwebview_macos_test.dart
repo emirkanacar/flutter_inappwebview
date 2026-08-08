@@ -115,6 +115,16 @@ void main() {
     );
   }
 
+  final ownershipRemoval = webViewSource.indexOf(
+    'plugin?.inAppWebViewManager?.windowWebViews.removeValue(forKey: wId)',
+  );
+  final pluginRelease = webViewSource.indexOf('plugin = nil', ownershipRemoval);
+  if (ownershipRemoval < 0 || pluginRelease <= ownershipRemoval) {
+    throw StateError(
+      'macOS WebView disposal must remove popup ownership before releasing the plugin',
+    );
+  }
+
   final printScript = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'
     'flutter_inappwebview_forge_macos/PluginScriptsJS/PrintJS.swift',
