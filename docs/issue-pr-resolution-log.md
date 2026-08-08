@@ -24,8 +24,8 @@ tracked separately from that historical export:
 | --- | ---: | --- |
 | Locally implemented or mitigated; runtime validation pending | 66 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
-| Host/platform-specific boundary | 5 issues (`#2636`, `#2659`, `#2713`, `#2723`, `#2727`) | Host/provider/engine tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
-| Open implementation or reproduction | 53 issues | [open-work-plan.md](open-work-plan.md) |
+| Host/platform-specific boundary | 6 issues (`#2598`, `#2636`, `#2659`, `#2713`, `#2723`, `#2727`) | Host/provider/engine tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
+| Open implementation or reproduction | 52 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
 
 The issue inventory below remains the historical 125-record export and is not
@@ -34,6 +34,7 @@ reduced when a record moves between the local status registers.
 ## Local resolution history
 
 | 2026-08-08 | iOS keyboard `visualViewport` diagnostic [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | No upstream relationship inferred | Added an opt-in integration diagnostic that records WebKit viewport metrics and the Flutter WebView frame. Flutter analysis and the iOS 26.0 simulator build pass; the baseline frame is `402x778` with a `778px` viewport, but the automated platform-view tap did not open the software keyboard (`activeElementId` remained empty), and no iOS 17 runtime is installed. No package behavior change was made; physical/iOS 17 and native inset/frame validation remain pending. |
+| 2026-08-08 | iOS draggable overlay gesture ownership [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598) | No upstream relationship inferred | Source review confirms that the overlay belongs to Flutter's host gesture arena: Forge forwards `gestureRecognizers` to `UiKitView`, and its opt-in `preventGestureDelay` hook only runs when the WebView itself is hit-tested. The reported iOS 18/18.6 overlay-drag/underlying-scroll behavior is therefore tracked as a host/platform boundary with no package code change; a minimal Flutter 3.38.6+ comparison remains the required follow-up. |
 | 2026-08-08 | iOS navigation decision/load ordering [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568) | No upstream relationship inferred | iOS now queues `loadUrl` requests issued while `shouldOverrideUrlLoading` is waiting for the WebKit policy decision and flushes them after `.allow`/`.cancel` is delivered. The source regression, Flutter analysis, SwiftPM manifest check, and Xcode example build pass; physical navigation/header validation remains pending. |
 | 2026-08-08 | iOS Simulator dyld failure [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636) | No upstream relationship inferred | The native stack and upstream reproduction identify an iOS 18.4/18.5 Simulator/WebKit deployment-target failure while physical devices and newer Simulator runtimes work. Forge supports iOS 15.0 and cannot safely raise that baseline, so this is recorded as a host/platform boundary with no package code change. |
 | 2026-08-08 | Android HTML time input picker crash [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659) | No upstream relationship inferred | The supplied NPE ends in Android's `TimePickerSpinnerDelegate.updateInputState`; source review found no Forge-owned time picker or interception boundary. The record remains visible for OEM/framework tracking and is not presented as locally fixed. |

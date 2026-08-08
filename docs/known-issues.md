@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 53 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2598, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 52 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -21,8 +21,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 | --- | ---: | --- |
 | Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 5 issues ([#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 53 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 6 issues ([#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 52 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -183,6 +183,14 @@ The upstream reproducer uses Flutter 3.35.5 and reports the failure only after p
 The report aligns with Flutter's iOS platform-view gesture issue chain ([#175099](https://github.com/flutter/flutter/issues/175099), [#158961](https://github.com/flutter/flutter/issues/158961)). The reported PointerInterceptor/overlay workarounds act in Flutter's hit-testing layer, and the symptom is consistent with platform-view gesture state rather than a Forge WebKit callback or channel contract. Forge's iOS native layer cannot safely reset Flutter's gesture arena after a Drawer transition, so no speculative package patch is justified.
 
 **Required evidence:** if the symptom reproduces on the supported Flutter 3.38.6 baseline, capture the exact Flutter/Xcode/iOS versions and a minimal platform-view reproduction, then compare another Flutter platform-view plugin or a native view. Only implement a Forge change if the failure crosses that host boundary and a stable plugin-owned control point is identified.
+
+### #2598 — iOS draggable overlay scrolls the WebView
+
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Flutter iOS platform-view hit testing and gesture arbitration. **Impact:** dragging a Flutter `Draggable`/`Positioned` widget above an iOS WebView can also scroll the WebView underneath. **Confidence:** Strong host-boundary evidence from the iOS 18/18.6 reports and source ownership review.
+
+The report's moving overlay is owned by the host Flutter widget tree, while the Forge iOS widget passes `gestureRecognizers` directly to `UiKitView`. The native `gestureRecognizer` delegate permits simultaneous recognition, and the existing opt-in `preventGestureDelay` code only disables Flutter's delaying recognizer when the WebView itself is hit-tested; it cannot claim or cancel a pointer already targeted at an overlay. Changing that behavior globally would alter gesture arbitration for every iOS WebView and could break scrolling, links, and nested Flutter gestures.
+
+**Required evidence:** reproduce a minimal overlay/WebView example on Flutter 3.38.6 and current stable across iOS 18+, compare a plain `UiKitView`, another WebView plugin, and a native view, and record whether the underlying scroll begins before or after the overlay's drag recognizer wins. Only add a Forge change if the failure crosses the Flutter hit-testing boundary and a stable plugin-owned control point is identified.
 
 ## Remaining validation and follow-up
 
