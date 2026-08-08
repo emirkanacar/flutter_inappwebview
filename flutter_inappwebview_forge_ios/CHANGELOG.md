@@ -1,3 +1,7 @@
+## 2.1.18 - 2026-08-08
+
+- Make native `InAppWebView.dispose()` idempotent before observer, WebKit, and fullscreen cleanup, reducing duplicate teardown `EXC_BAD_ACCESS` risk ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)). Physical iOS teardown validation remains pending.
+
 ## 2.1.17 - 2026-08-08
 
 - Harden popup `windowId` WebView lifecycle against stale KVO callbacks, pre-attachment JavaScript evaluation, and transient shared content-world/frame objects ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)). iOS device/Xcode validation remains pending.
@@ -30,11 +34,11 @@
 
 ## 2.1.11 - 2026-08-08
 
-- Validate iOS `loadFile` asset paths before dispatching them to the WebView channel ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- Validate iOS `loadFile` asset paths before dispatching them to the WebView channel (internal boundary hardening; not upstream #2654).
 
 ## 2.1.10 - 2026-08-08
 
-- Validate iOS `postUrl` and `loadData` channel arguments before constructing URLs or reading typed post data ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- Validate iOS `postUrl` and `loadData` channel arguments before constructing URLs or reading typed post data (internal boundary hardening; not upstream #2654).
 
 ## 2.1.9 - 2026-08-08
 

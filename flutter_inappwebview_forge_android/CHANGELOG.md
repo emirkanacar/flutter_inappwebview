@@ -1,3 +1,8 @@
+## 1.0.29 - 2026-08-08
+
+- Catch provider-specific `WebSettingsCompat` adapter failures when applying or reading `forceDarkStrategy`, leaving the WebView provider's default intact ([#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)). Provider/device validation remains pending.
+- Make Android WebView disposal idempotent and absorb stale Android 10 IME operations after detachment ([#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555), [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)). Physical-device validation remains pending.
+
 ## 1.0.28 - 2026-08-08
 
 - Recreate the asynchronous WebView startup executor after engine detach and ignore stale startup generations during reattach, closing the lifecycle gap in release/AOT and headless cold-start flows ([#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)). Real-device validation remains pending.
@@ -60,7 +65,7 @@
 
 ## 1.0.14 - 2026-08-08
 
-- Ignore malformed non-string values in Android allow-list settings instead of throwing provider/channel cast errors ([#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)).
+- Ignore malformed non-string values in Android allow-list settings instead of throwing dynamic channel casts (internal boundary hardening; not an upstream #2698/#2673/#2594 mapping).
 
 ## 1.0.13 - 2026-08-08
 

@@ -1,3 +1,9 @@
+## 2.1.29 - 2026-08-08
+
+- Android: catch provider-specific `forceDarkStrategy` adapter casts, make WebView disposal idempotent, and guard detached Android 10 IME operations ([#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555), [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- iOS: make native WebView disposal idempotent before observer/WebKit cleanup ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)). Physical iOS/Android provider validation remains pending.
+- Update root dependencies to Android 1.0.29 and iOS 2.1.18.
+
 ## 2.1.28 - 2026-08-08
 
 - Android: make asynchronous WebView startup restartable after engine detach and ignore stale startup callbacks during reattach ([#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)). Real-device release/AOT validation remains pending.
@@ -64,13 +70,13 @@
 ## 2.1.17 - 2026-08-08
 
 - Android: guard compatibility callbacks against unrelated WebView instances ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
-- iOS: validate `loadFile` channel payloads before using asset paths ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- iOS: validate `loadFile` channel payloads before using asset paths (internal boundary hardening; not upstream #2654).
 - Update root dependencies to Android 1.0.21 and iOS 2.1.11.
 
 ## 2.1.16 - 2026-08-08
 
 - Android: ignore malformed WebStorage origin callback entries ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).
-- iOS: validate `postUrl` and `loadData` channel arguments before URL and typed-data use ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- iOS: validate `postUrl` and `loadData` channel arguments before URL and typed-data use (internal boundary hardening; not upstream #2654).
 - Update root dependencies to Android 1.0.20 and iOS 2.1.10.
 
 ## 2.1.15 - 2026-08-08
@@ -121,7 +127,7 @@
 
 ## 2.1.7 - 2026-08-08
 
-- Android: ignore malformed allow-list payload entries instead of throwing dynamic cast errors ([#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)).
+- Android: ignore malformed allow-list payload entries instead of throwing dynamic cast errors (internal boundary hardening; not an upstream #2698/#2673/#2594 mapping).
 - macOS: make popup WebView registry cleanup unconditional during disposal to avoid stale browser-window ownership ([#2707](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2707)).
 - Update root dependencies to Android 1.0.14 and macOS 1.1.2.
 

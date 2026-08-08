@@ -442,7 +442,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         try {
           WebSettingsCompat.setForceDarkStrategy(settings, it)
         } catch (e: Exception) {
-          e.printStackTrace()
+          Log.w(
+            LOG_TAG,
+            "Unable to apply forceDarkStrategy for the active WebView provider.",
+            e
+          )
         }
       }
     }
@@ -1400,7 +1404,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         try {
           WebSettingsCompat.setForceDarkStrategy(settings, it)
         } catch (e: Exception) {
-          e.printStackTrace()
+          Log.w(
+            LOG_TAG,
+            "Unable to update forceDarkStrategy for the active WebView provider.",
+            e
+          )
         }
       }
     }
@@ -2107,11 +2115,22 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
           }
         }
 
-        if (containerView != null && inputMethodManager != null && !isAcceptingText) {
-          inputMethodManager.hideSoftInputFromWindow(
-            containerView?.windowToken,
-            InputMethodManager.HIDE_NOT_ALWAYS
-          )
+        val postedContainerView = containerView
+        if (
+          postedContainerView != null &&
+          postedContainerView.isAttachedToWindow &&
+          postedContainerView.windowToken != null &&
+          inputMethodManager != null &&
+          !isAcceptingText
+        ) {
+          try {
+            inputMethodManager.hideSoftInputFromWindow(
+              postedContainerView.windowToken,
+              InputMethodManager.HIDE_NOT_ALWAYS
+            )
+          } catch (error: RuntimeException) {
+            Log.w(LOG_TAG, "Unable to hide the input method after a stale WebView focus.", error)
+          }
         }
       }, 128)
     }
@@ -2661,9 +2680,14 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   override fun showInputMethod() {
     val activity = plugin?.activity ?: return
+    if (!isAttachedToWindow || windowToken == null) return
     val inputMethodManager =
       activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-    inputMethodManager?.showSoftInput(this, 0)
+    try {
+      inputMethodManager?.showSoftInput(this, 0)
+    } catch (error: RuntimeException) {
+      Log.w(LOG_TAG, "Unable to show the input method for the WebView.", error)
+    }
   }
 
   override fun hideInputMethod() {
@@ -2671,13 +2695,19 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     val inputMethodManager =
       activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
     if (inputMethodManager != null) {
-      val windowToken =
+      val inputWindowToken =
         if (customSettings.useHybridComposition != true && containerView != null) {
           containerView?.windowToken
         } else {
           windowToken
         }
-      inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+      if (inputWindowToken != null) {
+        try {
+          inputMethodManager.hideSoftInputFromWindow(inputWindowToken, 0)
+        } catch (error: RuntimeException) {
+          Log.w(LOG_TAG, "Unable to hide the input method for the WebView.", error)
+        }
+      }
     }
   }
 
@@ -2709,6 +2739,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   override fun dispose() {
+    if (isDisposed) return
     isDisposed = true
     nativeRegistrationsRegistered = true
     nativeRegistrationRequestScheduled = false

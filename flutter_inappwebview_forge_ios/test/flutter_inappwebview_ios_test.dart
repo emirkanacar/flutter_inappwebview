@@ -29,6 +29,11 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
 
   _assert(
+    source.contains('guard !isDisposed else { return }'),
+    'iOS WebView disposal is not idempotent',
+  );
+
+  _assert(
     source.contains('keyboardDidHideNotification'),
     'keyboardDidHideNotification is not registered',
   );
@@ -204,8 +209,7 @@ void _runSourceContractAssertions() {
   );
 
   _assert(
-    source.contains('windowCreated') &&
-        source.contains('guard !isDisposed'),
+    source.contains('windowCreated') && source.contains('guard !isDisposed'),
     'popup JavaScript is evaluated before the Flutter platform view is attached',
   );
   _assert(

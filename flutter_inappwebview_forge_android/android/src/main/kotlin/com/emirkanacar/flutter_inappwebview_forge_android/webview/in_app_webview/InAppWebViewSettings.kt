@@ -2,6 +2,7 @@ package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webvie
 
 import android.annotation.SuppressLint
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.webkit.WebSettings
 import androidx.webkit.WebSettingsCompat
@@ -408,7 +409,15 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
             realSettings["forceDark"] = settings.forceDark
         }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
-            realSettings["forceDarkStrategy"] = WebSettingsCompat.getForceDarkStrategy(settings)
+            try {
+                realSettings["forceDarkStrategy"] = WebSettingsCompat.getForceDarkStrategy(settings)
+            } catch (e: Exception) {
+                Log.w(
+                    LOG_TAG,
+                    "Unable to read forceDarkStrategy from the active WebView provider.",
+                    e
+                )
+            }
         }
         realSettings["layoutAlgorithm"] = settings.layoutAlgorithm.name
         realSettings["loadWithOverviewMode"] = settings.loadWithOverviewMode

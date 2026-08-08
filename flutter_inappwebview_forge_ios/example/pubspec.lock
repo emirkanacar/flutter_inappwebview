@@ -88,7 +88,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.1.17"
+    version: "2.1.18"
   flutter_inappwebview_forge_platform_interface:
     dependency: "direct main"
     description:

@@ -4109,6 +4109,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     public func dispose() {
+        guard !isDisposed else { return }
         isDisposed = true
         windowIdJSInitializationGeneration += 1
         windowIdJSInitializationScheduled = false

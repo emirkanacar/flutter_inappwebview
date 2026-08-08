@@ -63,14 +63,14 @@ open class InputAwareWebView : WebView {
                 return@post
             }
 
-            currentContainerView.requestFocus()
-            if (!useHybridComposition) {
-                resetInputConnection()
-            }
-
-            val inputMethodManager =
-                getContext().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
             try {
+                currentContainerView.requestFocus()
+                if (!useHybridComposition) {
+                    resetInputConnection()
+                }
+
+                val inputMethodManager =
+                    getContext().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
                 inputMethodManager?.restartInput(currentContainerView)
             } catch (error: RuntimeException) {
                 Log.w(LOG_TAG, "Unable to restore the Flutter input connection after fullscreen.", error)
@@ -200,12 +200,16 @@ open class InputAwareWebView : WebView {
 
             val inputMethodManager =
                 getContext().getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
-            // Make InputMethodManager believe that the target view now has focus. This causes
-            // it to create the input connection on targetView.getHandler().
-            targetView.onWindowFocusChanged(true)
+            try {
+                // Make InputMethodManager believe that the target view now has focus. This causes
+                // it to create the input connection on targetView.getHandler().
+                targetView.onWindowFocusChanged(true)
 
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                inputMethodManager?.isActive(postedContainerView)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    inputMethodManager?.isActive(postedContainerView)
+                }
+            } catch (error: RuntimeException) {
+                Log.w(LOG_TAG, "Unable to route the input connection to the target view.", error)
             }
         }
     }
