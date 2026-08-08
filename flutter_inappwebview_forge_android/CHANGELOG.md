@@ -1,3 +1,7 @@
+## 1.0.15 - 2026-08-08
+
+- Ignore renderer callbacks delivered for non-plugin WebView instances instead of throwing a cast exception during renderer lifecycle events ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+
 ## 1.0.14 - 2026-08-08
 
 - Ignore malformed non-string values in Android allow-list settings instead of throwing provider/channel cast errors ([#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)).

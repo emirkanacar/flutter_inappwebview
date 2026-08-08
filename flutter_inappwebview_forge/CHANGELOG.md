@@ -1,3 +1,9 @@
+## 2.1.8 - 2026-08-08
+
+- Android: ignore renderer callbacks for non-plugin WebView instances instead of raising a cast exception ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+- iOS: retain guarded prompt presentation behavior when no visible presenter exists; runtime validation remains pending for the location-prompt lifecycle ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+- Update root dependencies to Android 1.0.15 and iOS 2.1.5.
+
 ## 2.1.7 - 2026-08-08
 
 - Android: ignore malformed allow-list payload entries instead of throwing dynamic cast errors ([#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)).

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -23,6 +24,11 @@ void main() {
   _assert(
     source.contains('keyboardDidHideNotification'),
     'keyboardDidHideNotification is not registered',
+  );
+  _assert(
+    source.contains('guard let presentingViewController') &&
+        source.contains('visibleViewController'),
+    'iOS prompt presentation path does not guard missing presenters',
   );
   _assert(
     source.contains('func keyboardDidHide'),

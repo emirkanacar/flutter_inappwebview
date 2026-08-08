@@ -17,7 +17,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
         view: WebView,
         renderer: WebViewRenderProcess?
     ) {
-        val webView = view as InAppWebView
+        val webView = view as? InAppWebView ?: return
         val callback = object : WebViewChannelDelegate.RenderProcessUnresponsiveCallback() {
             override fun nonNullSuccess(action: Int): Boolean {
                 if (renderer != null) {
@@ -56,7 +56,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
         view: WebView,
         renderer: WebViewRenderProcess?
     ) {
-        val webView = view as InAppWebView
+        val webView = view as? InAppWebView ?: return
         val callback = object : WebViewChannelDelegate.RenderProcessResponsiveCallback() {
             override fun nonNullSuccess(action: Int): Boolean {
                 if (renderer != null) {

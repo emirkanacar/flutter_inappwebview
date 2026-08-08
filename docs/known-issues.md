@@ -28,6 +28,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; macOS/Xcode runtime validation pending. **Affected package:** macOS native WebView. **Impact:** a popup WebView could remain in the manager registry when its ownership state changed before disposal, leaving stale references during browser-window teardown. **Fix:** popup window IDs are removed unconditionally before the WebView releases its plugin reference. **Required evidence:** create/present/dismiss/recreate popup windows on macOS 11 through Tahoe with Xcode 26.
 
+#### #2697 - Android renderer callback type boundary
+
+**Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android renderer-process client. **Impact:** a renderer callback delivered for a non-Forge WebView instance could throw a cast exception before the callback reached the channel layer. **Fix:** renderer callbacks now use a nullable type check and return for unrelated WebView instances. **Required evidence:** renderer unresponsive/responsive and renderer-gone flows across API 19/21/29/35/36 and OEM providers.
+
+#### #2831 - iOS location prompt presenter lifecycle
+
+**Local status:** Source-validated mitigation; device reproduction and validation pending. **Affected package:** iOS prompt presentation. **Impact:** a location prompt cannot complete safely if scene transitions leave no visible presenter. **Fix reviewed:** prompt presentation paths already guard missing visible view controllers; no broader permission change is justified without an iOS 26 reproduction. **Required evidence:** minimal geolocation page across active/inactive scenes, popup presentation, dismissal, and app background/foreground transitions.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

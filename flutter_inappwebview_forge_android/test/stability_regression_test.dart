@@ -30,6 +30,16 @@ void main() {
     expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
   });
 
+  test('Android renderer callbacks ignore non-plugin WebView instances', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewRenderProcessClient.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('view as? InAppWebView ?: return'));
+    expect(source, isNot(contains('view as InAppWebView')));
+  });
+
   test('Android synchronous channel callbacks share bounded dispatch capacity', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

@@ -1,3 +1,7 @@
+## 2.1.5 - 2026-08-08
+
+- Keep prompt presentation paths guarded when no visible view controller is available; iOS device reproduction for the location-prompt lifecycle remains required ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+
 ## 2.1.4 - 2026-08-07
 
 - Skip duplicate `estimatedProgress` values before sending them across the platform channel.
