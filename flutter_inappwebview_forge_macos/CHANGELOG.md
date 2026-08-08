@@ -1,3 +1,7 @@
+## 1.1.5 - 2026-08-08
+
+- Keep the native macOS WebView frame synchronized to fractional Flutter platform-view bounds instead of relying on AppKit autoresizing masks ([#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826)).
+
 ## 1.1.4 - 2026-08-08
 
 - Validate macOS WebStorage data types, records, timestamps, and display names before native cleanup operations ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).

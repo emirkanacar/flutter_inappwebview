@@ -13,9 +13,9 @@ details remain in [known-issues.md](known-issues.md).
 
 | Local status | Issue records | Count | Meaning |
 | --- | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | Issue register below | 63 | Source, regression, and host/build checks pass; real validation remains. |
+| Locally implemented or mitigated; runtime validation pending | Issue register below | 64 | Source, regression, and host/build checks pass; real validation remains. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 61 | No complete local implementation boundary has been established. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 60 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Three PR-only records also have local implementations but remain outside the
@@ -29,13 +29,13 @@ Three PR-only records also have local implementations but remain outside the
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Bugs | 98 | 50 | 1 | 47 | 47 |
 | Enhancements | 16 | 6 | 0 | 10 | 10 |
-| Unlabelled | 8 | 7 | 0 | 1 | 1 |
+| Unlabelled | 8 | 8 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **63** | **1** | **61** | **58** |
+| **Total** | **125** | **64** | **1** | **60** | **57** |
 
 ## Issue register
 
-The following 63 issue records have moved out of the active implementation
+The following 64 issue records have moved out of the active implementation
 queue. They remain release gates until the required real validation is
 recorded:
 
@@ -43,7 +43,7 @@ recorded:
 `#2673`, `#2697`, `#2698`, `#2700`, `#2703`, `#2707`, `#2709`, `#2710`,
 `#2711`, `#2717`, `#2718`, `#2725`, `#2728`, `#2733`, `#2736`, `#2737`,
 `#2741`, `#2762`, `#2763`, `#2778`, `#2780`, `#2782`, `#2783`, `#2789`,
-`#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2814`, `#2819`, `#2831`,
+`#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2814`, `#2819`, `#2826`, `#2831`,
 `#2835`, `#2837`, `#2840`, `#2841`, `#2842`, `#2843`, `#2848`, `#2849`,
 `#2850`, `#2852`, `#2855`, `#2856`, `#2859`, `#2861`, `#2862`, `#2863`,
 `#2867`, `#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880`.

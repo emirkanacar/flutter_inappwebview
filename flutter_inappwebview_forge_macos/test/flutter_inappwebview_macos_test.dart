@@ -131,6 +131,27 @@ void _runSourceContractAssertions() {
       'macOS initial context menu is not passed to the native WebView',
     );
   }
+  if (!factorySource.contains('webView!.autoresizingMask = []') ||
+      !factorySource.contains('self.autoresizesSubviews = false') ||
+      !factorySource.contains('self.autoresizingMask = []') ||
+      !factorySource.contains('public override func layout()') ||
+      !factorySource.contains(
+        'public override func setFrameSize(_ newSize: NSSize)',
+      ) ||
+      !factorySource.contains(
+        'public override func setBoundsSize(_ newSize: NSSize)',
+      ) ||
+      !factorySource.contains(
+        'public override func resizeSubviews(withOldSize oldSize: NSSize)',
+      ) ||
+      !factorySource.contains('private func syncWebViewFrameToBounds()') ||
+      !factorySource.contains('bounds.width.isFinite') ||
+      !factorySource.contains('webView.frame != bounds') ||
+      !factorySource.contains('webView.frame = bounds')) {
+    throw StateError(
+      'macOS platform-view frame synchronization is not guarded',
+    );
+  }
   final delegateSource = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'
     'flutter_inappwebview_forge_macos/InAppWebView/WebViewChannelDelegate.swift',

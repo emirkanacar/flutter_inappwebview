@@ -1,3 +1,8 @@
+## 2.1.24 - 2026-08-08
+
+- macOS: synchronize native WebView frames with fractional Flutter platform-view bounds to prevent AppKit resize drift ([#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826)).
+- Update the root dependency to macOS 1.1.5.
+
 ## 2.1.23 - 2026-08-08
 
 - iOS: bridge iOS 26 geolocation permission decisions to the existing `onGeolocationPermissionsShowPrompt` callback ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).

@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 63 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 61 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 64 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 60 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -16,9 +16,9 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 63 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 64 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Open implementation or reproduction | 61 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 60 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -27,6 +27,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 #### #2707 - macOS browser-window teardown ownership
 
 **Local status:** Implemented and source-validated; macOS/Xcode runtime validation pending. **Affected package:** macOS native WebView. **Impact:** a popup WebView could remain in the manager registry when its ownership state changed before disposal, leaving stale references during browser-window teardown. **Fix:** popup window IDs are removed unconditionally before the WebView releases its plugin reference. **Required evidence:** create/present/dismiss/recreate popup windows on macOS 11 through Tahoe with Xcode 26.
+
+#### #2826 - macOS fractional platform-view frame drift
+
+**Local status:** Implemented and source-validated; macOS runtime validation pending. **Affected package:** macOS platform-view container. **Impact:** AppKit autoresizing could round the native `WKWebView` width and origin away from Flutter's stable fractional platform-view bounds, causing content to resize or zoom across frames. **Fix:** the native WebView and controller no longer use autoresizing masks for sizing; the WebView frame is synchronized to finite controller bounds during initialization, layout, frame-size, bounds-size, and subview-resize callbacks. The source regression test passes, and the Xcode 27 macOS example build passes with a temporary `MACOSX_DEPLOYMENT_TARGET=12.0` command-line override. **Required evidence:** reproduce the fractional-width example on Retina macOS across supported macOS versions and confirm the native frame remains equal to the Flutter platform-view bounds during resize and refresh cycles.
 
 #### #2697 - Android renderer callback type boundary
 
@@ -140,7 +144,7 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-63 locally implemented or mitigated issue records and three PR-only records.
+64 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -464,8 +468,7 @@ records already listed in [runtime-validation-pending.md](runtime-validation-pen
 have a documented local implementation or mitigation boundary; their next
 action is target validation, not speculative code change. The remaining
 active examples that still need a reproducible matrix before implementation
-are [#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826),
-[#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
+are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
 [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723),
 [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720),

@@ -11,10 +11,10 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Sixty-four issue records have a
-documented local implementation, mitigation, or source-review boundary: 63
+The export contains 125 issues and 73 PRs. Sixty-five issue records have a
+documented local implementation, mitigation, or source-review boundary: 64
 await real runtime validation and #2745 is closed by source review. The other
-61 issue records remain in this active plan. Three additional PR-only records
+60 issue records remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
@@ -22,9 +22,9 @@ validation; they do not change the issue counts below.
 | --- | ---: | ---: | ---: | ---: | --- |
 | Bugs | 98 | 50 | 1 | 47 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 10 | API/design decision and implementation required |
-| Unlabelled | 8 | 7 | 0 | 1 | Triage before implementation |
+| Unlabelled | 8 | 8 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **63** | **1** | **61** | **58 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **64** | **1** | **60** | **57 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -40,7 +40,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 63 implementation or mitigation records awaiting real validation are
+The 64 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -67,7 +67,7 @@ are locally implemented and awaiting real validation in the
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826), [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787), [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721) | Apple frame, keyboard viewport, and accessibility layout | Measure fractional platform-view frames, safe-area/inset changes, keyboard transitions, and display-size changes. Apply geometry fixes only after capturing before/after frames on iOS 17+ and macOS 11+. |
+| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787), [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721) | Apple keyboard viewport and accessibility layout | Measure safe-area/inset changes, keyboard transitions, and display-size changes. Apply geometry fixes only after capturing before/after frames on iOS 17+ and macOS 11+. |
 | [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636) | iOS/macOS startup and disposal crashes | Run symbolicated tests for startup, `windowId`, and dispose/recreate. Check frame/content-world initialization and main-actor ownership. |
 | [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/Drawer/modal transitions, local HTML resume, form autofill, and navigation headers. Separate Flutter-engine regressions from plugin channel behavior. |
 
@@ -122,10 +122,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 63 issue records and three PR-only
+items. The complete register contains 64 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 61 issue records that still need implementation, design, or
+keeps only the 60 issue records that still need implementation, design, or
 reproduction.
 
 ## PR queue
@@ -178,13 +178,13 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-08 status pass has 63 locally implemented or mitigated issue
+The 2026-08-08 status pass has 64 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, and 61 active issue records in this plan. The runtime-pending records
+review, and 60 active issue records in this plan. The runtime-pending records
 are deliberately not counted as active implementation work; their release
 gates live in [`runtime-validation-pending.md`](runtime-validation-pending.md).
-The active queue contains 47 bugs, 10 enhancements, 1 unlabelled record, and
-3 showcase records (58 active technical records after excluding showcases).
+The active queue contains 47 bugs, 10 enhancements, 0 unlabelled records, and
+3 showcase records (57 active technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:
 
