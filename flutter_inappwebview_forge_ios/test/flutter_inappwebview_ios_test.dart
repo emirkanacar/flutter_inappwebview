@@ -16,6 +16,13 @@ void _assert(bool condition, String message) {
 }
 
 void main() {
+  test(
+    'iOS native source contracts remain guarded',
+    _runSourceContractAssertions,
+  );
+}
+
+void _runSourceContractAssertions() {
   final source = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift',
@@ -91,6 +98,13 @@ void main() {
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',
+  );
+  _assert(
+    source.contains(
+          'inAppWebViewManager?.windowWebViews.removeValue(forKey: windowId)',
+        ) &&
+        !source.contains('self?.loadUrl(urlRequest: navigationAction.request'),
+    'iOS rejected popups must not navigate the caller WebView',
   );
   _assert(
     source.contains('func keyboardDidHide'),

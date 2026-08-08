@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -15,13 +16,24 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test(
+    'Linux native source contracts remain guarded',
+    _runSourceContractAssertions,
+  );
+}
+
+void _runSourceContractAssertions() {
   final source = _sourceFile(
     'linux/in_app_webview/in_app_webview.cc',
   ).readAsStringSync();
-  final cmakeSource = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
-  final readmeSource = _sourceFile(
-    'flutter_inappwebview_forge_linux/README.md',
+  final softwareRenderingSource = _sourceFile(
+    'linux/utils/software_rendering.cc',
   ).readAsStringSync();
+  final softwareRenderingHeader = _sourceFile(
+    'linux/utils/software_rendering.h',
+  ).readAsStringSync();
+  final cmakeSource = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
+  final readmeSource = _sourceFile('README.md').readAsStringSync();
 
   _expectContains(
     source,
@@ -80,5 +92,25 @@ void main() {
     browserSource,
     'falling back to pixel-buffer rendering',
     'the actionable GL fallback diagnostic',
+  );
+  _expectContains(
+    softwareRenderingSource,
+    'FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL',
+    'the explicit no-GL software-rendering override',
+  );
+  _expectContains(
+    softwareRenderingSource,
+    'setenv("LIBGL_ALWAYS_SOFTWARE", "1", 0)',
+    'the early software-rendering environment setup',
+  );
+  _expectContains(
+    source,
+    '!software_rendering_requested && !egl_import_failed_permanently',
+    'the DMA-BUF skip in the pixel-buffer path',
+  );
+  _expectContains(
+    softwareRenderingHeader,
+    'software WPE buffers',
+    'the software-buffer fallback documentation',
   );
 }

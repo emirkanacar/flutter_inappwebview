@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -15,6 +16,10 @@ void _assert(bool condition, String message) {
 }
 
 void main() {
+  test('Web source contracts remain guarded', _runSourceContractAssertions);
+}
+
+void _runSourceContractAssertions() {
   final supportSource = _sourceFile(
     'lib/assets/web/web_support.js',
   ).readAsStringSync();
@@ -71,5 +76,11 @@ void main() {
     supportSource.contains('return null;') &&
         supportSource.contains('getIFrameUrl'),
     'cross-origin URL reads must not reuse the iframe source',
+  );
+  _assert(
+    supportSource.contains('evaluateJavascript: function(source)') &&
+        supportSource.contains('contentWindow?.eval(source)') &&
+        RegExp(r'\beval\s*\(').allMatches(supportSource).length == 1,
+    'web dynamic JavaScript evaluation must remain limited to the explicit API',
   );
 }

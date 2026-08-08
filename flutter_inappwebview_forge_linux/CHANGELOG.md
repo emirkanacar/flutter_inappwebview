@@ -1,3 +1,8 @@
+## 1.0.5 - 2026-08-08
+
+- Make `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` force software WPE buffers before startup and skip DMA-BUF/EGL import in the pixel-buffer path, addressing white/transparent output reports on affected Intel/X11 systems ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).
+- Add static regression coverage for the no-GL software-buffer contract.
+
 ## 1.0.4 - 2026-08-08
 
 - Fall back from GtkGLArea to pixel-buffer rendering when GL initialization fails at runtime, with an actionable diagnostic for affected X11/Intel configurations ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).

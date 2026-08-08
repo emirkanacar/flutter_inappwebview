@@ -10,7 +10,6 @@ import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.io.Serializable
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.UUID
@@ -120,13 +119,13 @@ open class ChromeSafariBrowserManager(
             putString("url", url)
             putString("id", viewId)
             putString("managerId", id)
-            putSerializable("headers", headers as? Serializable)
+            Util.putValueExtra(this, "headers", headers)
             putString("referrer", referrer)
-            putSerializable("otherLikelyURLs", otherLikelyURLs as? Serializable)
-            putSerializable("settings", settings as? Serializable)
-            putSerializable("actionButton", actionButton as? Serializable)
-            putSerializable("secondaryToolbar", secondaryToolbar as? Serializable)
-            putSerializable("menuItemList", menuItemList as? Serializable)
+            Util.putValueExtra(this, "otherLikelyURLs", otherLikelyURLs)
+            Util.putValueExtra(this, "settings", settings)
+            Util.putValueExtra(this, "actionButton", actionButton)
+            Util.putValueExtra(this, "secondaryToolbar", secondaryToolbar)
+            Util.putValueExtra(this, "menuItemList", menuItemList)
         }
 
         val actualSettings = settings ?: hashMapOf()

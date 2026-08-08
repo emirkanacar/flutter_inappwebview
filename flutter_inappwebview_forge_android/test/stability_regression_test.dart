@@ -149,6 +149,60 @@ void main() {
     );
   });
 
+  test('Android browser activity extras avoid Java serialization', () {
+    final activitySource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'in_app_browser/InAppBrowserActivity.kt',
+    ).readAsStringSync();
+    final browserManagerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'in_app_browser/InAppBrowserManager.kt',
+    ).readAsStringSync();
+    final chromeActivitySource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'chrome_custom_tabs/ChromeCustomTabsActivity.kt',
+    ).readAsStringSync();
+    final chromeManagerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'chrome_custom_tabs/ChromeSafariBrowserManager.kt',
+    ).readAsStringSync();
+    final utilSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'Util.kt',
+    ).readAsStringSync();
+
+    for (final source in [
+      activitySource,
+      browserManagerSource,
+      chromeActivitySource,
+      chromeManagerSource,
+    ]) {
+      expect(source, isNot(contains('getSerializable')));
+      expect(source, isNot(contains('putSerializable')));
+      expect(source, isNot(contains('java.io.Serializable')));
+    }
+    expect(utilSource, contains('fun putValueExtra'));
+    expect(utilSource, contains('bundle.putBundle'));
+    expect(utilSource, contains('bundle.getBundle'));
+  });
+
+  test(
+    'Android dynamic JavaScript evaluation remains an explicit API boundary',
+    () {
+      final source = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        'plugin_scripts_js/PluginScriptsUtil.kt',
+      ).readAsStringSync();
+
+      expect(
+        source,
+        contains('EVALUATE_JAVASCRIPT_WITH_CONTENT_WORLD_WRAPPER_JS_SOURCE'),
+      );
+      expect(source, contains('VAR_PLACEHOLDER_VALUE'));
+      expect(RegExp(r'\beval\s*\(').allMatches(source), hasLength(1));
+    },
+  );
+
   test(
     'Android cookie clearing does not flush synchronously after async deletion',
     () {

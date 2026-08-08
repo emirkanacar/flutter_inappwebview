@@ -124,7 +124,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
     manager = currentManager
 
     @Suppress("UNCHECKED_CAST")
-    val settingsMap = bundle.getSerializable("settings") as? MutableMap<String, Any?> ?: hashMapOf()
+    val settingsMap = Util.getValueExtra(bundle, "settings") as? MutableMap<String, Any?> ?: hashMapOf()
     customSettings.parse(settingsMap)
     windowId = bundle.getInt("windowId")
 
@@ -145,7 +145,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
     }
 
     @Suppress("UNCHECKED_CAST")
-    val pullToRefreshInitialSettings = bundle.getSerializable("pullToRefreshInitialSettings") as? MutableMap<String, Any?>
+    val pullToRefreshInitialSettings = Util.getValueExtra(bundle, "pullToRefreshInitialSettings") as? MutableMap<String, Any?>
     val pullToRefreshLayoutChannel = MethodChannel(
       plugin.requireMessenger(),
       PullToRefreshLayout.METHOD_CHANNEL_NAME_PREFIX + id
@@ -180,11 +180,11 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
 
     fromActivity = bundle.getString("fromActivity")
     @Suppress("UNCHECKED_CAST")
-    val contextMenu = bundle.getSerializable("contextMenu") as? MutableMap<String, Any?>
+    val contextMenu = Util.getValueExtra(bundle, "contextMenu") as? MutableMap<String, Any?>
     @Suppress("UNCHECKED_CAST")
-    val initialUserScripts = bundle.getSerializable("initialUserScripts") as? List<MutableMap<String, Any?>>
+    val initialUserScripts = Util.getValueExtra(bundle, "initialUserScripts") as? List<MutableMap<String, Any?>>
     @Suppress("UNCHECKED_CAST")
-    val menuItemList = bundle.getSerializable("menuItems") as? List<MutableMap<String, Any?>>
+    val menuItemList = Util.getValueExtra(bundle, "menuItems") as? List<MutableMap<String, Any?>>
     for (menuItem in menuItemList ?: emptyList()) {
       InAppBrowserMenuItem.fromMap(menuItem)?.let(menuItems::add)
     }
@@ -221,7 +221,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
       } else {
         val initialFile = bundle.getString("initialFile")
         @Suppress("UNCHECKED_CAST")
-        val initialUrlRequest = bundle.getSerializable("initialUrlRequest") as? MutableMap<String, Any?>
+        val initialUrlRequest = Util.getValueExtra(bundle, "initialUrlRequest") as? MutableMap<String, Any?>
         val initialData = bundle.getString("initialData")
         if (initialFile != null) {
           try {

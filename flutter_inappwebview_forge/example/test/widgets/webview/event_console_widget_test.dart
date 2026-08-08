@@ -42,7 +42,7 @@ void main() {
       await tester.pump();
 
       expect(find.text('Page loaded'), findsOneWidget);
-      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(SliverList), findsOneWidget);
     });
 
     testWidgets('shows clear button in header', (tester) async {
@@ -218,7 +218,7 @@ void main() {
       );
 
       final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, Colors.red.shade50);
+      expect(decoration.color, Colors.red.shade100);
     });
   });
 }

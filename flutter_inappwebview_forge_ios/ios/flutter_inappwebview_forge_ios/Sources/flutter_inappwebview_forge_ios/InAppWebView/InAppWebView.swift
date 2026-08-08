@@ -2829,11 +2829,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         callback.nonNullSuccess = { (handledByClient: Bool) in
             return !handledByClient
         }
-        callback.defaultBehaviour = { [weak self] (handledByClient: Bool?) in
-            if inAppWebViewManager?.windowWebViews[windowId] != nil {
-                inAppWebViewManager?.windowWebViews.removeValue(forKey: windowId)
-            }
-            self?.loadUrl(urlRequest: navigationAction.request, allowingReadAccessTo: nil)
+        callback.defaultBehaviour = { (handledByClient: Bool?) in
+            // A nil/false onCreateWindow result means that the host did not
+            // accept the popup. Keep the WebKit target window blocked, just
+            // like Android and the public API contract; callers that want to
+            // reuse the current WebView can explicitly call loadUrl from the
+            // callback before returning false.
+            inAppWebViewManager?.windowWebViews.removeValue(forKey: windowId)
         }
         callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
             print(code + ", " + (message ?? ""))

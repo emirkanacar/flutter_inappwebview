@@ -19,8 +19,10 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('Method Tester'), findsOneWidget);
       expect(find.byType(TextField), findsOneWidget);
+      final searchField = tester.widget<TextField>(find.byType(TextField));
+      expect(searchField.decoration?.hintText, startsWith('Search '));
+      expect(searchField.decoration?.hintText, endsWith(' methods...'));
       expect(
         find.textContaining('WebView controller not available'),
         findsOneWidget,

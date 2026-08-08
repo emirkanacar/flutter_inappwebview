@@ -1,3 +1,9 @@
+## 1.0.26 - 2026-08-08
+
+- Replace Java-serialized InAppBrowser and Chrome Custom Tabs activity extras with primitive and nested-`Bundle` values, eliminating the `Bundle.getSerializable`/`putSerializable` boundary ([#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)).
+- Add source regression coverage for the activity-extra codec and the explicit JavaScript evaluation boundary.
+- Keep the non-Forge `shouldOverrideUrlLoading` fallback Boolean-returning so Android native compilation remains valid.
+
 ## 1.0.25 - 2026-08-08
 
 - Guard Android file chooser callback casts and return safely when the platform callback shape is unsupported ([#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

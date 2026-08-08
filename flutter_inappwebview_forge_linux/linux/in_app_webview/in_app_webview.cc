@@ -1279,12 +1279,19 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
     // Check buffer type to determine best rendering path
     bool is_dma_buf = WPE_IS_BUFFER_DMA_BUF(buffer);
     bool is_shm = WPE_IS_BUFFER_SHM(buffer);
+    const char* disable_gl = g_getenv("FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL");
+    bool software_rendering_requested =
+        disable_gl != nullptr &&
+        (strcmp(disable_gl, "1") == 0 || strcasecmp(disable_gl, "true") == 0);
     
     // === Priority 1: Try EGL image import (zero-copy, best performance) ===
     // Only attempt EGL for DMA-BUF buffers (SHM buffers cannot be imported via EGL)
-    // Skip if previous EGL attempts failed
+    // Skip if software rendering was explicitly requested or previous EGL
+    // attempts failed. A no-GL WebView must continue into SHM/pixel import;
+    // keeping a successfully imported EGL image would leave the pixel-buffer
+    // texture without CPU-readable pixels and produce a white surface.
     if (egl_display_ != nullptr && 
-        is_dma_buf && !egl_import_failed_permanently) {
+        is_dma_buf && !software_rendering_requested && !egl_import_failed_permanently) {
       GError* error = nullptr;
       void* egl_image = wpe_buffer_import_to_egl_image(buffer, &error);
       

@@ -142,18 +142,31 @@ bool HasProblematicGpuDriver() {
   return false;
 }
 
+bool IsTruthyEnvironmentValue(const char* value) {
+  return value != nullptr &&
+         (strcmp(value, "1") == 0 || strcasecmp(value, "true") == 0);
+}
+
 }  // namespace
 
 bool ShouldUseSoftwareRendering() {
+  // The explicit no-GL mode must also force WPE/WebKit to produce software
+  // buffers. Otherwise WPEPlatform can still emit DMA-BUF buffers which the
+  // pixel-buffer fallback cannot display without an EGL import.
+  if (IsTruthyEnvironmentValue(getenv("FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL"))) {
+    debugLog("Explicit no-GL mode requested, using software rendering");
+    return true;
+  }
+
   // Check user override: skip detection
   const char* skip_check = getenv("FLUTTER_INAPPWEBVIEW_SKIP_DMABUF_CHECK");
-  if (skip_check && (strcmp(skip_check, "1") == 0 || strcasecmp(skip_check, "true") == 0)) {
+  if (IsTruthyEnvironmentValue(skip_check)) {
     return false;
   }
   
   // Already set by user or another component
   const char* already_sw = getenv("LIBGL_ALWAYS_SOFTWARE");
-  if (already_sw && (strcmp(already_sw, "1") == 0 || strcasecmp(already_sw, "true") == 0)) {
+  if (IsTruthyEnvironmentValue(already_sw)) {
     return true;  // Already in software mode
   }
   
@@ -181,7 +194,7 @@ bool ShouldUseSoftwareRendering() {
 bool ApplySoftwareRenderingIfNeeded() {
   // Already set - nothing to do
   const char* already_sw = getenv("LIBGL_ALWAYS_SOFTWARE");
-  if (already_sw && (strcmp(already_sw, "1") == 0 || strcasecmp(already_sw, "true") == 0)) {
+  if (IsTruthyEnvironmentValue(already_sw)) {
     debugLog("Software rendering already enabled (LIBGL_ALWAYS_SOFTWARE set)");
     return true;
   }

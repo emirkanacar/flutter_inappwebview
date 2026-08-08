@@ -40,10 +40,9 @@ Their remaining device/build checks are included below only when they block rele
 
 | Issues | Work | First action | Acceptance criteria |
 | --- | --- | --- | --- |
-| [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) | Linux software-rendering white/transparent output | Reproduce Fedora/X11 + Intel i915 with `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` and `LIBGL_ALWAYS_SOFTWARE=1`; capture backend, EGL, DMA-BUF, and texture logs. | A supported configuration renders correctly, or the fallback documents a known limitation and emits actionable diagnostics. |
 | [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | iOS 26 location prompt cannot close | Build a minimal permission page and test iOS 26 with scene transitions, popup presentation, and dismissal. | A reproducible callback/window path exists before changing shared permission code; add a device regression test if confirmed. |
-| [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) | iOS `onCreateWindow` result ignored | Reproduce `window.open` with a returned child WebView and record the `CreateWindowAction` lifecycle and target frame. | The returned child is attached or a structured unsupported result is delivered exactly once. |
-| [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745), [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | Security claims around `eval()` and CWE-502 | Perform a source-to-sink review of generated JavaScript and native deserialization boundaries. | Each claim is either closed with evidence, or has a minimal security fix and regression test. Do not label either report a vulnerability from its title alone. |
+
+The source work for [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861) (Linux software-buffer fallback), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) (iOS rejected popup navigation), and [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) (Android Bundle extras) is complete. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) is closed by source review. Their Linux/iOS runtime gates are tracked in `known-issues.md`; only #2831 remains in the P0 reproduction queue.
 
 ### P1: Native stability and compatibility
 

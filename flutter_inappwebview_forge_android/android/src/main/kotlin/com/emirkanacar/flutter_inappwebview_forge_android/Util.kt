@@ -227,6 +227,141 @@ class Util private constructor() {
             }
         }
 
+        private const val BUNDLE_VALUE_TYPE = "__flutter_value_type"
+        private const val BUNDLE_VALUE = "__flutter_value"
+        private const val TYPE_NULL = "null"
+        private const val TYPE_STRING = "string"
+        private const val TYPE_BOOLEAN = "boolean"
+        private const val TYPE_INT = "int"
+        private const val TYPE_LONG = "long"
+        private const val TYPE_SHORT = "short"
+        private const val TYPE_BYTE = "byte"
+        private const val TYPE_DOUBLE = "double"
+        private const val TYPE_FLOAT = "float"
+        private const val TYPE_BYTE_ARRAY = "byte_array"
+        private const val TYPE_MAP = "map"
+        private const val TYPE_LIST = "list"
+
+        /**
+         * Stores a supported Flutter channel value without Java serialization.
+         * These extras stay inside plugin-owned activities, but using Bundle
+         * primitives also keeps them safe if an intent is restored or
+         * inspected by the platform.
+         */
+        @JvmStatic
+        fun putValueExtra(bundle: Bundle, key: String, value: Any?) {
+            encodeBundleValue(value)?.let { bundle.putBundle(key, it) }
+        }
+
+        @JvmStatic
+        fun getValueExtra(bundle: Bundle, key: String): Any? =
+            bundle.getBundle(key)?.let(::decodeBundleValue)
+
+        private fun encodeBundleValue(value: Any?): Bundle? {
+            val encoded = Bundle()
+            when (value) {
+                null -> encoded.putString(BUNDLE_VALUE_TYPE, TYPE_NULL)
+                is String -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_STRING)
+                    encoded.putString(BUNDLE_VALUE, value)
+                }
+                is CharSequence -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_STRING)
+                    encoded.putString(BUNDLE_VALUE, value.toString())
+                }
+                is Boolean -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_BOOLEAN)
+                    encoded.putBoolean(BUNDLE_VALUE, value)
+                }
+                is Int -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_INT)
+                    encoded.putInt(BUNDLE_VALUE, value)
+                }
+                is Long -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_LONG)
+                    encoded.putLong(BUNDLE_VALUE, value)
+                }
+                is Short -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_SHORT)
+                    encoded.putShort(BUNDLE_VALUE, value)
+                }
+                is Byte -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_BYTE)
+                    encoded.putByte(BUNDLE_VALUE, value)
+                }
+                is Double -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_DOUBLE)
+                    encoded.putDouble(BUNDLE_VALUE, value)
+                }
+                is Float -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_FLOAT)
+                    encoded.putFloat(BUNDLE_VALUE, value)
+                }
+                is ByteArray -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_BYTE_ARRAY)
+                    encoded.putByteArray(BUNDLE_VALUE, value)
+                }
+                is Map<*, *> -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_MAP)
+                    val entries = Bundle()
+                    value.forEach { (mapKey, mapValue) ->
+                        if (mapKey is String) {
+                            encodeBundleValue(mapValue)?.let { entries.putBundle(mapKey, it) }
+                        }
+                    }
+                    encoded.putBundle(BUNDLE_VALUE, entries)
+                }
+                is List<*> -> {
+                    encoded.putString(BUNDLE_VALUE_TYPE, TYPE_LIST)
+                    val entries = Bundle()
+                    value.forEachIndexed { index, item ->
+                        encodeBundleValue(item)?.let { entries.putBundle(index.toString(), it) }
+                    }
+                    encoded.putBundle(BUNDLE_VALUE, entries)
+                }
+                else -> return null
+            }
+            return encoded
+        }
+
+        private fun decodeBundleValue(bundle: Bundle): Any? {
+            return when (bundle.getString(BUNDLE_VALUE_TYPE)) {
+                TYPE_NULL -> null
+                TYPE_STRING -> bundle.getString(BUNDLE_VALUE)
+                TYPE_BOOLEAN -> bundle.getBoolean(BUNDLE_VALUE)
+                TYPE_INT -> bundle.getInt(BUNDLE_VALUE)
+                TYPE_LONG -> bundle.getLong(BUNDLE_VALUE)
+                TYPE_SHORT -> bundle.getShort(BUNDLE_VALUE)
+                TYPE_BYTE -> bundle.getByte(BUNDLE_VALUE)
+                TYPE_DOUBLE -> bundle.getDouble(BUNDLE_VALUE)
+                TYPE_FLOAT -> bundle.getFloat(BUNDLE_VALUE)
+                TYPE_BYTE_ARRAY -> bundle.getByteArray(BUNDLE_VALUE)
+                TYPE_MAP -> {
+                    val decoded = HashMap<String, Any?>()
+                    val entries = bundle.getBundle(BUNDLE_VALUE)
+                    entries?.keySet()?.forEach { key ->
+                        entries.getBundle(key)?.let {
+                            decoded[key] = decodeBundleValue(it)
+                        }
+                    }
+                    decoded
+                }
+                TYPE_LIST -> {
+                    val decoded = ArrayList<Any?>()
+                    val entries = bundle.getBundle(BUNDLE_VALUE)
+                    entries?.keySet()
+                        ?.sortedBy { it.toIntOrNull() }
+                        ?.forEach { key ->
+                            entries.getBundle(key)?.let {
+                                decoded.add(decodeBundleValue(it))
+                            }
+                        }
+                    decoded
+                }
+                else -> null
+            }
+        }
+
         @JvmStatic
         fun objEquals(a: Any?, b: Any?): Boolean {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

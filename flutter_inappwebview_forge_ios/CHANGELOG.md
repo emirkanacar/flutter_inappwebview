@@ -1,3 +1,8 @@
+## 2.1.14 - 2026-08-08
+
+- Align the repository Flutter development baseline with 3.44.8 and register the iOS native source assertions as an executable regression test.
+- Block rejected or unhandled `onCreateWindow` popups without loading their target URL into the caller WebView ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
+
 ## 2.1.13 - 2026-08-08
 
 - Validate iOS WebMessageChannel port indices and message payloads before accessing ports or dispatching messages ([#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584)).

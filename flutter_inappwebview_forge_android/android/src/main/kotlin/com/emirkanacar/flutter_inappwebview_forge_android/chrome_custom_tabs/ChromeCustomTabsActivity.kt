@@ -21,6 +21,7 @@ import androidx.browser.customtabs.EngagementSignalsCallback;
 import androidx.annotation.CallSuper
 
 import com.emirkanacar.flutter_inappwebview_forge_android.R;
+import com.emirkanacar.flutter_inappwebview_forge_android.Util;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.AndroidResource;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.CustomTabsActionButton;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.CustomTabsMenuItem;
@@ -117,21 +118,22 @@ open class ChromeCustomTabsActivity : Activity(), Disposable {
 
     initialUrl = bundle.getString("url")
     @Suppress("UNCHECKED_CAST")
-    initialHeaders = bundle.getSerializable("headers") as? Map<String, String>
+    initialHeaders = Util.getValueExtra(bundle, "headers") as? Map<String, String>
     initialReferrer = bundle.getString("referrer")
-    initialOtherLikelyURLs = bundle.getStringArrayList("otherLikelyURLs")?.toList()
+    initialOtherLikelyURLs = (Util.getValueExtra(bundle, "otherLikelyURLs") as? List<*>)
+      ?.filterIsInstance<String>()
 
     @Suppress("UNCHECKED_CAST")
-    val settings = bundle.getSerializable("settings") as? MutableMap<String, Any?>
+    val settings = Util.getValueExtra(bundle, "settings") as? MutableMap<String, Any?>
     customSettings = ChromeCustomTabsSettings().parse(settings ?: hashMapOf())
     @Suppress("UNCHECKED_CAST")
-    val actionButtonMap = bundle.getSerializable("actionButton") as? MutableMap<String, Any?>
+    val actionButtonMap = Util.getValueExtra(bundle, "actionButton") as? MutableMap<String, Any?>
     actionButton = CustomTabsActionButton.fromMap(actionButtonMap)
     @Suppress("UNCHECKED_CAST")
-    val secondaryToolbarMap = bundle.getSerializable("secondaryToolbar") as? MutableMap<String, Any?>
+    val secondaryToolbarMap = Util.getValueExtra(bundle, "secondaryToolbar") as? MutableMap<String, Any?>
     secondaryToolbar = CustomTabsSecondaryToolbar.fromMap(secondaryToolbarMap)
     @Suppress("UNCHECKED_CAST")
-    val menuItemList = bundle.getSerializable("menuItemList") as? List<MutableMap<String, Any?>>
+    val menuItemList = Util.getValueExtra(bundle, "menuItemList") as? List<MutableMap<String, Any?>>
     for (menuItem in menuItemList ?: emptyList()) {
       CustomTabsMenuItem.fromMap(menuItem)?.let(menuItems::add)
     }

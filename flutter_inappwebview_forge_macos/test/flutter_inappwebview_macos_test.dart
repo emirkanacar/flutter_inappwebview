@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -9,6 +10,13 @@ File _sourceFile(String relativePath) {
 }
 
 void main() {
+  test(
+    'macOS native source contracts remain guarded',
+    _runSourceContractAssertions,
+  );
+}
+
+void _runSourceContractAssertions() {
   final settings = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'
     'flutter_inappwebview_forge_macos/WebAuthenticationSession/'
@@ -69,7 +77,9 @@ void main() {
   ).readAsStringSync();
   if (!customSchemeSource.contains('webView as? InAppWebView') ||
       !customSchemeSource.contains('didFailWithError')) {
-    throw StateError('macOS custom scheme handler does not guard WebView ownership');
+    throw StateError(
+      'macOS custom scheme handler does not guard WebView ownership',
+    );
   }
   final storageSource = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'

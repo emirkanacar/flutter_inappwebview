@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -15,6 +16,13 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test(
+    'Windows native source contracts remain guarded',
+    _runSourceContractAssertions,
+  );
+}
+
+void _runSourceContractAssertions() {
   final platformUtilSource = _sourceFile(
     'windows/platform_util.cpp',
   ).readAsStringSync();

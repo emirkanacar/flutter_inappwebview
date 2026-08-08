@@ -12,6 +12,8 @@ namespace flutter_inappwebview_plugin {
 //
 // Environment variables:
 // - LIBGL_ALWAYS_SOFTWARE=1 : Force software rendering (standard WebKit flag)
+// - FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1 : Force pixel-buffer rendering and
+//   software WPE buffers so DMA-BUF is not selected by the WebKit process
 // - FLUTTER_INAPPWEBVIEW_SKIP_DMABUF_CHECK=1 : Skip detection, use hardware
 //
 // If this returns true, LIBGL_ALWAYS_SOFTWARE=1 should be set BEFORE any

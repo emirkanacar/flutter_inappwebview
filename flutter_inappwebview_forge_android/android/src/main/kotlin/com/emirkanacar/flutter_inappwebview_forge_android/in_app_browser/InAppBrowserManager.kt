@@ -10,10 +10,10 @@ import android.provider.Browser
 import android.util.Log
 import android.webkit.MimeTypeMap
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
+import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.io.Serializable
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.UUID
@@ -164,7 +164,7 @@ open class InAppBrowserManager(
 
         val extras = Bundle().apply {
             putString("fromActivity", activity.javaClass.name)
-            putSerializable("initialUrlRequest", urlRequest as? Serializable)
+            Util.putValueExtra(this, "initialUrlRequest", urlRequest)
             putString("initialFile", assetFilePath)
             putString("initialData", data)
             putString("initialMimeType", mimeType)
@@ -173,15 +173,12 @@ open class InAppBrowserManager(
             putString("initialHistoryUrl", historyUrl)
             putString("id", id)
             putString("managerId", this@InAppBrowserManager.id)
-            putSerializable("settings", settings as? Serializable)
-            putSerializable("contextMenu", contextMenu as? Serializable)
+            Util.putValueExtra(this, "settings", settings)
+            Util.putValueExtra(this, "contextMenu", contextMenu)
             putInt("windowId", windowId)
-            putSerializable("initialUserScripts", initialUserScripts as? Serializable)
-            putSerializable(
-                "pullToRefreshInitialSettings",
-                pullToRefreshInitialSettings as? Serializable
-            )
-            putSerializable("menuItems", menuItems as? Serializable)
+            Util.putValueExtra(this, "initialUserScripts", initialUserScripts)
+            Util.putValueExtra(this, "pullToRefreshInitialSettings", pullToRefreshInitialSettings)
+            Util.putValueExtra(this, "menuItems", menuItems)
         }
         startInAppBrowserActivity(activity, extras)
     }
