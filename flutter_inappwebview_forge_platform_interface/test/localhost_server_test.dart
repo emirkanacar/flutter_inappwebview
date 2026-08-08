@@ -35,4 +35,39 @@ void main() {
     await server.close();
     expect(server.isRunning(), isFalse);
   });
+
+  test('localhost server can restart after a controlled close', () async {
+    final server = DefaultInAppLocalhostServer(
+      const PlatformInAppLocalhostServerCreationParams(port: 0),
+    );
+
+    await server.start();
+    expect(server.isRunning(), isTrue);
+    await server.close();
+    expect(server.isRunning(), isFalse);
+
+    await server.start();
+    expect(server.isRunning(), isTrue);
+    await server.close();
+    expect(server.isRunning(), isFalse);
+  });
+
+  test('closing one localhost server does not clear another', () async {
+    final first = DefaultInAppLocalhostServer(
+      const PlatformInAppLocalhostServerCreationParams(port: 0),
+    );
+    final second = DefaultInAppLocalhostServer(
+      const PlatformInAppLocalhostServerCreationParams(port: 0),
+    );
+
+    await first.start();
+    await second.start();
+    try {
+      await first.close();
+      expect(first.isRunning(), isFalse);
+      expect(second.isRunning(), isTrue);
+    } finally {
+      await second.close();
+    }
+  });
 }

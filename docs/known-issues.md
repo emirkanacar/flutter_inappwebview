@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2598, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 51 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 67 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2598, #2636, #2659, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 50 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,10 +19,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 67 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 7 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 51 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 50 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -206,7 +206,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-66 locally implemented or mitigated issue records and three PR-only records.
+67 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -520,9 +520,9 @@ frame/inset comparison remain required.
 
 ### #2720 — iOS localhost server is stale after background/resume
 
-**Local status:** Partial mitigation implemented and source-validated; the issue remains active until release-mode resume/reload behavior is validated. **Affected package:** shared platform-interface localhost server used by iOS and Android. **Impact:** after the OS terminates the local HTTP listener while the app is backgrounded, `isRunning()` could continue to return `true` and prevent an application from deciding whether the server must be started again. **Confidence:** Confirmed stale-reference path; the complete WebView resume failure still needs runtime reproduction.
+**Local status:** Implemented and source-validated; iOS/Android runtime validation pending. **Affected package:** shared platform-interface localhost server used by iOS and Android. **Impact:** after the OS terminates the local HTTP listener while the app is backgrounded, `isRunning()` could continue to return `true` and prevent an application from deciding whether the server must be started again. **Confidence:** Confirmed stale-reference path; the complete release-mode WebView resume failure remains unverified.
 
-The default server now listens for the `HttpServer` request stream's `onDone` and `onError` events and clears its reference only when the callback belongs to the current server instance. This keeps intentional close, external listener termination, and replacement-server races idempotent. The fix does not silently restart a server or reload a WebView, because the public API does not own the application's server instances or initial URL lifecycle.
+The default server now listens for the `HttpServer` request stream's `onDone` and `onError` events and clears its reference only when the callback belongs to the current server instance. This keeps intentional close, external listener termination, and replacement-server races idempotent. The platform-interface regression suite also covers normal close, controlled restart, and independent server lifecycles. The fix does not silently restart a server or reload a WebView, because the public API does not own the application's server instances or initial URL lifecycle.
 
 **Required evidence:** run iOS and Android release builds through background/lock/resume with a local HTML asset, verify `isRunning()` becomes `false` after listener termination, explicitly restart the server, and reload the WebView. Confirm shared/non-shared ports and multiple server instances do not cross-clear each other's state.
 
@@ -577,7 +577,6 @@ active examples that still need a reproducible matrix before implementation
 are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
 [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
-[#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
