@@ -2,13 +2,16 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 58 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2636, #2659, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 55 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
 - **Confirmed path**: the report is consistent with a concrete code path in this repository.
 - **Strong report**: the report contains a reproducible scenario and useful native/platform evidence, but the root cause still needs a regression test.
 - **Needs reproduction**: the symptom is important, but the report does not yet contain enough evidence to safely change the implementation.
+- **Host/platform boundary**: the evidence identifies an external runtime or
+  provider failure with no package-owned control point; the upstream record
+  remains open for host updates or additional evidence.
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
@@ -18,7 +21,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 | --- | ---: | --- |
 | Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Open implementation or reproduction | 58 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 3 issues ([#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 55 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -139,6 +143,30 @@ The same ownership guard now covers page-started, page-finished, document-start,
 #### #2737 - Web iframe URL tracking
 
 **Local status:** Existing implementation source-validated; browser integration validation pending. **Affected package:** Web. **User impact:** same-origin iframe navigation must report the current location, while cross-origin reads must not leak or repeat the initial `src`. **Fix reviewed:** the JavaScript helper reads the current iframe location where same-origin access permits it and returns `null` for cross-origin access; load events carry nullable URLs and `getUrl` avoids falling back to the initial source after a document has loaded. Regression assertions protect these boundaries. **Required evidence:** same-origin redirect/history and cross-origin browser integration tests.
+
+### #2636 — iOS 18.4/18.5 Simulator missing `libswiftWebKit.dylib`
+
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Apple Simulator runtime, WebKit, Xcode, and deployment-target configuration. **Impact:** the application can abort at launch because the Simulator dyld cannot resolve the system Swift WebKit library. **Confidence:** Host-specific boundary.
+
+The upstream crash is a `DYLD 1 Library missing` failure for `/usr/lib/swift/libswiftWebKit.dylib`, not a Swift symbol or plugin-owned library bundled by Forge. The upstream investigation reports that the failure is specific to iOS 18.4/18.5 Simulator combinations when the deployment target is below the affected runtime requirement; iOS 18.6 Simulator and physical devices work, and newer/older Xcode or Simulator configurations are available workarounds. Forge intentionally supports iOS 15.0, so raising the package deployment target to 18.4 would break the supported contract and is not an acceptable fix.
+
+**Required evidence:** if the host failure is reported again, capture the exact Xcode/Simulator runtime, architecture, deployment target, and whether the same app runs on a physical device. Re-test on a current Apple Simulator runtime before changing package code.
+
+### #2659 — Android HTML time input picker NPE
+
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Android framework/OEM WebView time picker. **Impact:** tapping the plus/minus controls for `<input type="time">` can terminate the process on affected Android 34+ Samsung devices. **Confidence:** Host/platform boundary from the native stack and source ownership review.
+
+The supplied stack terminates in Android's `android.widget.TimePickerSpinnerDelegate.updateInputState` while handling a `NumberPicker` click. Forge's Android implementation delegates WebView UI to the platform and contains no `TimePickerDialog`, `DatePickerDialog`, or `TimePickerSpinnerDelegate` implementation to guard. The available plugin-owned file chooser callbacks are unrelated to HTML time input, so a speculative interception or replacement picker would change WebView behavior without a reproducible compatibility contract.
+
+**Required evidence:** reproduce on the reported Samsung/API/WebView-provider matrix and compare the same HTML page in a minimal native Android WebView. Only add a Forge workaround if the failure is shown to cross the native WebView boundary and a stable interception API exists.
+
+### #2727 — iOS modal sheet/dialog leaves WebView unresponsive
+
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Flutter iOS platform-view gesture lifecycle. **Impact:** after dismissing `showModalBottomSheet` or `showDialog`, WebView JavaScript/touch handling can stop responding on older Flutter/iOS 26 combinations. **Confidence:** Host/platform boundary from the upstream reproduction history.
+
+The upstream report has multiple confirmations that upgrading Flutter to 3.41/3.41.3 restores WebView interaction, while the failure appears across WebView plugins and is linked to Flutter platform-view gesture issues. Forge's iOS WebKit layer cannot safely reset Flutter's gesture arena or platform-view state. The repository keeps its Flutter compatibility baseline at 3.38.6; this record therefore remains a host/engine compatibility boundary rather than a speculative native patch.
+
+**Required evidence:** if the failure is still reported on the supported baseline, capture the exact Flutter/Xcode/iOS versions and compare `flutter_inappwebview_forge` with a minimal native platform-view reproduction before considering a compatibility change.
 
 ## Remaining validation and follow-up
 
@@ -436,6 +464,14 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 **Remaining validation:** exercise keyboard show/hide, focus changes between HTML inputs, interactive dismissal, and scroll-to-bottom on iOS 17.2 through the latest supported iOS release.
 
+### #2787 — iOS keyboard dismissal leaves a reduced `visualViewport`
+
+**Local status:** Active; needs iOS 17 device/Simulator reproduction. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard is dismissed, `visualViewport.height` can remain smaller than the Flutter WebView and fixed-position page elements can appear offset from the bottom. **Confidence:** Needs reproduction for a Forge-owned root cause.
+
+This report is not treated as the same defect as #2859. The existing iOS 2.0.1 keyboard change restores the native `UIScrollView` content inset after `keyboardDidHide` and addresses the documented scroll-to-bottom regression; it does not prove that WebKit's DOM `visualViewport` state is restored on iOS 17. The upstream report has no native stack, minimal reproduction project, or before/after native frame data, so injecting JavaScript or changing WebKit geometry would be speculative.
+
+**Required evidence:** reproduce with `resizeToAvoidBottomInset` and `SafeArea` combinations on iOS 17 and current supported iOS, capture `window.innerHeight`, `visualViewport.height/offsetTop`, WebView frame, `contentInset`, and `adjustedContentInset` before/after keyboard dismissal, then compare with a minimal native `WKWebView` host.
+
 ### #2568 — iOS `shouldOverrideUrlLoading` header replacement deadlock
 
 **Local status:** Implemented and source-validated; physical iOS navigation/header validation pending. **Affected package:** iOS WebKit navigation delegate and method channel. **Impact:** when `shouldOverrideUrlLoading` cancels a navigation after calling `controller.loadUrl` with replacement headers, the WebView could turn white and remain in a navigation deadlock. **Confidence:** Confirmed callback-ordering path from the upstream reproducer.
@@ -486,6 +522,7 @@ action is target validation, not speculative code change. The remaining
 active examples that still need a reproducible matrix before implementation
 are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
+[#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
 [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723),
 [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720),
 [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713),

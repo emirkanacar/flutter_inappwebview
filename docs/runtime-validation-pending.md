@@ -15,7 +15,8 @@ details remain in [known-issues.md](known-issues.md).
 | --- | --- | ---: | --- |
 | Locally implemented or mitigated; runtime validation pending | Issue register below | 66 | Source, regression, and host/build checks pass; real validation remains. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 58 | No complete local implementation boundary has been established. |
+| Host/platform-specific boundary | [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727) | 3 | Strong evidence points to Apple/WebKit Simulator, Android framework/provider, and Flutter engine behavior; no Forge-owned control point is available. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 55 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Three PR-only records also have local implementations but remain outside the
@@ -25,13 +26,13 @@ Three PR-only records also have local implementations but remain outside the
 
 ### Count by exported category
 
-| Category | Export | Runtime pending | Source-review closed | Still open | Technical open after showcase |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Bugs | 98 | 52 | 1 | 45 | 45 |
-| Enhancements | 16 | 6 | 0 | 10 | 10 |
-| Unlabelled | 8 | 8 | 0 | 0 | 0 |
-| Showcase | 3 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **66** | **1** | **58** | **55** |
+| Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Still open | Technical open after showcase |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Bugs | 98 | 52 | 1 | 3 | 42 | 42 |
+| Enhancements | 16 | 6 | 0 | 0 | 10 | 10 |
+| Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 |
+| Showcase | 3 | 0 | 0 | 0 | 3 | 0 |
+| **Total** | **125** | **66** | **1** | **3** | **55** | **52** |
 
 ## Issue register
 
@@ -72,5 +73,8 @@ replacement for the target runtime test.
 3. If all required real validation passes, remove the issue from this
    register and mark it fully locally validated in `known-issues.md` and the
    resolution log.
-4. Do not change or comment on the upstream GitHub issue state as part of
+4. Host/platform-specific boundaries are neither runtime-pending fixes nor
+   upstream closures; keep their evidence and limitations in
+   `known-issues.md` and the resolution log.
+5. Do not change or comment on the upstream GitHub issue state as part of
    these local transitions.
