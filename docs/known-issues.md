@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; promoted items below are explicitly classified as resolved locally, mitigated, validation-pending, or still requiring reproduction. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 63 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 61 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -10,15 +10,15 @@ The confidence labels below describe the evidence available during this review:
 - **Strong report**: the report contains a reproducible scenario and useful native/platform evidence, but the root cause still needs a regression test.
 - **Needs reproduction**: the symptom is important, but the report does not yet contain enough evidence to safely change the implementation.
 
-For the actionable backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md).
+For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
 ## Resolution summary
 
-| Local status | Issues | Meaning |
-| --- | --- | --- |
-| Resolved in code | [#2873](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2873), [#2875](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2875), [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856), [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819), [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2762), [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2848](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2848), [#2700](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2700), [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555), [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2791), [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789), [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780), [#2850](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2850), [#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863), [#2835](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2835), [#2812](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2812), [#2813](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2813), [#2725](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2725), [#2741](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2741), [#2852](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2852), [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837), [#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763), [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536), [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474) | The local implementation contains the fix and focused regression coverage. Native/device/build validation is listed in the detailed entry when still required. |
-| Mitigated locally | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733), [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2728), [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | A safe local behavior or targeted workaround exists, but the upstream/runtime boundary or final artifact still needs validation. |
-| Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | The reported security sink was not found in the package; the remaining evidence required is an external source-to-sink trace, not a speculative code change. |
+| Local status | Count | Meaning |
+| --- | ---: | --- |
+| Resolved locally; runtime validation pending | 63 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
+| Open implementation or reproduction | 61 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -138,13 +138,11 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 ## Remaining validation and follow-up
 
-| Priority | Issues | Reason |
-| --- | --- | --- |
-| Device/native validation | [#2840](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2840), [#2733](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2733), [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878), [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819), [#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868), [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2789), [#2859](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2859), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867), [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474) | The local fix exists; run the affected Windows, Android OEM, iOS/WebKit, or fullscreen matrix before declaring runtime behavior fully validated. |
-| Build/artifact validation | [#2703](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2703), [#2862](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2862), [#2780](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2780), [#2872](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2872) | Check the consuming Android AAB/APK, Linux WPE configurations, older WebKit builds, and Windows WebView2 asset trees. |
-| Device/native validation | [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861), [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | The local fix exists; run Fedora/X11/Intel Linux, iOS popup, and physical iOS 26 geolocation grant/deny and scene matrices before declaring runtime behavior fully validated. |
-| Device/native validation | [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | The Android source fix and compile/static checks pass; run InAppBrowser and Custom Tabs launch, restore, rotation, provider, and malformed-extra validation before declaring the scanner finding fully closed. |
-| Source review complete | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | Dynamic JavaScript evaluation is an explicit API boundary; reopen only with a concrete untrusted source-to-sink trace. |
+The complete pending-runtime register is now maintained in
+[runtime-validation-pending.md](runtime-validation-pending.md). It contains
+63 locally implemented or mitigated issue records and three PR-only records.
+This section remains as a pointer so the detailed findings below can retain
+the root cause and acceptance evidence without creating a second status list.
 
 ## Detailed findings
 
@@ -461,13 +459,27 @@ Issue [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/278
 
 ### Other crash and regression candidates retained for follow-up
 
-These CSV entries are notable enough to keep in the engineering backlog, but their issue bodies do not yet justify a code change without a reproducible matrix: [#2855](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2855), [#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826), [#2778](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2778), [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752), [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697), [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654), [#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619), [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), and [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584). Duplicate cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673) and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594) should be triaged together.
+These CSV entries are notable enough to keep in the engineering backlog. The
+records already listed in [runtime-validation-pending.md](runtime-validation-pending.md)
+have a documented local implementation or mitigation boundary; their next
+action is target validation, not speculative code change. The remaining
+active examples that still need a reproducible matrix before implementation
+are [#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826),
+[#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
+[#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
+[#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723),
+[#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720),
+[#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713),
+and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
+Duplicate cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
+and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
+are already covered by the runtime register and should be validated together.
 
 ## Full CSV screening notes
 
 The remaining CSV records were screened but not promoted to the incident-focused list because they are feature requests, showcases, duplicate/low-detail reports, or platform-specific warnings without enough evidence. Examples include SPM/Kotlin migration requests, WebAssembly support, proxy/payment-request features, page zoom/pull-to-refresh requests, showcase entries, and isolated build warnings. They should not be treated as evidence that the package itself is crashing until a reproducible package-level failure is available.
 
-In particular, [#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863), [#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846), [#2842](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2842), [#2835](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2835), [#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834), [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811), [#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793), [#2769](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2769), [#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760), [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712), [#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690), and [#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660) are not error-rate priorities.
+In particular, [#2863](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2863), [#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846), [#2842](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2842), [#2835](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2835), [#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834), [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811), [#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793), [#2769](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2769), [#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760), [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712), [#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690), and [#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660) are not error-rate priorities. This remains true whether a record is active or already has a local source boundary; runtime-pending records still retain their required platform gate.
 
 ## General engineering themes
 

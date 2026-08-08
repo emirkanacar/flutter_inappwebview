@@ -9,6 +9,7 @@ This directory describes the architecture, development workflow, native-platform
 - [Issue resolution workflow](issue-resolution-workflow.md) defines the required triage, implementation, validation, and documentation steps for each issue.
 - [Issue and PR resolution log](issue-pr-resolution-log.md) records the supplied CSV snapshots and the local fixes they informed.
 - [Open work plan](open-work-plan.md) lists unresolved work, priorities, acceptance criteria, and implementation phases.
+- [Runtime validation pending](runtime-validation-pending.md) lists locally implemented issues that still need real device, provider, browser, native, or artifact validation.
 
 ## Existing plans and triage
 

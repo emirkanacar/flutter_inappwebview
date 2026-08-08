@@ -108,13 +108,13 @@ Follow [docs/issue-resolution-workflow.md](docs/issue-resolution-workflow.md) fo
 An issue must not be marked locally resolved until the source, regression coverage, validation status, changelog, release metadata, and relevant documentation agree. An upstream CSV state remains historical metadata and must not be changed to imply local resolution.
 
 `docs/open-work-plan.md` is the live unresolved-work queue, not a list of
-source patches. Update or remove an issue there only after its acceptance
-criteria and required native/device/runtime evidence are complete. A source-
-only fix, static assertion, or successful host build belongs in
-`docs/known-issues.md` and the validation-only gates until the missing target
-evidence is recorded. If the team does not genuinely have enough evidence to
-call an issue resolved, leave it in the plan and document the next validation
-step instead of counting it as closed.
+source patches. When the implementation is complete but target
+native/device/runtime evidence is still missing, move the record to
+`docs/runtime-validation-pending.md` and link the detailed evidence from
+`docs/known-issues.md`. If the team does not genuinely have enough evidence to
+call an issue fully resolved, keep it in the runtime register rather than
+counting it as closed. A failed runtime gate moves the issue back to the open
+work plan with its environment and native evidence.
 
 ## Documentation index
 

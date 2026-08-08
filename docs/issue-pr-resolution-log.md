@@ -15,6 +15,21 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## Current local status counts
+
+The export contains 125 issues and 73 PRs. Local implementation status is
+tracked separately from that historical export:
+
+| Status | Count | Register |
+| --- | ---: | --- |
+| Locally implemented or mitigated; runtime validation pending | 63 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
+| Closed by source review | 1 issue (`#2745`) | No package runtime gate |
+| Open implementation or reproduction | 61 issues | [open-work-plan.md](open-work-plan.md) |
+| PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
+
+The issue inventory below remains the historical 125-record export and is not
+reduced when a record moves between the local status registers.
+
 ## Local resolution history
 
 | 2026-08-08 | Android activity-extra deserialization [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) | No upstream relationship inferred | InAppBrowser and Chrome Custom Tabs maps/lists now cross activity boundaries through a recursive primitive/nested-`Bundle` codec. Android native source contains no `getSerializable`, `putSerializable`, or `java.io.Serializable` references; the static regression test and Android compile pass. API/provider restore and malformed-extra validation remain pending. |
