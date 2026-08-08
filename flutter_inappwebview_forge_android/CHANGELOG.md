@@ -1,3 +1,7 @@
+## 1.0.23 - 2026-08-08
+
+- Guard Android page lifecycle callbacks against unrelated WebView instances instead of force-casting provider callbacks ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+
 ## 1.0.22 - 2026-08-08
 
 - Ignore URL-navigation callbacks delivered for unrelated WebView instances instead of force-casting them to the Forge WebView type ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

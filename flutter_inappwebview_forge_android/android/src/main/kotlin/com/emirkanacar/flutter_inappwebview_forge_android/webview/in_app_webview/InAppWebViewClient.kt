@@ -239,7 +239,7 @@ open class InAppWebViewClient(
 
   @SuppressLint("RestrictedApi")
   fun loadCustomJavaScriptOnPageStarted(view: WebView) {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
 
     if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
       val source = webView.userContentController.generateWrappedCodeForDocumentStart()
@@ -248,7 +248,7 @@ open class InAppWebViewClient(
   }
 
   fun loadCustomJavaScriptOnPageFinished(view: WebView) {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
 
     if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
       val source = webView.userContentController.generateWrappedCodeForDocumentEnd()
@@ -257,7 +257,7 @@ open class InAppWebViewClient(
   }
 
   override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
     webView.isLoading = true
     webView.disposeWebMessageChannels()
     webView.userContentController.resetContentWorlds()
@@ -270,7 +270,7 @@ open class InAppWebViewClient(
   }
 
   override fun onPageFinished(view: WebView, url: String) {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
     webView.isLoading = false
     loadCustomJavaScriptOnPageFinished(webView)
     previousAuthRequestFailureCount = 0
@@ -299,7 +299,7 @@ open class InAppWebViewClient(
     val currentUrl = view.url ?: url
     inAppBrowserDelegate?.didUpdateVisitedHistory(currentUrl)
 
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return
     webView.channelDelegate?.onUpdateVisitedHistory(currentUrl, isReload)
   }
 

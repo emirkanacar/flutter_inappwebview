@@ -76,9 +76,11 @@ public class ProxySettings {
         guard let map = map else {
             return nil
         }
-        return ProxySettings(
-            proxyRules: (map["proxyRules"] as! [[String:Any?]]).map { ProxyRule.fromMap(map: $0)! }
-        )
+        guard let maps = map["proxyRules"] as? [[String:Any?]] else {
+            return nil
+        }
+        let rules = maps.compactMap { ProxyRule.fromMap(map: $0) }
+        return ProxySettings(proxyRules: rules)
     }
     
     public func toProxyConfigurations() -> [ProxyConfiguration] {
@@ -127,8 +129,11 @@ public class ProxyRule {
         guard let map = map else {
             return nil
         }
+        guard let url = map["url"] as? String else {
+            return nil
+        }
         return ProxyRule(
-            url: map["url"] as! String,
+            url: url,
             allowFailover: map["allowFailover"] as? Bool,
             excludedDomains: map["excludedDomains"] as? [String],
             matchDomains: map["matchDomains"] as? [String],

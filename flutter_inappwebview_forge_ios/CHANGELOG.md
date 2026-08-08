@@ -1,3 +1,7 @@
+## 2.1.12 - 2026-08-08
+
+- Validate iOS proxy settings and rules before constructing proxy configurations, ignoring malformed rule entries ([#2805](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2805)).
+
 ## 2.1.11 - 2026-08-08
 
 - Validate iOS `loadFile` asset paths before dispatching them to the WebView channel ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).

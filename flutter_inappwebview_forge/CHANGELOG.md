@@ -1,3 +1,9 @@
+## 2.1.19 - 2026-08-08
+
+- Android: guard page lifecycle callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+- iOS: validate proxy settings and rule payloads before constructing proxy configurations ([#2805](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2805)).
+- Update root dependencies to Android 1.0.23 and iOS 2.1.12.
+
 ## 2.1.18 - 2026-08-08
 
 - Android: guard URL-navigation callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

@@ -98,6 +98,12 @@ The same validation now covers `loadFile`'s required asset path, preventing a nu
 
 **Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android navigation client. **Impact:** an unrelated WebView callback could be force-cast during URL navigation. **Fix:** navigation callbacks now return the platform default behavior for non-Forge WebViews. **Required evidence:** navigation and renderer callback flows across supported providers.
 
+The same ownership guard now covers page-started, page-finished, document-start, document-end, and main-frame error callbacks.
+
+#### #2805 - iOS proxy payload validation
+
+**Local status:** Implemented and source-validated; iOS 17+ proxy runtime validation pending. **Affected package:** iOS proxy manager. **Impact:** malformed proxy settings or rules could force-cast rule lists/URLs or unwrap invalid rule objects. **Fix:** proxy settings use optional map decoding and discard malformed rules safely. **Required evidence:** valid, empty, malformed, and mixed proxy rule lists on iOS 17+.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads
