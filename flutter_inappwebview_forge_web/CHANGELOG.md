@@ -1,3 +1,7 @@
+## 1.0.2 - 2026-08-08
+
+- Reinforce same-origin current-URL reporting and the cross-origin `null` fallback for iframe navigation and `getUrl()` ([#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737)).
+
 ## 1.0.1 - 2026-08-06
 
 - Report the current same-origin iframe URL for load, history, and `getUrl()` paths instead of repeating the iframe's initial `src` after navigation.

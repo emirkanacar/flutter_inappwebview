@@ -1,3 +1,7 @@
+## 1.0.13 - 2026-08-08
+
+- Validate nullable and provider-controlled values before decoding `requestFocusNodeHref` and `requestImageRef` results, preventing malformed payloads from reaching `WebUri` or non-null public fields ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)).
+
 ## 1.0.12 - 2026-08-07
 
 - Reuse one main-looper dispatcher for synchronous resource callbacks instead of allocating a `Handler` per request.

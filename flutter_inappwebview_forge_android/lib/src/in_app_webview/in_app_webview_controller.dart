@@ -2654,13 +2654,17 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
       'requestFocusNodeHref',
       args,
     );
-    return result != null
-        ? RequestFocusNodeHrefResult(
-            url: result['url'] != null ? WebUri(result['url']) : null,
-            title: result['title'],
-            src: result['src'],
-          )
-        : null;
+    if (result == null) {
+      return null;
+    }
+    final url = result['url'];
+    final title = result['title'];
+    final src = result['src'];
+    return RequestFocusNodeHrefResult(
+      url: url is String && url.isNotEmpty ? WebUri(url) : null,
+      title: title is String ? title : null,
+      src: src is String ? src : null,
+    );
   }
 
   @override
@@ -2670,11 +2674,13 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
       'requestImageRef',
       args,
     );
-    return result != null
-        ? RequestImageRefResult(
-            url: result['url'] != null ? WebUri(result['url']) : null,
-          )
-        : null;
+    if (result == null) {
+      return null;
+    }
+    final url = result['url'];
+    return RequestImageRefResult(
+      url: url is String && url.isNotEmpty ? WebUri(url) : null,
+    );
   }
 
   @override

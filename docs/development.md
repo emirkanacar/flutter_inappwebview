@@ -96,6 +96,8 @@ Run the Web package tests and browser integration tests with both same-origin an
 
 ## Change workflow
 
+For issue-specific work, follow the detailed [issue resolution workflow](issue-resolution-workflow.md). Review both the Flutter/Dart and native implementation paths before closing an issue; its post-resolution documentation step is mandatory, so do not stop after only one side's code and tests pass.
+
 1. Identify the owning package and read its README, changelog, and nearby tests.
 2. If a public contract changes, update the platform interface and every implementation together.
 3. Add a regression test that fails for the original issue or scenario.

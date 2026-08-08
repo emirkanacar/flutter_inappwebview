@@ -6,6 +6,7 @@ This directory describes the architecture, development workflow, native-platform
 
 - [Project overview](project-overview.md) explains the federated package graph and platform boundaries.
 - [Development guide](development.md) covers setup, code generation, tests, native builds, and release checks.
+- [Issue resolution workflow](issue-resolution-workflow.md) defines the required triage, implementation, validation, and documentation steps for each issue.
 - [Issue and PR resolution log](issue-pr-resolution-log.md) records the supplied CSV snapshots and the local fixes they informed.
 - [Open work plan](open-work-plan.md) lists unresolved work, priorities, acceptance criteria, and implementation phases.
 

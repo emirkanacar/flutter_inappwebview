@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-07
+Last reviewed: 2026-08-08
 
 This is the implementation backlog for work that is not yet resolved in the local Forge repository. It is derived from the supplied `issues.csv` and `pr.csv` snapshots, the current source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
@@ -166,6 +166,8 @@ The PR export is also marked `OPEN`; do not merge or copy it without checking th
 - Ship additive APIs only when unsupported platforms have explicit capability behavior.
 
 ## Definition of done
+
+The 2026-08-08 source-validation pass addressed the Android nullable request-result boundary associated with #2856 and reviewed the existing Web URL mitigation for #2737. Both remain validation-pending until the Android provider matrix and Web browser integration matrix are run.
 
 An issue leaves this plan only when:
 

@@ -1,3 +1,9 @@
+## 2.1.6 - 2026-08-08
+
+- Android: safely decode nullable/provider-controlled `requestFocusNodeHref` and `requestImageRef` callback values ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)).
+- Web: preserve current same-origin iframe URLs and return `null` for inaccessible cross-origin URLs ([#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737)).
+- Update the root package dependencies to Android 1.0.13 and Web 1.0.2.
+
 ## 2.1.5 - 2026-08-07
 
 - Android: reuse a shared main-looper dispatcher for synchronous resource callbacks and cap concurrent waits across WebView, service-worker, and custom asset paths.

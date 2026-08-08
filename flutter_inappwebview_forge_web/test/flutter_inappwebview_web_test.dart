@@ -67,4 +67,9 @@ void main() {
     platformSource.contains('String? url = args?[0] as String?;'),
     'native URL event decoding is not nullable',
   );
+  _assert(
+    supportSource.contains('return null;') &&
+        supportSource.contains('getIFrameUrl'),
+    'cross-origin URL reads must not reuse the iframe source',
+  );
 }

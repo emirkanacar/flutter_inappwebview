@@ -91,6 +91,21 @@ For Apple package validation, use `swift package dump-package` in each native pa
 - Update the relevant document in `docs/` when behavior, support, migration, or validation status changes.
 - Never represent a CSV `OPEN` value as an upstream-closed issue. The local implementation status and the export metadata are separate; see [`docs/issue-pr-resolution-log.md`](docs/issue-pr-resolution-log.md).
 
+## Issue resolution workflow
+
+Follow [docs/issue-resolution-workflow.md](docs/issue-resolution-workflow.md) for every issue. The required sequence is:
+
+1. Record the upstream reference, local status, affected package/platform, environment, severity, and original evidence.
+2. Reproduce the issue and capture a baseline. Mark source-only validation separately from device/runtime validation.
+3. Trace both the Flutter/Dart and native sides of the complete platform-interface, channel, WebView/WebKit, and callback lifecycle path. A fix is incomplete if one side is changed while the other side's contract, payload, nullability, fallback, or lifecycle behavior is left inconsistent.
+4. Write the root cause hypothesis, affected files, compatibility/fallback behavior, acceptance criteria, and documentation updates into the relevant plan.
+5. Add a failing regression test, inspect and test both Flutter and native paths, then implement the smallest idempotent fix while preserving public and native contracts. If one side requires no code change, record why it was verified and left unchanged.
+6. Run focused tests, affected native builds, generation/format checks, and required device/provider validation.
+7. After the fix is validated, update the affected package changelog and version metadata, plus docs/known-issues.md, docs/issue-pr-resolution-log.md, docs/open-work-plan.md, and any relevant architecture, migration, performance, security, API, README, or support documentation.
+8. Review the diff for unrelated or personal files, run git diff --check, and commit/push only with authorization.
+
+An issue must not be marked locally resolved until the source, regression coverage, validation status, changelog, release metadata, and relevant documentation agree. An upstream CSV state remains historical metadata and must not be changed to imply local resolution.
+
 ## Documentation index
 
 - [`docs/README.md`](docs/README.md): documentation entry point.

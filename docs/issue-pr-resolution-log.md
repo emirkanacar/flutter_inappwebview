@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-06
+Last reviewed: 2026-08-08
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -16,6 +16,8 @@ This document records the issue and pull-request exports supplied for the Forge 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
 ## Local resolution history
+
+| 2026-08-08 | Android nullable request-result payloads [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856); Web iframe URL tracking [#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737) | No upstream relationship inferred | Android request-result decoding now validates optional strings before constructing `WebUri` or public fields. Web same-origin/current-location and cross-origin-null behavior is protected by source assertions. Android focused tests pass with the system Flutter 3.44.8; Web test loading is blocked by the toolchain mismatch, and device/browser validation remains pending. |
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |

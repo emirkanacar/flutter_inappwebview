@@ -64,4 +64,5 @@ void main() {
     expect(safeBrowsingCalled, isFalse);
     expect(permissionRequestCalled, isFalse);
   });
+
 }
