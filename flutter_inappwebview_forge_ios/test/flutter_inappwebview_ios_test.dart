@@ -337,6 +337,19 @@ void _runSourceContractAssertions() {
     authenticationSession.contains('session.additionalHeaderFields'),
     'iOS authentication session does not apply additional headers',
   );
+  _assert(
+    authenticationSession.contains(
+          '@available(iOS 13.0, *)\nprivate class WebAuthenticationPresentationContextProviding: NSObject, ASWebAuthenticationPresentationContextProviding',
+        ) &&
+        authenticationSession.contains(
+          'public class WebAuthenticationSession: NSObject, Disposable',
+        ) &&
+        authenticationSession.contains('_presentationContextProvider') &&
+        authenticationSession.contains(
+          'session.presentationContextProvider = provider',
+        ),
+    'iOS authentication context provider is not isolated behind its availability boundary',
+  );
 
   final printScript = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'

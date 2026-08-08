@@ -149,13 +149,40 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'Util.kt',
     ).readAsStringSync();
+    final callbackSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/SyncBaseCallbackResultImpl.kt',
+    ).readAsStringSync();
 
     expect(source, contains('MAX_CONCURRENT_SYNC_METHOD_CHANNEL_CALLS'));
     expect(source, contains('synchronousMethodChannelCallsInFlight'));
     expect(source, contains('private val mainLooperHandler = Handler(Looper.getMainLooper())'));
     expect(source, contains('mainLooperHandler.post'));
+    expect(source, contains('mainLooperHandler.postAtFrontOfQueue'));
+    expect(source, contains('val dispatchRunnable = Runnable'));
+    expect(
+      source,
+      contains('mainLooperHandler.removeCallbacks(dispatchRunnable)'),
+    );
+    expect(source, contains('callback.cancel()'));
     expect(source, contains('callback.latch.await'));
     expect(source, contains('TimeUnit.MILLISECONDS'));
+    expect(callbackSource, contains('fun cancel()'));
+    expect(callbackSource, contains('if (cancelled)'));
+    final delegateSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/WebViewChannelDelegate.kt',
+    ).readAsStringSync();
+    final serviceWorkerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'service_worker/ServiceWorkerChannelDelegate.kt',
+    ).readAsStringSync();
+    expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
+    expect(
+      delegateSource,
+      contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,\n      true'),
+    );
+    expect(serviceWorkerSource, contains('priority = true'));
     expect(
       source,
       isNot(contains('val handler = Handler(Looper.getMainLooper())')),

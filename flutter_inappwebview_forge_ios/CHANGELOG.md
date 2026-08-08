@@ -1,3 +1,7 @@
+## 2.1.19 - 2026-08-09
+
+- Isolate the iOS 13+ `ASWebAuthenticationPresentationContextProviding` implementation from `WebAuthenticationSession`, preventing the Xcode 26 availability compile failure ([#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)). Source tests and the Xcode 27 iOS example build pass; exact Xcode 26.4.1 validation remains pending.
+
 ## 2.1.18 - 2026-08-08
 
 - Make native `InAppWebView.dispose()` idempotent before observer, WebKit, and fullscreen cleanup, reducing duplicate teardown `EXC_BAD_ACCESS` risk ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)). Physical iOS teardown validation remains pending.

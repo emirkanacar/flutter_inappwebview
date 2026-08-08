@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-09
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 65 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2698, #2713, #2723, #2727, and #2753 are host/platform-specific boundaries with no Forge-owned fix, and 49 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2698, #2713, #2723, #2727, and #2753 are host/platform-specific boundaries with no Forge-owned fix, and 47 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,10 +19,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 65 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 10 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 49 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 11 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 47 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -222,7 +222,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-65 locally implemented or mitigated issue records and three PR-only records.
+66 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -289,6 +289,14 @@ Windows now maps `InAppWebViewSettings.pageZoom` to `ICoreWebView2Controller.Zoo
 **Status:** Fixed in macOS 1.1.1. **Impact:** Tahoe/Xcode authentication sessions could be presented from an invalid or stale window when the key window was not the first window returned by AppKit. **Confidence:** Confirmed lifecycle path.
 
 The presentation anchor now prefers `NSApp.keyWindow`, then a visible main window, then any visible window, and finally an empty anchor. The fallback chain avoids force-unwrapping AppKit window state while preserving the existing macOS 10.15 availability boundary.
+
+### #2830 — Xcode 26 `WebAuthenticationSession` availability compile failure
+
+**Local status:** Implemented in iOS 2.1.19 and macOS 1.1.6; source-validated with the Xcode 27 iOS example build passing. Exact Xcode 26.4.1 and macOS consuming-app validation remain pending. **Affected package:** iOS/macOS native `WebAuthenticationSession`. **Impact:** Xcode 26 diagnoses the direct `ASWebAuthenticationPresentationContextProviding` conformance because the `presentationAnchor(for:)` witness has a narrower platform availability boundary than the enclosing session class. **Confidence:** Confirmed build compatibility path from upstream [PR #2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809).
+
+The Forge implementation now keeps `WebAuthenticationSession` as a plain disposable session and supplies a retained, availability-gated presentation-provider object only on iOS 13+ or macOS 10.15+. The existing active-window and visible-window fallback behavior is preserved, and the provider is released during disposal. iOS/macOS source tests and Swift Package manifest checks pass. The macOS example build is currently blocked by the existing Xcode 27 project/Pods deployment target mismatch (`10.15` versus the toolchain's supported `12.0` minimum), which is separate from this Swift source fix.
+
+**Required evidence:** build the iOS and macOS consuming examples with Xcode 26.4.1 and the supported CocoaPods/SPM configurations, then start/cancel/complete authentication sessions across the supported deployment targets and confirm the presentation anchor remains valid after scene/window changes.
 
 ### #2725 — Windows WebView2 title lookup
 
@@ -398,9 +406,9 @@ The report does not identify whether the frame belongs to hybrid composition, vi
 
 ### #2680 — Android audio `ERR_FAILED` on mobile data
 
-**Local status:** Active; needs provider/network reproduction. **Affected scope:** Android WebView media/network delivery. **Impact:** the report describes an MP3 request that works on Wi-Fi but fails with `ERR_FAILED` on mobile data after an upgrade to target SDK 35; follow-up evidence identifies a Cloudflare `206 Partial Content` response whose body is empty in WebView inspection, while `webview_flutter` succeeds. The upstream record was stale-closed on 2026-08-07; the supplied export remains historical metadata and this local triage is not an upstream state change.
+**Local status:** Host/provider boundary; no Forge-owned fix identified. **Affected scope:** Android WebView media/network delivery. **Impact:** the report describes an MP3 request that works on Wi-Fi but fails with `ERR_FAILED` on mobile data after an upgrade to target SDK 35; follow-up evidence identifies a Cloudflare `206 Partial Content` response whose body is empty in WebView inspection, while `webview_flutter` succeeds. The upstream record was stale-closed on 2026-08-07; the supplied export remains historical metadata and this local classification is not an upstream state change.
 
-Source review found no Forge-owned audio transport or default interception change that can be safely patched: `shouldInterceptRequest` only returns a response when the application enables the callback and supplies one, otherwise Android WebView continues the request. Reproduce the exact URL with request/range headers, Android System WebView version, API level, carrier, and `useShouldInterceptRequest` state; compare a native `WebView` and `webview_flutter` before changing response handling or headers.
+Source review found no Forge-owned audio transport or default interception change that can be safely patched: `shouldInterceptRequest` only returns a response when the application enables the callback and supplies one, otherwise Android WebView continues the request. The issue therefore remains visible for provider/carrier tracking, but is not counted as active Forge implementation work. Reopen the local implementation boundary only if the exact URL with request/range headers, Android System WebView version, API level, carrier, and `useShouldInterceptRequest` state reproduces in Forge while a native `WebView` and `webview_flutter` do not.
 
 ### #2872 — Windows `loadFile` and WebView2 file-origin semantics
 
@@ -478,11 +486,19 @@ The Forge Windows implementation now keeps shared WinRT/Composition pointers out
 
 ### #2580, #2718, and #2555 — Android blocking callback and lifecycle failures
 
-**Status:** Hardened in Android 1.0.29; retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
+**Status:** Hardened in Android 1.0.31; retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
 
 For [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), the native `shouldInterceptRequest` path can synchronously wait for a Dart result through `Util.invokeMethodAndWaitResult`, which posts to the main looper and then blocks on a latch. This is a plausible deadlock when WebView resource callbacks and UI-thread work depend on each other. [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) shows a Play Console native trace through `MyCookieManager.deleteAllCookies`, where `removeAllCookies` is followed immediately by `flush`. [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) reports an `InputMethodManager` null crash on Android 10 and is related to the same general focus/lifecycle surface as #2878.
 
-The Forge implementation now caps concurrent synchronous resource-interception callbacks at two and uses a 250 ms callback timeout for this path; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal. The input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection, catches stale Android 10 IME runtime failures, and ignores detached delayed callbacks. The source regression suite covers the timeout, backpressure, no-immediate-flush, and detached-IME contracts.
+The Forge implementation now caps concurrent synchronous resource-interception callbacks at two, dispatches `shouldInterceptRequest` and Service Worker interception to the front of the main looper queue, and uses a 250 ms callback timeout for this path. Queued dispatches are removed after timeout and late callback results are ignored; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal. The input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection, catches stale Android 10 IME runtime failures, and ignores detached delayed callbacks. The source regression suite covers the timeout, priority dispatch, backpressure, no-immediate-flush, and detached-IME contracts.
+
+The Android example APK build was also attempted with the configured Flutter
+toolchain, but the host Gradle 8.13/JDK setup failed before plugin Kotlin
+compilation while creating `:app:outgoingVariants`
+(`OutgoingVariantsReportTask`, `Type T not present`). Repeat the APK validation
+under a supported Gradle/JDK combination before treating the native build gate
+as complete; the plugin's direct `:flutter_inappwebview_forge_android:compileDebugKotlin`
+task succeeds with the current source.
 
 **Remaining validation:** run rapid back/forward navigation with `shouldInterceptRequest`, Play Console cookie-clear scenarios, and Android 10 text-input tests on physical devices.
 
@@ -612,7 +628,6 @@ are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752)
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
 [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
 [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688),
-[#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)

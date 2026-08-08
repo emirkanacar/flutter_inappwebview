@@ -10,7 +10,14 @@ import AuthenticationServices
 import Flutter
 import UIKit
 
-public class WebAuthenticationSession: NSObject, ASWebAuthenticationPresentationContextProviding, Disposable {
+@available(iOS 13.0, *)
+private class WebAuthenticationPresentationContextProviding: NSObject, ASWebAuthenticationPresentationContextProviding {
+    public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        return UIApplication.shared.activeKeyWindow ?? ASPresentationAnchor()
+    }
+}
+
+public class WebAuthenticationSession: NSObject, Disposable {
     static let METHOD_CHANNEL_NAME_PREFIX = "com.emirkanacar/flutter_webauthenticationsession_"
     var id: String
     var plugin: InAppWebViewFlutterPlugin?
@@ -20,6 +27,7 @@ public class WebAuthenticationSession: NSObject, ASWebAuthenticationPresentation
     var session: Any?
     var channelDelegate: WebAuthenticationSessionChannelDelegate?
     private var _canStart = true
+    private var _presentationContextProvider: Any?
     
     public init(plugin: InAppWebViewFlutterPlugin, id: String, url: URL, callbackURLScheme: String?, settings: WebAuthenticationSessionSettings) {
         self.id = id
@@ -29,7 +37,11 @@ public class WebAuthenticationSession: NSObject, ASWebAuthenticationPresentation
         super.init()
         self.callbackURLScheme = callbackURLScheme
         let session = ASWebAuthenticationSession(url: self.url, callbackURLScheme: self.callbackURLScheme, completionHandler: self.completionHandler)
-        session.presentationContextProvider = self
+        if #available(iOS 13.0, *) {
+            let provider = WebAuthenticationPresentationContextProviding()
+            _presentationContextProvider = provider
+            session.presentationContextProvider = provider
+        }
         self.session = session
         let channel = FlutterMethodChannel(name: WebAuthenticationSession.METHOD_CHANNEL_NAME_PREFIX + id,
                                            binaryMessenger: plugin.registrar.messenger())
@@ -83,6 +95,7 @@ public class WebAuthenticationSession: NSObject, ASWebAuthenticationPresentation
         channelDelegate?.dispose()
         channelDelegate = nil
         session = nil
+        _presentationContextProvider = nil
         plugin?.webAuthenticationSessionManager?.sessions[id] = nil
         plugin = nil
     }

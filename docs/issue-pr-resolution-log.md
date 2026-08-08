@@ -43,6 +43,13 @@ public `WKNavigationDelegate` failure callbacks, but WebKit does not expose an
 equivalent arbitrary-subresource callback. The record is therefore tracked as
 an Apple/WebKit capability boundary rather than a speculative JavaScript patch.
 
+The same review of Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
+found only a Cloudflare `206 Partial Content`/mobile-carrier failure. The
+follow-up reports that the same resource works with `webview_flutter`, and
+Forge's default path does not intercept or rewrite the request. The upstream
+record was stale-closed on 2026-08-07; locally it moves from active reproduction
+to host/provider boundary tracking without changing the historical export.
+
 ## 2026-08-09 Android callback payload hardening
 
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
@@ -52,6 +59,30 @@ non-null `String` local in the event dispatcher; the existing callback and
 default-behavior contracts are preserved. Focused Android tests pass, while the
 API/provider device matrix remains in the runtime register.
 
+## 2026-08-09 iOS/macOS authentication availability hardening
+
+GitHub CLI review of upstream [PR #2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809)
+confirmed that Xcode 26 diagnoses the `ASWebAuthenticationPresentationContextProviding`
+conformance when its `presentationAnchor(for:)` witness is not isolated behind
+the protocol's platform availability boundary. Local [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)
+now uses availability-gated provider objects for iOS and macOS and retains each
+provider for the lifetime of its authentication session. The iOS/macOS source
+tests and Swift Package manifest checks pass, and the iOS example builds with
+Xcode 27. Exact Xcode 26.4.1 and macOS consuming-app validation remain pending;
+the upstream GitHub state is unchanged.
+
+## 2026-08-09 Android interception dispatch hardening
+
+GitHub CLI review of closed upstream [PR #2773](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2773)
+confirmed the high-volume `shouldInterceptRequest` mitigation: dispatching the
+native-to-Dart callback at the front of the Android main-looper queue. Local
+Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
+now combines that priority dispatch with bounded concurrency, a 250 ms timeout,
+queued-runnable cancellation, and late-result suppression. Service Worker
+interception uses the same priority path. Android source tests and analysis pass;
+physical provider and rapid-navigation validation remain pending. The upstream
+issue and PR states are unchanged.
+
 ## Current local status counts
 
 The export contains 125 issues and 73 PRs. Local implementation status is
@@ -59,10 +90,10 @@ tracked separately from that historical export:
 
 | Status | Count | Register |
 | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | 65 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
+| Locally implemented or mitigated; runtime validation pending | 66 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
-| Host/platform-specific boundary | 10 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`) | Host/provider/engine/application/site tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
-| Open implementation or reproduction | 49 issues | [open-work-plan.md](open-work-plan.md) |
+| Host/platform-specific boundary | 11 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2680`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`) | Host/provider/engine/application/site tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
+| Open implementation or reproduction | 47 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
 
 The issue inventory below remains the historical 125-record export and is not
@@ -71,7 +102,9 @@ reduced when a record moves between the local status registers.
 ## Local resolution history
 
 | 2026-08-08 | Android cold-start and startup reattach [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) | [#2844](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2844) | Android now orders provider startup and document-start registration, retries transient failures, and recreates the startup executor after engine detach while ignoring stale generations. Android source tests pass; release/AOT and headless real-device validation remains pending. |
+| 2026-08-09 | iOS/macOS Xcode authentication availability [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830) | [#2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809) | iOS 2.1.19 and macOS 1.1.6 isolate the authentication presentation provider behind the iOS 13/macOS 10.15 availability boundaries. iOS/macOS source tests, Swift Package manifest checks, and the Xcode 27 iOS example build pass; exact Xcode 26.4.1 and macOS consuming-app validation remain pending. |
 | 2026-08-08 | Android interception freeze and cookie ANR [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) | No upstream relationship inferred | Android synchronous interception is bounded by concurrency and timeout limits, and `deleteAllCookies` no longer flushes synchronously after asynchronous removal. Focused Android tests pass; Android 10/provider and Play Console runtime validation remains pending. |
+| 2026-08-09 | Android interception dispatch hardening [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580) | [#2773](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2773) (closed, not merged) | Android 1.0.31 prioritizes WebView and Service Worker interception callbacks on the main looper, cancels queued callbacks after timeout, and suppresses late results. Android tests and analysis pass; rapid-navigation/provider validation remains pending. |
 | 2026-08-08 | iOS popup/window-ID crashes [#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | No upstream relationship inferred | iOS now defers popup window-ID initialization off KVO, verifies observed object identity, ignores callbacks after disposal, and uses the initialized page world for popup JavaScript. Source tests pass; iOS device/Xcode validation remains pending. |
 | 2026-08-08 | iOS header replacement navigation [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568) | No upstream relationship inferred | iOS counts simultaneous navigation-policy decisions, queues replacement-header loads until the final decision handler completes, and rejects malformed URL requests safely. Source tests pass; physical navigation validation remains pending. |
 | 2026-08-08 | iOS 26 fullscreen and geolocation behavior [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | No upstream relationship inferred | The native fullscreen-container mitigation and iOS 26 geolocation decision bridge remain enabled and source-validated. Physical iOS 26 fullscreen/grant/deny validation remains required; no upstream state was changed. |
@@ -117,11 +150,12 @@ reduced when a record moves between the local status registers.
 | 2026-08-08 | Android 10 IME lifecycle crash [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | No upstream relationship inferred | Detached-view checks and `RuntimeException` fallbacks now cover delayed focus, `restartInput`, `isActive`, and soft-input operations. Android source tests and compilation pass; Android 10 physical-device validation remains pending. |
 | 2026-08-08 | Android System WebView renderer termination [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698) | No upstream relationship inferred | The upstream body identifies a provider-version-specific Chromium crash and reports recovery after rolling back Android System WebView. No Forge-owned stack or control point is present, so the issue moves from runtime-pending to host/provider tracking without a speculative plugin patch. |
 | 2026-08-08 | Android screen-transition flicker [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688) | No upstream relationship inferred | GitHub CLI review found an Android 35 report of WebView content flashing during the first transition to a Flutter screen, but no minimal code, native stack, frame timing, or composition-mode comparison. The issue remains active pending a minimal reproduction; no global composition or transition workaround is justified. |
-| 2026-08-08 | Android mobile-data audio failure [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680) | No upstream relationship inferred | GitHub CLI review found `ERR_FAILED` only on mobile data for a `206 Partial Content` Cloudflare MP3 response; the follow-up says `webview_flutter` succeeds and the upstream record was stale-closed. Forge's default request path passes through to Android WebView unless the app supplies an interception response, so exact provider/range/native-WebView reproduction is required before a plugin change. |
+| 2026-08-09 | Android mobile-data audio provider boundary [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680) | No upstream relationship inferred | GitHub CLI review found `ERR_FAILED` only on mobile data for a `206 Partial Content` Cloudflare MP3 response; the follow-up says `webview_flutter` succeeds and the upstream record was stale-closed. Forge's default request path passes through to Android WebView unless the app supplies an interception response, so the issue moves to host/provider tracking without a speculative plugin change. |
 | 2026-08-09 | iOS iframe subresource error callback boundary [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753) | No upstream relationship inferred | iOS forwards WebKit navigation failures through `onReceivedError`, but `WKNavigationDelegate` does not expose arbitrary HTTPS iframe subresource failures. The report remains an Apple/WebKit capability boundary; a partial JavaScript error listener would not preserve the public callback contract. |
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.31 | iOS/macOS WebAuthenticationSession Xcode availability [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830) | [#2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809) | Root 2.1.31 depends on iOS 2.1.19 and macOS 1.1.6. The availability-gated provider fix is source-validated; Xcode 26.4.1 and macOS consuming-app validation remain required. |
 | 2.1.29 | Android `forceDarkStrategy` provider casts [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594); iOS/Android disposal [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654); Android IME lifecycle [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) | No direct PR relationship was present in the export | Android provider adapter exceptions now fail open, iOS/Android disposal is idempotent, and stale IME operations are guarded. Root 2.1.29 depends on Android 1.0.29 and iOS 2.1.18; physical provider/device validation remains required. |
 | 2.0.0 | iOS AppDelegate window access and SPM requests: [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880), [#2842](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2842), [#2841](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2841) | No direct PR relationship was present in the export | UIScene-aware registration, iOS 15 baseline, iOS/macOS SPM manifests, and CocoaPods preservation. |
 | 2.0.1 | FileProvider paths [#2873](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2873), unknown WebView2 permission values [#2875](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2875), nullable Android callbacks [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856), fullscreen renderer cleanup [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) | [#2874](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2874), [#2876](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2876), [#2857](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2857) | FileProvider scope is restricted, unknown enum values are ignored safely, optional callback fields are validated, and fullscreen cleanup is idempotent. Native Windows/device validation remains required. |

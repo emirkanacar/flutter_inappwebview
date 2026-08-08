@@ -1,3 +1,8 @@
+## 1.0.31 - 2026-08-09
+
+- Prioritize Android `shouldInterceptRequest` MethodChannel dispatch on the main looper, cancel queued callbacks after timeout, and ignore late results to reduce freeze/deadlock risk during high-volume resource interception ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). Android provider/device validation remains pending.
+- Apply the same priority dispatch to Service Worker interception callbacks and extend static regression coverage.
+
 ## 1.0.30 - 2026-08-09
 
 - Validate optional Android MethodChannel string fields by runtime type before dispatching callbacks, so null or malformed provider values cannot abort `_handleMethod` with a `String` cast error ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)). Device/provider validation remains pending.

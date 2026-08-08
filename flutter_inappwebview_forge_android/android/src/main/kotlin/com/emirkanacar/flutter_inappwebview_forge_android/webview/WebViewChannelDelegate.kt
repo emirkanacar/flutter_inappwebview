@@ -1154,7 +1154,8 @@ open class WebViewChannelDelegate(
       "shouldInterceptRequest",
       request.toMap(),
       callback,
-      SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS
+      SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,
+      true
     )
   }
 

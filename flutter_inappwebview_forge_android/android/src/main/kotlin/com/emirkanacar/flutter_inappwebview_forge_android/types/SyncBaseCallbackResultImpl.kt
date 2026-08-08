@@ -10,12 +10,26 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
     @JvmField
     var result: T? = null
 
+    @Volatile
+    private var cancelled = false
+
+    fun cancel() {
+        cancelled = true
+        latch.countDown()
+    }
+
     @CallSuper
     override fun defaultBehaviour(result: T?) {
+        if (cancelled) {
+            return
+        }
         latch.countDown()
     }
 
     override fun success(obj: Any?) {
+        if (cancelled) {
+            return
+        }
         val decodedResult = decodeResult(obj)
         result = decodedResult
         val shouldRunDefaultBehaviour = if (decodedResult == null) {
@@ -32,6 +46,9 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
 
     @CallSuper
     override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        if (cancelled) {
+            return
+        }
         latch.countDown()
     }
 

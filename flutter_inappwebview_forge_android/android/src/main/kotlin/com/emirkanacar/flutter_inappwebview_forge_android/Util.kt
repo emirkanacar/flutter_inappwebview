@@ -90,7 +90,8 @@ class Util private constructor() {
             method: String,
             arguments: Any?,
             callback: SyncBaseCallbackResultImpl<T>,
-            timeoutMillis: Long = SYNC_METHOD_CHANNEL_TIMEOUT_MILLIS
+            timeoutMillis: Long = SYNC_METHOD_CHANNEL_TIMEOUT_MILLIS,
+            priority: Boolean = false
         ): T? {
             if (Looper.myLooper() == Looper.getMainLooper()) {
                 channel.invokeMethod(method, arguments, callback)
@@ -110,23 +111,34 @@ class Util private constructor() {
                 return null
             }
 
+            val dispatchRunnable = Runnable {
+                channel.invokeMethod(method, arguments, callback)
+            }
             try {
-                if (!mainLooperHandler.post {
-                        channel.invokeMethod(method, arguments, callback)
-                    }
-                ) {
+                val dispatched = if (priority) {
+                    mainLooperHandler.postAtFrontOfQueue(dispatchRunnable)
+                } else {
+                    mainLooperHandler.post(dispatchRunnable)
+                }
+                if (!dispatched) {
+                    callback.cancel()
                     Log.w(LOG_TAG, "Unable to dispatch synchronous method channel callback: $method")
                     return null
                 }
-                if (!callback.latch.await(
-                        timeoutMillis,
-                        TimeUnit.MILLISECONDS
-                    )
-                ) {
+                val completed = try {
+                    callback.latch.await(timeoutMillis, TimeUnit.MILLISECONDS)
+                } catch (e: InterruptedException) {
+                    callback.cancel()
+                    throw e
+                }
+                if (!completed) {
+                    callback.cancel()
+                    mainLooperHandler.removeCallbacks(dispatchRunnable)
                     Log.w(LOG_TAG, "Timed out waiting for synchronous method channel callback: $method")
                 }
                 return callback.result
             } finally {
+                mainLooperHandler.removeCallbacks(dispatchRunnable)
                 synchronousMethodChannelCallsInFlight.decrementAndGet()
             }
         }

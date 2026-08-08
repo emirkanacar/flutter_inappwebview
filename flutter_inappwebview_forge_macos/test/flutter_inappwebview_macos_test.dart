@@ -43,6 +43,18 @@ void _runSourceContractAssertions() {
       'macOS authentication session does not prefer the active key window',
     );
   }
+  if (!session.contains(
+        '@available(macOS 10.15, *)\nprivate class WebAuthenticationPresentationContextProviding: NSObject, ASWebAuthenticationPresentationContextProviding',
+      ) ||
+      !session.contains(
+        'public class WebAuthenticationSession: NSObject, Disposable',
+      ) ||
+      !session.contains('_presentationContextProvider') ||
+      !session.contains('session.presentationContextProvider = provider')) {
+    throw StateError(
+      'macOS authentication context provider is not isolated behind its availability boundary',
+    );
+  }
 
   final webViewSource = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'

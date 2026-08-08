@@ -1,3 +1,13 @@
+## 2.1.32 - 2026-08-09
+
+- Android: prioritize `shouldInterceptRequest` callbacks on the main looper, cancel queued callbacks after timeout, and ignore late results to reduce freeze/deadlock risk during high-volume resource interception ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). Android provider/device validation remains pending.
+- Update the root dependency to Android 1.0.31.
+
+## 2.1.31 - 2026-08-09
+
+- iOS/macOS: isolate the `WebAuthenticationSession` presentation provider behind its platform availability boundary, fixing the Xcode 26 compile failure ([#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)).
+- Update root dependencies to iOS 2.1.19 and macOS 1.1.6.
+
 ## 2.1.30 - 2026-08-09
 
 - Android: validate optional native MethodChannel string fields before callback dispatch, preventing malformed provider values from reaching non-null `String` assignments ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)). Android device/provider validation remains pending.

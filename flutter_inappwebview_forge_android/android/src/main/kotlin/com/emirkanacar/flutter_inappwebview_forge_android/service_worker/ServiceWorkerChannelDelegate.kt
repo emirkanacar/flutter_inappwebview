@@ -163,7 +163,13 @@ open class ServiceWorkerChannelDelegate(
     fun shouldInterceptRequest(request: WebResourceRequestExt): WebResourceResponseExt? {
         val channel = getChannel() ?: return null
         val callback = SyncShouldInterceptRequestCallback()
-        return Util.invokeMethodAndWaitResult(channel, "shouldInterceptRequest", request.toMap(), callback)
+        return Util.invokeMethodAndWaitResult(
+            channel,
+            "shouldInterceptRequest",
+            request.toMap(),
+            callback,
+            priority = true
+        )
     }
 
     override fun dispose() {

@@ -11,24 +11,24 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Seventy-six issue records have a
+The export contains 125 issues and 73 PRs. Seventy-seven issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 65 await real runtime validation, #2745 is closed by source review,
-and #2570/#2584/#2598/#2636/#2659/#2698/#2713/#2723/#2727/#2753 have no Forge-owned fix because
+boundary: 66 await real runtime validation, #2745 is closed by source review,
+and #2570/#2584/#2598/#2636/#2659/#2680/#2698/#2713/#2723/#2727/#2753 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider, and Flutter engine/platform-view layers.
-The other 49 issue records
+The other 47 issue records
 remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 51 | 1 | 10 | 36 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 52 | 1 | 11 | 34 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **65** | **1** | **10** | **49** | **46 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **66** | **1** | **11** | **47** | **44 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -45,7 +45,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 65 implementation or mitigation records awaiting real validation are
+The 66 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -66,6 +66,18 @@ now defers `loadUrl` calls made during `shouldOverrideUrlLoading` until the
 WebKit navigation decision is released. Source/regression, SwiftPM, and Xcode
 example validation pass; physical iOS navigation/header validation remains in
 the runtime register.
+
+iOS/macOS [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)
+now isolates the `ASWebAuthenticationPresentationContextProviding` witness in
+an availability-gated provider object. iOS/macOS source tests and SwiftPM
+manifest checks pass, and the iOS example builds with Xcode 27; exact Xcode
+26.4.1 and macOS consuming-app validation remain in the runtime register.
+
+Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
+now prioritizes `shouldInterceptRequest` and Service Worker interception on the
+main looper, removes timed-out queued dispatches, and ignores late callback
+results. Android source tests and analysis pass; rapid-navigation and provider
+validation remain in the runtime register.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
@@ -139,6 +151,14 @@ reported as upstream-closed:
   wins hit testing; the plugin does not own the overlay's Flutter gesture arena.
   This is tracked as a host/platform boundary until a reproducible Flutter
   3.38.6+ minimal example identifies a Forge-owned control point.
+- [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680):
+  the Android mobile-data MP3 failure is tied to a Cloudflare `206 Partial
+  Content` response and Android WebView/provider network delivery. The
+  follow-up reports that the same URL works with `webview_flutter`, while
+  Forge's default path passes through to Android WebView unless the host app
+  supplies an interception response. The upstream record was stale-closed on
+  2026-08-07; it remains a host/provider boundary locally until a Forge-owned
+  interception regression is demonstrated.
 - [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570):
   iCloud Keychain Password AutoFill depends on the host app's Associated
   Domains entitlement, the site's `apple-app-site-association` response, and
@@ -175,7 +195,6 @@ are locally implemented and awaiting real validation in the
 | Issues | Work package | Plan |
 | --- | --- | --- |
 | [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688) | Android-to-Flutter screen transition flicker | Reproduce on Android 35 with a minimal WebView-to-Flutter-screen transition and capture hybrid/virtual composition, first-frame, surface, and navigation timing. The GitHub report has no minimal code or native stack, so do not change composition or transition behavior before a Forge-owned path is proven. |
-| [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680) | Android audio `ERR_FAILED` on mobile data | Reproduce the same `206 Partial Content` URL on API 35 with the exact WebView provider, range headers, and `useShouldInterceptRequest` state; compare a native `WebView` and `webview_flutter`. GitHub evidence points to provider/network delivery, and Forge's default request path passes through to WebView, so add a plugin workaround only if a Forge-owned interception regression is captured. |
 
 #### Windows and Linux
 
@@ -189,7 +208,7 @@ are locally implemented and awaiting real validation in the
 
 | Issues | Plan | Exit criterion |
 | --- | --- | --- |
-| [#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830), [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce MSVC `/await`, Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
+| [#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce MSVC `/await`, Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
 | [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757), [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687), [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685), [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641), [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize generated Pigeon/build artifacts, pub.dev analysis, Java 17/Flutter deprecation warnings, and release JAR synchronization. | `flutter analyze`, `pana`/publish dry-run, Android release build, and all generated metadata checks pass without package-owned warnings. |
 | [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2788](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2788), [#2695](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2695), [#2686](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2686), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682) | Triage vague initialization, Windows warning/release, network, Safari, and packaging reports | Require a reproducible command, environment, and stack trace. Close as host/application-specific in the local log when no package path exists. |
 
@@ -222,11 +241,11 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 65 issue records and three PR-only
+items. The complete register contains 66 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 49 issue records that still need implementation, design, or
-reproduction. Ten host/platform boundaries are tracked above and are not
+keeps only the 47 issue records that still need implementation, design, or
+reproduction. Eleven host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
 ## PR queue
@@ -279,15 +298,15 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-09 status pass has 65 locally implemented or mitigated issue
+The 2026-08-09 status pass has 66 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, ten host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
-#2698, #2713, #2723, #2727, and #2753), and 49 active issue records in this plan. The runtime-pending
+review, eleven host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
+#2680, #2698, #2713, #2723, #2727, and #2753), and 47 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
 live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
-[`known-issues.md`](known-issues.md). The active queue contains 36 bugs, 10
-enhancements, 0 unlabelled records, and 3 showcase records (46 active
+[`known-issues.md`](known-issues.md). The active queue contains 34 bugs, 10
+enhancements, 0 unlabelled records, and 3 showcase records (44 active
 technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:
