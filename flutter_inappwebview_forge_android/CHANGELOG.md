@@ -1,3 +1,7 @@
+## 1.0.18 - 2026-08-08
+
+- Safely cancel Android client-certificate requests delivered for non-Forge WebView instances instead of force-casting the callback view ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+
 ## 1.0.17 - 2026-08-08
 
 - Reject Android popup creation when the WebView manager is unavailable instead of synthesizing window ID `0` and retaining an incomplete result message ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).

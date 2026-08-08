@@ -1,3 +1,8 @@
+## 2.1.12 - 2026-08-08
+
+- Android: guard client-certificate callback ownership and cancel requests from unrelated WebView instances ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+- Update the root dependency to Android 1.0.18.
+
 ## 2.1.11 - 2026-08-08
 
 - Android: reject popup creation without a live WebView manager before allocating a synthetic window ID or storing a result message ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).

@@ -56,6 +56,10 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Not established; no implementation change justified. **Affected scope:** JavaScript bridge and generated plugin scripts. **Source review:** repository search did not identify a plugin-owned direct `eval()` or `new Function()` sink receiving remote page data. `evaluateJavascript` is an explicit public API that executes caller-supplied code by design and is not evidence of a package vulnerability by itself. **Required evidence:** a concrete source-to-sink path showing untrusted page data reaching privileged generated code, plus a minimal exploit reproduction and threat model.
 
+#### #2782, #2783 - Android callback ownership and input stability
+
+**Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android client-certificate callback boundary. **Impact:** a provider callback delivered for a non-Forge WebView could be force-cast before the certificate request was completed. **Fix:** the callback now uses a nullable Forge-WebView cast and cancels the request for unrelated WebViews. **Required evidence:** client-certificate and input/focus transitions across supported Android API levels and OEM providers.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

@@ -77,7 +77,11 @@ open class InAppWebViewClient(
 
   @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView
+    if (webView == null) {
+      request.cancel()
+      return
+    }
     val requestUrl = request.url.toString()
 
     if (allowSyncUrlLoading(webView, requestUrl)) {
