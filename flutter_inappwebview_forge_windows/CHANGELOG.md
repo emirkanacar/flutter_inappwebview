@@ -1,3 +1,7 @@
+## 1.0.7 - 2026-08-08
+
+- Guard headless WebView size callbacks after the WebView2 controller has been released during startup or renderer teardown ([#2778](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2778)).
+
 ## 1.0.6 - 2026-08-08
 
 - Guard the InAppBrowser resize callback when the WebView2 controller has already been released during window teardown ([#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736)).

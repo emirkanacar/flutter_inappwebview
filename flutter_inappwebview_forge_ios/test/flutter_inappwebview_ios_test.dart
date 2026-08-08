@@ -30,6 +30,15 @@ void main() {
         source.contains('visibleViewController'),
     'iOS prompt presentation path does not guard missing presenters',
   );
+  final customSchemeSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/CustomSchemeHandler.swift',
+  ).readAsStringSync();
+  _assert(
+    customSchemeSource.contains('webView as? InAppWebView') &&
+        customSchemeSource.contains('didFailWithError'),
+    'custom scheme handler does not guard non-plugin WebViews',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',

@@ -60,6 +60,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android client-certificate callback boundary. **Impact:** a provider callback delivered for a non-Forge WebView could be force-cast before the certificate request was completed. **Fix:** the callback now uses a nullable Forge-WebView cast and cancels the request for unrelated WebViews. **Required evidence:** client-certificate and input/focus transitions across supported Android API levels and OEM providers.
 
+#### #2619 - iOS custom scheme callback ownership
+
+**Local status:** Implemented and source-validated; iOS WebKit runtime validation pending. **Affected package:** iOS custom URL-scheme handler. **Impact:** a scheme callback for a non-Forge WebView could force-cast the WebView and terminate the process. **Fix:** the handler now rejects unrelated WebViews with a structured URL-scheme task error and removes the task from its pending map. **Required evidence:** custom schemes, disposal during an outstanding task, and WebKit callback ordering on supported iOS versions.
+
+#### #2778 - Windows headless WebView controller teardown
+
+**Local status:** Implemented and source-validated; Windows/WebView2 runtime validation pending. **Affected package:** Windows headless WebView. **Impact:** a late size callback could dereference a released WebView2 controller during startup or renderer teardown. **Fix:** size setters/getters now require both the WebView wrapper and controller before accessing bounds. **Required evidence:** create, resize, renderer restart, dispose, and recreate cycles on supported WebView2 runtimes.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

@@ -15,7 +15,15 @@ public class CustomSchemeHandler: NSObject, WKURLSchemeHandler {
     
     public func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         schemeHandlers[urlSchemeTask.hash] = urlSchemeTask
-        let inAppWebView = webView as! InAppWebView
+        guard let inAppWebView = webView as? InAppWebView else {
+            urlSchemeTask.didFailWithError(NSError(
+                domain: "flutter_inappwebview_forge",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Unsupported WebView for custom scheme task"]
+            ))
+            schemeHandlers.removeValue(forKey: urlSchemeTask.hash)
+            return
+        }
         let request = WebResourceRequest.init(fromURLRequest: urlSchemeTask.request)
         let callback = WebViewChannelDelegate.LoadResourceWithCustomSchemeCallback()
         callback.nonNullSuccess = { (response: CustomSchemeResponse) in

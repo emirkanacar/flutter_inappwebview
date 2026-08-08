@@ -1,3 +1,9 @@
+## 2.1.13 - 2026-08-08
+
+- iOS: fail custom URL-scheme tasks safely when the callback WebView is not a Forge WebView ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).
+- Windows: guard headless WebView size access after controller teardown ([#2778](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2778)).
+- Update root dependencies to iOS 2.1.7 and Windows 1.0.7.
+
 ## 2.1.12 - 2026-08-08
 
 - Android: guard client-certificate callback ownership and cancel requests from unrelated WebView instances ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

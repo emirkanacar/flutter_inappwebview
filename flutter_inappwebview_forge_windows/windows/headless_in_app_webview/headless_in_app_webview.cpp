@@ -16,7 +16,7 @@ namespace flutter_inappwebview_plugin
 
   void HeadlessInAppWebView::prepare(const HeadlessInAppWebViewCreationParams& params)
   {
-    if (!webView) {
+    if (!webView || !webView->webViewController) {
       return;
     }
   }
@@ -34,7 +34,7 @@ namespace flutter_inappwebview_plugin
 
   std::shared_ptr<Size2D> HeadlessInAppWebView::getSize() const
   {
-    if (!webView) {
+    if (!webView || !webView->webViewController) {
       return std::make_shared<Size2D>(-1.0, -1.0);
     }
     RECT rect;

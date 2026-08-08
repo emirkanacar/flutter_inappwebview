@@ -104,4 +104,12 @@ void main() {
     'webView && webView->webViewController',
     'the guarded browser resize callback',
   );
+  final headlessSource = _sourceFile(
+    'windows/headless_in_app_webview/headless_in_app_webview.cpp',
+  ).readAsStringSync();
+  _expectContains(
+    headlessSource,
+    '!webView || !webView->webViewController',
+    'the headless WebView controller lifetime guard',
+  );
 }

@@ -1,3 +1,7 @@
+## 2.1.7 - 2026-08-08
+
+- Guard custom URL-scheme callbacks against non-plugin WebView instances and fail the task with a structured error instead of force-casting ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).
+
 ## 2.1.6 - 2026-08-08
 
 - Return no popup WebView when the iOS window manager is unavailable instead of creating an unattached child with a synthetic window ID ([#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)).
