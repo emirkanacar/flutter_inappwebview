@@ -1,3 +1,8 @@
+## 2.1.14 - 2026-08-08
+
+- iOS: harden cookie cleanup against missing or provider-specific origin properties ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).
+- Update the root dependency to iOS 2.1.8.
+
 ## 2.1.13 - 2026-08-08
 
 - iOS: fail custom URL-scheme tasks safely when the callback WebView is not a Forge WebView ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).

@@ -225,11 +225,11 @@ public class MyCookieManager: ChannelDelegate {
         MyCookieManager.httpCookieStore.getAllCookies { (cookies) in
             for cookie in cookies {
                 var originURL = url
-                if cookie.properties![.originURL] is String {
-                    originURL = cookie.properties![.originURL] as! String
+                if let origin = cookie.properties?[.originURL] as? String {
+                    originURL = origin
                 }
-                else if cookie.properties![.originURL] is URL {
-                    originURL = (cookie.properties![.originURL] as! URL).absoluteString
+                else if let origin = cookie.properties?[.originURL] as? URL {
+                    originURL = origin.absoluteString
                 }
                 if domain == nil, let domainUrl = URL(string: originURL) {
                     if #available(iOS 16.0, *) {
@@ -255,11 +255,11 @@ public class MyCookieManager: ChannelDelegate {
         MyCookieManager.httpCookieStore.getAllCookies { (cookies) in
             for cookie in cookies {
                 var originURL = url
-                if cookie.properties![.originURL] is String {
-                    originURL = cookie.properties![.originURL] as! String
+                if let origin = cookie.properties?[.originURL] as? String {
+                    originURL = origin
                 }
-                else if cookie.properties![.originURL] is URL {
-                    originURL = (cookie.properties![.originURL] as! URL).absoluteString
+                else if let origin = cookie.properties?[.originURL] as? URL {
+                    originURL = origin.absoluteString
                 }
                 if domain == nil, let domainUrl = URL(string: originURL) {
                     if #available(iOS 16.0, *) {
@@ -284,7 +284,11 @@ public class MyCookieManager: ChannelDelegate {
     public static func deleteAllCookies(result: @escaping FlutterResult) {
         let websiteDataTypes = NSSet(array: [WKWebsiteDataTypeCookies])
         let date = NSDate(timeIntervalSince1970: 0)
-        WKWebsiteDataStore.default().removeData(ofTypes: websiteDataTypes as! Set<String>, modifiedSince: date as Date, completionHandler:{
+        guard let dataTypes = websiteDataTypes as? Set<String> else {
+            result(false)
+            return
+        }
+        WKWebsiteDataStore.default().removeData(ofTypes: dataTypes, modifiedSince: date as Date, completionHandler:{
             result(true)
         })
     }

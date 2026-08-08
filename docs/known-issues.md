@@ -68,6 +68,10 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; Windows/WebView2 runtime validation pending. **Affected package:** Windows headless WebView. **Impact:** a late size callback could dereference a released WebView2 controller during startup or renderer teardown. **Fix:** size setters/getters now require both the WebView wrapper and controller before accessing bounds. **Required evidence:** create, resize, renderer restart, dispose, and recreate cycles on supported WebView2 runtimes.
 
+#### #2600 - iOS cookie property decoding
+
+**Local status:** Implemented and source-validated; iOS WebKit cookie runtime validation pending. **Affected package:** iOS cookie manager. **Impact:** cookie cleanup could force-unwrap or force-cast an absent or provider-specific `originURL` property, or assume the website data type set cast succeeded. **Fix:** origin values and website data types are decoded with optional checks and return a safe failure when the platform shape is unsupported. **Required evidence:** cookie deletion with String/URL/missing origin properties across iOS 15-26.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

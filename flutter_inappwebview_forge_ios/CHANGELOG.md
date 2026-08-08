@@ -1,3 +1,7 @@
+## 2.1.8 - 2026-08-08
+
+- Decode optional cookie origin properties and website data types safely instead of force-unwrapping provider-controlled values ([#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600)).
+
 ## 2.1.7 - 2026-08-08
 
 - Guard custom URL-scheme callbacks against non-plugin WebView instances and fail the task with a structured error instead of force-casting ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).

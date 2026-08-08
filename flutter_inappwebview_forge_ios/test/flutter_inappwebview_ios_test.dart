@@ -39,6 +39,15 @@ void main() {
         customSchemeSource.contains('didFailWithError'),
     'custom scheme handler does not guard non-plugin WebViews',
   );
+  final cookieSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/MyCookieManager.swift',
+  ).readAsStringSync();
+  _assert(
+    cookieSource.contains('cookie.properties?[.originURL] as? String') &&
+        cookieSource.contains('websiteDataTypes as? Set<String>'),
+    'iOS cookie cleanup still force-casts platform properties',
+  );
   _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',
