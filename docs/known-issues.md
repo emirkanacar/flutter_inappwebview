@@ -472,6 +472,14 @@ This report is not treated as the same defect as #2859. The existing iOS 2.0.1 k
 
 **Required evidence:** reproduce with `resizeToAvoidBottomInset` and `SafeArea` combinations on iOS 17 and current supported iOS, capture `window.innerHeight`, `visualViewport.height/offsetTop`, WebView frame, `contentInset`, and `adjustedContentInset` before/after keyboard dismissal, then compare with a minimal native `WKWebView` host.
 
+### #2720 — iOS localhost server is stale after background/resume
+
+**Local status:** Partial mitigation implemented and source-validated; the issue remains active until release-mode resume/reload behavior is validated. **Affected package:** shared platform-interface localhost server used by iOS and Android. **Impact:** after the OS terminates the local HTTP listener while the app is backgrounded, `isRunning()` could continue to return `true` and prevent an application from deciding whether the server must be started again. **Confidence:** Confirmed stale-reference path; the complete WebView resume failure still needs runtime reproduction.
+
+The default server now listens for the `HttpServer` request stream's `onDone` and `onError` events and clears its reference only when the callback belongs to the current server instance. This keeps intentional close, external listener termination, and replacement-server races idempotent. The fix does not silently restart a server or reload a WebView, because the public API does not own the application's server instances or initial URL lifecycle.
+
+**Required evidence:** run iOS and Android release builds through background/lock/resume with a local HTML asset, verify `isRunning()` becomes `false` after listener termination, explicitly restart the server, and reload the WebView. Confirm shared/non-shared ports and multiple server instances do not cross-clear each other's state.
+
 ### #2568 — iOS `shouldOverrideUrlLoading` header replacement deadlock
 
 **Local status:** Implemented and source-validated; physical iOS navigation/header validation pending. **Affected package:** iOS WebKit navigation delegate and method channel. **Impact:** when `shouldOverrideUrlLoading` cancels a navigation after calling `controller.loadUrl` with replacement headers, the WebView could turn white and remain in a navigation deadlock. **Confidence:** Confirmed callback-ordering path from the upstream reproducer.

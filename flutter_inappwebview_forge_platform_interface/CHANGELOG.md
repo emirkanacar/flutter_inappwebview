@@ -1,3 +1,8 @@
+## 1.1.3 - 2026-08-08
+
+- Clear the default localhost server's stale `HttpServer` reference when its request stream closes or errors, so `isRunning()` reflects externally terminated servers on iOS and Android ([#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)).
+- Add regression coverage for localhost-server listener cleanup and normal lifecycle reporting.
+
 ## 1.1.2 - 2026-08-08
 
 - Mark `onGeolocationPermissionsShowPrompt` as supported by iOS 26+ and regenerate the platform capability metadata ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).

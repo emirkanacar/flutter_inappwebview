@@ -1,0 +1,38 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
+
+File _sourceFile() {
+  final candidates = [
+    File('lib/src/in_app_localhost_server.dart'),
+    File(
+      'flutter_inappwebview_forge_platform_interface/lib/src/'
+      'in_app_localhost_server.dart',
+    ),
+  ];
+  return candidates.firstWhere((file) => file.existsSync());
+}
+
+void main() {
+  test('localhost server clears stale references when HttpServer ends', () {
+    final source = _sourceFile().readAsStringSync();
+
+    expect(source, contains('subscription.onDone'));
+    expect(source, contains('subscription.onError'));
+    expect(source, contains('identical(this._server, server)'));
+    expect(source, contains('_clearServerReference'));
+  });
+
+  test('localhost server reports its normal lifecycle', () async {
+    final server = DefaultInAppLocalhostServer(
+      const PlatformInAppLocalhostServerCreationParams(port: 0),
+    );
+
+    await server.start();
+    expect(server.isRunning(), isTrue);
+
+    await server.close();
+    expect(server.isRunning(), isFalse);
+  });
+}

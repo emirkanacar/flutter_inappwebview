@@ -100,7 +100,7 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
 
           this._server = server;
 
-          server.listen((HttpRequest request) async {
+          final subscription = server.listen((HttpRequest request) async {
             if (await _customOnData?.call(request) ?? false) {
               // if _customOnData returns true,
               // it means that the request has been handled
@@ -147,6 +147,10 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
             request.response.add(body);
             request.response.close();
           });
+          subscription.onDone(() => _clearServerReference(server));
+          subscription.onError((Object error, StackTrace stackTrace) {
+            _clearServerReference(server);
+          });
 
           completer.complete();
         });
@@ -163,20 +167,28 @@ class DefaultInAppLocalhostServer extends PlatformInAppLocalhostServer {
 
   @override
   Future<void> close() async {
-    if (this._server == null) {
+    final server = this._server;
+    if (server == null) {
       return;
     }
-    await this._server!.close(force: true);
+    await server.close(force: true);
     if (kDebugMode) {
       print('Server running on http://localhost:$_port closed');
     }
-    this._started = false;
-    this._server = null;
+    _clearServerReference(server);
   }
 
   @override
   bool isRunning() {
     return this._server != null;
+  }
+
+  void _clearServerReference(HttpServer server) {
+    if (!identical(this._server, server)) {
+      return;
+    }
+    this._server = null;
+    this._started = false;
   }
 
   ContentType _getContentTypeFromMimeType(String mimeType) {

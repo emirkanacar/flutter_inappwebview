@@ -27,8 +27,8 @@ The root package owns public Dart widgets, controllers, settings, browser APIs, 
 
 | Package | Native/runtime technology | Current version | Minimum Flutter | Main boundary |
 | --- | --- | ---: | --- | --- |
-| `flutter_inappwebview_forge` | Shared Dart API and example | 2.1.26 | 3.38.6 | Public controllers, widgets, settings, callbacks |
-| `flutter_inappwebview_forge_platform_interface` | Dart federated contract | 1.1.0 | 3.32.0 | Method/event names, payload maps, types, capability metadata |
+| `flutter_inappwebview_forge` | Shared Dart API and example | 2.1.27 | 3.38.6 | Public controllers, widgets, settings, callbacks |
+| `flutter_inappwebview_forge_platform_interface` | Dart federated contract | 1.1.3 | 3.32.0 | Method/event names, payload maps, types, capability metadata |
 | `flutter_inappwebview_forge_android` | Android WebView, Kotlin, AndroidX | 1.0.27 | 3.32.0 | Method channels, platform views, WebView lifecycle |
 | `flutter_inappwebview_forge_ios` | `WKWebView`, Swift, SPM/CocoaPods | 2.1.16 | 3.38.6 | Scene-aware windows, WebKit delegates, native resources |
 | `flutter_inappwebview_forge_macos` | `WKWebView`, Swift, SPM/CocoaPods | 1.1.5 | 3.32.0 | macOS WebKit and browser windows |

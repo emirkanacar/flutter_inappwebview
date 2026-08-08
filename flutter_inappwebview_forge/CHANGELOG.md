@@ -1,3 +1,8 @@
+## 2.1.27 - 2026-08-08
+
+- Platform interface: clear stale localhost-server references when the underlying request stream closes or errors, keeping `isRunning()` accurate after external lifecycle termination on iOS and Android ([#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)). Full release-mode resume/reload validation remains pending.
+- Update the root dependency to platform interface 1.1.3.
+
 ## 2.1.26 - 2026-08-08
 
 - iOS: defer `loadUrl` requests issued from `shouldOverrideUrlLoading` until the WebKit navigation decision handler has completed, preventing the white-screen/deadlock path when replacing navigation headers ([#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)). Physical iOS navigation/header validation remains pending.
