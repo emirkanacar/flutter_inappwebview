@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-08
+Last reviewed: 2026-08-09
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -15,8 +15,8 @@ details remain in [known-issues.md](known-issues.md).
 | --- | --- | ---: | --- |
 | Locally implemented or mitigated; runtime validation pending | Issue register below | 65 | Source, regression, and host/build checks pass; real validation remains. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
-| Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727) | 9 | Strong evidence points to Apple/WebKit Simulator, Android framework/provider, host app/site configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 50 | No complete local implementation boundary has been established. |
+| Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753) | 10 | Strong evidence points to Apple/WebKit Simulator or callback limitations, Android framework/provider, host app/site configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 49 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Three PR-only records also have local implementations but remain outside the
@@ -28,11 +28,16 @@ Three PR-only records also have local implementations but remain outside the
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Still open | Technical open after showcase |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Bugs | 98 | 51 | 1 | 9 | 37 | 37 |
+| Bugs | 98 | 51 | 1 | 10 | 36 | 36 |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | 10 |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **65** | **1** | **9** | **50** | **47** |
+| **Total** | **125** | **65** | **1** | **10** | **49** | **46** |
+
+Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
+now validates nullable and non-string optional callback fields before dispatch;
+the remaining gate is the Android API/provider matrix listed in
+[`known-issues.md`](known-issues.md).
 
 ## Issue register
 

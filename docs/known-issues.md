@@ -1,8 +1,8 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-08
+Last reviewed: 2026-08-09
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 65 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2698, #2713, #2723, and #2727 are host/platform-specific boundaries with no Forge-owned fix, and 50 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 65 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2698, #2713, #2723, #2727, and #2753 are host/platform-specific boundaries with no Forge-owned fix, and 49 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -21,8 +21,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 | --- | ---: | --- |
 | Resolved locally; runtime validation pending | 65 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 9 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 50 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 10 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 49 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -152,9 +152,9 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 ### 2026-08-08 issue work
 
-#### #2856 - Android nullable request-result payloads
+#### #2856 - Android nullable and malformed callback payloads
 
-**Local status:** Implemented and source-validated; device/provider validation pending. **Affected package:** Android Dart controller. **Environment:** Flutter 3.44.8/Dart 3.12.2 development baseline; published package compatibility minimum remains Flutter 3.38.6. **User impact:** malformed or nullable WebView provider fields could cause a Dart type error while converting `requestFocusNodeHref` or `requestImageRef` results. **Hypothesis:** dynamic channel values were passed directly to `WebUri` and nullable public fields without runtime type checks. **Fix:** optional URL, title, and source values are accepted only when they are strings; invalid values are ignored. The public channel and result contracts are unchanged. **Required evidence:** Android API/provider matrix covering null, empty, and malformed callback fields.
+**Local status:** Implemented and source-validated in Android 1.0.30; device/provider validation pending. **Affected package:** Android Dart controller. **Environment:** Flutter 3.44.8/Dart 3.12.2 development baseline; published package compatibility minimum remains Flutter 3.38.6. **User impact:** malformed or nullable WebView provider fields could cause a Dart type error while converting request results or dispatching normal callbacks. **Hypothesis:** dynamic channel values were passed directly to `WebUri`, nullable public fields, or non-null `String` locals. **Fix:** optional URL, title, source, origin, callback ID, touch-icon, safe-browsing, print-job, and context-menu values are accepted only when they are strings; invalid values are ignored or mapped to the existing empty-title/default behavior. The public channel and result contracts are unchanged. **Required evidence:** Android API/provider matrix covering null, empty, malformed, and wrong-type callback fields.
 
 #### #2737 - Web iframe URL tracking
 
@@ -254,11 +254,11 @@ The platform-interface regression test parses a request containing a known camer
 
 ### #2856 — Android `null` values cast to non-null `String`
 
-**Status:** Fixed in release 2.0.1 (Android 1.0.2). **Impact:** Runtime crash after upgrading to the 6.2 beta line. **Confidence:** Confirmed path.
+**Status:** Hardened in Android 1.0.30 (root 2.1.30); device/provider validation pending. **Impact:** Runtime crash after upgrading to the 6.2 beta line. **Confidence:** Confirmed path.
 
 Issue [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) reports `type 'Null' is not a subtype of type 'String'`. The Android event handlers currently read platform-channel values as non-null strings, for example `origin` and `resources` in `InAppWebViewController`’s `onPermissionRequest` handler, and `url` in the safe-browsing handler. Native WebView callbacks can omit or change optional fields across OS/WebView versions.
 
-The Android Dart event dispatcher now validates nullable `origin` and `url` values before constructing non-null public types, filters malformed permission-resource entries, and uses an empty title for a context-menu item when Android omits its optional title. Missing data in geolocation, permission, and safe-browsing callbacks returns control to the native default behavior. Regression coverage exercises the reported null title and representative nullable callback payloads.
+The Android Dart event dispatcher now validates nullable and non-string `origin`, `url`, title, callback IDs, and other optional string values before constructing public types or dispatching callbacks. It filters malformed permission-resource entries and uses an empty title for a context-menu item when Android omits or corrupts its optional title. Missing data in geolocation, permission, and safe-browsing callbacks returns control to the native default behavior. Regression coverage exercises null and wrong-type callback payloads, including injected-script IDs.
 
 ### #2850 — iOS console arguments lose object and Error data
 
@@ -545,6 +545,12 @@ or open the software keyboard, and this environment has no iOS 17 runtime;
 the diagnostic therefore stops at its keyboard precondition and does not
 validate or close the issue. Physical/iOS 17 runtime evidence and native
 frame/inset comparison remain required.
+
+### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
+
+**Local status:** Host/WebKit capability boundary; no Forge-owned fix identified. **Affected scope:** iOS `WKNavigationDelegate` error reporting for iframe and other subresource requests. **Impact:** the report expects `onReceivedError` for an offline iframe request, matching Android behavior, but iOS only exposes navigation-level failure callbacks through the public WebKit delegate. **Confidence:** Strong platform-boundary evidence; the upstream report has no Forge stack or API that can supply the missing callback.
+
+The iOS implementation forwards `webView(_:didFailProvisionalNavigation:withError:)` and `webView(_:didFail:withError:)` to the existing channel event. Apple's [`WKNavigationDelegate` documentation](https://developer.apple.com/documentation/webkit/wknavigationdelegate) defines these as navigation tracking/error callbacks and describes the delegate in terms of the main frame, not arbitrary HTTPS iframe subresources. A JavaScript error listener would be incomplete for cross-origin frames, media, opaque fetches, and failures below JavaScript, so adding one would not preserve the public `onReceivedError` contract. The issue remains visible for Apple/WebKit capability tracking and would require a documented API decision or new WebKit callback before implementation.
 
 ### #2720 — iOS localhost server is stale after background/resume
 

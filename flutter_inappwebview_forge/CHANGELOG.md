@@ -1,3 +1,8 @@
+## 2.1.30 - 2026-08-09
+
+- Android: validate optional native MethodChannel string fields before callback dispatch, preventing malformed provider values from reaching non-null `String` assignments ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)). Android device/provider validation remains pending.
+- Update the root dependency to Android 1.0.30.
+
 ## 2.1.29 - 2026-08-08
 
 - Android: catch provider-specific `forceDarkStrategy` adapter casts, make WebView disposal idempotent, and guard detached Android 10 IME operations ([#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594), [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555), [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).

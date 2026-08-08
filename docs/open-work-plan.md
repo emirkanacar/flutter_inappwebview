@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-08
+Last reviewed: 2026-08-09
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -11,24 +11,24 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Seventy-five issue records have a
+The export contains 125 issues and 73 PRs. Seventy-six issue records have a
 documented local implementation, mitigation, source-review, or host/platform
 boundary: 65 await real runtime validation, #2745 is closed by source review,
-and #2570/#2584/#2598/#2636/#2659/#2698/#2713/#2723/#2727 have no Forge-owned fix because
+and #2570/#2584/#2598/#2636/#2659/#2698/#2713/#2723/#2727/#2753 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider, and Flutter engine/platform-view layers.
-The other 50 issue records
+The other 49 issue records
 remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 51 | 1 | 9 | 37 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 51 | 1 | 10 | 36 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **65** | **1** | **9** | **50** | **47 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **65** | **1** | **10** | **49** | **46 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -76,6 +76,10 @@ The Android provider-cast reports [#2673](https://github.com/pichillilorenzo/flu
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
 are now mapped to the reported `WebSettingsCompat.setForceDarkStrategy` boundary;
 their setter/getter fail-open guards and source tests are in the runtime register.
+Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
+also validates optional native MethodChannel string fields by runtime type before
+dispatching callbacks; malformed provider values are ignored without changing the
+public callback contract. Its API/provider matrix remains in the runtime register.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack
@@ -141,6 +145,13 @@ reported as upstream-closed:
   semantic HTML `autocomplete` fields. The Forge iOS configuration has no
   Password AutoFill switch and cannot edit host entitlements or the remote
   login page, so the record is tracked as a host/application boundary.
+- [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753):
+  iOS `WKNavigationDelegate` reports navigation failures, not arbitrary
+  HTTPS iframe subresource failures. The upstream report has no Forge-owned
+  native callback or complete cross-origin JavaScript replacement; adding a
+  partial error script would not preserve the `onReceivedError` contract.
+  The record is tracked as an Apple/WebKit capability boundary pending a
+  documented API-level decision or new WebKit evidence.
 
 ## Priority queue
 
@@ -202,7 +213,7 @@ These items must not be implemented by copying an upstream PR directly. Each one
 
 These records remain listed so they are not lost, but they should not consume implementation time before P0/P1 work has evidence:
 
-`#2824`, `#2821`, `#2804`, `#2798`, `#2795`, `#2753`, `#2742`, `#2730`, `#2702`, `#2681`, `#2667`.
+`#2824`, `#2821`, `#2804`, `#2798`, `#2795`, `#2742`, `#2730`, `#2702`, `#2681`, `#2667`.
 
 For each P3 item, first add the platform, OS/runtime version, minimal reproduction, expected behavior, actual behavior, and native stack trace to the triage record. A title-only report is not enough for a shared implementation change.
 
@@ -214,8 +225,8 @@ Runtime-pending records are resolved implementation work, not active queue
 items. The complete register contains 65 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 50 issue records that still need implementation, design, or
-reproduction. Nine host/platform boundaries are tracked above and are not
+keeps only the 49 issue records that still need implementation, design, or
+reproduction. Ten host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
 ## PR queue
@@ -268,15 +279,15 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-08 status pass has 65 locally implemented or mitigated issue
+The 2026-08-09 status pass has 65 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
-review, nine host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
-#2698, #2713, #2723, and #2727), and 50 active issue records in this plan. The runtime-pending
+review, ten host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
+#2698, #2713, #2723, #2727, and #2753), and 49 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
 live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
-[`known-issues.md`](known-issues.md). The active queue contains 37 bugs, 10
-enhancements, 0 unlabelled records, and 3 showcase records (47 active
+[`known-issues.md`](known-issues.md). The active queue contains 36 bugs, 10
+enhancements, 0 unlabelled records, and 3 showcase records (46 active
 technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:

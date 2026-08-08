@@ -1,3 +1,8 @@
+## 1.0.30 - 2026-08-09
+
+- Validate optional Android MethodChannel string fields by runtime type before dispatching callbacks, so null or malformed provider values cannot abort `_handleMethod` with a `String` cast error ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)). Device/provider validation remains pending.
+- Extend regression coverage to malformed context-menu, geolocation, safe-browsing, permission, and injected-script callback values.
+
 ## 1.0.29 - 2026-08-08
 
 - Catch provider-specific `WebSettingsCompat` adapter failures when applying or reading `forceDarkStrategy`, leaving the WebView provider's default intact ([#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673), [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)). Provider/device validation remains pending.

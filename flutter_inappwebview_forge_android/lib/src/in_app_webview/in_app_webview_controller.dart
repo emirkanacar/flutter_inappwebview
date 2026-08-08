@@ -203,6 +203,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
     );
   }
 
+  String? _optionalString(dynamic value) {
+    return value is String ? value : null;
+  }
+
   Future<dynamic> _handleMethod(MethodCall call) async {
     if (PlatformInAppWebViewController.debugLoggingSettings.enabled &&
         call.method != "onCallJsHandler") {
@@ -214,7 +218,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         _injectedScriptsFromURL.clear();
         if ((webviewParams != null && webviewParams!.onLoadStart != null) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
           if (webviewParams != null && webviewParams!.onLoadStart != null)
             webviewParams!.onLoadStart!(_controllerFromPlatform, uri);
@@ -225,7 +229,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
       case "onLoadStop":
         if ((webviewParams != null && webviewParams!.onLoadStop != null) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
           if (webviewParams != null && webviewParams!.onLoadStop != null)
             webviewParams!.onLoadStop!(_controllerFromPlatform, uri);
@@ -487,7 +491,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
       case "onTitleChanged":
         if ((webviewParams != null && webviewParams!.onTitleChanged != null) ||
             _inAppBrowserEventHandler != null) {
-          String? title = call.arguments["title"];
+          String? title = _optionalString(call.arguments["title"]);
           if (webviewParams != null && webviewParams!.onTitleChanged != null)
             webviewParams!.onTitleChanged!(_controllerFromPlatform, title);
           else
@@ -501,7 +505,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     webviewParams!.androidOnGeolocationPermissionsShowPrompt !=
                         null)) ||
             _inAppBrowserEventHandler != null) {
-          final String? origin = call.arguments["origin"];
+          final String? origin = _optionalString(call.arguments["origin"]);
           if (origin == null) {
             break;
           }
@@ -594,7 +598,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     webviewParams!.androidOnRenderProcessUnresponsive !=
                         null)) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
 
           if (webviewParams != null) {
@@ -625,7 +629,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnRenderProcessResponsive != null)) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
 
           if (webviewParams != null) {
@@ -689,7 +693,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnFormResubmission != null)) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
 
           if (webviewParams != null) {
@@ -784,7 +788,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnReceivedTouchIconUrl != null)) ||
             _inAppBrowserEventHandler != null) {
-          final String? url = call.arguments["url"];
+          final String? url = _optionalString(call.arguments["url"]);
           if (url == null) {
             break;
           }
@@ -913,7 +917,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnSafeBrowsingHit != null)) ||
             _inAppBrowserEventHandler != null) {
-          final String? url = call.arguments["url"];
+          final String? url = _optionalString(call.arguments["url"]);
           if (url == null) {
             break;
           }
@@ -1141,15 +1145,15 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnPermissionRequest != null)) ||
             _inAppBrowserEventHandler != null) {
-          final String? origin = call.arguments["origin"];
+          final String? origin = _optionalString(call.arguments["origin"]);
           if (origin == null) {
             break;
           }
           final List<String> resources =
               (call.arguments["resources"] as List<dynamic>? ??
-                    const <dynamic>[])
-                .whereType<String>()
-                .toList();
+                      const <dynamic>[])
+                  .whereType<String>()
+                  .toList();
 
           Map<String, dynamic> arguments = call.arguments
               .cast<String, dynamic>();
@@ -1185,7 +1189,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         if ((webviewParams != null &&
                 webviewParams!.onUpdateVisitedHistory != null) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           bool? isReload = call.arguments["isReload"];
           WebUri? uri = url != null ? WebUri(url) : null;
           if (webviewParams != null &&
@@ -1224,7 +1228,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         if ((webviewParams != null &&
                 webviewParams!.onPageCommitVisible != null) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
+          String? url = _optionalString(call.arguments["url"]);
           WebUri? uri = url != null ? WebUri(url) : null;
           if (webviewParams != null &&
               webviewParams!.onPageCommitVisible != null)
@@ -1400,9 +1404,9 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
 
         if (contextMenu != null) {
           int? androidId = call.arguments["androidId"];
-          String? iosId = call.arguments["iosId"];
+          String? iosId = _optionalString(call.arguments["iosId"]);
           dynamic id = call.arguments["id"];
-          final String title = call.arguments["title"] ?? "";
+          final String title = _optionalString(call.arguments["title"]) ?? "";
 
           ContextMenuItem menuItemClicked = ContextMenuItem(
             id: id,
@@ -1479,8 +1483,8 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.onPrint != null)) ||
             _inAppBrowserEventHandler != null) {
-          String? url = call.arguments["url"];
-          String? printJobId = call.arguments["printJobId"];
+          String? url = _optionalString(call.arguments["url"]);
+          String? printJobId = _optionalString(call.arguments["printJobId"]);
           WebUri? uri = url != null ? WebUri(url) : null;
           AndroidPrintJobController? printJob = printJobId != null
               ? AndroidPrintJobController(
@@ -1511,7 +1515,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onInjectedScriptLoaded":
-        final String? id = call.arguments[0];
+        final String? id = _optionalString(call.arguments[0]);
         if (id == null) {
           break;
         }
@@ -1522,7 +1526,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onInjectedScriptError":
-        final String? id = call.arguments[0];
+        final String? id = _optionalString(call.arguments[0]);
         if (id == null) {
           break;
         }
@@ -1629,7 +1633,9 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onCallJsHandler":
-        final String? handlerName = call.arguments["handlerName"];
+        final String? handlerName = _optionalString(
+          call.arguments["handlerName"],
+        );
         final Map<String, dynamic>? handlerDataMap =
             (call.arguments["data"] as Map?)?.cast<String, dynamic>();
         if (handlerName == null || handlerDataMap == null) {
@@ -1778,7 +1784,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
               _inAppBrowserEventHandler!.onWindowBlur();
             return null;
           case "onInjectedScriptLoaded":
-            String id = handlerData.args[0];
+            String? id = _optionalString(handlerData.args[0]);
+            if (id == null) {
+              return null;
+            }
             var onLoadCallback = _injectedScriptsFromURL[id]?.onLoad;
             if ((webviewParams != null || _inAppBrowserEventHandler != null) &&
                 onLoadCallback != null) {
@@ -1786,7 +1795,10 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
             }
             return null;
           case "onInjectedScriptError":
-            String id = handlerData.args[0];
+            String? id = _optionalString(handlerData.args[0]);
+            if (id == null) {
+              return null;
+            }
             var onErrorCallback = _injectedScriptsFromURL[id]?.onError;
             if ((webviewParams != null || _inAppBrowserEventHandler != null) &&
                 onErrorCallback != null) {
@@ -2603,7 +2615,7 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         InAppWebViewHitTestResultType.fromNativeValue(
           hitTestResultMap["type"]?.toInt(),
         );
-    String? extra = hitTestResultMap["extra"];
+    String? extra = _optionalString(hitTestResultMap["extra"]);
     return InAppWebViewHitTestResult(type: type, extra: extra);
   }
 
