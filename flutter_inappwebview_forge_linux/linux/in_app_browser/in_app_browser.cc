@@ -380,6 +380,9 @@ void InAppBrowser::setupDrawingArea() {
 }
 
 void InAppBrowser::setupDrawingAreaFallback() {
+  if (drawingArea_ != nullptr) {
+    return;
+  }
   // Original GtkDrawingArea code - used when GL rendering is not available
   drawingArea_ = gtk_drawing_area_new();
   gtk_widget_set_can_focus(drawingArea_, TRUE);
@@ -414,6 +417,18 @@ void InAppBrowser::setupDrawingAreaFallback() {
 
   gtk_box_pack_start(GTK_BOX(contentBox_), drawingArea_, TRUE, TRUE, 0);
   useGlRendering_ = false;
+}
+
+void InAppBrowser::fallbackFromGlArea() {
+  if (!useGlRendering_ || glArea_ == nullptr) {
+    return;
+  }
+  errorLog("InAppBrowser: falling back to pixel-buffer rendering after GL initialization failure");
+  gtk_widget_destroy(glArea_);
+  glArea_ = nullptr;
+  useGlRendering_ = false;
+  setupDrawingAreaFallback();
+  gtk_widget_show_all(contentBox_);
 }
 
 void InAppBrowser::setupWebView(const InAppBrowserCreationParams& params) {
@@ -1075,6 +1090,7 @@ void InAppBrowser::OnGlAreaRealize(GtkGLArea* area, gpointer user_data) {
   GError* error = gtk_gl_area_get_error(area);
   if (error != nullptr) {
     errorLog("InAppBrowser: GtkGLArea error during realize: %s", error->message);
+    browser->fallbackFromGlArea();
     return;
   }
 

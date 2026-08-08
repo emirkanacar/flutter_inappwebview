@@ -218,6 +218,7 @@ class InAppBrowser {
   
   // Fallback setup for GtkDrawingArea (when GtkGLArea fails)
   void setupDrawingAreaFallback();
+  void fallbackFromGlArea();
 
   // Cursor change handler
   void OnCursorChanged(const std::string& cursorName);

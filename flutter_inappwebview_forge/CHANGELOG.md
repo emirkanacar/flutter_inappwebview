@@ -1,3 +1,8 @@
+## 2.1.22 - 2026-08-08
+
+- Linux: fall back from failed GtkGLArea initialization to pixel-buffer rendering for GPU/DMA-BUF failures ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).
+- Update the root dependency to Linux 1.0.4.
+
 ## 2.1.21 - 2026-08-08
 
 - Android: guard file chooser callback casts during provider and activity lifecycle changes ([#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

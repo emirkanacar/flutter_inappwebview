@@ -167,7 +167,7 @@ The PR export is also marked `OPEN`; do not merge or copy it without checking th
 
 ## Definition of done
 
-The 2026-08-08 source-validation pass produced several local mitigations, but they are not treated as upstream issue resolution until their device/provider/runtime gates pass. The plan deliberately keeps the export counts at 70 bugs, 10 enhancements, 2 unlabelled, and 3 showcase records; local implementation status is tracked separately in `known-issues.md` and the resolution log.
+The 2026-08-08 source-validation pass produced several local mitigations, including the Linux GL-to-pixel-buffer runtime fallback for #2861, but they are not treated as upstream issue resolution until their device/provider/runtime gates pass. The plan deliberately keeps the export counts at 70 bugs, 10 enhancements, 2 unlabelled, and 3 showcase records; local implementation status is tracked separately in `known-issues.md` and the resolution log.
 
 An issue leaves this plan only when:
 

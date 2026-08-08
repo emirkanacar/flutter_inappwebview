@@ -48,6 +48,8 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; Fedora/X11/Intel runtime validation pending. **Affected package:** Linux rendering backend. **Impact:** the default GL/DMA-BUF path may produce black, white, or transparent output on affected Intel/X11 configurations. **Fix:** `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` now selects the existing pixel-buffer/SHM fallback. **Required evidence:** Fedora/X11 with Intel i915, backend logs, and before/after frame output.
 
+The runtime GL realize path now also switches to the same fallback when GtkGLArea initialization reports an error. This is containment, not proof that every DMA-BUF/driver failure is resolved; Fedora/X11/Intel runtime evidence remains required.
+
 #### #2763 - iOS popup WebView manager lifecycle
 
 **Local status:** Implemented and source-validated; iOS popup device validation pending. **Affected package:** iOS `WKUIDelegate` popup creation. **Impact:** popup creation could synthesize window ID `0` without a live manager, returning a child that could not be attached to the caller's `CreateWindowAction`. **Fix:** popup creation now returns `nil` when the manager is unavailable. **Required evidence:** `window.open`, returned child attachment, navigation, disposal, and scene transitions on iOS 15-26.

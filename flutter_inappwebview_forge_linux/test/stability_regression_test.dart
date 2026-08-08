@@ -71,4 +71,14 @@ void main() {
     'setupDrawingAreaFallback()',
     'the non-GL rendering path',
   );
+  _expectContains(
+    browserSource,
+    'fallbackFromGlArea()',
+    'the runtime GL failure fallback',
+  );
+  _expectContains(
+    browserSource,
+    'falling back to pixel-buffer rendering',
+    'the actionable GL fallback diagnostic',
+  );
 }
