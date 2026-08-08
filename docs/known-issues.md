@@ -488,6 +488,18 @@ This report is not treated as the same defect as #2859. The existing iOS 2.0.1 k
 
 **Required evidence:** reproduce with `resizeToAvoidBottomInset` and `SafeArea` combinations on iOS 17 and current supported iOS, capture `window.innerHeight`, `visualViewport.height/offsetTop`, WebView frame, `contentInset`, and `adjustedContentInset` before/after keyboard dismissal, then compare with a minimal native `WKWebView` host.
 
+An opt-in integration diagnostic is available at
+[`flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart).
+Run it from `flutter_inappwebview_forge/example` with
+`fvm flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/ios_keyboard_viewport_diagnostic_test.dart -d <ios-device> --dart-define=RUN_IOS_KEYBOARD_VIEWPORT_DIAGNOSTIC=true`.
+Flutter analysis and the iOS 26.0 simulator build passed, and the baseline
+WebView frame was `402x778` with a `778px` visual viewport. The automated
+platform-view tap did not focus the HTML input (`activeElementId` stayed empty)
+or open the software keyboard, and this environment has no iOS 17 runtime;
+the diagnostic therefore stops at its keyboard precondition and does not
+validate or close the issue. Physical/iOS 17 runtime evidence and native
+frame/inset comparison remain required.
+
 ### #2720 — iOS localhost server is stale after background/resume
 
 **Local status:** Partial mitigation implemented and source-validated; the issue remains active until release-mode resume/reload behavior is validated. **Affected package:** shared platform-interface localhost server used by iOS and Android. **Impact:** after the OS terminates the local HTTP listener while the app is backgrounded, `isRunning()` could continue to return `true` and prevent an application from deciding whether the server must be started again. **Confidence:** Confirmed stale-reference path; the complete WebView resume failure still needs runtime reproduction.

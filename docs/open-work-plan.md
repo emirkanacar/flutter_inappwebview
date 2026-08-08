@@ -116,7 +116,7 @@ are locally implemented and awaiting real validation in the
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Measure safe-area/inset changes and keyboard transitions. Apply geometry fixes only after capturing before/after frames on iOS 17+ and macOS 11+. |
+| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Use the opt-in iOS diagnostic to capture WebKit viewport metrics and the Flutter WebView frame. The iOS 26.0 simulator build/baseline passes, but automated platform-view input did not open the software keyboard and iOS 17 is unavailable locally; obtain physical/iOS 17 frame, `contentInset`, and `adjustedContentInset` evidence before applying a geometry fix. |
 | [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | iOS interaction, resume, headers, autofill, and focus behavior | The shared localhost server liveness guard is source-validated; complete iOS release resume/restart/reload evidence is still required. Create one matrix for iOS 15–26, Flutter 3.38.6/current stable, ListView/modal transitions, local HTML resume, form autofill, and navigation headers. Keep #2713 and #2723 in the host/platform register and separate Flutter-engine regressions from plugin channel behavior. |
 
 #### Android
