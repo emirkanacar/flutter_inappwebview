@@ -1,3 +1,8 @@
+## 2.1.25 - 2026-08-08
+
+- Android: refresh hybrid-composition WebView geometry after display-size changes and visibility recovery ([#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)). Android 16/API 36 and OEM WebView runtime validation remains pending.
+- Update the root dependency to Android 1.0.27.
+
 ## 2.1.24 - 2026-08-08
 
 - macOS: synchronize native WebView frames with fractional Flutter platform-view bounds to prevent AppKit resize drift ([#2826](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2826)).

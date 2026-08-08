@@ -2550,21 +2550,32 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     throw UnsupportedOperationException()
   }
 
+  private fun refreshGeometryAfterLayoutChange() {
+    if (isDisposed) return
+    postInvalidateOnAnimation()
+    requestLayout()
+  }
+
+  override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    super.onSizeChanged(w, h, oldw, oldh)
+    if (w != oldw || h != oldh) {
+      refreshGeometryAfterLayoutChange()
+    }
+  }
+
   override fun onWindowVisibilityChanged(visibility: Int) {
     if (customSettings.allowBackgroundAudioPlaying == true) {
       if (visibility != View.GONE) {
         super.onWindowVisibilityChanged(View.VISIBLE)
       }
       if (visibility != View.GONE) {
-        postInvalidateOnAnimation()
-        requestLayout()
+        refreshGeometryAfterLayoutChange()
       }
       return
     }
     super.onWindowVisibilityChanged(visibility)
     if (visibility != View.GONE) {
-      postInvalidateOnAnimation()
-      requestLayout()
+      refreshGeometryAfterLayoutChange()
     }
   }
 

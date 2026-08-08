@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-08
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 64 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 60 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 65 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, and 59 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -16,9 +16,9 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 64 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 65 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Open implementation or reproduction | 60 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 59 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2698, #2673, #2594 - Android provider-specific setting casts
 
@@ -144,7 +144,7 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-64 locally implemented or mitigated issue records and three PR-only records.
+65 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -235,6 +235,14 @@ The Android Gradle configuration uses the available `proguard-android-optimize.t
 **Status:** Fixed in Android 1.0.8; validate on Android 10 and affected OEM/device combinations. **Impact:** After a long screen-lock period, the WebView could remain visually blank until a touch or scroll triggered a redraw. **Confidence:** Strong report with a lifecycle rendering path.
 
 When the WebView window becomes visible again, the Android implementation now schedules an animation invalidation and requests layout after forwarding the visibility callback. This keeps the redraw explicit without forcing a navigation or destroying the WebView state. A static regression assertion protects the visibility recovery path; physical lock/unlock validation remains required.
+
+#### #2721 — Android WebView display-size recovery
+
+**Local status:** Implemented and source-validated; Android 16/API 36 and OEM WebView runtime validation pending. **Affected package:** Android hybrid-composition WebView geometry/lifecycle. **Impact:** after returning from Android accessibility or display-size settings, the WebView could retain stale geometry or redraw state; the report also includes a provider renderer crash during the visibility/dispose/recreate sequence. **Confidence:** Strong report; the geometry path is confirmed, while the renderer-crash cause remains provider-specific.
+
+`InAppWebView` now shares an idempotent geometry-refresh helper between visibility recovery and `onSizeChanged`. A real size change calls `super.onSizeChanged`, invalidates the view, and requests layout; visibility recovery uses the same helper and ignores disposed instances. This keeps the native WebView bounds and redraw path synchronized when Android changes display metrics without forcing navigation or recreating the WebView. The Android source regression test and example APK/AAR build pass; this mitigation does not claim to eliminate a provider-owned Chromium renderer crash without device evidence.
+
+**Required evidence:** Android 16/API 36 accessibility/display-size changes with hybrid composition, API 35/36 and OEM WebView providers, native frame/bounds before and after the settings change, no renderer crash, no stale size, and no duplicate navigation/dispose callbacks.
 
 ### #2855 — macOS custom context-menu items do not render
 

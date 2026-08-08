@@ -281,6 +281,17 @@ void main() {
     expect(source, contains('requestLayout()'));
   });
 
+  test('Android refreshes WebView geometry after display-size changes', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('override fun onSizeChanged'));
+    expect(source, contains('if (w != oldw || h != oldh)'));
+    expect(source, contains('refreshGeometryAfterLayoutChange()'));
+  });
+
   test('Android progress callbacks do not re-inject document-start scripts', () {
     final chromeClientSource = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

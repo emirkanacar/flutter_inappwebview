@@ -1,3 +1,7 @@
+## 1.0.27 - 2026-08-08
+
+- Refresh native WebView geometry after display-size changes and visibility recovery ([#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)). Android 16/API 36 and OEM WebView runtime validation remains pending.
+
 ## 1.0.26 - 2026-08-08
 
 - Replace Java-serialized InAppBrowser and Chrome Custom Tabs activity extras with primitive and nested-`Bundle` values, eliminating the `Bundle.getSerializable`/`putSerializable` boundary ([#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)).
