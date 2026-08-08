@@ -1,3 +1,9 @@
+## 2.1.21 - 2026-08-08
+
+- Android: guard file chooser callback casts during provider and activity lifecycle changes ([#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+- macOS: validate WebStorage cleanup payloads before native record operations ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).
+- Update root dependencies to Android 1.0.25 and macOS 1.1.4.
+
 ## 2.1.20 - 2026-08-08
 
 - Android: guard ChromeClient callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

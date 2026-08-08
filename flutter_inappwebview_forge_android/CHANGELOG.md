@@ -1,3 +1,7 @@
+## 1.0.25 - 2026-08-08
+
+- Guard Android file chooser callback casts and return safely when the platform callback shape is unsupported ([#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+
 ## 1.0.24 - 2026-08-08
 
 - Guard Android ChromeClient progress, title, icon, and touch-icon callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).

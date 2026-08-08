@@ -71,6 +71,14 @@ void main() {
       !customSchemeSource.contains('didFailWithError')) {
     throw StateError('macOS custom scheme handler does not guard WebView ownership');
   }
+  final storageSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/MyWebStorageManager.swift',
+  ).readAsStringSync();
+  if (!storageSource.contains('dataTypes is required') ||
+      !storageSource.contains('displayName = r["displayName"] as? String')) {
+    throw StateError('macOS WebStorage payloads are not validated');
+  }
   if (!webViewSource.contains('onCreateContextMenu') ||
       !webViewSource.contains('onHideContextMenu')) {
     throw StateError(

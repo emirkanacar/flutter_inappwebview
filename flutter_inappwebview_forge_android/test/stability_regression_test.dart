@@ -112,6 +112,15 @@ void main() {
     expect(source, contains('(view as? InAppWebView)?.channelDelegate'));
   });
 
+  test('Android file chooser callbacks use nullable callback casts', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    expect(source, contains('filePathsCallback as? ValueCallback'));
+    expect(source, isNot(contains('filePathsCallback as ValueCallback')));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

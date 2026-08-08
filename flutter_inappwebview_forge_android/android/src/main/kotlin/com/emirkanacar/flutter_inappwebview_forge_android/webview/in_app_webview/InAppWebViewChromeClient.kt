@@ -659,13 +659,8 @@ open class InAppWebViewChromeClient(
       override fun nonNullSuccess(response: ShowFileChooserResponse): Boolean {
         if (response.isHandledByClient) {
           val uriArray = response.filePaths?.map(Uri::parse)?.toTypedArray()
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            @Suppress("UNCHECKED_CAST")
-            (filePathsCallback as ValueCallback<Array<Uri>>).onReceiveValue(uriArray)
-          } else {
-            @Suppress("UNCHECKED_CAST")
-            (filePathsCallback as ValueCallback<Uri>).onReceiveValue(uriArray?.firstOrNull())
-          }
+          @Suppress("UNCHECKED_CAST")
+          (filePathsCallback as? ValueCallback<Array<Uri>>)?.onReceiveValue(uriArray)
           return false
         }
         return true
@@ -675,17 +670,15 @@ open class InAppWebViewChromeClient(
         val acceptTypes = request.acceptTypes.toTypedArray()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
           val allowMultiple = request.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
-          @Suppress("UNCHECKED_CAST")
           startPickerIntent(
-            filePathsCallback as ValueCallback<Array<Uri>>,
+            filePathsCallback as? ValueCallback<Array<Uri>> ?: return,
             acceptTypes,
             allowMultiple,
             request.isCaptureEnabled
           )
         } else {
-          @Suppress("UNCHECKED_CAST")
           startPickerIntent(
-            filePathsCallback as ValueCallback<Uri>,
+            filePathsCallback as? ValueCallback<Uri> ?: return,
             acceptTypes.firstOrNull() ?: "",
             request.isCaptureEnabled
           )

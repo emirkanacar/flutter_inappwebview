@@ -23,18 +23,27 @@ public class MyWebStorageManager: ChannelDelegate {
         let arguments = call.arguments as? NSDictionary
         switch call.method {
             case "fetchDataRecords":
-                let dataTypes = Set(arguments!["dataTypes"] as! [String])
-                MyWebStorageManager.fetchDataRecords(dataTypes: dataTypes, result: result)
+                guard let dataTypes = arguments?["dataTypes"] as? [String] else {
+                    result(FlutterError(code: "invalid_arguments", message: "dataTypes is required.", details: nil))
+                    return
+                }
+                MyWebStorageManager.fetchDataRecords(dataTypes: Set(dataTypes), result: result)
                 break
             case "removeDataFor":
-                let dataTypes = Set(arguments!["dataTypes"] as! [String])
-                let recordList = arguments!["recordList"] as! [[String: Any?]]
-                MyWebStorageManager.removeDataFor(dataTypes: dataTypes, recordList: recordList, result: result)
+                guard let dataTypes = arguments?["dataTypes"] as? [String],
+                      let recordList = arguments?["recordList"] as? [[String: Any?]] else {
+                    result(FlutterError(code: "invalid_arguments", message: "Invalid web storage records.", details: nil))
+                    return
+                }
+                MyWebStorageManager.removeDataFor(dataTypes: Set(dataTypes), recordList: recordList, result: result)
                 break
             case "removeDataModifiedSince":
-                let dataTypes = Set(arguments!["dataTypes"] as! [String])
-                let timestamp = arguments!["timestamp"] as! Int64
-                MyWebStorageManager.removeDataModifiedSince(dataTypes: dataTypes, timestamp: timestamp, result: result)
+                guard let dataTypes = arguments?["dataTypes"] as? [String],
+                      let timestamp = arguments?["timestamp"] as? Int64 else {
+                    result(FlutterError(code: "invalid_arguments", message: "Invalid web storage timestamp.", details: nil))
+                    return
+                }
+                MyWebStorageManager.removeDataModifiedSince(dataTypes: Set(dataTypes), timestamp: timestamp, result: result)
                 break
             default:
                 result(FlutterMethodNotImplemented)
@@ -64,7 +73,9 @@ public class MyWebStorageManager: ChannelDelegate {
         MyWebStorageManager.websiteDataStore.fetchDataRecords(ofTypes: dataTypes) { (data) in
             for record in data {
                 for r in recordList {
-                    let displayName = r["displayName"] as! String
+                    guard let displayName = r["displayName"] as? String else {
+                        continue
+                    }
                     if (record.displayName == displayName) {
                         records.append(record)
                         break

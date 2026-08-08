@@ -1,3 +1,7 @@
+## 1.1.4 - 2026-08-08
+
+- Validate macOS WebStorage data types, records, timestamps, and display names before native cleanup operations ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).
+
 ## 1.1.3 - 2026-08-08
 
 - Guard macOS custom URL-scheme callbacks against non-Forge WebViews and fail unsupported tasks safely ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).

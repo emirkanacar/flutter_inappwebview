@@ -112,6 +112,14 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 **Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android WebChromeClient. **Impact:** progress, title, icon, or touch-icon callbacks could force-cast unrelated WebViews. **Fix:** callbacks now ignore non-Forge WebViews safely. **Required evidence:** provider callback flows during navigation, renderer restart, and teardown.
 
+#### #2783 - Android file chooser callback ownership
+
+**Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android file chooser callback bridge. **Impact:** provider/activity lifecycle changes could make the generic callback shape incompatible with an unchecked `ValueCallback` cast. **Fix:** callback casts are nullable and unsupported shapes return without invoking a stale callback. **Required evidence:** single/multiple selection, capture mode, cancellation, rotation, and dispose/recreate flows.
+
+#### #2717 - macOS WebStorage cleanup payload validation
+
+**Local status:** Implemented and source-validated; macOS runtime validation pending. **Affected package:** macOS WebStorage manager. **Impact:** malformed data type, record, timestamp, or display-name payloads could force-cast and terminate the app. **Fix:** required fields are validated and malformed records are skipped or rejected with structured errors. **Required evidence:** fetch/remove records with valid, empty, missing, and mixed-type payloads.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads
