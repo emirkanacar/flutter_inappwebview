@@ -1,3 +1,7 @@
+## 1.0.22 - 2026-08-08
+
+- Ignore URL-navigation callbacks delivered for unrelated WebView instances instead of force-casting them to the Forge WebView type ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+
 ## 1.0.21 - 2026-08-08
 
 - Guard Android compatibility callbacks against non-Forge WebViews, preserving safe browsing fallback behavior instead of force-casting provider callback views ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

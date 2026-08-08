@@ -63,6 +63,14 @@ void main() {
   if (!webViewSource.contains('contextMenuActionTargets')) {
     throw StateError('macOS custom context menu targets are not retained');
   }
+  final customSchemeSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/InAppWebView/CustomSchemeHandler.swift',
+  ).readAsStringSync();
+  if (!customSchemeSource.contains('webView as? InAppWebView') ||
+      !customSchemeSource.contains('didFailWithError')) {
+    throw StateError('macOS custom scheme handler does not guard WebView ownership');
+  }
   if (!webViewSource.contains('onCreateContextMenu') ||
       !webViewSource.contains('onHideContextMenu')) {
     throw StateError(

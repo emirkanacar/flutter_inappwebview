@@ -90,6 +90,14 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 The same validation now covers `loadFile`'s required asset path, preventing a null channel value from reaching native file resolution.
 
+#### #2619 - macOS custom scheme callback ownership
+
+**Local status:** Implemented and source-validated; macOS WebKit runtime validation pending. **Affected package:** macOS custom URL-scheme handler. **Impact:** a non-Forge WebView callback could be force-cast and crash the application. **Fix:** unsupported WebViews now receive a structured task error and are removed from the pending task map. **Required evidence:** custom scheme loading and disposal during outstanding tasks on macOS 10.14+.
+
+#### #2697 - Android URL callback ownership
+
+**Local status:** Implemented and source-validated; Android provider/device validation pending. **Affected package:** Android navigation client. **Impact:** an unrelated WebView callback could be force-cast during URL navigation. **Fix:** navigation callbacks now return the platform default behavior for non-Forge WebViews. **Required evidence:** navigation and renderer callback flows across supported providers.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

@@ -1,3 +1,9 @@
+## 2.1.18 - 2026-08-08
+
+- Android: guard URL-navigation callbacks against unrelated WebView instances ([#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697)).
+- macOS: guard custom URL-scheme callbacks against unrelated WebView instances ([#2619](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2619)).
+- Update root dependencies to Android 1.0.22 and macOS 1.1.3.
+
 ## 2.1.17 - 2026-08-08
 
 - Android: guard compatibility callbacks against unrelated WebView instances ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).

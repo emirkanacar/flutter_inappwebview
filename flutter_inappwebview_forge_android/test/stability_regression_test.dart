@@ -85,6 +85,14 @@ void main() {
     expect(source, contains('callback.showInterstitial(false)'));
   });
 
+  test('Android URL callbacks ignore non-plugin WebViews safely', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewClient.kt',
+    ).readAsStringSync();
+    expect(source, contains('val webView = view as? InAppWebView ?: return false'));
+  });
+
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

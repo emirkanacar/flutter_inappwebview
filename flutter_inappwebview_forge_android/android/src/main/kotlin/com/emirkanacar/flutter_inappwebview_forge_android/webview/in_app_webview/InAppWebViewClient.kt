@@ -125,7 +125,7 @@ open class InAppWebViewClient(
   }
 
   override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-    val webView = view as InAppWebView
+    val webView = view as? InAppWebView ?: return false
 
     if (allowSyncUrlLoading(webView, url)) {
       // Allow the request synchronously.
