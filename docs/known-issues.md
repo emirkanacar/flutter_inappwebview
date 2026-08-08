@@ -88,6 +88,8 @@ For the actionable backlog, priorities, work packages, and acceptance criteria, 
 
 **Local status:** Implemented and source-validated; iOS device validation pending. **Affected package:** iOS WebView channel delegate. **Impact:** malformed `postUrl` or `loadData` payloads could force-cast typed data or force-unwrap invalid URLs. **Fix:** required values are validated and a structured `invalid_arguments` error is returned. **Required evidence:** malformed/null payloads and valid POST/data navigation across iOS 15-26.
 
+The same validation now covers `loadFile`'s required asset path, preventing a null channel value from reaching native file resolution.
+
 ### 2026-08-08 issue work
 
 #### #2856 - Android nullable request-result payloads

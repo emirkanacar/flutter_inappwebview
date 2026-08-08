@@ -1,3 +1,7 @@
+## 1.0.21 - 2026-08-08
+
+- Guard Android compatibility callbacks against non-Forge WebViews, preserving safe browsing fallback behavior instead of force-casting provider callback views ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+
 ## 1.0.20 - 2026-08-08
 
 - Ignore malformed Android WebStorage origin entries instead of force-casting provider callback values ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).

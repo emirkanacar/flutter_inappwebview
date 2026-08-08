@@ -70,7 +70,7 @@ open class InAppWebViewClientCompat(
         request: WebResourceRequest,
         error: WebResourceErrorCompat
     ) {
-        val webView = view as InAppWebView
+        val webView = view as? InAppWebView ?: return
         if (request.isForMainFrame) {
             if (webView.customSettings.disableDefaultErrorPage == true) {
                 webView.stopLoading()
@@ -157,7 +157,10 @@ open class InAppWebViewClientCompat(
         threatType: Int,
         callback: SafeBrowsingResponseCompat
     ) {
-        val webView = view as InAppWebView
+        val webView = view as? InAppWebView ?: run {
+            callback.showInterstitial(false)
+            return
+        }
         val resultCallback = object : WebViewChannelDelegate.SafeBrowsingHitCallback() {
             override fun nonNullSuccess(
                 response: com.emirkanacar.flutter_inappwebview_forge_android.types.SafeBrowsingResponse

@@ -75,7 +75,10 @@ public class WebViewChannelDelegate: ChannelDelegate {
             result(true)
             break
         case .loadFile:
-            let assetFilePath = arguments!["assetFilePath"] as! String
+                    guard let assetFilePath = arguments?["assetFilePath"] as? String else {
+                        result(FlutterError(code: "invalid_arguments", message: "assetFilePath is required.", details: nil))
+                        return
+                    }
             
             do {
                 try webView?.loadFile(assetFilePath: assetFilePath)

@@ -1,3 +1,9 @@
+## 2.1.17 - 2026-08-08
+
+- Android: guard compatibility callbacks against unrelated WebView instances ([#2782](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2782), [#2783](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2783)).
+- iOS: validate `loadFile` channel payloads before using asset paths ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+- Update root dependencies to Android 1.0.21 and iOS 2.1.11.
+
 ## 2.1.16 - 2026-08-08
 
 - Android: ignore malformed WebStorage origin callback entries ([#2717](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2717)).

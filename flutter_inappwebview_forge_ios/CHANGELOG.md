@@ -1,3 +1,7 @@
+## 2.1.11 - 2026-08-08
+
+- Validate iOS `loadFile` asset paths before dispatching them to the WebView channel ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+
 ## 2.1.10 - 2026-08-08
 
 - Validate iOS `postUrl` and `loadData` channel arguments before constructing URLs or reading typed post data ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).

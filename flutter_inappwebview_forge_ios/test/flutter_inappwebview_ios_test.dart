@@ -67,6 +67,10 @@ void main() {
     'iOS navigation channel does not validate URL payloads',
   );
   _assert(
+    channelSource.contains('assetFilePath is required'),
+    'iOS loadFile channel does not validate asset paths',
+  );
+  _assert(
     source.contains('else {\n            return nil\n        }'),
     'iOS popup creation does not reject a missing WebView manager',
   );
