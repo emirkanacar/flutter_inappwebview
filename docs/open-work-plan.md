@@ -152,7 +152,9 @@ has detached-view and stale-runtime guards. Android fullscreen surface report
 now also restores fullscreen state from `onRenderProcessGone` before forwarding
 renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
 fallback. All three remain runtime pending until the affected physical-device
-matrices pass.
+matrices pass. The API 35 IME diagnostic now passes for virtual-display and
+hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
+remains pending.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned

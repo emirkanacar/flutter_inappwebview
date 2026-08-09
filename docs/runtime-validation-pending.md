@@ -100,6 +100,16 @@ change/reset attempts temporarily put `emulator-5554` offline before the test
 could complete its geometry assertion; no Forge/native crash was recorded.
 The display-size and OEM-provider gate therefore remains pending.
 
+Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
+now has an opt-in IME lifecycle diagnostic at
+[`android_ime_lifecycle_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_ime_lifecycle_diagnostic_test.dart).
+On the API 35 AVD, both virtual-display and hybrid composition cycles focus
+the HTML input, clear and dispose the WebView, then reopen the Flutter keyboard
+with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
+explicit WebView disposal also logs Chromium renderer exit code `-1`, but no
+AndroidRuntime, fatal, or IME NPE appears; Android 10 and OEM validation remain
+required.
+
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android
