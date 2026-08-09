@@ -82,6 +82,16 @@ opt-in API 35/WebView 124 diagnostic pass (`finalLoaded=true`, final marker
 OEM/provider validation and broader back/forward coverage remain required, so
 the record stays in this register and the count remains 68.
 
+Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
+now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic
+at
+[`flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart).
+The API 35 `emulator-5554` with WebView 124 passes the flow with
+`insetBeforeFocus=0.0`, `insetAfterFocus=24.0`, and an active Flutter focus
+node; ADB IME history records `SHOW_SOFT_INPUT` on the host activity. Samsung
+One UI/WebView 150+ and physical-device validation remain required, so the
+record stays in this register and the count remains 68.
+
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation
 work: the reported Cloudflare `206 Partial Content` failure is not on Forge's

@@ -108,6 +108,14 @@ overload directly. Source tests and the API 35/WebView 124 diagnostic pass, but
 physical Android 10/11 OEM/provider and back/forward validation remain in the
 runtime register, so the active/runtime counts do not change.
 
+Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
+is also source-validated and remains outside this active plan in the runtime
+register. The API 35/WebView 124 diagnostic covers a tapped HTML5 fullscreen
+request, exit, and a separate Flutter `TextField`; it passes after the
+fullscreen input-connection restoration path runs. Samsung One UI/WebView
+150+ and physical-device validation remain required, so the 68 runtime-pending
+count is unchanged.
+
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
 Their remaining device/build checks are included in the runtime register. Do

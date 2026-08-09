@@ -342,11 +342,21 @@ The macOS `WKWebView` now receives the initial and runtime `ContextMenu` configu
 
 ### #2878 — Keyboard remains unavailable after exiting HTML5 fullscreen
 
-**Status:** Fixed in release 2.0.2 (Android 1.0.3); validate on the affected Samsung/WebView combinations. **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
+**Status:** Source-fixed in Android 1.0.34 (root 2.1.35); the API 35/WebView 124 diagnostic passes, while the affected Samsung/WebView combinations remain pending. **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
 
 The issue reproduces after `onShowCustomView`/`onHideCustomView` fullscreen cycles with hybrid composition. The native path removes the custom view, restores system UI/orientation, invokes `onExitFullscreen`, and clears fullscreen state in `InAppWebViewChromeClient.onHideCustomView()`. The repository also has custom IME proxy/focus handling in `InputAwareWebView.kt`. Together, this points to an IME/window association that is not restored when the fullscreen view is detached.
 
 The reported workaround is invoking Flutter’s `TextInput.show` after exiting fullscreen, but that only masks the native lifecycle problem. The Forge implementation now retains the Flutter container view for hybrid composition and, after custom-view removal, requests focus and restarts the input connection on that actual Flutter view. The existing non-hybrid input proxy is reset as part of the same path.
+
+An opt-in diagnostic is available at
+[`flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart).
+It uses a real HTML5 fullscreen request from a tapped page button, exits through
+the page API, then focuses a separate Flutter `TextField`. On the API 35
+`emulator-5554` with WebView 124, it passed with
+`insetBeforeFocus=0.0`, `insetAfterFocus=24.0`, and the Flutter focus node
+active; the AVD IME history also records `SHOW_SOFT_INPUT` for the host
+`MainActivity`. This validates the source path on that provider, not the
+reported OEM matrix.
 
 **Remaining validation:** run a real-device regression covering fullscreen → exit → text input in a different Flutter widget, especially Samsung One UI and WebView 150+.
 
