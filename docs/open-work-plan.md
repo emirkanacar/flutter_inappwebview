@@ -11,24 +11,24 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Eighty-two issue records have a
+The export contains 125 issues and 73 PRs. Eighty-three issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 68 await real runtime validation, #2745 is closed by source review,
+boundary: 69 await real runtime validation, #2745 is closed by source review,
 and #2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 43 issue records
+The other 42 issue records
 remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 54 | 1 | 13 | 30 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 55 | 1 | 13 | 29 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **68** | **1** | **13** | **43** | **40 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **69** | **1** | **13** | **42** | **39 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -45,7 +45,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 68 implementation or mitigation records awaiting real validation are
+The 69 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -59,7 +59,7 @@ Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2
 now has Android 35 AVD happy-path evidence for the recursive activity-extra
 codec across InAppBrowser and Chrome Custom Tabs, including lifecycle callbacks.
 Malformed external extras, restore/rotation, and physical/provider coverage
-remain in the runtime register; therefore the 68 runtime-pending count includes
+remain in the runtime register; therefore the 69 runtime-pending count includes
 this release-gate record.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
@@ -98,6 +98,15 @@ an availability-gated provider object. iOS/macOS source tests and SwiftPM
 manifest checks pass, and the iOS example builds with Xcode 27; exact Xcode
 26.4.1 and macOS consuming-app validation remain in the runtime register.
 
+iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
+now retains the WebView's pre-keyboard `UIScrollView` zoom scale and content
+offset, then refreshes the final platform-view frame/layout after dismissal so
+WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. The
+opt-in diagnostic passes on the iPhone 17 Pro iOS 26.2 Simulator
+(`778px -> 435.44px -> 778px`, scale `1.0 -> 0.939 -> 1.0`); physical iOS 17,
+device, and native `WKWebView` comparison validation remain in the runtime
+register, so #2787 is resolved locally but still validation-pending.
+
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
 now prioritizes `shouldInterceptRequest` and Service Worker interception on the
 main looper, removes timed-out queued dispatches, and ignores late callback
@@ -113,7 +122,7 @@ is also source-validated and remains outside this active plan in the runtime
 register. The API 35/WebView 124 diagnostic covers a tapped HTML5 fullscreen
 request, exit, and a separate Flutter `TextField`; it passes after the
 fullscreen input-connection restoration path runs. Samsung One UI/WebView
-150+ and physical-device validation remain required, so the 68 runtime-pending
+150+ and physical-device validation remain required, so the 69 runtime-pending
 count is unchanged.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
@@ -240,7 +249,7 @@ deny, and scene-lifecycle validation remains required.
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Source review confirms that the existing iOS keyboard change and upstream PR [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) address native `contentInset` restoration for #2859, not the reported DOM `visualViewport` symptom. The iOS 27.0 diagnostic reaches the HTML input but cannot open the simulator keyboard (`keyboardDelta=0`); iOS 26.2 returns no non-zero viewport metrics after load. The issue still needs an iOS 17/physical-device run that opens the keyboard and captures WebKit metrics, Flutter frame, `contentInset`, and `adjustedContentInset` before any geometry fix is justified. |
+| None currently | Apple keyboard viewport and accessibility layout | #2787 is source-fixed in iOS 2.1.20 and moved to the runtime register. Its iPhone 17 Pro iOS 26.2 Simulator diagnostic passes after restoring the pre-keyboard zoom/offset and final frame/layout; physical iOS 17/device and native `WKWebView` comparison validation remain pending. |
 
 #### Android
 
@@ -293,10 +302,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 68 issue records and three PR-only
+items. The complete register contains 69 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 43 issue records that still need implementation, design, or
+keeps only the 42 issue records that still need implementation, design, or
 reproduction. Thirteen host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
@@ -350,15 +359,15 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-09 status pass has 68 locally implemented or mitigated issue
+The 2026-08-09 status pass has 69 locally implemented or mitigated issue
 records awaiting runtime validation, one issue (#2745) closed by source
 review, thirteen host/platform boundaries (#2570, #2584, #2598, #2636, #2659,
-#2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796), and 43 active issue records in this plan. The runtime-pending
+#2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796), and 42 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
  live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
- [`known-issues.md`](known-issues.md). The active queue contains 30 bugs, 10
- enhancements, 0 unlabelled records, and 3 showcase records (40 active
+ [`known-issues.md`](known-issues.md). The active queue contains 29 bugs, 10
+ enhancements, 0 unlabelled records, and 3 showcase records (39 active
  technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:

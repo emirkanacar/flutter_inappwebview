@@ -1,3 +1,10 @@
+## 2.1.37 - 2026-08-09
+
+- iOS: restore the pre-keyboard `UIScrollView` zoom/offset and refresh the
+  final platform-view layout so WKWebView's DOM viewport recovers after HTML
+  input dismissal ([#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)). The iPhone 17 Pro iOS 26.2 Simulator diagnostic passes; physical iOS 17/device validation remains pending.
+- Update the root dependency to iOS 2.1.20.
+
 ## 2.1.36 - 2026-08-09
 
 - Android: restore fullscreen state when the WebView renderer disappears, preventing a stale custom view and missing exit callback in the renderer/surface failure path ([#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)). MediaTek/gralloc physical-device validation remains pending.

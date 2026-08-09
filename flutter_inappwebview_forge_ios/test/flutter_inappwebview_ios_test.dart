@@ -146,6 +146,56 @@ void _runSourceContractAssertions() {
     'keyboardWillHide restores the inset before UIKit finishes its layout pass',
   );
 
+  _assert(
+    source.contains(
+          'private var _scrollViewZoomScaleBeforeKeyboard: CGFloat?',
+        ) &&
+        source.contains(
+          'private var _scrollViewContentOffsetBeforeKeyboard: CGPoint?',
+        ),
+    'iOS keyboard handling does not retain the pre-keyboard WebView viewport',
+  );
+  final willShow = RegExp(
+    r'@objc func keyboardWillShow\(notification: NSNotification\) \{'
+    r'([\s\S]*?)\n    \}\n    @objc func keyboardWillHide',
+  ).firstMatch(source)?.group(1);
+  _assert(willShow != null, 'keyboardWillShow function could not be parsed');
+  _assert(
+    willShow!.contains(
+          '_scrollViewZoomScaleBeforeKeyboard = scrollView.zoomScale',
+        ) &&
+        willShow.contains(
+          '_scrollViewContentOffsetBeforeKeyboard = scrollView.contentOffset',
+        ),
+    'keyboardWillShow does not capture the pre-keyboard WebView viewport',
+  );
+  final didHide = RegExp(
+    r'@objc func keyboardDidHide\(notification: NSNotification\) \{'
+    r'([\s\S]*?)\n    \}\n    \r?\n    required public init',
+  ).firstMatch(source)?.group(1);
+  _assert(didHide != null, 'keyboardDidHide function could not be parsed');
+  final viewportRestore = RegExp(
+    r'private func restoreScrollViewViewportAfterKeyboard\(refreshFrame: Bool = true\) \{'
+    r'([\s\S]*?)\n    \}\n\n    // Fix',
+  ).firstMatch(source)?.group(1);
+  _assert(
+    viewportRestore != null,
+    'keyboard viewport restoration helper could not be parsed',
+  );
+  _assert(
+    didHide!.contains('restoreScrollViewViewportAfterKeyboard()') &&
+        viewportRestore!.contains('setZoomScale(zoomScale, animated: false)') &&
+        viewportRestore.contains(
+          'setContentOffset(contentOffset, animated: false)',
+        ) &&
+        source.contains(
+          'restoreScrollViewViewportAfterKeyboard(refreshFrame: false)',
+        ) &&
+        source.contains('_scrollViewZoomScaleBeforeKeyboard = nil') &&
+        source.contains('_scrollViewContentOffsetBeforeKeyboard = nil'),
+    'keyboardDidHide does not restore the pre-keyboard WebView viewport',
+  );
+
   final windowSource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/UIApplication/VisibleViewController.swift',

@@ -1,3 +1,10 @@
+## 2.1.20 - 2026-08-09
+
+- Restore the pre-keyboard `UIScrollView` zoom and offset, then refresh the
+  final platform-view frame/layout so WKWebView's DOM viewport recovers after
+  HTML input dismissal ([#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)). The iPhone 17 Pro iOS 26.2 Simulator diagnostic passes; physical iOS 17/device validation remains pending.
+- Add source regression coverage for the keyboard viewport restoration path.
+
 ## 2.1.19 - 2026-08-09
 
 - Isolate the iOS 13+ `ASWebAuthenticationPresentationContextProviding` implementation from `WebAuthenticationSession`, preventing the Xcode 26 availability compile failure ([#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)). Source tests and the Xcode 27 iOS example build pass; exact Xcode 26.4.1 validation remains pending.

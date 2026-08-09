@@ -103,6 +103,22 @@ void main() {
         return Map<String, dynamic>.from(result as Map);
       }
 
+      void logFlutterGeometry(String phase) {
+        final renderBox = tester.renderObject<RenderBox>(
+          find.byKey(_webViewKey),
+        );
+        final view = WidgetsBinding.instance.platformDispatcher.views.first;
+        debugPrint(
+          'iOS #2787 Flutter geometry ($phase): '
+          'origin=${renderBox.localToGlobal(Offset.zero)} '
+          'size=${renderBox.size} '
+          'viewInsets=${view.viewInsets} '
+          'padding=${view.padding} '
+          'physicalSize=${view.physicalSize} '
+          'devicePixelRatio=${view.devicePixelRatio}',
+        );
+      }
+
       Future<Map<String, dynamic>> waitForViewportLayout() async {
         for (var attempt = 0; attempt < 20; attempt++) {
           final metrics = await readViewportMetrics();
@@ -119,6 +135,7 @@ void main() {
 
       final before = await waitForViewportLayout();
       debugPrint('iOS #2787 before keyboard: $before');
+      logFlutterGeometry('before');
 
       final webViewRenderBox = tester.renderObject<RenderBox>(
         find.byKey(_webViewKey),
@@ -127,8 +144,8 @@ void main() {
       debugPrint(
         'iOS #2787 WebView frame: origin=$webViewOrigin size=${webViewRenderBox.size}',
       );
-      final inputTapPoint = webViewOrigin +
-          Offset(webViewRenderBox.size.width / 2, 220);
+      final inputTapPoint =
+          webViewOrigin + Offset(webViewRenderBox.size.width / 2, 220);
       await tester.tapAt(inputTapPoint);
       // Flutter's synthetic platform-view pointer does not always reach the
       // native WKWebView in an integration test. Keep the user-tap attempt,
@@ -142,6 +159,7 @@ void main() {
 
       final withKeyboard = await readViewportMetrics();
       debugPrint('iOS #2787 with keyboard: $withKeyboard');
+      logFlutterGeometry('with keyboard');
       final keyboardDelta =
           (before['visualViewportHeight'] as num).toDouble() -
           (withKeyboard['visualViewportHeight'] as num).toDouble();
@@ -155,11 +173,22 @@ void main() {
             'before=$before withKeyboard=$withKeyboard',
       );
 
+      // Blur the native WebKit input as a real keyboard dismissal would do;
+      // TextInput.hide alone can leave the HTML input focused on iOS.
+      await controller.evaluateJavascript(
+        source: "document.getElementById('keyboard-input')?.blur()",
+      );
       await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
       await tester.pump(const Duration(milliseconds: 1200));
+      // The native keyboard notification and the Flutter platform-view layout
+      // run on separate clocks in a drive test; allow the delayed native
+      // viewport refresh to complete before sampling the DOM.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      await tester.pump();
 
       final after = await readViewportMetrics();
       debugPrint('iOS #2787 after keyboard: $after');
+      logFlutterGeometry('after keyboard');
 
       expect(
         (after['visualViewportHeight'] as num).toDouble(),

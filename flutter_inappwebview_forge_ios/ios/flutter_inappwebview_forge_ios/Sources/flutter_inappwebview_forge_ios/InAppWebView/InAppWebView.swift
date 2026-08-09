@@ -144,6 +144,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         set {
             super.frame = newValue
             resetScrollViewContentInset()
+            if !_scrollViewContentInsetAdjusted &&
+                (_scrollViewZoomScaleBeforeKeyboard != nil ||
+                    _scrollViewContentOffsetBeforeKeyboard != nil) {
+                restoreScrollViewViewportAfterKeyboard(refreshFrame: false)
+            }
         }
     }
 
@@ -160,8 +165,30 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
     }
 
+    private func restoreScrollViewViewportAfterKeyboard(refreshFrame: Bool = true) {
+        resetScrollViewContentInset()
+
+        if let zoomScale = _scrollViewZoomScaleBeforeKeyboard {
+            scrollView.setZoomScale(zoomScale, animated: false)
+        }
+        if let contentOffset = _scrollViewContentOffsetBeforeKeyboard {
+            scrollView.setContentOffset(contentOffset, animated: false)
+        }
+
+        // Reapply the current frame so WebKit recalculates its visual viewport
+        // after UIKit has finished changing the keyboard-related layout.
+        if refreshFrame {
+            let currentFrame = frame
+            frame = currentFrame
+        }
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+
     // Fix https://github.com/pichillilorenzo/flutter_inappwebview/issues/1947
     private var _scrollViewContentInsetAdjusted = false
+    private var _scrollViewZoomScaleBeforeKeyboard: CGFloat?
+    private var _scrollViewContentOffsetBeforeKeyboard: CGPoint?
     private var _scrollChangedUpdatePending = false
     private var _pendingScrollStartedByUser = false
     private var _pendingOldContentOffset: CGPoint?
@@ -178,6 +205,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 // if the scrollView.contentInset has already been fixed, do nothing
                 if !_scrollViewContentInsetAdjusted {
                     _scrollViewContentInsetAdjusted = true
+                    _scrollViewZoomScaleBeforeKeyboard = scrollView.zoomScale
+                    _scrollViewContentOffsetBeforeKeyboard = scrollView.contentOffset
                     let insetToAdjust = scrollView.adjustedContentInset
                     scrollView.contentInset = UIEdgeInsets(top: -insetToAdjust.top, left: -insetToAdjust.left,
                                                            bottom: -insetToAdjust.bottom, right: -insetToAdjust.right)
@@ -199,7 +228,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             guard let self = self, !self._scrollViewContentInsetAdjusted else {
                 return
             }
-            self.resetScrollViewContentInset()
+            self.restoreScrollViewViewportAfterKeyboard()
+
+            // Flutter may apply the final platform-view frame on the next main
+            // queue turn after UIKit posts keyboardDidHide. Refresh once more
+            // after that layout pass so WKWebView sees the restored viewport.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                guard let self = self, !self._scrollViewContentInsetAdjusted else {
+                    return
+                }
+                self.restoreScrollViewViewportAfterKeyboard()
+                self._scrollViewZoomScaleBeforeKeyboard = nil
+                self._scrollViewContentOffsetBeforeKeyboard = nil
+            }
         }
     }
     

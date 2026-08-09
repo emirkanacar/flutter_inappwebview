@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-09
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 68 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 43 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 69 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 42 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,10 +19,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 68 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 69 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 13 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 43 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 42 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -226,7 +226,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-68 locally implemented or mitigated issue records and three PR-only records.
+69 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -600,25 +600,23 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 ### #2787 — iOS keyboard dismissal leaves a reduced `visualViewport`
 
-**Local status:** Active; needs iOS 17 device/Simulator reproduction. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard is dismissed, `visualViewport.height` can remain smaller than the Flutter WebView and fixed-position page elements can appear offset from the bottom. **Confidence:** Needs reproduction for a Forge-owned root cause.
+**Local status:** Source-fixed in iOS 2.1.20; iOS 26.2 Simulator validated, with physical iOS 17/device validation pending. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard was dismissed, `visualViewport.height` could remain smaller than the Flutter WebView and fixed-position page elements could appear offset from the bottom. **Confidence:** Confirmed Forge-owned path with source and runtime regression coverage.
 
-This report is not treated as the same defect as #2859. The existing iOS 2.0.1 keyboard change restores the native `UIScrollView` content inset after `keyboardDidHide` and addresses the documented scroll-to-bottom regression; it does not prove that WebKit's DOM `visualViewport` state is restored on iOS 17. Upstream PR #2860 also addresses #2859's native inset restoration rather than this DOM viewport symptom. The upstream report has no native stack, minimal reproduction project, or before/after native frame data, so injecting JavaScript or changing WebKit geometry would be speculative. The diagnostic now deliberately uses `resizeToAvoidBottomInset: false`, matching the report's trigger instead of masking the keyboard inset in Flutter.
+This report is distinct from #2859. #2859 covers stale native `UIScrollView.contentInset` restoration; #2787 exposed a second state mismatch where UIKit restored the frame and inset but WebKit retained a keyboard-induced zoom scale and DOM viewport. The fix retains the pre-keyboard `zoomScale` and `contentOffset`, restores them after `keyboardDidHide`, and refreshes the final platform-view frame/layout so WebKit recalculates its visual viewport. Upstream PR #2860 remains associated with the separate #2859 inset regression.
 
-**Required evidence:** reproduce with `resizeToAvoidBottomInset` and `SafeArea` combinations on iOS 17 and current supported iOS, capture `window.innerHeight`, `visualViewport.height/offsetTop`, WebView frame, `contentInset`, and `adjustedContentInset` before/after keyboard dismissal, then compare with a minimal native `WKWebView` host.
+The opt-in diagnostic deliberately uses `resizeToAvoidBottomInset: false` and blurs the HTML input before hiding Flutter's text input channel. On iPhone 17 Pro Simulator `38B5237D-C667-489A-A7EA-F3B1CAAA0119` (iOS 26.2), the fixed path measures `visualViewport.height` as `778px -> 435.44px -> 778px`, restores `visualViewport.scale` from `0.939` to `1.0`, and returns the page offset to zero. The native frame is `402x778` with zero content inset after dismissal.
+
+**Remaining validation:** exercise HTML input focus changes, interactive dismissal, custom page zoom, and scroll-to-bottom on physical iOS 17 through the latest supported iOS release, and compare with a minimal native `WKWebView` host.
 
 An opt-in integration diagnostic is available at
 [`flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart).
 Run it from `flutter_inappwebview_forge/example` with
 `fvm flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/ios_keyboard_viewport_diagnostic_test.dart -d <ios-device> --dart-define=RUN_IOS_KEYBOARD_VIEWPORT_DIAGNOSTIC=true`.
-Flutter analysis and the iOS 27.0 simulator build passed, and the baseline
-WebView frame was `402x778` with a `778px` visual viewport. A programmatic
-WebKit focus fallback now reaches the HTML input (`activeElementId` becomes
-`keyboard-input`), but `TextInput.show` still does not open the software
-keyboard on the simulator (`keyboardDelta=0`), so the diagnostic cannot yet
-validate dismissal or close the issue. A repeat on the iOS 26.2 Simulator
-also built successfully, but WebKit did not return non-zero viewport metrics
-after loading, so it provides no keyboard evidence. Physical/iOS 17 runtime
-evidence and native frame/inset comparison remain required.
+The iPhone 17 Pro iOS 26.2 run uses the WebKit focus fallback after the
+synthetic platform-view tap, opens the software keyboard, and passes the full
+show/blur/hide cycle. Flutter analysis, the iOS source test, and the Xcode
+example build pass. Physical iOS 17 runtime evidence, custom page-zoom
+coverage, and the native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 
@@ -690,7 +688,6 @@ action is target validation, not speculative code change. The remaining
 active examples that still need a reproducible matrix before implementation
 are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
-[#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
