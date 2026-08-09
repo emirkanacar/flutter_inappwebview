@@ -362,11 +362,11 @@ reported OEM matrix.
 
 ### #2819 — MediaTek fullscreen surface failure leaves a frozen WebView
 
-**Status:** Hardened in Android 1.0.29. **Impact:** On affected MediaTek devices, a GPU/gralloc failure during fullscreen video can remove the native surface without firing the normal exit/error callbacks. The screen then remains black/white and fullscreen state is stale. **Confidence:** Strong report.
+**Status:** Hardened in Android 1.0.29 and Android 1.0.35; MediaTek/gralloc runtime validation remains pending. **Impact:** On affected MediaTek devices, a GPU/gralloc failure during fullscreen video can remove the native surface without firing the normal exit/error callbacks. The screen then remains black/white and fullscreen state is stale. **Confidence:** Strong report.
 
 Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819) includes native gralloc errors and reports that neither `onExitFullscreen`, `onRenderProcessGone`, nor `onReceivedError` is delivered. This is a different failure mode from a normal `onHideCustomView` callback: cleanup must also be robust when the renderer or surface disappears first.
 
-`FlutterWebView.dispose()` now checks the fullscreen state before destroying the WebView, asks the chrome client to remove the custom view, and emits the exit callback/state reset fallback if the activity or custom-view callback is already unavailable. The fallback is guarded by the fullscreen flag so normal exits notify Dart only once. A MediaTek device test with network loss during H.264/HLS playback is still required before release.
+`FlutterWebView.dispose()` now checks the fullscreen state before destroying the WebView, asks the chrome client to remove the custom view, and emits the exit callback/state reset fallback if the activity or custom-view callback is already unavailable. The renderer-loss callback now uses the same idempotent fullscreen cleanup before forwarding `onRenderProcessGone`, covering the path where a renderer/surface failure arrives before `onHideCustomView()`. A MediaTek device test with network loss during H.264/HLS playback is still required before release.
 
 ### #2880 — iOS UIScene migration
 

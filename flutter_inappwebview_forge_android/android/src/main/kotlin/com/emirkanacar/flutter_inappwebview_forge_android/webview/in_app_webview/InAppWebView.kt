@@ -2571,6 +2571,16 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     this.inFullscreen = inFullscreen
   }
 
+  internal fun restoreFullscreenStateAfterRendererGone() {
+    if (!isInFullscreen()) return
+
+    inAppWebViewChromeClient?.onHideCustomView()
+    if (isInFullscreen()) {
+      channelDelegate?.onExitFullscreen()
+      setInFullscreen(false)
+    }
+  }
+
   @Throws(Exception::class)
   override fun postWebMessage(
     message: com.emirkanacar.flutter_inappwebview_forge_android.types.WebMessage,

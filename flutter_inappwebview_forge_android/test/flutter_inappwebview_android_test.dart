@@ -206,4 +206,48 @@ void main() {
       contains('currentWebView.channelDelegate?.onExitFullscreen()'),
     );
   });
+
+  test('Android renderer loss clears stale fullscreen state before callbacks', () {
+    final webViewSource =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+          );
+    final clientSource =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewClient.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewClient.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewClient.kt',
+          );
+
+    final webViewContent = webViewSource.readAsStringSync();
+    expect(
+      webViewContent,
+      contains('internal fun restoreFullscreenStateAfterRendererGone()'),
+    );
+    expect(webViewContent, contains('if (!isInFullscreen()) return'));
+    expect(webViewContent, contains('channelDelegate?.onExitFullscreen()'));
+
+    final clientContent = clientSource.readAsStringSync();
+    expect(
+      clientContent,
+      contains('webView.restoreFullscreenStateAfterRendererGone()'),
+    );
+    final rendererCallback = clientContent.substring(
+      clientContent.indexOf('override fun onRenderProcessGone'),
+    );
+    expect(
+      rendererCallback.indexOf('restoreFullscreenStateAfterRendererGone'),
+      lessThan(rendererCallback.indexOf('val channelDelegate')),
+    );
+  });
 }

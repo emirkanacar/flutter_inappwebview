@@ -1,3 +1,8 @@
+## 2.1.36 - 2026-08-09
+
+- Android: restore fullscreen state when the WebView renderer disappears, preventing a stale custom view and missing exit callback in the renderer/surface failure path ([#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)). MediaTek/gralloc physical-device validation remains pending.
+- Update the root dependency to Android 1.0.35.
+
 ## 2.1.35 - 2026-08-09
 
 - Android: fix Kotlin-migration JavaScript injection recursion that could grow the main-thread queue and terminate the app with `OutOfMemoryError` during rapid navigation ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). The API 35 AVD/WebView 124 diagnostic passes; physical Android 10/11 OEM/provider validation remains pending.

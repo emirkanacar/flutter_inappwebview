@@ -825,6 +825,11 @@ open class InAppWebViewClient(
   override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
     val webView = view as InAppWebView
 
+    // Renderer loss can bypass WebChromeClient.onHideCustomView(). Restore
+    // the host fullscreen state before forwarding the renderer event so the
+    // custom view and system UI do not remain stuck after a surface failure.
+    webView.restoreFullscreenStateAfterRendererGone()
+
     val channelDelegate = webView.channelDelegate
     if (webView.customSettings.useOnRenderProcessGone == true && channelDelegate != null) {
       channelDelegate.onRenderProcessGone(detail.didCrash(), detail.rendererPriorityAtExit())

@@ -138,8 +138,10 @@ iOS/Android disposal report [#2654](https://github.com/pichillilorenzo/flutter_i
 now has idempotent native disposal guards, and Android IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has detached-view and stale-runtime guards. Android fullscreen surface report
 [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
-retains its pre-destroy fullscreen exit fallback. All three remain runtime
-pending until the affected physical-device matrices pass.
+now also restores fullscreen state from `onRenderProcessGone` before forwarding
+renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
+fallback. All three remain runtime pending until the affected physical-device
+matrices pass.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned

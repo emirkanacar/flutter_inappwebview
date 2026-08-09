@@ -1,3 +1,8 @@
+## 1.0.35 - 2026-08-09
+
+- Restore Android fullscreen state before forwarding `onRenderProcessGone`, so a renderer or surface failure cannot leave the custom fullscreen view and exit state stuck ([#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)). The cleanup is idempotent and retains the pre-destroy fallback; MediaTek/gralloc physical-device validation remains pending.
+- Add Android source regression coverage for renderer-loss fullscreen cleanup.
+
 ## 1.0.34 - 2026-08-09
 
 - Fix Android JavaScript injection recursion introduced by the Kotlin migration: `injectDeferredObject` now invokes the platform `WebView.evaluateJavascript` overload instead of re-entering the plugin overload. This prevents rapid-navigation OOM/freeze behavior and preserves the callback contract ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)).
