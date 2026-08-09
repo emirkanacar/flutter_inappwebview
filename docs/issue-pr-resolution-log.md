@@ -46,6 +46,18 @@ iOS 26.2 Simulator completes three popup attach/evaluate/navigate/dispose
 cycles and reports all `shouldOverrideUrlLoading` URLs. Physical iOS 15–26,
 Xcode 16/26, and symbolicated-crash validation remain release gates.
 
+## 2026-08-10 Android screen-lock redraw checkpoint
+
+Android [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
+already has the visibility recovery fix in Android 1.0.8. The new opt-in
+`android_screen_lock_redraw_diagnostic_test.dart` reached a real API 35
+`emulator-5554` hybrid-composition checkpoint: after ADB keyevent lock/unlock,
+the `ANDROID_SCREEN_LOCK_MARKER` DOM content and WebView URL remained intact,
+and the captured log contained no `AndroidRuntime`, fatal, or renderer crash.
+The host Flutter runner could not complete a clean exit because DDS/golden
+stream setup was unavailable; Android 10 and affected OEM/provider validation
+remain release gates. No upstream issue state or comment was changed.
+
 ## 2026-08-08 audit correction
 
 GitHub CLI review of the upstream issue bodies corrected three historical local

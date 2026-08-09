@@ -171,6 +171,14 @@ passes three popup attach/evaluate/navigate/dispose cycles, including
 `shouldOverrideUrlLoading`; physical iOS 15–26 and Xcode 16/26 validation
 remains in the runtime register, so the 69 runtime-pending count is unchanged.
 
+Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
+now has an API 35 AVD lock/unlock checkpoint diagnostic. Hybrid-composition
+WebView content and URL survive a real ADB keyevent lock/unlock sequence with
+no AndroidRuntime, fatal, or renderer crash in the captured log. The Flutter
+host's DDS/golden-stream connection prevents a clean integration-test exit;
+Android 10 and OEM/provider validation therefore remain in the runtime
+register and the count stays 69.
+
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned
 control point. They remain visible in the resolution log and must not be

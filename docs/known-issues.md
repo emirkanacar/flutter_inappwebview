@@ -324,7 +324,7 @@ The Android Gradle configuration uses the available `proguard-android-optimize.t
 
 **Status:** Fixed in Android 1.0.8; validate on Android 10 and affected OEM/device combinations. **Impact:** After a long screen-lock period, the WebView could remain visually blank until a touch or scroll triggered a redraw. **Confidence:** Strong report with a lifecycle rendering path.
 
-When the WebView window becomes visible again, the Android implementation now schedules an animation invalidation and requests layout after forwarding the visibility callback. This keeps the redraw explicit without forcing a navigation or destroying the WebView state. A static regression assertion protects the visibility recovery path; physical lock/unlock validation remains required.
+When the WebView window becomes visible again, the Android implementation now schedules an animation invalidation and requests layout after forwarding the visibility callback. This keeps the redraw explicit without forcing a navigation or destroying the WebView state. A static regression assertion protects the visibility recovery path. The opt-in [`android_screen_lock_redraw_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_screen_lock_redraw_diagnostic_test.dart) reached a real ADB lock/unlock checkpoint on the API 35 `emulator-5554`; the DOM marker and URL survived and no AndroidRuntime, fatal, or renderer crash appeared in the captured log. The Flutter host's DDS/golden-stream connection prevented a clean integration-test exit, so Android 10 and affected OEM/device validation remain required.
 
 #### #2721 — Android WebView display-size recovery
 

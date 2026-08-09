@@ -165,6 +165,17 @@ returns `false`, and the caller remains at `https://example.com/`. The record
 remains in this register until physical iOS 15-26 popup attachment, navigation,
 disposal, and scene-transition coverage is completed.
 
+Android [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
+now has an opt-in screen-lock redraw diagnostic at
+[`android_screen_lock_redraw_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_screen_lock_redraw_diagnostic_test.dart).
+On the API 35 `emulator-5554` hybrid-composition run, a real ADB lock/unlock
+checkpoint preserved the `ANDROID_SCREEN_LOCK_MARKER` DOM content and the
+WebView URL, with no AndroidRuntime, fatal, or renderer crash in the captured
+log. The Flutter host's DDS/golden-stream connection is unstable for this
+diagnostic, so the checkpoint is evidence rather than a clean integration-test
+exit; Android 10 and affected OEM/provider lock/unlock validation remain
+required and the count remains 69.
+
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 is source-fixed in iOS 2.1.20. The opt-in diagnostic passes on the iPhone 17 Pro
 iOS 26.2 Simulator (`38B5237D-C667-489A-A7EA-F3B1CAAA0119`): the keyboard
