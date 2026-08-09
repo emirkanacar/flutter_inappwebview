@@ -205,6 +205,10 @@ void main() {
       flutterWebViewContent,
       contains('currentWebView.channelDelegate?.onExitFullscreen()'),
     );
+    expect(
+      webViewSource.readAsStringSync(),
+      contains('finishPendingAsyncJavaScriptCallbacksOnDispose()'),
+    );
   });
 
   test('Android renderer loss clears stale fullscreen state before callbacks', () {

@@ -1,6 +1,6 @@
 # iOS and Android Performance & WebView Upgrade Plan
 
-Last reviewed: 2026-08-07
+Last reviewed: 2026-08-10
 Status: Phase 1 source slice complete; first Android and iOS Phase 2/3 fixes landed, with profiling and device validation pending
 Scope: iOS and Android first
 
@@ -14,8 +14,8 @@ Current state in this workspace:
 - Android progress callbacks no longer re-inject document-start scripts; duplicate progress and unchanged scroll positions are not sent across the platform channel, and scroll updates are coalesced to one pending frame dispatch.
 - Android native-registration retries clear their scheduled state and stop pending callbacks when a WebView is disposed.
 - iOS keyboard-dismissal inset restoration, scroll callback coalescing, progress de-duplication, and content-size callback coalescing are implemented as the first lifecycle/performance slice; device profiling and edge-case validation remain open.
-- iOS pre-iOS 18 asynchronous JavaScript routing and nil-frame guards are implemented; fallback latency, disposal, and popup stress validation remain open.
-- iOS pending legacy asynchronous JavaScript callbacks now complete with a disposal error during teardown.
+- iOS pre-iOS 18 asynchronous JavaScript routing, native iOS 14+ callback tracking, and nil-frame guards are implemented; fallback latency, disposal, and popup stress validation remain open.
+- iOS pending asynchronous JavaScript callbacks now complete with a disposal error during teardown, and Android pending callbacks use the same bounded cleanup contract.
 - iOS UIScene and Swift Package Manager migration is tracked in [`ios-uiscene-spm-migration-plan.md`](ios-uiscene-spm-migration-plan.md); the implementation slice is complete and device validation remains.
 
 The source-level slice is complete for this checkpoint. The next release decision must be based on release/profile measurements, not on dependency version numbers alone.
@@ -262,7 +262,7 @@ Exit criteria:
 
 Use [PR #2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), [PR #2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776), [PR #2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), and [PR #2574](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2574) as compatibility inputs.
 
-Current status: the pre-iOS 18 routing, nil-frame safety, and disposal completion fixes are implemented. Latency, Promise serialization, popup teardown, and device-side handler-cleanup measurements remain open.
+Current status: the pre-iOS 18 routing, native iOS 14+ callback tracking, nil-frame safety, and cross-platform disposal completion fixes are implemented. Latency, Promise serialization, popup teardown, and device-side handler-cleanup measurements remain open.
 
 - Keep native `callAsyncJavaScript` only where the OS/content-world combination is verified.
 - Use a tested Promise/`evaluateJavaScript` fallback before iOS 18 where required.

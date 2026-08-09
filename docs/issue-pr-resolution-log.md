@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-10
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,24 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-08-10 iOS/Android disposal callback completion
+
+Upstream [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
+remains `OPEN`; the local status is separate from the upstream export. The
+iOS implementation now tracks native iOS 14+ and legacy async JavaScript
+callbacks together, completes both callback sets with `WebView disposed`
+before teardown, and ignores late WebKit completions after the table is cleared.
+Android now completes its pending async JavaScript callback table before
+releasing the channel, while retaining idempotent disposal and fullscreen
+cleanup ordering.
+
+The iPhone 17 Pro iOS 26.2 Simulator diagnostic and the API 35
+`emulator-5554` diagnostic pass four navigate-away/dispose/recreate cycles;
+the Android run covers virtual-display and hybrid composition. Explicit
+Android WebView destruction still logs Chromium renderer exit code `-1`, but
+the host reports no `AndroidRuntime`, fatal, or Dart test failure. Physical
+iOS 17+ and Android API 33+/OEM/provider validation remain release gates.
 
 ## 2026-08-08 audit correction
 
@@ -179,6 +197,7 @@ reduced when a record moves between the local status registers.
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.38 / iOS 2.1.21 / Android 1.0.36 | iOS/Android WebView disposal and pending async JavaScript callbacks [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654) | No direct PR relationship was present in the export | Native iOS 14+ and legacy callbacks plus Android callbacks now complete with `WebView disposed` before teardown, and late callbacks are ignored. The iPhone 17 Pro iOS 26.2 Simulator and API 35 AVD hybrid/virtual-display diagnostics pass; physical iOS/Android provider validation remains required. |
 | 2.1.37 / iOS 2.1.20 | iOS keyboard `visualViewport` restoration [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) addresses the separate #2859 inset regression | Root 2.1.37 depends on iOS 2.1.20. The pre-keyboard zoom/offset and final frame/layout are restored after HTML input dismissal; source coverage and the iPhone 17 Pro iOS 26.2 Simulator diagnostic pass. Physical iOS 17/device and custom page-zoom validation remain required. |
 | 2.1.35 / Android 1.0.34 | Android interception and rapid-navigation OOM [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580) | No upstream relationship inferred | Root 2.1.35 depends on Android 1.0.34. The Kotlin overload boundary now calls the platform `WebView.evaluateJavascript` method, preventing recursive injection growth. Android source tests and the API 35/WebView 124 rapid-navigation diagnostic pass; physical Android 10/11 OEM/provider, back/forward, and release validation remain required. |
 | 2.1.34 / Android 1.0.33 | Android activity-extra deserialization [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536); Android release JAR gate [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687) | No upstream relationship inferred | Root 2.1.34 depends on Android 1.0.33. Activity extras use the primitive/nested-`Bundle` codec, Chrome Custom Tabs channel/lifecycle handoff is corrected, and Android 35 activity-handoff validation passes. The example release output path and plugin release JAR synchronization are also validated on the API 35 AVD; restore/rotation, malformed-extra, provider/device, JDK, AAB, and publish gates remain. |

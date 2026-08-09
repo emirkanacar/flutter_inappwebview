@@ -1,3 +1,13 @@
+## 2.1.38 - 2026-08-10
+
+- iOS and Android: complete pending `callAsyncJavaScript` callbacks with a
+  structured `WebView disposed` result before native WebView teardown, and
+  ignore late platform callbacks during navigate-away/dispose/recreate cycles
+  ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+  The iPhone 17 Pro iOS 26.2 Simulator and API 35 Android diagnostics pass;
+  physical iOS/Android provider validation remains pending.
+- Update root dependencies to Android 1.0.36 and iOS 2.1.21.
+
 ## 2.1.37 - 2026-08-09
 
 - iOS: restore the pre-keyboard `UIScrollView` zoom/offset and refresh the

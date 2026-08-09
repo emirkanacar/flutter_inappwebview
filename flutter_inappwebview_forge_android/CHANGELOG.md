@@ -1,3 +1,12 @@
+## 1.0.36 - 2026-08-10
+
+- Complete pending `callAsyncJavaScript` callbacks with a structured
+  `WebView disposed` result before native WebView teardown ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+  The API 35 AVD diagnostic passes four navigate-away/dispose/recreate cycles
+  across virtual-display and hybrid composition; physical Android 33+/OEM
+  validation remains pending.
+- Add an opt-in Android disposal lifecycle diagnostic.
+
 ## 1.0.35 - 2026-08-09
 
 - Restore Android fullscreen state before forwarding `onRenderProcessGone`, so a renderer or surface failure cannot leave the custom fullscreen view and exit state stuck ([#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)). The cleanup is idempotent and retains the pre-destroy fallback; MediaTek/gralloc physical-device validation remains pending.

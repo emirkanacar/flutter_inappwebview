@@ -1,3 +1,12 @@
+## 2.1.21 - 2026-08-10
+
+- Complete pending native iOS 14+ and legacy `callAsyncJavaScript` callbacks
+  with a structured `WebView disposed` error before WebView teardown, and
+  ignore late WebKit completions ([#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)).
+  The iPhone 17 Pro iOS 26.2 Simulator disposal diagnostic passes; physical
+  iOS 17/device validation remains pending.
+- Add an opt-in navigate-away/dispose/recreate regression diagnostic.
+
 ## 2.1.20 - 2026-08-09
 
 - Restore the pre-keyboard `UIScrollView` zoom and offset, then refresh the

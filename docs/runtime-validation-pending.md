@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-10
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -109,6 +109,19 @@ with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
 explicit WebView disposal also logs Chromium renderer exit code `-1`, but no
 AndroidRuntime, fatal, or IME NPE appears; Android 10 and OEM validation remain
 required.
+
+iOS/Android [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
+now has disposal lifecycle diagnostics at
+[`ios_disposal_lifecycle_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_disposal_lifecycle_diagnostic_test.dart)
+and
+[`android_disposal_lifecycle_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_disposal_lifecycle_diagnostic_test.dart).
+The iPhone 17 Pro iOS 26.2 Simulator completes four cycles with every pending
+async JavaScript call returning `WebView disposed`. The API 35 `emulator-5554`
+does the same across virtual-display and hybrid composition; explicit disposal
+logs Chromium renderer exit code `-1`, but no `AndroidRuntime`, fatal, or Dart
+test failure appears. Physical iOS 17+ and Android API 33+/OEM/provider
+validation remain required, so #2654 stays in this register and the count
+remains 69.
 
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the

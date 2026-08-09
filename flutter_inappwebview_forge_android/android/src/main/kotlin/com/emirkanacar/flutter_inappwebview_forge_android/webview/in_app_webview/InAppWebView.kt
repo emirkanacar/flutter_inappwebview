@@ -2765,6 +2765,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     nativeRegistrationsRegistered = true
     nativeRegistrationRequestScheduled = false
     nativeRegistrationCallbacks.clear()
+    finishPendingAsyncJavaScriptCallbacksOnDispose()
     channelDelegate?.dispose()
     channelDelegate = null
     super.dispose()
@@ -2811,7 +2812,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     pendingScrollX = null
     pendingScrollY = null
     scrollChangedDispatchScheduled = false
-    callAsyncJavaScriptCallbacks.clear()
     evaluateJavaScriptContentWorldCallbacks.clear()
     inAppBrowserDelegate = null
 
@@ -2827,6 +2827,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     javaScriptBridgeInterface = null
     plugin = null
     loadUrl("about:blank")
+  }
+
+  private fun finishPendingAsyncJavaScriptCallbacksOnDispose() {
+    val pendingCallbacks = ArrayList(callAsyncJavaScriptCallbacks.values)
+    callAsyncJavaScriptCallbacks.clear()
+    val disposedResult = JSONObject().apply {
+      put("value", JSONObject.NULL)
+      put("error", "WebView disposed")
+    }.toString()
+    pendingCallbacks.forEach { callback ->
+      callback?.onReceiveValue(disposedResult)
+    }
   }
 
   override fun destroy() {

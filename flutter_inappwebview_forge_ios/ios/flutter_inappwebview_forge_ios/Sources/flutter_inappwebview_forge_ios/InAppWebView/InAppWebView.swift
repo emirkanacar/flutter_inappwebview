@@ -99,8 +99,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     var onCreateContextMenuEventTriggeredWhenMenuDisabled = false
     
     var customIMPs: [IMP] = []
-    
+
     var callAsyncJavaScriptBelowIOS14Results: [String:((Any?) -> Void)] = [:]
+    var pendingCallAsyncJavaScriptResults: [String:((Any?) -> Void)] = [:]
     
     var oldZoomScale = Float(1.0)
     
@@ -1898,12 +1899,18 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     @available(iOS 14.0, *)
     public func callAsyncJavaScript(functionBody: String, arguments: [String:Any], contentWorld: WKContentWorld, completionHandler: ((Any?) -> Void)? = nil) {
         let jsToInject = configuration.userContentController.generateCodeForScriptEvaluation(scriptMessageHandler: self, source: functionBody, contentWorld: contentWorld)
-        
-        callAsyncJavaScript(jsToInject, arguments: arguments, frame: nil, contentWorld: contentWorld) { (evalResult) in
-            guard let completionHandler = completionHandler else {
+
+        let resultUuid = NSUUID().uuidString
+        if let completionHandler = completionHandler {
+            pendingCallAsyncJavaScriptResults[resultUuid] = completionHandler
+        }
+
+        callAsyncJavaScript(jsToInject, arguments: arguments, frame: nil, contentWorld: contentWorld) { [weak self] (evalResult) in
+            guard let self = self,
+                  let completionHandler = self.pendingCallAsyncJavaScriptResults.removeValue(forKey: resultUuid) else {
                 return
             }
-            
+
             var body: [String: Any?] = [
                 "value": nil,
                 "error": nil
@@ -1962,18 +1969,22 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 with: windowId.map { String($0) } ?? "null"
             )
         
-        evaluateJavaScript(jsToInject) { (value, error) in
+        evaluateJavaScript(jsToInject) { [weak self] (value, error) in
+            guard let self = self else {
+                return
+            }
             if let error = error {
                 let userInfo = (error as NSError).userInfo
                 let errorMessage = userInfo["WKJavaScriptExceptionMessage"] ??
                                    userInfo["NSLocalizedDescription"] as? String ??
                                    error.localizedDescription
                 self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
-                completionHandler?([
-                    "value": NSNull(),
-                    "error": errorMessage
-                ])
-                self.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid)
+                if let completionHandler = self.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid) {
+                    completionHandler([
+                        "value": NSNull(),
+                        "error": errorMessage
+                    ])
+                }
             }
         }
     }
@@ -4139,8 +4150,12 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     private func finishPendingAsyncJavaScriptCallsOnDispose() {
-        let pendingCallbacks = Array(callAsyncJavaScriptBelowIOS14Results.values)
+        let pendingCallbacks = Array(
+            Array(callAsyncJavaScriptBelowIOS14Results.values)
+                + Array(pendingCallAsyncJavaScriptResults.values)
+        )
         callAsyncJavaScriptBelowIOS14Results.removeAll()
+        pendingCallAsyncJavaScriptResults.removeAll()
         pendingCallbacks.forEach { callback in
             callback([
                 "value": NSNull(),

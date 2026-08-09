@@ -321,11 +321,27 @@ void _runSourceContractAssertions() {
   );
   _assert(
     source.contains('finishPendingAsyncJavaScriptCallsOnDispose'),
-    'pending legacy callAsyncJavaScript callbacks are not completed on dispose',
+    'pending callAsyncJavaScript callbacks are not completed on dispose',
   );
   _assert(
     source.contains('"error": "WebView disposed"'),
-    'pending legacy callAsyncJavaScript callbacks do not receive a disposal error',
+    'pending callAsyncJavaScript callbacks do not receive a disposal error',
+  );
+  _assert(
+    source.contains('pendingCallAsyncJavaScriptResults'),
+    'native callAsyncJavaScript callbacks are not tracked until completion',
+  );
+  _assert(
+    source.contains(
+      'self.pendingCallAsyncJavaScriptResults.removeValue(forKey: resultUuid)',
+    ),
+    'late native callAsyncJavaScript callbacks are not ignored after disposal',
+  );
+  _assert(
+    source.contains(
+      'self.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid)',
+    ),
+    'late legacy callAsyncJavaScript errors are not ignored after disposal',
   );
   _assert(
     source.contains('_lastReportedProgress'),

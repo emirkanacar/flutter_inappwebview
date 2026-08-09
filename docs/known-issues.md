@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-10
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 69 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 42 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -100,7 +100,7 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2654 - iOS/Android WebView disposal crash boundary
 
-**Local status:** Implemented and source-validated; iOS/Android device validation pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup, while Android disposal is idempotent and fullscreen teardown is completed before the native WebView is destroyed. Late callbacks are still ignored by the existing disposed-state guards. **Required evidence:** repeated create/load/navigate-away/dispose cycles on physical iOS 17+ and Android API 33+, including hybrid composition and renderer teardown logs.
+**Local status:** Implemented and source/runtime-diagnostic validated; physical iOS/Android provider validation pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup and completes both native-content-world and legacy async JavaScript callbacks with a structured `WebView disposed` error; late WebKit callbacks are ignored after the pending table is cleared. Android disposal is idempotent, completes pending async JavaScript callbacks before releasing the channel, and keeps fullscreen teardown before native WebView destruction. The iPhone 17 Pro iOS 26.2 Simulator and API 35 AVD diagnostics each complete four navigate-away/dispose/recreate cycles across the tested Android composition modes. Android's renderer exit code `-1` during explicit WebView destruction is recorded as expected teardown evidence, with no `AndroidRuntime`/fatal failure. **Required evidence:** repeated create/load/navigate-away/dispose cycles on physical iOS 17+ and Android API 33+ OEM/provider matrices, including hybrid composition and renderer teardown logs.
 
 #### Internal iOS cookie property decoding (no upstream issue mapping)
 

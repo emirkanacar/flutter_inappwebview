@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-10
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -146,7 +146,14 @@ results, so it is tracked as a host/platform boundary until a Forge-owned stack
 or minimal-host comparison identifies a package control point.
 
 iOS/Android disposal report [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
-now has idempotent native disposal guards, and Android IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
+now completes pending async JavaScript callbacks during teardown in both native
+implementations, in addition to the idempotent disposal guards. The iPhone 17
+Pro iOS 26.2 Simulator diagnostic completes four navigate-away/dispose/recreate
+cycles with `WebView disposed` outcomes; the API 35 AVD diagnostic does the
+same across virtual-display and hybrid composition. Android emits the expected
+Chromium renderer exit code `-1` while an explicitly destroyed WebView is
+released, but no `AndroidRuntime`, fatal, or Dart test failure appears. Android
+IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has detached-view and stale-runtime guards. Android fullscreen surface report
 [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now also restores fullscreen state from `onRenderProcessGone` before forwarding
@@ -154,7 +161,8 @@ renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
 fallback. All three remain runtime pending until the affected physical-device
 matrices pass. The API 35 IME diagnostic now passes for virtual-display and
 hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
-remains pending.
+remains pending. The #2654 physical iOS 17+ and Android API 33+/OEM renderer
+matrix also remains a release gate, so the runtime-pending count stays 69.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned
