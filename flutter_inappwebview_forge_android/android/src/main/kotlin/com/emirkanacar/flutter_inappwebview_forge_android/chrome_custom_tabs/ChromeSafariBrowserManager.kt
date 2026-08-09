@@ -24,7 +24,7 @@ open class ChromeSafariBrowserManager(
         protected val LOG_TAG = "ChromeBrowserManager"
 
         @JvmField
-        val METHOD_CHANNEL_NAME = "com.emirakanacar/flutter_chromesafaribrowser"
+        val METHOD_CHANNEL_NAME = "com.emirkanacar/flutter_chromesafaribrowser"
 
         @JvmField
         val shared: MutableMap<String, ChromeSafariBrowserManager> = HashMap()

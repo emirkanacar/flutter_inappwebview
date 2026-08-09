@@ -62,7 +62,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       "com.emirkanacar/flutter_inappwebview_"
 
     @JvmField
-    val mHandler = Handler()
+    val mHandler = Handler(Looper.getMainLooper())
   }
 
   @JvmField
@@ -357,7 +357,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     if (customSettings.clearCache == true) {
       clearAllCache()
     } else if (customSettings.clearSessionCache == true) {
-      CookieManager.getInstance().removeSessionCookie()
+      clearSessionCookies()
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -893,6 +893,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     userContentController.addUserOnlyScripts(initialUserOnlyScripts)
   }
 
+  @Suppress("DEPRECATION")
   fun setIncognito(enabled: Boolean) {
     val settings = getSettings()
     if (enabled) {
@@ -956,7 +957,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   override fun isLoading(): Boolean = isLoading
 
+  @Suppress("DEPRECATION")
+  private fun clearSessionCookies() {
+    val manager = CookieManager.getInstance()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      manager.removeSessionCookies(null)
+    } else {
+      manager.removeSessionCookie()
+    }
+  }
+
   @Deprecated("")
+  @Suppress("DEPRECATION")
   private fun clearCookies() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       CookieManager.getInstance().removeAllCookies(ValueCallback { })
@@ -1232,7 +1244,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       newSettingsMap["clearSessionCache"] != null &&
       newCustomSettings.clearSessionCache == true
     ) {
-      CookieManager.getInstance().removeSessionCookie()
+      clearSessionCookies()
     }
 
     if (changed(
@@ -1752,9 +1764,8 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     mainLooperHandler.post {
       val generatedScript =
         userContentController.generateCodeForScriptEvaluation(finalScriptToInject, contentWorld)
-      evaluateJavascript(
+      super.evaluateJavascript(
         generatedScript,
-        null,
         ValueCallback { value ->
           if (resultUuid == null && resultCallback != null) {
             resultCallback.onReceiveValue(value)

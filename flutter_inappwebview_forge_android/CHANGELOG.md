@@ -1,3 +1,21 @@
+## 1.0.34 - 2026-08-09
+
+- Fix Android JavaScript injection recursion introduced by the Kotlin migration: `injectDeferredObject` now invokes the platform `WebView.evaluateJavascript` overload instead of re-entering the plugin overload. This prevents rapid-navigation OOM/freeze behavior and preserves the callback contract ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)).
+- Android source tests and the opt-in API 35/WebView 124 rapid-navigation diagnostic pass; physical Android 10/11 OEM/provider validation remains pending.
+
+## 1.0.33 - 2026-08-09
+
+- Replace Android activity-extra Java serialization with the recursive primitive/nested-`Bundle` codec for InAppBrowser and Chrome Custom Tabs ([#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)).
+- Fix the Chrome Custom Tabs manager channel namespace and keep its service session bound until the hosting activity is destroyed, preserving Custom Tabs lifecycle callbacks on Android 35.
+- Android package tests and the opt-in Android 35 activity-handoff diagnostic pass; malformed-extra, restore/rotation, and provider-matrix validation remain pending.
+- Validate the Android release `syncReleaseLibJars` path and example release APK on the API 35 AVD for [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687); the remaining JDK/provider/AAB/publish matrix stays in runtime validation.
+
+## 1.0.32 - 2026-08-09
+
+- Port the first Android deprecation-warning batch from upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817): bind the shared callback handler to the main looper, isolate legacy cookie APIs behind API-level compatibility paths, and route session-cookie clearing through the asynchronous API on API 21+ ([#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641), [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685)).
+- Keep the remaining WebView/Java deprecation families and release-gate warnings tracked as open work; this release is batch 1, not a claim that all warnings are removed.
+- Android source tests, analysis, and the example `compileDebugKotlin` build pass.
+
 ## 1.0.31 - 2026-08-09
 
 - Prioritize Android `shouldInterceptRequest` MethodChannel dispatch on the main looper, cancel queued callbacks after timeout, and ignore late results to reduce freeze/deadlock risk during high-volume resource interception ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). Android provider/device validation remains pending.

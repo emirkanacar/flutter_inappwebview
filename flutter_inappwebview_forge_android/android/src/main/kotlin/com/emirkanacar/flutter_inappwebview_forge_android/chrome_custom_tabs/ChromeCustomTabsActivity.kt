@@ -407,11 +407,11 @@ open class ChromeCustomTabsActivity : Activity(), Disposable {
 
   override fun onStop() {
     super.onStop()
-    customTabActivityHelper.unbindCustomTabsService(this)
-    isBindSuccess = false
   }
 
   override fun onDestroy() {
+    customTabActivityHelper.unbindCustomTabsService(this)
+    isBindSuccess = false
     super.onDestroy()
   }
 

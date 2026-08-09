@@ -1,3 +1,19 @@
+## 2.1.35 - 2026-08-09
+
+- Android: fix Kotlin-migration JavaScript injection recursion that could grow the main-thread queue and terminate the app with `OutOfMemoryError` during rapid navigation ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). The API 35 AVD/WebView 124 diagnostic passes; physical Android 10/11 OEM/provider validation remains pending.
+- Update the root dependency to Android 1.0.34.
+
+## 2.1.34 - 2026-08-09
+
+- Android: harden InAppBrowser and Chrome Custom Tabs activity handoffs with the primitive/nested-`Bundle` codec, correct the manager channel namespace, and preserve Custom Tabs callbacks while the external tab is foreground ([#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)). Android 35 AVD happy-path validation passes; malformed-extra, restore/rotation, and provider-matrix validation remain pending.
+- Android: fix the example release build output path and validate the release `syncReleaseLibJars` gate for [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687). The API 35 release APK builds, installs, and launches; clean JDK/provider/AAB/publish validation remains pending.
+- Update the root dependency to Android 1.0.33.
+
+## 2.1.33 - 2026-08-09
+
+- Android: port the first deprecation-warning batch from upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817), including explicit main-looper callback dispatch and API-level session-cookie compatibility paths ([#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641), [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685)). Remaining warning families and release-gate validation stay open.
+- Update the root dependency to Android 1.0.32.
+
 ## 2.1.32 - 2026-08-09
 
 - Android: prioritize `shouldInterceptRequest` callbacks on the main looper, cancel queued callbacks after timeout, and ignore late results to reduce freeze/deadlock risk during high-volume resource interception ([#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)). Android provider/device validation remains pending.

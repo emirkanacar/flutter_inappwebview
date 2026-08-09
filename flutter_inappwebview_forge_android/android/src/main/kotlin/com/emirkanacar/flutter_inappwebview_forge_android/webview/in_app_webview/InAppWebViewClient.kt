@@ -266,6 +266,7 @@ open class InAppWebViewClient(
     webView.channelDelegate?.onLoadStart(url)
   }
 
+  @Suppress("DEPRECATION")
   override fun onPageFinished(view: WebView, url: String) {
     val webView = view as? InAppWebView ?: return
     webView.isLoading = false

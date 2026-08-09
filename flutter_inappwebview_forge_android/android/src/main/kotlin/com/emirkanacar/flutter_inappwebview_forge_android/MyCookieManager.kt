@@ -132,6 +132,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
     }
 
+    @Suppress("DEPRECATION")
     fun setCookie(
         url: String,
         name: String,
@@ -248,6 +249,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         return cookieListMap
     }
 
+    @Suppress("DEPRECATION")
     fun deleteCookie(
         url: String,
         name: String,
@@ -286,6 +288,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
     }
 
+    @Suppress("DEPRECATION")
     fun deleteCookies(url: String, domain: String?, path: String, result: MethodChannel.Result) {
         val manager = getCookieManager()
         cookieManager = manager
@@ -326,6 +329,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         result.success(true)
     }
 
+    @Suppress("DEPRECATION")
     fun deleteAllCookies(result: MethodChannel.Result) {
         val manager = getCookieManager()
         cookieManager = manager
@@ -351,6 +355,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
     }
 
+    @Suppress("DEPRECATION")
     fun removeSessionCookies(result: MethodChannel.Result) {
         val manager = getCookieManager()
         cookieManager = manager
@@ -376,6 +381,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
     }
 
+    @Suppress("DEPRECATION")
     fun flush(result: MethodChannel.Result) {
         val manager = getCookieManager()
         cookieManager = manager

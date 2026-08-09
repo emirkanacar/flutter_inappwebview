@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-09
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2698, #2713, #2723, #2727, and #2753 are host/platform-specific boundaries with no Forge-owned fix, and 47 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 68 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 43 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,10 +19,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 68 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 11 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753)) | The issue remains visible for host/provider/engine/application/site tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 47 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 13 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 43 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -42,7 +42,7 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 #### #2831 - iOS 26 geolocation permission decision bridge
 
-**Local status:** Implemented and source-validated; physical iOS 26 runtime validation pending. **Affected scope:** iOS/WebKit system geolocation prompt. **Impact:** the upstream report says the native location dialog appears but its buttons cannot be tapped. The iOS 26 SDK adds `WKUIDelegate.webView(_:requestGeolocationPermissionFor:initiatedByFrame:decisionHandler:)`; the plugin previously did not implement it, so the existing Dart `onGeolocationPermissionsShowPrompt` callback could not decide the WebKit request. **Fix:** iOS 26+ now forwards the origin through the existing channel callback, maps `allow` to `WKPermissionDecision.grant`/`.deny`, calls the decision handler once, and safely denies missing/malformed responses. Platform-interface capability metadata now marks the callback as iOS 26+; iOS source tests, platform-interface tests, and the Xcode 27 iOS example build pass. **Required evidence:** run the minimal HTTPS geolocation page on a physical iOS 26 device and verify grant/deny, repeat requests, active/inactive scenes, popup presentation, dismissal, and background/foreground transitions.
+**Local status:** Implemented and source-validated; the iOS 27 Simulator deny path is validated, while physical iOS 26 runtime validation remains pending. **Affected scope:** iOS/WebKit system geolocation prompt. **Impact:** the upstream report says the native location dialog appears but its buttons cannot be tapped. The iOS 26 SDK adds `WKUIDelegate.webView(_:requestGeolocationPermissionFor:initiatedByFrame:decisionHandler:)`; the plugin previously did not implement it, so the existing Dart `onGeolocationPermissionsShowPrompt` callback could not decide the WebKit request. **Fix:** iOS 26+ now forwards the origin through the existing channel callback, maps `allow` to `WKPermissionDecision.grant`/`.deny`, calls the decision handler once, and safely denies missing/malformed responses. Platform-interface capability metadata now marks the callback as iOS 26+; iOS source tests, platform-interface tests, and the Xcode 27 iOS example build pass. The opt-in HTTPS diagnostic passes on the iOS 27 Simulator with the Dart callback receiving `https://example.com` and returning `error:1`. Fresh iOS 26.0 and 26.2 Simulator runs build successfully but leave `callbackOrigin=null` and the DOM result unset, so they are recorded as Simulator/WebKit evidence rather than proof of a bridge failure. **Required evidence:** run the minimal HTTPS geolocation page on a physical iOS 26 device and verify grant/deny, repeat requests, active/inactive scenes, popup presentation, dismissal, and background/foreground transitions.
 
 #### #2814, #2797, #2711, #2709 - Android activity-result listener lifecycle
 
@@ -60,7 +60,7 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2763 - iOS popup WebView manager lifecycle
 
-**Local status:** Implemented and source-validated; iOS popup device validation pending. **Affected package:** iOS `WKUIDelegate` popup creation. **Impact:** the rejected popup target was previously loaded into the caller WebView even when `onCreateWindow` returned `false`, so an external launch caused a duplicate embedded navigation. **Fix:** rejected or unhandled popup callbacks now remove the pending transport without loading the target; explicit `controller.loadUrl` from the callback remains available for same-window handling. Missing managers still return `nil` instead of synthesizing window ID `0`. **Required evidence:** `window.open`, `onCreateWindow` returning `false`/`true`, returned child attachment, navigation, disposal, and scene transitions on iOS 15-26.
+**Local status:** Implemented and source-validated; the rejected-popup path is validated on iOS 26.0, 26.2, and 27.0 Simulators, while physical iOS popup validation remains pending. **Affected package:** iOS `WKUIDelegate` popup creation. **Impact:** the rejected popup target was previously loaded into the caller WebView even when `onCreateWindow` returned `false`, so an external launch caused a duplicate embedded navigation. **Fix:** rejected or unhandled popup callbacks now remove the pending transport without loading the target; explicit `controller.loadUrl` from the callback remains available for same-window handling. Missing managers still return `nil` instead of synthesizing window ID `0`. **Evidence:** the opt-in `ios_popup_default_handling_diagnostic_test.dart` receives `https://example.com/popup` in `onCreateWindow`, returns `false`, and keeps the caller at `https://example.com/` on all three runtimes. **Required evidence:** `window.open`, `onCreateWindow` returning `false`/`true`, returned child attachment, navigation, disposal, and scene transitions on physical iOS 15-26.
 
 #### #2745 - JavaScript `eval()` security claim
 
@@ -68,7 +68,11 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2536 - Android `Bundle.getSerializable` scanner finding
 
-**Local status:** Fixed in Android source; compile and static regression validation passed. **Affected package:** Android InAppBrowser and Chrome Custom Tabs activity handoff. **Impact:** plugin-owned activity extras previously used Java serialization for Flutter maps/lists, matching the scanner's `Bundle.getSerializable` trace. **Fix:** all browser activity maps/lists now use a recursive `Bundle` primitive/nested-`Bundle` codec; no `getSerializable`, `putSerializable`, or `java.io.Serializable` references remain in Android native source. Activities remain `android:exported="false"`. **Required evidence:** Android API/provider matrix covering InAppBrowser and Custom Tabs launch, restore, rotation, and malformed extras.
+**Local status:** Fixed in source and Android 35 happy-path validated; negative/runtime matrix pending. **Affected package:** Android InAppBrowser and Chrome Custom Tabs activity handoff. **Impact:** plugin-owned activity extras previously used Java serialization for Flutter maps/lists, matching the scanner's `Bundle.getSerializable` trace. **Fix:** all browser activity maps/lists now use a recursive `Bundle` primitive/nested-`Bundle` codec; no `getSerializable`, `putSerializable`, or `java.io.Serializable` references remain in Android native source. During the Android 35 validation the Custom Tabs manager channel typo was corrected and its service session was kept bound until activity destruction so lifecycle callbacks survive the external tab transition. Activities remain `android:exported="false"`. **Evidence:** Android package tests pass (42 tests), the opt-in `emulator-5554` API 35 diagnostic passes for nested InAppBrowser and Chrome Custom Tabs payloads (`browserCreated`, `firstPageLoaded`, `opened`, `loaded`, and `closed`), and the debug APK launches Chrome's Custom Tab with the requested URL. **Remaining evidence:** physical/provider matrix, activity restore/rotation, and malformed external extras.
+
+#### #2687 - Android release JAR synchronization
+
+**Local status:** Mitigated in the example release path; JDK/provider/publish validation pending. **Affected scope:** Android example Gradle output discovery and plugin release artifact synchronization. **Impact:** Flutter could report no APK or a stale release registrant could retain the dev-only `integration_test` plugin, masking the actual plugin release gate. **Fix:** the example Gradle script now resolves its root build directory from the project directory (`../build`), so release output is placed under `example/build` as Flutter expects. A normal `flutter build apk --release` regenerates release tooling without the dev-only `integration_test` registrant; with JDK 21, `flutter build apk --release --no-pub` produces `build/app/outputs/flutter-apk/app-release.apk`, and `:flutter_inappwebview_forge_android:syncReleaseLibJars` succeeds. The APK installs on the API 35 `emulator-5554`; `MainActivity` remains resumed and no fatal crash appears in the smoke log. **Remaining validation:** clean JDK 17/21 matrix, real provider/device, AAB/publish artifact inspection, and ensuring the first release-tooling regeneration is run after pub changes. The remaining #2685/#2641 deprecation warning families are separate active work.
 
 #### #2782, #2783 - Android callback ownership and input stability
 
@@ -222,7 +226,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-66 locally implemented or mitigated issue records and three PR-only records.
+68 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -400,9 +404,29 @@ The local implementation makes `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` select 
 
 ### #2688 — Android first navigation to a Flutter screen flickers
 
-**Local status:** Active; needs a minimal Android 35 reproduction. **Affected scope:** Android WebView/platform-view transition. **Impact:** the upstream report says the first navigation from a WebView page to a native Flutter screen briefly displays WebView content and that subsequent transitions are noticeably slow. **Confidence:** Needs reproduction; the GitHub CLI record contains no minimal code, native stack, frame timing, or composition-mode comparison.
+**Local status:** Host/platform-specific boundary; no Forge package fix. **Affected scope:** Android WebView/platform-view transition, Flutter route animation, and Android surface ordering. **Impact:** the upstream report says the first navigation from a WebView page to a native Flutter screen briefly displays WebView content and that subsequent transitions are noticeably slow. **Confidence:** Android 35 behavioral and visual evidence does not reproduce the reported failure, and source review found no Forge-owned route-animation or surface-ordering control point.
 
-The report does not identify whether the frame belongs to hybrid composition, virtual display composition, the Flutter route transition, or the host application's surface ordering. Forge has no safe basis for changing platform-view composition or disabling transitions globally. Capture first-frame/surface timing with a minimal host on Android 35, compare both composition modes and a native `WebView`, and only then add a narrowly scoped lifecycle guard if the failure crosses the plugin boundary.
+The opt-in diagnostic at
+[`flutter_inappwebview_forge/example/integration_test/android_screen_transition_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_screen_transition_diagnostic_test.dart)
+passes on `emulator-5554` (API 35) with hybrid composition
+(`webViewCreated=true`, `destinationPresent=true`, `webViewPresent=false`,
+45 frame timings), virtual-display composition
+(`loadStopObserved=true`, `destinationPresent=true`,
+`webViewPresent=false`, 45 frame timings), and the example's direct native
+`android.webkit.WebView` baseline (`destinationPresent=true`,
+`webViewPresent=false`, 45 frame timings). The virtual-display run logs a
+roughly 2.97-second startup `Davey`/GC stall before the WebView is hosted, but
+this is a startup performance signal, not the reported transition flicker.
+
+The latest hybrid run was also captured externally with ADB. The sampled
+frames show a direct blue WebView-surface to orange Flutter-destination
+transition with no blank, black, or returning WebView frame. The
+`integration_test` screenshot API remains unsuitable for this run because it
+blocked on the hybrid path; the external capture is the visual evidence used
+for this local classification. This is not an upstream closure or a Forge
+code fix. If the symptom recurs, capture the exact host app, Flutter version,
+Android SDK/System WebView provider, composition mode, route animation, and a
+minimal host comparison before reopening implementation work.
 
 ### #2680 — Android audio `ERR_FAILED` on mobile data
 
@@ -486,21 +510,25 @@ The Forge Windows implementation now keeps shared WinRT/Composition pointers out
 
 ### #2580, #2718, and #2555 — Android blocking callback and lifecycle failures
 
-**Status:** Hardened in Android 1.0.31; retain Android 10 and rapid-navigation device validation. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
+**Status:** #2580 is source-fixed in Android 1.0.34 and passes the API 35/WebView 124 rapid-navigation diagnostic; physical Android 10/11 OEM/provider validation remains pending. #2718 and #2555 retain their separate Android 10/Play Console validation gates. **Impact:** WebView deadlock/freeze, cookie-cleanup ANR, or Android 10 IME crash. **Confidence:** Strong report for #2580/#2718; #2555 is an older device-specific crash.
 
 For [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), the native `shouldInterceptRequest` path can synchronously wait for a Dart result through `Util.invokeMethodAndWaitResult`, which posts to the main looper and then blocks on a latch. This is a plausible deadlock when WebView resource callbacks and UI-thread work depend on each other. [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) shows a Play Console native trace through `MyCookieManager.deleteAllCookies`, where `removeAllCookies` is followed immediately by `flush`. [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555) reports an `InputMethodManager` null crash on Android 10 and is related to the same general focus/lifecycle surface as #2878.
 
+The API 35 diagnostic then exposed a second Forge-owned failure in the rapid-navigation path: the Kotlin migration's `injectDeferredObject` implementation called the plugin's three-argument `evaluateJavascript` overload from inside itself instead of the platform two-argument `WebView.evaluateJavascript` method. Each evaluation re-entered the injection queue, and 24 rapid `loadData` navigations grew the main-thread heap until `OutOfMemoryError`. Android 1.0.34 now calls `super.evaluateJavascript`, with a source regression test covering the overload boundary. On `emulator-5554` (API 35, WebView 124), the opt-in diagnostic completes all rapid navigations, reports `finalLoaded=true`, reaches the `final` DOM marker, records 31 interception callbacks, and exits without a fatal crash.
+
 The Forge implementation now caps concurrent synchronous resource-interception callbacks at two, dispatches `shouldInterceptRequest` and Service Worker interception to the front of the main looper queue, and uses a 250 ms callback timeout for this path. Queued dispatches are removed after timeout and late callback results are ignored; saturated or timed-out requests fall back to normal WebView loading. Android cookie deletion no longer calls the blocking `flush()` immediately after asynchronous removal. The input-aware WebView requires both the container and target views to have an attached window/token before touching the IME connection, catches stale Android 10 IME runtime failures, and ignores detached delayed callbacks. The source regression suite covers the timeout, priority dispatch, backpressure, no-immediate-flush, and detached-IME contracts.
 
-The Android example APK build was also attempted with the configured Flutter
-toolchain, but the host Gradle 8.13/JDK setup failed before plugin Kotlin
-compilation while creating `:app:outgoingVariants`
-(`OutgoingVariantsReportTask`, `Type T not present`). Repeat the APK validation
-under a supported Gradle/JDK combination before treating the native build gate
-as complete; the plugin's direct `:flutter_inappwebview_forge_android:compileDebugKotlin`
-task succeeds with the current source.
+The Android example build was also checked with the configured Flutter
+toolchain. JDK 24 plus Gradle 8.13 fails before plugin Kotlin compilation while
+creating `:app:outgoingVariants` (`OutgoingVariantsReportTask`, `Type T not
+present`), while JDK 21 completes `assembleDebug` and the plugin's Kotlin
+compilation. The JDK 21 release path reaches and completes the plugin's
+`syncReleaseLibJars`, then fails at the generated example registrant because
+the dev-only `integration_test` class is not on the release Java classpath.
+Repeat release validation on the documented JDK 17 baseline with a clean
+example/test harness before treating the final artifact gate as complete.
 
-**Remaining validation:** run rapid back/forward navigation with `shouldInterceptRequest`, Play Console cookie-clear scenarios, and Android 10 text-input tests on physical devices.
+**Remaining validation:** run rapid back/forward navigation with `shouldInterceptRequest` on Android 10/11 physical OEM devices (including the reported Xiaomi/WebView provider family), repeat against current and updated System WebView providers, run Play Console cookie-clear scenarios, and run Android 10 text-input tests on physical devices.
 
 ### #2791 — `shouldOverrideUrlLoading` breaks browsing context
 
@@ -521,6 +549,24 @@ Issue [#2728](https://github.com/pichillilorenzo/flutter_inappwebview/issues/272
 The Forge `InAppBrowserActivity` no longer emits a direct `statusBarColor` assignment. The existing `WindowCompat` edge-to-edge setup and toolbar `WindowInsetsCompat` listener remain responsible for safe top-bar layout without putting the deprecated API in the plugin bytecode.
 
 **Remaining validation:** inspect a target-SDK 35/36 AAB in Play Console and separate plugin warnings from Flutter framework and host-application warnings.
+
+### #2757 — pub.dev Pana analysis fails on disabled lint overrides
+
+**Local status:** Implemented in the federated analysis configuration; full pub.dev/publish validation pending. **Affected scope:** package analysis and pub.dev platform-support scoring. **Impact:** Pana 0.23.3 crashes before analysis when a package's `linter.rules` map uses the string `ignore` value, preventing analysis results and platform badges from being generated. **Confidence:** Confirmed tool failure and configuration fix.
+
+The related upstream [PR #2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758) changes disabled linter overrides from `ignore` to boolean `false`. Forge applies the same compatibility fix across the federated package analysis options. In an isolated package, Pana 0.23.3 reproduces the `type 'String' is not a subtype of type 'bool'` failure with the old form and passes static analysis with the boolean form. The current Pana 0.23.17 tool also no longer contains that type assumption.
+
+**Remaining validation:** run Pana against the published Forge package set (or a complete local package graph with all dependency overrides) and retain the publish/platform-badge report. This record remains in the runtime validation register until that release gate passes.
+
+### #2641 and #2685 — Android Java/WebView deprecation warning backlog
+
+**Local status:** Partially addressed in Android 1.0.32; active until the remaining warning families and release gates are resolved. **Affected scope:** Android Kotlin/WebView compatibility and package release tooling. **Impact:** Android/Flutter upgrades expose deprecated API warnings and can obscure package-owned compatibility problems in analysis or publish output. **Confidence:** Confirmed warning paths for the first batch; the complete issue scope remains broader.
+
+GitHub CLI review of upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) maps the first batch to the current Kotlin implementation: the shared callback handler now uses `Looper.getMainLooper()`, session-cookie clearing uses `removeSessionCookies(null)` on API 21+ and the legacy synchronous method only below API 21, and legacy `CookieSyncManager`/cookie fallback methods carry narrow deprecation suppression. The public method-channel contract and API 19 fallback are unchanged.
+
+Android source tests, `flutter analyze`, and the example `:app:compileDebugKotlin` build pass. The native compiler still reports separate warning families such as `forceDark`, `saveFormData`, `AbsoluteLayout`, legacy print APIs, and deprecated WebView settings; the #2687 release JAR synchronization path is validated on API 35, while clean JDK/provider/AAB and publish dry-run evidence remain outstanding. Do not classify #2641/#2685 as fully resolved from this batch.
+
+**Required evidence:** finish the remaining warning families without weakening API 19 compatibility, run `flutter analyze`/publish dry-run and a clean Android release build, inspect generated artifacts, and verify no package-owned warnings remain.
 
 ### #2703 — Android 16 KB page-size support
 
@@ -546,7 +592,7 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 **Local status:** Active; needs iOS 17 device/Simulator reproduction. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard is dismissed, `visualViewport.height` can remain smaller than the Flutter WebView and fixed-position page elements can appear offset from the bottom. **Confidence:** Needs reproduction for a Forge-owned root cause.
 
-This report is not treated as the same defect as #2859. The existing iOS 2.0.1 keyboard change restores the native `UIScrollView` content inset after `keyboardDidHide` and addresses the documented scroll-to-bottom regression; it does not prove that WebKit's DOM `visualViewport` state is restored on iOS 17. The upstream report has no native stack, minimal reproduction project, or before/after native frame data, so injecting JavaScript or changing WebKit geometry would be speculative.
+This report is not treated as the same defect as #2859. The existing iOS 2.0.1 keyboard change restores the native `UIScrollView` content inset after `keyboardDidHide` and addresses the documented scroll-to-bottom regression; it does not prove that WebKit's DOM `visualViewport` state is restored on iOS 17. Upstream PR #2860 also addresses #2859's native inset restoration rather than this DOM viewport symptom. The upstream report has no native stack, minimal reproduction project, or before/after native frame data, so injecting JavaScript or changing WebKit geometry would be speculative. The diagnostic now deliberately uses `resizeToAvoidBottomInset: false`, matching the report's trigger instead of masking the keyboard inset in Flutter.
 
 **Required evidence:** reproduce with `resizeToAvoidBottomInset` and `SafeArea` combinations on iOS 17 and current supported iOS, capture `window.innerHeight`, `visualViewport.height/offsetTop`, WebView frame, `contentInset`, and `adjustedContentInset` before/after keyboard dismissal, then compare with a minimal native `WKWebView` host.
 
@@ -554,19 +600,25 @@ An opt-in integration diagnostic is available at
 [`flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart).
 Run it from `flutter_inappwebview_forge/example` with
 `fvm flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/ios_keyboard_viewport_diagnostic_test.dart -d <ios-device> --dart-define=RUN_IOS_KEYBOARD_VIEWPORT_DIAGNOSTIC=true`.
-Flutter analysis and the iOS 26.0 simulator build passed, and the baseline
-WebView frame was `402x778` with a `778px` visual viewport. The automated
-platform-view tap did not focus the HTML input (`activeElementId` stayed empty)
-or open the software keyboard, and this environment has no iOS 17 runtime;
-the diagnostic therefore stops at its keyboard precondition and does not
-validate or close the issue. Physical/iOS 17 runtime evidence and native
-frame/inset comparison remain required.
+Flutter analysis and the iOS 27.0 simulator build passed, and the baseline
+WebView frame was `402x778` with a `778px` visual viewport. A programmatic
+WebKit focus fallback now reaches the HTML input (`activeElementId` becomes
+`keyboard-input`), but `TextInput.show` still does not open the software
+keyboard on the simulator (`keyboardDelta=0`), so the diagnostic cannot yet
+validate dismissal or close the issue. Physical/iOS 17 runtime evidence and
+native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 
 **Local status:** Host/WebKit capability boundary; no Forge-owned fix identified. **Affected scope:** iOS `WKNavigationDelegate` error reporting for iframe and other subresource requests. **Impact:** the report expects `onReceivedError` for an offline iframe request, matching Android behavior, but iOS only exposes navigation-level failure callbacks through the public WebKit delegate. **Confidence:** Strong platform-boundary evidence; the upstream report has no Forge stack or API that can supply the missing callback.
 
 The iOS implementation forwards `webView(_:didFailProvisionalNavigation:withError:)` and `webView(_:didFail:withError:)` to the existing channel event. Apple's [`WKNavigationDelegate` documentation](https://developer.apple.com/documentation/webkit/wknavigationdelegate) defines these as navigation tracking/error callbacks and describes the delegate in terms of the main frame, not arbitrary HTTPS iframe subresources. A JavaScript error listener would be incomplete for cross-origin frames, media, opaque fetches, and failures below JavaScript, so adding one would not preserve the public `onReceivedError` contract. The issue remains visible for Apple/WebKit capability tracking and would require a documented API decision or new WebKit callback before implementation.
+
+### #2796 — Android Pigeon build errors belong to an external dependency
+
+**Local status:** Dependency attribution boundary; no Forge-owned fix identified. **Affected scope:** `webview_flutter_android` Pigeon-generated Java sources. **Impact:** the report's compiler errors reference missing `webview_flutter_android` 4.10.13 base classes, but the Forge package graph and source tree contain no `webview_flutter_android` dependency or its generated Pigeon classes. The only `webview_flutter` reference in this repository is an optional example test script.
+
+Reproduce this locally only with a package graph that actually includes `webview_flutter_android`; the issue is not a Forge Android build path and is excluded from the active implementation count.
 
 ### #2720 — iOS localhost server is stale after background/resume
 
@@ -586,7 +638,7 @@ While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a
 
 ### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
 
-**Status:** #2710 is hardened in iOS 2.1.17; #2831 has an iOS 26 decision-bridge fix pending physical-device validation and #2763 is fixed in source pending popup-device validation. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The #2831 callback gap is confirmed locally; the original button-tap symptom still requires iOS 26 runtime confirmation.
+**Status:** #2710 is hardened in iOS 2.1.17; #2831 has an iOS 26 decision-bridge fix pending physical-device validation and #2763 is source-fixed with the rejected-popup path validated on iOS 26.0, 26.2, and 27.0 Simulators. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The #2831 callback gap is confirmed locally; the original button-tap symptom still requires iOS 26 runtime confirmation, while #2763 still requires the physical popup matrix.
 
 [Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) has a concrete iOS 26 report: after an inline HTML5 video is scrubbed and enters native fullscreen, playback can become black or unresponsive. The report also reproduces with `webview_flutter` and remains after testing the available inline/PiP/fullscreen settings, which points to the WebKit/GPU layer rather than a package-only path.
 
@@ -594,7 +646,7 @@ While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a
 
 This is a targeted mitigation rather than a claim that WebKit is fixed: it requires iOS 26+, JavaScript-enabled pages, and device validation across inline videos, iframe videos, orientation changes, and media controls. For affected paths on older iOS versions, forcing inline playback or using a native player/Safari remains an application-level workaround.
 
-[#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) now has a source-level iOS 26 geolocation decision bridge and needs the physical-device grant/deny and scene matrix. [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) now has a source fix and needs only the iOS popup device matrix. Maintain an iOS matrix for Flutter, Xcode, iOS, keyboard, fullscreen, geolocation, and multi-window flows; do not present these as one common root cause.
+[#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) now has a source-level iOS 26 geolocation decision bridge and needs the physical-device grant/deny and scene matrix. [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) now has a source fix and passing iOS 26.0, 26.2, and 27.0 Simulator rejected-popup diagnostics; the physical popup device matrix remains required. Maintain an iOS matrix for Flutter, Xcode, iOS, keyboard, fullscreen, geolocation, and multi-window flows; do not present these as one common root cause.
 
 ### #2737 — Web platform reports stale navigation URLs
 
@@ -615,7 +667,7 @@ Issue [#2789](https://github.com/pichillilorenzo/flutter_inappwebview/issues/278
 ### Security claims requiring validation before labeling as vulnerabilities
 
 - [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) is closed locally by source review: dynamic evaluation is confined to explicit `evaluateJavascript` wrappers and no plugin-owned remote-data sink was found.
-- [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) is fixed locally by replacing activity-extra Java serialization with a primitive/nested-`Bundle` codec; Android compile and static regression tests pass.
+- [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536) is fixed locally by replacing activity-extra Java serialization with a primitive/nested-`Bundle` codec; Android source tests and the Android 35 InAppBrowser/Chrome Custom Tabs happy-path diagnostic pass. Restore/rotation, malformed-extra, physical/provider validation remains a release gate.
 
 ### Other crash and regression candidates retained for follow-up
 
@@ -627,7 +679,6 @@ active examples that still need a reproducible matrix before implementation
 are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
 [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
 [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787),
-[#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)

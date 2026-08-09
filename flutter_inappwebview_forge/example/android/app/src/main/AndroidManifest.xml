@@ -38,7 +38,7 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:exported="true"
-            android:name="io.flutter.embedding.android.FlutterActivity"
+            android:name=".MainActivity"
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

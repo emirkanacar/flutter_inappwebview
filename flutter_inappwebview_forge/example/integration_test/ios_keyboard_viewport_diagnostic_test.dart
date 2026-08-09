@@ -60,7 +60,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            resizeToAvoidBottomInset: true,
+            // The reported regression requires the keyboard inset to be routed
+            // to WKWebView instead of being absorbed by Flutter.
+            resizeToAvoidBottomInset: false,
             body: SafeArea(
               child: InAppWebView(
                 key: _webViewKey,
@@ -128,6 +130,14 @@ void main() {
       final inputTapPoint = webViewOrigin +
           Offset(webViewRenderBox.size.width / 2, 220);
       await tester.tapAt(inputTapPoint);
+      // Flutter's synthetic platform-view pointer does not always reach the
+      // native WKWebView in an integration test. Keep the user-tap attempt,
+      // then focus the same DOM input through WebKit before asking UIKit to
+      // present the keyboard so the viewport transition can still be measured.
+      await controller.evaluateJavascript(
+        source: "document.getElementById('keyboard-input')?.focus()",
+      );
+      await SystemChannels.textInput.invokeMethod<void>('TextInput.show');
       await tester.pump(const Duration(milliseconds: 900));
 
       final withKeyboard = await readViewportMetrics();
