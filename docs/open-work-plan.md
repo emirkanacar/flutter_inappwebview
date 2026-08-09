@@ -238,7 +238,7 @@ deny, and scene-lifecycle validation remains required.
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Source review confirms that the existing iOS keyboard change and upstream PR [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) address native `contentInset` restoration for #2859, not the reported DOM `visualViewport` symptom. The opt-in diagnostic still needs an iOS 17/physical-device run that opens the keyboard and captures WebKit metrics, Flutter frame, `contentInset`, and `adjustedContentInset` before any geometry fix is justified. |
+| [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | Apple keyboard viewport and accessibility layout | Source review confirms that the existing iOS keyboard change and upstream PR [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) address native `contentInset` restoration for #2859, not the reported DOM `visualViewport` symptom. The iOS 27.0 diagnostic reaches the HTML input but cannot open the simulator keyboard (`keyboardDelta=0`); iOS 26.2 returns no non-zero viewport metrics after load. The issue still needs an iOS 17/physical-device run that opens the keyboard and captures WebKit metrics, Flutter frame, `contentInset`, and `adjustedContentInset` before any geometry fix is justified. |
 
 #### Android
 

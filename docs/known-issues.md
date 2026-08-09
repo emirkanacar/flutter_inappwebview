@@ -615,8 +615,10 @@ WebView frame was `402x778` with a `778px` visual viewport. A programmatic
 WebKit focus fallback now reaches the HTML input (`activeElementId` becomes
 `keyboard-input`), but `TextInput.show` still does not open the software
 keyboard on the simulator (`keyboardDelta=0`), so the diagnostic cannot yet
-validate dismissal or close the issue. Physical/iOS 17 runtime evidence and
-native frame/inset comparison remain required.
+validate dismissal or close the issue. A repeat on the iOS 26.2 Simulator
+also built successfully, but WebKit did not return non-zero viewport metrics
+after loading, so it provides no keyboard evidence. Physical/iOS 17 runtime
+evidence and native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 
