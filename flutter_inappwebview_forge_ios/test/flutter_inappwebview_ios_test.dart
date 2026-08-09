@@ -324,8 +324,17 @@ void _runSourceContractAssertions() {
     'pending callAsyncJavaScript callbacks are not completed on dispose',
   );
   _assert(
-    source.contains('"error": "WebView disposed"'),
+    source.contains(
+      'finishPendingAsyncJavaScriptCalls(error: "WebView disposed")',
+    ),
     'pending callAsyncJavaScript callbacks do not receive a disposal error',
+  );
+  _assert(
+    source.contains('finishPendingAsyncJavaScriptCallsOnNavigation') &&
+        source.contains(
+          'finishPendingAsyncJavaScriptCalls(error: "WebView navigation started")',
+        ),
+    'pending callAsyncJavaScript callbacks do not complete when navigation starts',
   );
   _assert(
     source.contains('pendingCallAsyncJavaScriptResults'),

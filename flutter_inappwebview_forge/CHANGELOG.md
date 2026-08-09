@@ -1,3 +1,13 @@
+## 2.1.39 - 2026-08-10
+
+- iOS: complete pending popup callAsyncJavaScript callbacks when a new
+  navigation starts, preventing a lost callback during window.open,
+  shouldOverrideUrlLoading, and navigate-away races ([#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)).
+  The iPhone 17 Pro iOS 26.2 Simulator diagnostic passes three
+  attach/evaluate/navigate/dispose cycles; physical iOS 15-26/Xcode 16-26
+  validation remains pending.
+- Update the root dependency to iOS 2.1.22.
+
 ## 2.1.38 - 2026-08-10
 
 - iOS and Android: complete pending `callAsyncJavaScript` callbacks with a

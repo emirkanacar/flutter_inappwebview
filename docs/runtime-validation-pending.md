@@ -123,6 +123,18 @@ test failure appears. Physical iOS 17+ and Android API 33+/OEM/provider
 validation remain required, so #2654 stays in this register and the count
 remains 69.
 
+iOS [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
+now has an opt-in multi-window navigation diagnostic at
+[`ios_multi_window_navigation_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_multi_window_navigation_diagnostic_test.dart).
+The iPhone 17 Pro iOS 26.2 Simulator passes three popup
+attach/evaluate/navigate/dispose cycles, including page and custom-world
+JavaScript, `shouldOverrideUrlLoading`, and an async call raced with
+`about:blank` navigation. iOS 2.1.22 completes pending native and legacy async
+callbacks with `WebView navigation started` before the new provisional
+navigation and ignores late completions. Physical iOS 15–26, Xcode 16/26, and
+symbolicated-crash validation remain required, so #2867 stays in this register
+and the count remains 69.
+
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android

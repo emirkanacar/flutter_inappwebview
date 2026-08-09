@@ -2388,6 +2388,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         currentOriginalUrl = url
         lastTouchPoint = nil
+        finishPendingAsyncJavaScriptCallsOnNavigation()
         windowIdJSInitializationGeneration += 1
         windowIdJSInitializationScheduled = false
         windowIdJSInitializationInFlight = false
@@ -4149,7 +4150,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         windowBeforeCreatedCallbacks.removeAll()
     }
 
-    private func finishPendingAsyncJavaScriptCallsOnDispose() {
+    private func finishPendingAsyncJavaScriptCalls(error: String) {
         let pendingCallbacks = Array(
             Array(callAsyncJavaScriptBelowIOS14Results.values)
                 + Array(pendingCallAsyncJavaScriptResults.values)
@@ -4159,9 +4160,18 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         pendingCallbacks.forEach { callback in
             callback([
                 "value": NSNull(),
-                "error": "WebView disposed"
+                "error": error
             ])
         }
+    }
+
+    private func finishPendingAsyncJavaScriptCallsOnDispose() {
+        finishPendingAsyncJavaScriptCalls(error: "WebView disposed")
+    }
+
+    private func finishPendingAsyncJavaScriptCallsOnNavigation() {
+        guard !isDisposed else { return }
+        finishPendingAsyncJavaScriptCalls(error: "WebView navigation started")
     }
 
     public func dispose() {

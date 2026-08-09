@@ -164,6 +164,13 @@ hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
 remains pending. The #2654 physical iOS 17+ and Android API 33+/OEM renderer
 matrix also remains a release gate, so the runtime-pending count stays 69.
 
+iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
+now also completes pending popup async JavaScript callbacks when a new
+provisional navigation starts. The iPhone 17 Pro iOS 26.2 Simulator diagnostic
+passes three popup attach/evaluate/navigate/dispose cycles, including
+`shouldOverrideUrlLoading`; physical iOS 15–26 and Xcode 16/26 validation
+remains in the runtime register, so the 69 runtime-pending count is unchanged.
+
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned
 control point. They remain visible in the resolution log and must not be

@@ -33,6 +33,19 @@ Android WebView destruction still logs Chromium renderer exit code `-1`, but
 the host reports no `AndroidRuntime`, fatal, or Dart test failure. Physical
 iOS 17+ and Android API 33+/OEM/provider validation remain release gates.
 
+## 2026-08-10 iOS popup navigation callback completion
+
+Upstream [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
+and related popup workaround [#2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776)
+remain open upstream. Forge iOS 2.1.22 now completes pending native and legacy
+`callAsyncJavaScript` callbacks with `WebView navigation started` when a new
+provisional navigation begins, clears the callback tables before completion,
+and ignores late WebKit callbacks. The source contract test and the opt-in
+`ios_multi_window_navigation_diagnostic_test.dart` pass; the iPhone 17 Pro
+iOS 26.2 Simulator completes three popup attach/evaluate/navigate/dispose
+cycles and reports all `shouldOverrideUrlLoading` URLs. Physical iOS 15–26,
+Xcode 16/26, and symbolicated-crash validation remain release gates.
+
 ## 2026-08-08 audit correction
 
 GitHub CLI review of the upstream issue bodies corrected three historical local
@@ -197,6 +210,7 @@ reduced when a record moves between the local status registers.
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.39 / iOS 2.1.22 | iOS popup `EXC_BAD_ACCESS` and async callback ownership [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | [#2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776) | Popup JavaScript remains in the initialized page world, and pending native/legacy async callbacks now complete with `WebView navigation started` before a new provisional navigation. Source tests and the iPhone 17 Pro iOS 26.2 three-cycle diagnostic pass; physical iOS 15–26/Xcode 16/26 validation remains required. |
 | 2.1.38 / iOS 2.1.21 / Android 1.0.36 | iOS/Android WebView disposal and pending async JavaScript callbacks [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654) | No direct PR relationship was present in the export | Native iOS 14+ and legacy callbacks plus Android callbacks now complete with `WebView disposed` before teardown, and late callbacks are ignored. The iPhone 17 Pro iOS 26.2 Simulator and API 35 AVD hybrid/virtual-display diagnostics pass; physical iOS/Android provider validation remains required. |
 | 2.1.37 / iOS 2.1.20 | iOS keyboard `visualViewport` restoration [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) addresses the separate #2859 inset regression | Root 2.1.37 depends on iOS 2.1.20. The pre-keyboard zoom/offset and final frame/layout are restored after HTML input dismissal; source coverage and the iPhone 17 Pro iOS 26.2 Simulator diagnostic pass. Physical iOS 17/device and custom page-zoom validation remain required. |
 | 2.1.35 / Android 1.0.34 | Android interception and rapid-navigation OOM [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580) | No upstream relationship inferred | Root 2.1.35 depends on Android 1.0.34. The Kotlin overload boundary now calls the platform `WebView.evaluateJavascript` method, preventing recursive injection growth. Android source tests and the API 35/WebView 124 rapid-navigation diagnostic pass; physical Android 10/11 OEM/provider, back/forward, and release validation remain required. |

@@ -1,3 +1,14 @@
+## 2.1.22 - 2026-08-10
+
+- Complete pending popup callAsyncJavaScript callbacks when a new
+  navigation starts, returning a structured error instead of leaving the
+  Dart future unresolved during multi-window navigation races ([#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)).
+  The iPhone 17 Pro iOS 26.2 Simulator diagnostic passes three
+  attach/evaluate/navigate/dispose cycles; physical iOS 15-26/Xcode 16-26
+  validation remains pending.
+- Add source and opt-in integration regression coverage for popup
+  page/custom-world evaluation and navigation callback ownership.
+
 ## 2.1.21 - 2026-08-10
 
 - Complete pending native iOS 14+ and legacy `callAsyncJavaScript` callbacks
