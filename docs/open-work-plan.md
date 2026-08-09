@@ -53,7 +53,9 @@ above. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/27
 is closed by source review and has no package runtime gate. Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
 now has an idempotent native WebView geometry refresh for display-size changes
 and visibility recovery; its Android 16/API 36 and OEM provider validation is
-tracked in the runtime register.
+tracked in the runtime register. The opt-in display-size diagnostic starts on
+the API 35 AVD, but host `wm size` change/reset currently disconnects that AVD
+before the geometry assertion, so no runtime count changes.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for the recursive activity-extra

@@ -92,6 +92,14 @@ node; ADB IME history records `SHOW_SOFT_INPUT` on the host activity. Samsung
 One UI/WebView 150+ and physical-device validation remain required, so the
 record stays in this register and the count remains 69.
 
+Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
+now has an opt-in display-size recovery diagnostic at
+[`android_display_size_recovery_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_display_size_recovery_diagnostic_test.dart).
+The API 35 AVD builds and starts the diagnostic, but both host `wm size`
+change/reset attempts temporarily put `emulator-5554` offline before the test
+could complete its geometry assertion; no Forge/native crash was recorded.
+The display-size and OEM-provider gate therefore remains pending.
+
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android
@@ -110,7 +118,10 @@ the Dart callback received `https://example.com` and returned `error:1`. The
 iOS 26.0 and 26.2 Simulator runs build successfully but leave
 `callbackOrigin=null` and the DOM result unset, so the record remains in this
 register until a physical iOS 26 grant/deny and scene-lifecycle matrix is
-completed.
+completed. On the iPhone 17 Pro iOS 26.2 Simulator, `simctl privacy grant
+location` produces `granted` without invoking the Dart callback, while
+`revoke` leaves the request pending; these states do not exercise the
+interactive system prompt.
 
 iOS [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)
 now has successful opt-in diagnostics on iOS 26.0, 26.2, and 27.0 Simulators:
