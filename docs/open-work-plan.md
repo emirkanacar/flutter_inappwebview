@@ -207,9 +207,14 @@ implementations, in addition to the idempotent disposal guards. The iPhone 17
 Pro iOS 26.2 Simulator diagnostic completes four navigate-away/dispose/recreate
 cycles with the safe `WebView navigation started` terminal result; the harness
 accepts that result as well as `WebView disposed`. The API 35 AVD diagnostic
-does the same across virtual-display and hybrid composition. Android emits the
+does the same across virtual-display and hybrid composition. A fresh 2026-08-10
+`flutter drive` run completes all four cycles with exit code 0. Android emits the
 expected Chromium renderer exit code `-1` while an explicitly destroyed WebView
-is released, but no `AndroidRuntime`, fatal, or Dart test failure appears. Android
+is released, but no app `AndroidRuntime`, fatal, ANR, or Dart test failure
+appears. This matches the teardown signature reported by external
+[#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491),
+which is outside the supplied issue export; its exact back-button/OEM path
+remains unvalidated. Android
 IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has detached-view and stale-runtime guards. Android fullscreen surface report
 [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)

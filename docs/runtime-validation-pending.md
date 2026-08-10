@@ -180,10 +180,15 @@ error after the harness begins navigation; the diagnostic now accepts both
 that result and `WebView disposed`. A clean iPhone 17 Pro iOS 27 Simulator run
 also completed four cycles with outcomes `[WebView navigation started, WebView
 disposed, WebView navigation started, WebView navigation started]`. The API 35
-`emulator-5554` does the same across virtual-display and hybrid composition; explicit disposal logs
-Chromium renderer exit code `-1`, but no `AndroidRuntime`, fatal, or Dart test
-failure appears. Physical iOS 17+ and Android API 33+/OEM/provider validation
-remain required, so #2654 stays in this register and the count remains 68.
+`emulator-5554` does the same across virtual-display and hybrid composition. A
+fresh 2026-08-10 `flutter drive` run completes all four cycles with exit code 0;
+explicit disposal logs Chromium renderer exit code `-1`, but no app
+`AndroidRuntime`, fatal, ANR, or Dart test failure appears. This matches the
+renderer-teardown signature reported by external [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491),
+which is outside the supplied 125-issue export; the exact back-button and
+affected-OEM path remains unvalidated. Physical iOS 17+ and Android API
+33+/OEM/provider validation remain required, so #2654 stays in this register
+and the count remains 68.
 
 iOS [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now has an opt-in multi-window navigation diagnostic at
