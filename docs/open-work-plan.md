@@ -232,10 +232,11 @@ matrix also remains a release gate, so the runtime-pending count stays 68.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new
-provisional navigation starts. The iPhone 17 Pro iOS 26.2 Simulator diagnostic
-passes three popup attach/evaluate/navigate/dispose cycles, including
-`shouldOverrideUrlLoading`; physical iOS 15–26 and Xcode 16/26 validation
-remains in the runtime register, so the 68 runtime-pending count is unchanged.
+provisional navigation starts. A fresh 2026-08-10 `flutter drive` run on the
+iPhone 17 Pro iOS 26.2 Simulator passes three popup attach/evaluate/navigate/
+dispose cycles with exit code 0 and no `EXC_BAD_ACCESS`/fatal log. Physical iOS
+15–26 and Xcode 16/26 validation remains in the runtime register, so the 68
+runtime-pending count is unchanged.
 
 Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
 now has an API 35 AVD lock/unlock checkpoint diagnostic. Hybrid-composition

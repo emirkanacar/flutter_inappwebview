@@ -200,11 +200,13 @@ now has an opt-in multi-window navigation diagnostic at
 The iPhone 17 Pro iOS 26.2 Simulator passes three popup
 attach/evaluate/navigate/dispose cycles, including page and custom-world
 JavaScript, `shouldOverrideUrlLoading`, and an async call raced with
-`about:blank` navigation. iOS 2.1.23 completes pending native and legacy async
-callbacks with `WebView navigation started` before the new provisional
-navigation and ignores late completions. Physical iOS 15–26, Xcode 16/26, and
-symbolicated-crash validation remain required, so #2867 stays in this register
-and the count remains 68.
+`about:blank` navigation. A fresh 2026-08-10 `flutter drive` run exits 0 with
+`popupActions=3` and the same navigation sequence; no `EXC_BAD_ACCESS`,
+`SIGSEGV`, `SIGABRT`, or fatal Simulator log is present. iOS 2.1.23 completes
+pending native and legacy async callbacks with `WebView navigation started`
+before the new provisional navigation and ignores late completions. Physical
+iOS 15–26, Xcode 16/26, and symbolicated-crash validation remain required, so
+#2867 stays in this register and the count remains 68.
 
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
