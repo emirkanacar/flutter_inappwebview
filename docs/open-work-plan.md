@@ -11,25 +11,25 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Eighty-two issue records have a
+The export contains 125 issues and 73 PRs. Eighty-four issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 67 await real runtime validation, #2709 is source-validated with no
+boundary: 69 await real runtime validation, #2709 is source-validated with no
 native runtime gate, #2745 is closed by source review, and
 #2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 43 issue records
+The other 41 issue records
 remain in this active plan. Three additional PR-only records
 (`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
 validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 53 | 1 | 1 | 13 | 30 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 55 | 1 | 1 | 13 | 28 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **67** | **1** | **1** | **13** | **43** | **40 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **69** | **1** | **1** | **13** | **41** | **38 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -47,7 +47,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 67 implementation or mitigation records awaiting real validation are
+The 69 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the three PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -73,7 +73,7 @@ Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2
 now has Android 35 AVD happy-path evidence for the recursive activity-extra
 codec across InAppBrowser and Chrome Custom Tabs, including lifecycle callbacks.
 Malformed external extras, restore/rotation, and physical/provider coverage
-remain in the runtime register; therefore the 67 runtime-pending count includes
+remain in the runtime register; therefore the 69 runtime-pending count includes
 this release-gate record.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
@@ -93,6 +93,17 @@ the Android plugin `syncReleaseLibJars` task succeeds, and the APK installs and
 launches on the API 35 `emulator-5554` with `MainActivity` resumed and no fatal
 crash in the smoke log. A clean JDK 17/provider/AAB/publish matrix remains in
 the runtime register.
+
+Android [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641)
+and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685)
+are implemented in Android 1.0.40. Legacy API 19/20 and provider compatibility
+paths remain SDK-gated, while the native compatibility files explicitly isolate
+their deprecation diagnostics. The 47-test Android package suite,
+`compileDebugKotlin`, and the debug APK build pass without package-owned
+Java/Android deprecation warnings. A clean release/AAB/publish matrix remains
+in the runtime register because the direct release compile still encounters the
+generated dev-only `integration_test` registrant and the normal Flutter release
+path uses a stale configured Android Studio JDK location in this environment.
 
 Shared iOS/Android [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)
 now clears stale localhost-server state when the request stream ends or errors.
@@ -136,7 +147,7 @@ is also source-validated and remains outside this active plan in the runtime
 register. The API 35/WebView 124 diagnostic covers a tapped HTML5 fullscreen
 request, exit, and a separate Flutter `TextField`; it passes after the
 fullscreen input-connection restoration path runs. Samsung One UI/WebView
-150+ and physical-device validation remain required, so the 67 runtime-pending
+150+ and physical-device validation remain required, so the 69 runtime-pending
 count is unchanged.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
@@ -153,7 +164,7 @@ also validates optional native MethodChannel string fields by runtime type befor
 dispatching callbacks. Android 1.0.37 additionally rejects malformed permission
 request/cancellation maps and non-list resources containers, while filtering
 unknown resource entries without changing the public callback contract. Its
-API/provider matrix remains in the runtime register, so the 67 runtime-pending
+API/provider matrix remains in the runtime register, so the 69 runtime-pending
 count is unchanged.
 
 Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
@@ -163,7 +174,7 @@ timeout, while preserving bridge and document-start registration retries. The
 API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start installs
 with `onWebViewCreated`, `onLoadStop`, and both bridge checks succeeding. Physical,
 headless, and release/provider validation remains in the runtime register, so the
-67 runtime-pending count is unchanged.
+69 runtime-pending count is unchanged.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack
@@ -187,14 +198,14 @@ fallback. All three remain runtime pending until the affected physical-device
 matrices pass. The API 35 IME diagnostic now passes for virtual-display and
 hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
 remains pending. The #2654 physical iOS 17+ and Android API 33+/OEM renderer
-matrix also remains a release gate, so the runtime-pending count stays 67.
+matrix also remains a release gate, so the runtime-pending count stays 69.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new
 provisional navigation starts. The iPhone 17 Pro iOS 26.2 Simulator diagnostic
 passes three popup attach/evaluate/navigate/dispose cycles, including
 `shouldOverrideUrlLoading`; physical iOS 15–26 and Xcode 16/26 validation
-remains in the runtime register, so the 67 runtime-pending count is unchanged.
+remains in the runtime register, so the 69 runtime-pending count is unchanged.
 
 Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
 now has an API 35 AVD lock/unlock checkpoint diagnostic. Hybrid-composition
@@ -202,7 +213,7 @@ WebView content and URL survive a real ADB keyevent lock/unlock sequence with
 no AndroidRuntime, fatal, or renderer crash in the captured log. The Flutter
 host's DDS/golden-stream connection prevents a clean integration-test exit;
 Android 10 and OEM/provider validation therefore remain in the runtime
-register and the count stays 67.
+register and the count stays 69.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned
@@ -324,7 +335,7 @@ deny, and scene-lifecycle validation remains required.
 | Issues | Plan | Exit criterion |
 | --- | --- | --- |
 | [#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce MSVC `/await`, Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
-| [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685), [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641), [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize generated Pigeon/build artifacts and Java 17/Flutter deprecation warnings. Upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) is ported as batch 1 in Android 1.0.32 (main-looper handler and cookie compatibility); the remaining warning families stay active. #2687's release JAR path is mitigated and its remaining JDK/provider/AAB/publish matrix is tracked in the runtime register. | `flutter analyze`, publish dry-run, Android release build, and all generated metadata checks pass without package-owned warnings. |
+| [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize the remaining Windows build-warning and release-artifact path. Android [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641) and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685) are implemented in Android 1.0.40; their clean release/provider/AAB/publish matrix remains in the runtime register. #2687's release JAR path is also mitigated and its remaining JDK/provider/AAB/publish matrix is tracked there. | `flutter analyze`, publish dry-run, Android release build, and all generated metadata checks pass without package-owned warnings. |
 | [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2788](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2788), [#2695](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2695), [#2686](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2686), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682) | Triage vague initialization, Windows warning/release, network, Safari, and packaging reports | Require a reproducible command, environment, and stack trace. Close as host/application-specific in the local log when no package path exists. |
 
 ### P2: API and feature decisions
@@ -356,10 +367,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 67 issue records and three PR-only
+items. The complete register contains 69 issue records and three PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 43 issue records that still need implementation, design, or
+keeps only the 41 issue records that still need implementation, design, or
 reproduction. Thirteen host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
@@ -413,16 +424,16 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-10 status pass has 67 locally implemented or mitigated issue
+The 2026-08-10 status pass has 69 locally implemented or mitigated issue
 records awaiting runtime validation, one source-validated issue (#2709) with
 no runtime gate, one issue (#2745) closed by source review, thirteen
 host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
-#2698, #2713, #2723, #2727, #2753, and #2796), and 43 active issue records in this plan. The runtime-pending
+#2698, #2713, #2723, #2727, #2753, and #2796), and 41 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
  live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
- [`known-issues.md`](known-issues.md). The active queue contains 30 bugs, 10
- enhancements, 0 unlabelled records, and 3 showcase records (40 active
+ [`known-issues.md`](known-issues.md). The active queue contains 28 bugs, 10
+ enhancements, 0 unlabelled records, and 3 showcase records (38 active
  technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:

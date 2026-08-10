@@ -1,3 +1,7 @@
+## 1.0.40 - 2026-08-10
+
+- Complete the local Android deprecation-warning boundary for [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641) and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685): API 19/20 cookie, WebView, print, fullscreen, and compatibility fallbacks remain SDK-gated and are explicitly isolated from package compiler diagnostics. The Android package suite passes 47/47 tests, `compileDebugKotlin`, and the debug APK build pass without package-owned Java/Android deprecation warnings. Clean release, provider, AAB, and publish validation remains pending.
+
 ## 1.0.39 - 2026-08-10
 
 - Preserve Android activity results owned by other Flutter plugins for [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797): the WebView file chooser now returns `false` when no chooser is active or when the request code is unrelated, and only clears callbacks for handled picker results.

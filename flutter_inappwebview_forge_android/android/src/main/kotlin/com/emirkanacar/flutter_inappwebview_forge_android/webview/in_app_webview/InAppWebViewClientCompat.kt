@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+
 package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview
 
 import android.annotation.SuppressLint

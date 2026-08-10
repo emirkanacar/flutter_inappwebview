@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.emirkanacar.flutter_inappwebview_forge_android.chrome_custom_tabs;
 
 import android.app.Activity;

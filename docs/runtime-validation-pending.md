@@ -13,11 +13,11 @@ details remain in [known-issues.md](known-issues.md).
 
 | Local status | Issue records | Count | Meaning |
 | --- | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | Issue register below | 67 | Source, regression, and host/build checks pass; real validation remains. |
+| Locally implemented or mitigated; runtime validation pending | Issue register below | 69 | Source, regression, and host/build checks pass; real validation remains. |
 | Resolved locally; no runtime gate | [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | 1 | Pure Dart serialization is covered by a focused regression test; no device/provider behavior is involved. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
 | Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796) | 13 | Strong evidence points to Apple/WebKit Simulator or callback limitations, Android framework/provider/dependency, host app/site configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 43 | No complete local implementation boundary has been established. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 41 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Three PR-only records also have local implementations but remain outside the
@@ -29,17 +29,30 @@ Three PR-only records also have local implementations but remain outside the
 
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Still open | Technical open after showcase |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Bugs | 98 | 53 | 1 | 1 | 13 | 30 | 30 |
+| Bugs | 98 | 55 | 1 | 1 | 13 | 28 | 28 |
 | Enhancements | 16 | 6 | 0 | 0 | 0 | 10 | 10 |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **67** | **1** | **1** | **13** | **43** | **40** |
+| **Total** | **125** | **69** | **1** | **1** | **13** | **41** | **38** |
 
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
 now validates nullable and non-string optional callback fields before dispatch,
 including permission-request and cancellation maps plus the resources container;
 the remaining gate is the Android API/provider matrix listed in
-[`known-issues.md`](known-issues.md). The count remains 67.
+[`known-issues.md`](known-issues.md). The count remains 69.
+
+Android [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641)
+and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685)
+are implemented in Android 1.0.40. Legacy API 19/20 and provider compatibility
+paths remain SDK-gated, while the native compatibility files isolate their
+deprecation diagnostics. The 47-test Android package suite,
+`compileDebugKotlin`, and the debug APK build pass without package-owned
+Java/Android deprecation warnings. The direct release compile still encounters
+the generated dev-only `integration_test` registrant, and the normal Flutter
+release path uses a stale configured Android Studio JDK location in this
+environment; clean JDK 17/21, AAB, provider, device, and publish validation
+remain required. The records therefore stay in this register and the count is
+now 69.
 
 Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
 and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
@@ -47,14 +60,14 @@ now include a bounded provider-startup fallback in Android 1.0.38 and an opt-in
 profile/AOT cold-start diagnostic. Four clean API 35/WebView 124 installs pass
 `onWebViewCreated`, `onLoadStop`, and the JavaScript bridge/document-start checks.
 Physical, headless, and release/provider coverage remains required, so the record
-stays in this register and the count remains 67.
+stays in this register and the count remains 69.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for nested InAppBrowser and Chrome
 Custom Tabs activity extras. The package test suite and opt-in diagnostic pass,
 including open/load/close callbacks; restore/rotation, malformed external
 extras, and physical/provider coverage remain release gates, so the record stays
-in this register and the count remains 67.
+in this register and the count remains 69.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
 and upstream [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758)
@@ -90,7 +103,7 @@ platform `WebView.evaluateJavascript` overload. Android source tests and the
 opt-in API 35/WebView 124 diagnostic pass (`finalLoaded=true`, final marker
 `final`, 31 interception callbacks, no fatal crash). Physical Android 10/11
 OEM/provider validation and broader back/forward coverage remain required, so
-the record stays in this register and the count remains 67.
+the record stays in this register and the count remains 69.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic
@@ -100,7 +113,7 @@ The API 35 `emulator-5554` with WebView 124 passes the flow with
 `insetBeforeFocus=0.0`, `insetAfterFocus=24.0`, and an active Flutter focus
 node; ADB IME history records `SHOW_SOFT_INPUT` on the host activity. Samsung
 One UI/WebView 150+ and physical-device validation remain required, so the
-record stays in this register and the count remains 67.
+record stays in this register and the count remains 69.
 
 Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
 now has an opt-in display-size recovery diagnostic at
@@ -142,7 +155,7 @@ that result and `WebView disposed`. The API 35 `emulator-5554` does the same
 across virtual-display and hybrid composition; explicit disposal logs
 Chromium renderer exit code `-1`, but no `AndroidRuntime`, fatal, or Dart test
 failure appears. Physical iOS 17+ and Android API 33+/OEM/provider validation
-remain required, so #2654 stays in this register and the count remains 67.
+remain required, so #2654 stays in this register and the count remains 69.
 
 iOS [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now has an opt-in multi-window navigation diagnostic at
@@ -154,14 +167,14 @@ JavaScript, `shouldOverrideUrlLoading`, and an async call raced with
 callbacks with `WebView navigation started` before the new provisional
 navigation and ignores late completions. Physical iOS 15–26, Xcode 16/26, and
 symbolicated-crash validation remain required, so #2867 stays in this register
-and the count remains 67.
+and the count remains 69.
 
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android
 source regression test passes, but no available device reproduces the reported
 MediaTek gralloc/surface failure; a physical MediaTek test with fullscreen
-H.264/HLS playback and network loss remains required, so the count remains 67.
+H.264/HLS playback and network loss remains required, so the count remains 69.
 
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation
@@ -195,7 +208,7 @@ WebView URL, with no AndroidRuntime, fatal, or renderer crash in the captured
 log. The Flutter host's DDS/golden-stream connection is unstable for this
 diagnostic, so the checkpoint is evidence rather than a clean integration-test
 exit; Android 10 and affected OEM/provider lock/unlock validation remain
-required and the count remains 67.
+required and the count remains 69.
 
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 is source-fixed in iOS 2.1.20. The opt-in diagnostic passes on the iPhone 17 Pro
@@ -208,12 +221,12 @@ and native `WKWebView` comparison validation remain required.
 
 ## Issue register
 
-The following 67 issue records have moved out of the active implementation
+The following 69 issue records have moved out of the active implementation
 queue. They remain release gates until the required real validation is
 recorded:
 
-`#2536`, `#2555`, `#2568`, `#2580`, `#2594`, `#2600`, `#2619`, `#2654`,
-`#2673`, `#2687`, `#2697`, `#2700`, `#2703`, `#2707`, `#2710`, `#2711`,
+`#2536`, `#2555`, `#2568`, `#2580`, `#2594`, `#2600`, `#2619`, `#2641`,
+`#2654`, `#2673`, `#2685`, `#2687`, `#2697`, `#2700`, `#2703`, `#2707`, `#2710`, `#2711`,
 `#2717`, `#2718`, `#2720`, `#2721`, `#2725`, `#2728`, `#2733`, `#2736`, `#2737`,
 `#2741`, `#2757`, `#2762`, `#2763`, `#2778`, `#2780`, `#2782`, `#2783`, `#2787`, `#2789`,
 `#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2819`, `#2826`, `#2830`, `#2831`,

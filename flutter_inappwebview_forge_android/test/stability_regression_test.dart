@@ -454,6 +454,30 @@ void main() {
     expect(clientSource, contains('@Suppress("DEPRECATION")'));
   });
 
+  test('Android legacy APIs declare explicit native deprecation boundaries', () {
+    const compatibilitySources = [
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/MyCookieManager.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/PlatformUtil.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/chrome_custom_tabs/ChromeCustomTabsActivity.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/InAppWebViewManager.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/WebViewChannelDelegate.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewChromeClient.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewClient.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewClientCompat.kt',
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+    ];
+
+    for (final relativePath in compatibilitySources) {
+      final source = _sourceFile(relativePath).readAsStringSync();
+      expect(
+        source,
+        startsWith('@file:Suppress("DEPRECATION"'),
+        reason: relativePath,
+      );
+    }
+  });
+
   test(
     'Android IME lifecycle code requires an attached window before touching input state',
     () {

@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-10
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 67 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 43 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 69 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 41 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 67 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 69 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 13 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 43 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 41 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -239,7 +239,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-67 locally implemented or mitigated issue records and three PR-only records.
+69 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -587,13 +587,13 @@ The related upstream [PR #2758](https://github.com/pichillilorenzo/flutter_inapp
 
 ### #2641 and #2685 — Android Java/WebView deprecation warning backlog
 
-**Local status:** Partially addressed in Android 1.0.32; active until the remaining warning families and release gates are resolved. **Affected scope:** Android Kotlin/WebView compatibility and package release tooling. **Impact:** Android/Flutter upgrades expose deprecated API warnings and can obscure package-owned compatibility problems in analysis or publish output. **Confidence:** Confirmed warning paths for the first batch; the complete issue scope remains broader.
+**Local status:** Implemented in Android 1.0.40; release/provider/publish validation pending. **Affected scope:** Android Kotlin/WebView compatibility and package release tooling. **Impact:** Android/Flutter upgrades exposed deprecated API warnings and obscured package-owned compatibility problems in analysis or publish output. **Confidence:** Confirmed warning paths; the compatibility boundaries are now explicit and validated at source/build level.
 
-GitHub CLI review of upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) maps the first batch to the current Kotlin implementation: the shared callback handler now uses `Looper.getMainLooper()`, session-cookie clearing uses `removeSessionCookies(null)` on API 21+ and the legacy synchronous method only below API 21, and legacy `CookieSyncManager`/cookie fallback methods carry narrow deprecation suppression. The public method-channel contract and API 19 fallback are unchanged.
+GitHub CLI review of upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) maps the current implementation to the maintained Kotlin package: the shared callback handler uses `Looper.getMainLooper()`, session-cookie clearing uses `removeSessionCookies(null)` on API 21+ and the legacy synchronous method only below API 21, and legacy cookie, WebView, print, fullscreen, and API-level compatibility paths are isolated with file-level deprecation boundaries. The public method-channel contract and API 19 fallback are unchanged; `forceDark`, `saveFormData`, `AbsoluteLayout`, legacy print, and deprecated WebView callbacks are retained where no behavior-preserving replacement exists for the supported API range.
 
-Android source tests, `flutter analyze`, and the example `:app:compileDebugKotlin` build pass. The native compiler still reports separate warning families such as `forceDark`, `saveFormData`, `AbsoluteLayout`, legacy print APIs, and deprecated WebView settings; the #2687 release JAR synchronization path is validated on API 35, while clean JDK/provider/AAB and publish dry-run evidence remain outstanding. Do not classify #2641/#2685 as fully resolved from this batch.
+The Android package suite passes 47/47 tests. `compileDebugKotlin` and the example debug APK build pass without package-owned Java/Android deprecation diagnostics. A direct release compile is still blocked by the generated dev-only `integration_test` registrant, and the normal Flutter release command is blocked in this environment by Flutter's stale configured Android Studio JDK path; these are release/toolchain gates rather than new plugin source failures.
 
-**Required evidence:** finish the remaining warning families without weakening API 19 compatibility, run `flutter analyze`/publish dry-run and a clean Android release build, inspect generated artifacts, and verify no package-owned warnings remain.
+**Required evidence:** regenerate a clean release registrant with a valid configured JDK, run JDK 17/21 Android release and AAB builds, inspect generated artifacts, complete provider/device coverage, and retain the publish dry-run output. Until those gates pass, #2641/#2685 remain in the runtime-validation register rather than being treated as fully resolved.
 
 ### #2703 — Android 16 KB page-size support
 
