@@ -419,21 +419,41 @@ void main() {
     },
   );
 
-  test(
-    'Android cookie clearing does not flush synchronously after async deletion',
-    () {
-      final source = _sourceFile(
-        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
-        'MyCookieManager.kt',
-      ).readAsStringSync();
-      final deleteAllCookies = RegExp(
-        r'fun deleteAllCookies\(result: MethodChannel\.Result\) \{([\s\S]*?)\n    \}\n\n    (?:@Suppress\("DEPRECATION"\)\n    )?fun removeSessionCookies',
-      ).firstMatch(source)?.group(1);
+  test('Android cookie mutations do not flush synchronously after async updates', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'MyCookieManager.kt',
+    ).readAsStringSync();
 
-      expect(deleteAllCookies, isNotNull);
-      expect(deleteAllCookies, isNot(contains('manager.flush()')));
-    },
-  );
+    final setCookie = RegExp(
+      r'fun setCookie\([\s\S]*?\) \{([\s\S]*?)\n    \}\n\n    fun getCookies',
+    ).firstMatch(source)?.group(1);
+    final deleteCookie = RegExp(
+      r'fun deleteCookie\([\s\S]*?\) \{([\s\S]*?)\n    \}\n\n    @Suppress\("DEPRECATION"\)\n    fun deleteCookies',
+    ).firstMatch(source)?.group(1);
+    final deleteCookies = RegExp(
+      r'fun deleteCookies\([\s\S]*?\) \{([\s\S]*?)\n    \}\n\n    @Suppress\("DEPRECATION"\)\n    fun deleteAllCookies',
+    ).firstMatch(source)?.group(1);
+    final deleteAllCookies = RegExp(
+      r'fun deleteAllCookies\(result: MethodChannel\.Result\) \{([\s\S]*?)\n    \}\n\n    (?:@Suppress\("DEPRECATION"\)\n    )?fun removeSessionCookies',
+    ).firstMatch(source)?.group(1);
+    final explicitFlush = RegExp(
+      r'fun flush\(result: MethodChannel\.Result\) \{([\s\S]*?)\n    \}\n\n    override fun dispose',
+    ).firstMatch(source)?.group(1);
+
+    expect(setCookie, isNotNull);
+    expect(deleteCookie, isNotNull);
+    expect(deleteCookies, isNotNull);
+    expect(deleteAllCookies, isNotNull);
+    expect(explicitFlush, isNotNull);
+    expect(setCookie, isNot(contains('manager.flush()')));
+    expect(deleteCookie, isNot(contains('manager.flush()')));
+    expect(deleteCookies, contains('ValueCallback<Boolean>'));
+    expect(deleteCookies, contains('remaining.decrementAndGet()'));
+    expect(deleteCookies, isNot(contains('manager.flush()')));
+    expect(deleteAllCookies, isNot(contains('manager.flush()')));
+    expect(explicitFlush, contains('manager.flush()'));
+  });
 
   test('Android callback handler is explicitly bound to the main looper', () {
     final source = _sourceFile(

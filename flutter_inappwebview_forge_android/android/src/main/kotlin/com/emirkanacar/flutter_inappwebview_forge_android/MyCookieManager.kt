@@ -20,6 +20,8 @@ import java.util.Date
 import java.util.HashMap
 import java.util.Locale
 import java.util.TimeZone
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
     ChannelDelegateImpl(
@@ -165,10 +167,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         cookieValue += ";"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // API 21+ applies this mutation asynchronously. Keep persistence
+            // explicit because flush() can block the WebView UI thread.
             manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
                 result.success(successful)
             })
-            manager.flush()
         } else {
             val context = plugin?.applicationContext
             if (context != null) {
@@ -271,10 +274,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         cookieValue += ";"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // API 21+ applies this mutation asynchronously. Keep persistence
+            // explicit because flush() can block the WebView UI thread.
             manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
                 result.success(successful)
             })
-            manager.flush()
         } else {
             val context = plugin?.applicationContext
             if (context != null) {
@@ -299,36 +303,49 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
             return
         }
 
-        var cookieSyncManager: CookieSyncManager? = null
         val cookiesString = manager.getCookie(url)
-        if (cookiesString != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                plugin?.applicationContext?.let { context ->
-                    cookieSyncManager = CookieSyncManager.createInstance(context)
-                    cookieSyncManager?.startSync()
-                }
-            }
+        if (cookiesString == null) {
+            result.success(true)
+            return
+        }
 
-            for (cookie in cookiesString.split(";")) {
+        val cookies = cookiesString.split(";")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Wait for all asynchronous mutations instead of blocking the UI
+            // thread with flush().
+            val remaining = AtomicInteger(cookies.size)
+            val allSuccessful = AtomicBoolean(true)
+            for (cookie in cookies) {
                 val name = cookie.split("=", limit = 2)[0].trim()
                 var cookieValue = "$name=; Path=$path; Max-Age=-1"
                 if (domain != null) cookieValue += "; Domain=$domain"
                 cookieValue += ";"
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    manager.setCookie(url, cookieValue, null)
-                } else {
-                    manager.setCookie(url, cookieValue)
-                }
+                manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
+                    if (successful != true) allSuccessful.set(false)
+                    if (remaining.decrementAndGet() == 0) {
+                        result.success(allSuccessful.get())
+                    }
+                })
             }
-
+        } else {
+            var cookieSyncManager: CookieSyncManager? = null
+            plugin?.applicationContext?.let { context ->
+                cookieSyncManager = CookieSyncManager.createInstance(context)
+                cookieSyncManager?.startSync()
+            }
+            for (cookie in cookies) {
+                val name = cookie.split("=", limit = 2)[0].trim()
+                var cookieValue = "$name=; Path=$path; Max-Age=-1"
+                if (domain != null) cookieValue += "; Domain=$domain"
+                cookieValue += ";"
+                manager.setCookie(url, cookieValue)
+            }
             if (cookieSyncManager != null) {
                 cookieSyncManager?.stopSync()
                 cookieSyncManager?.sync()
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                manager.flush()
             }
+            result.success(true)
         }
-        result.success(true)
     }
 
     @Suppress("DEPRECATION")

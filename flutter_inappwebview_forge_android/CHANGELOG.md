@@ -1,3 +1,12 @@
+## 1.0.42 - 2026-08-10
+
+- Android: avoid UI-thread `CookieManager.flush()` calls after asynchronous
+  cookie mutations for [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718).
+  `setCookie`, `deleteCookie`, and `deleteCookies` now leave persistence
+  asynchronous while the explicit `flush` API remains available. The package
+  suite passes 49/49 tests, `compileDebugKotlin`, and `assembleDebug`; Android
+  10/provider and Play Console runtime validation remains pending.
+
 ## 1.0.41 - 2026-08-10
 
 - Reject private-sandbox `file://` URIs returned by Android file choosers, including canonicalized `..` paths and `/data/` paths, across single-select, multi-select, and legacy callbacks ([PR #2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)). `content://` selections and FileProvider capture URIs remain supported. The Android package suite passes 48/48 tests, `compileDebugKotlin`, and `assembleDebug`; hostile picker/provider runtime validation remains pending.

@@ -116,6 +116,18 @@ opt-in API 35/WebView 124 diagnostic pass (`finalLoaded=true`, final marker
 OEM/provider validation and broader back/forward coverage remain required, so
 the record stays in this register and the count remains 68.
 
+Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
+is source-hardened in Android 1.0.42. API 21+ `setCookie`, `deleteCookie`, and
+`deleteCookies` mutations no longer call the synchronous `CookieManager.flush()`
+after queuing their asynchronous updates; the explicit `flush` API is preserved
+for callers that require it. The Android package suite passes 49/49 tests,
+`compileDebugKotlin`, and `assembleDebug`. Android 10/provider and Play Console
+cookie-clear validation remain required. The existing remote-URL Cookie Manager
+integration test built and installed on the API 35 AVD but timed out after 60
+seconds before its assertions, with no fatal AndroidRuntime or ANR log captured;
+it is therefore not counted as a completed runtime gate. The record stays in
+this register and the count remains 68.
+
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic
 at

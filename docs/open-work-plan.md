@@ -142,6 +142,14 @@ overload directly. Source tests and the API 35/WebView 124 diagnostic pass, but
 physical Android 10/11 OEM/provider and back/forward validation remain in the
 runtime register, so the active/runtime counts do not change.
 
+Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
+is source-hardened in Android 1.0.42. API 21+ cookie mutations no longer call
+the synchronous `CookieManager.flush()` after asynchronous updates, while the
+explicit `flush` API remains available. The Android package suite passes 49/49
+tests and the native debug compilation/AAR build pass. Android 10/provider and
+Play Console validation remain in the runtime register, so the 68 runtime-
+pending and 41 active counts are unchanged.
+
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 is also source-validated and remains outside this active plan in the runtime
 register. The API 35/WebView 124 diagnostic covers a tapped HTML5 fullscreen
