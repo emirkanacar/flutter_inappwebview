@@ -84,6 +84,26 @@ void main() {
     expect(callbackSource, contains('requestCode != PICKER_LEGACY'));
   });
 
+  test('Android file chooser rejects private sandbox file URIs', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    final chooserSource = source.substring(
+      source.indexOf('override fun onActivityResult('),
+      source.indexOf('private fun isFileNotEmpty('),
+    );
+
+    expect(chooserSource, contains('isPrivateSandboxFileUri'));
+    expect(chooserSource, contains('filterSandboxFileUris'));
+    expect(chooserSource, contains('File(path).canonicalPath'));
+    expect(chooserSource, contains('applicationInfo?.dataDir'));
+    expect(chooserSource, contains('normalizedPath.startsWith("/data/")'));
+    expect(chooserSource, contains('data?.clipData'));
+    expect(chooserSource, contains('if (isPrivateSandboxFileUri(candidate))'));
+    expect(chooserSource, contains('filterSandboxFileUris('));
+  });
+
   test(
     'Android internal storage path handler serializes its base fields once',
     () {

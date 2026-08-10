@@ -301,7 +301,7 @@ Open PRs are evidence and design input, not release-ready commits.
 | Action | PRs | Rule |
 | --- | --- | --- |
 | Port the idea after local tests | #2844, #2860, #2853, #2776, #2574, #2614, #2558 | Re-implement against the current branch and add regression coverage. |
-| Validate the local implementation | #2871, #2771, #2474 | These PR-only compatibility fixes are present locally; use device/provider tests to verify behavior and avoid re-porting them. |
+| Validate the local implementation | #2243, #2871, #2771, #2474 | These PR-only compatibility fixes are present locally; use device/provider tests to verify behavior and avoid re-porting them. |
 | Benchmark before adoption | #2794, #2851, #2864, #2390 | Measure channel, payload, render, or first-frame effects before changing public behavior. |
 | Do not cherry-pick wholesale | #2548 | The branch contains unrelated commits and unresolved follow-up reports. |
 | Maintenance batch | #2879, #2870, #2817, #2729 | Land with build/deprecation verification, separate from runtime performance changes. |

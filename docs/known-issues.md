@@ -239,11 +239,35 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-68 locally implemented or mitigated issue records and three PR-only records.
+68 locally implemented or mitigated issue records and four PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
 ## Detailed findings
+
+### PR #2243 - Android file chooser private-sandbox URI
+
+**Local status:** Implemented in Android 1.0.41 and root 2.1.46; hostile
+picker/provider runtime validation pending. **Impact:** A malicious third-party
+file picker could return a `file://` URI into the host app's private data
+directory, allowing the WebView to read and expose that file to page content.
+**Confidence:** Confirmed native callback boundary from the upstream security
+report.
+
+The Android `InAppWebViewChromeClient` now canonicalizes file chooser paths to
+collapse traversal segments, rejects paths under the host application's
+canonical `ApplicationInfo.dataDir`, and applies a `/data/` defense-in-depth
+check. The guard covers legacy single-URI results, modern single-select
+results, and `ClipData` multi-select results. `content://` results and the
+plugin's FileProvider capture URIs are not rejected.
+
+The Android package suite passes 48/48 tests, `compileDebugKotlin`, and the
+`assembleDebug` AAR task. **Remaining validation:** use an
+external picker under test control to return private `file://` URIs, including
+`../` traversal, mixed safe/private multi-select results, and API 19-35
+provider variants; confirm the WebView receives no rejected URI and normal
+content/capture selection still works. PR #2243 remains open upstream; no
+upstream comment or state change was made.
 
 ### #2873 — Restrict `FileProvider` paths
 

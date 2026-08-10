@@ -764,7 +764,8 @@ open class InAppWebViewChromeClient(
       }
       PICKER_LEGACY -> {
         val result = if (resultCode == Activity.RESULT_OK) {
-          data?.data ?: getCapturedMediaFile()
+          val candidate = data?.data ?: getCapturedMediaFile()
+          if (isPrivateSandboxFileUri(candidate)) null else candidate
         } else {
           null
         }
@@ -784,7 +785,9 @@ open class InAppWebViewChromeClient(
     // we have one file selected
     if (data?.data != null) {
       if (resultCode == Activity.RESULT_OK && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        return WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+        return filterSandboxFileUris(
+          WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+        )
       } else {
         return null
       }
@@ -792,11 +795,54 @@ open class InAppWebViewChromeClient(
 
     // we have multiple files selected
     data?.clipData?.let { clipData ->
-      return Array(clipData.itemCount) { index -> clipData.getItemAt(index).uri }
+      return filterSandboxFileUris(
+        Array(clipData.itemCount) { index -> clipData.getItemAt(index).uri }
+      )
     }
 
     // we have a captured image or video file
     return getCapturedMediaFile()?.let { arrayOf(it) }
+  }
+
+  private fun isPrivateSandboxFileUri(uri: Uri?): Boolean {
+    if (uri == null || !uri.scheme.orEmpty().equals("file", ignoreCase = true)) {
+      return false
+    }
+
+    val path = uri.path ?: return false
+    val normalizedPath = canonicalizePath(path) ?: return true
+    val dataDir = getActivity()?.applicationInfo?.dataDir
+    val normalizedDataDir = dataDir?.let(::canonicalizePath)
+
+    if (normalizedDataDir != null &&
+      (normalizedPath == normalizedDataDir || normalizedPath.startsWith("$normalizedDataDir/"))
+    ) {
+      return true
+    }
+
+    // Defense in depth for alternate app-private data-dir representations such
+    // as /data/data and /data/user/0 paths on older Android releases.
+    return normalizedPath == "/data" || normalizedPath.startsWith("/data/")
+  }
+
+  private fun canonicalizePath(path: String): String? {
+    return try {
+      File(path).canonicalPath
+    } catch (e: IOException) {
+      Log.w(LOG_TAG, "Unable to canonicalize file chooser URI path.", e)
+      null
+    }
+  }
+
+  private fun filterSandboxFileUris(uris: Array<Uri>?): Array<Uri>? {
+    if (uris == null) return null
+
+    val safeUris = uris.filterNot(::isPrivateSandboxFileUri)
+    return when {
+      safeUris.size == uris.size -> uris
+      safeUris.isEmpty() -> null
+      else -> safeUris.toTypedArray()
+    }
   }
 
   private fun isFileNotEmpty(uri: Uri): Boolean {

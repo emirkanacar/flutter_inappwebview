@@ -1,3 +1,7 @@
+## 1.0.41 - 2026-08-10
+
+- Reject private-sandbox `file://` URIs returned by Android file choosers, including canonicalized `..` paths and `/data/` paths, across single-select, multi-select, and legacy callbacks ([PR #2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)). `content://` selections and FileProvider capture URIs remain supported. The Android package suite passes 48/48 tests, `compileDebugKotlin`, and `assembleDebug`; hostile picker/provider runtime validation remains pending.
+
 ## 1.0.40 - 2026-08-10
 
 - Complete the local Android deprecation-warning boundary for [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641) and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685): API 19/20 cookie, WebView, print, fullscreen, and compatibility fallbacks remain SDK-gated and are explicitly isolated from package compiler diagnostics. The Android package suite passes 47/47 tests, `compileDebugKotlin`, and the debug APK build pass without package-owned Java/Android deprecation warnings. Clean release, provider, AAB, and publish validation remains pending.

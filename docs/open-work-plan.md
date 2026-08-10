@@ -19,9 +19,9 @@ native runtime gate, #2745 is closed by source review, and
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
 The other 41 issue records
-remain in this active plan. Three additional PR-only records
-(`#2771`, `#2871`, and `#2474`) are implemented locally and await runtime
-validation; they do not change the issue counts below.
+remain in this active plan. Four additional PR-only records
+(`#2243`, `#2771`, `#2871`, and `#2474`) are implemented locally and await
+runtime validation; they do not change the issue counts below.
 
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -49,7 +49,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 The 68 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
-along with the three PR-only records. They are resolved implementation work,
+along with the four PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
 above. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)
 is closed by source review and has no package runtime gate. Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
@@ -149,6 +149,8 @@ request, exit, and a separate Flutter `TextField`; it passes after the
 fullscreen input-connection restoration path runs. Samsung One UI/WebView
 150+ and physical-device validation remain required, so the 68 runtime-pending
 count is unchanged.
+
+Android file chooser PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) is implemented locally in Android 1.0.41. The native callback boundary rejects canonicalized private-sandbox `file://` URIs from single-select, multi-select, and legacy picker results while preserving `content://` and FileProvider capture URIs. The source regression and native build are release evidence; hostile external-picker/provider validation remains a separate runtime gate, and this PR-only record does not change the issue counts above.
 
 The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771) and [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), together with the Android compatibility work from PR [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
@@ -375,7 +377,7 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 68 issue records and three PR-only
+items. The complete register contains 68 issue records and four PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
 keeps only the 41 issue records that still need implementation, design, or

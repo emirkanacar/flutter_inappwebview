@@ -20,10 +20,21 @@ details remain in [known-issues.md](known-issues.md).
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 41 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Three PR-only records also have local implementations but remain outside the
-125-issue count: [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
+Four PR-only records also have local implementations but remain outside the
+125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
+[#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
 [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), and
 [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474).
+
+Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
+is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
+rejects private-sandbox `/data/` `file://` results across single, multi-select,
+and legacy callbacks. `content://` selections and FileProvider capture URIs
+remain allowed. The Android package suite passes 48/48 tests, `compileDebugKotlin`,
+and the `assembleDebug` AAR task. The Flutter APK wrapper is blocked by the
+existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
+an adversarial external-picker/provider matrix across API levels also remains
+pending. This PR-only record does not change the 68-issue count.
 
 ### Count by exported category
 

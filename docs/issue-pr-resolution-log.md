@@ -15,6 +15,24 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-10 Android file chooser sandbox URI
+
+GitHub CLI review of upstream [PR #2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
+identified a security boundary in Android file chooser results: an implicit
+third-party picker can return a private `file://` URI that the host WebView
+then exposes to page content. Forge Android 1.0.41 now canonicalizes the URI
+path, rejects the host application's `ApplicationInfo.dataDir` and all
+`/data/` paths, and applies the same filter to modern single-select,
+`ClipData` multi-select, and legacy callbacks. `content://` selections and
+FileProvider camera captures remain supported.
+
+The Android package suite passes 48/48 tests, `compileDebugKotlin`, and the
+`assembleDebug` AAR task. The Flutter APK wrapper remains blocked by the
+existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
+adversarial external-picker/provider testing also remains pending. This is a
+PR-only record outside the 125-issue count. The upstream PR remains open and
+no upstream comment or state change was made.
+
 ## 2026-08-10 Android cold-start provider timeout
 
 GitHub CLI review of upstream [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849), and related [#2844](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2844) confirms the shared cold-start race: provider startup and document-start registration can overlap Chromium browser-process initialization. Android 1.0.38 now bounds the asynchronous provider-startup gate at five seconds, then relies on the existing bridge/document-start registration retries instead of holding the first platform-view load indefinitely.
@@ -177,13 +195,14 @@ tracked separately from that historical export:
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
 | Host/platform-specific boundary | 14 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2680`, `#2688`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`, `#2796`, `#2831`) | Host/provider/engine/application/site/dependency tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
 | Open implementation or reproduction | 41 issues | [open-work-plan.md](open-work-plan.md) |
-| PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
+| PR-only local implementations awaiting runtime validation | 4 PRs | `#2243`, `#2771`, `#2871`, `#2474` |
 
 The issue inventory below remains the historical 125-record export and is not
 reduced when a record moves between the local status registers.
 
 ## Local resolution history
 
+| 2026-08-10 | Android file chooser private-sandbox URI | [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) | Android 1.0.41 rejects canonicalized private `/data/` `file://` results from modern single-select, `ClipData` multi-select, and legacy callbacks while preserving `content://` and FileProvider capture URIs. Focused source regression and native build validation remain the local gates; adversarial picker/provider testing is pending. |
 | 2026-08-10 | Android cold-start and startup reattach [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843), [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) | [#2844](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2844) | Android 1.0.38 orders provider startup and document-start registration, bounds a stuck startup callback, retries transient failures, and recreates the startup executor after engine detach while ignoring stale generations. Android source tests and four API 35/WebView 124 profile/AOT cold-start installs pass; physical, headless, release/R8, and provider validation remains pending. |
 | 2026-08-09 | iOS/macOS Xcode authentication availability [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830) | [#2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809) | iOS 2.1.19 and macOS 1.1.6 isolate the authentication presentation provider behind the iOS 13/macOS 10.15 availability boundaries. iOS/macOS source tests, Swift Package manifest checks, and the Xcode 27 iOS example build pass; exact Xcode 26.4.1 and macOS consuming-app validation remain pending. |
 | 2026-08-08 | Android interception freeze and cookie ANR [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580), [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) | No upstream relationship inferred | Android synchronous interception is bounded by concurrency and timeout limits, and `deleteAllCookies` no longer flushes synchronously after asynchronous removal. Focused Android tests pass; Android 10/provider and Play Console runtime validation remains pending. |

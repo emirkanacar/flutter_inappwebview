@@ -1,3 +1,8 @@
+## 2.1.46 - 2026-08-10
+
+- Android: reject private-sandbox `file://` URIs returned by file choosers, including canonicalized traversal paths, across single-select, multi-select, and legacy callbacks ([PR #2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)). `content://` selections and FileProvider capture URIs remain supported; hostile picker/provider runtime validation remains pending.
+- Update the root dependency to Android 1.0.41.
+
 ## 2.1.45 - 2026-08-10
 
 - iOS: correct the public geolocation decision-handler availability for [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) to iOS 27+, keep the iOS 26 prompt path explicitly host/WebKit-owned, and update the iOS/platform-interface dependencies.
