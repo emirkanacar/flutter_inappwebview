@@ -241,14 +241,16 @@ required and the count remains 68.
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 is source-fixed in iOS 2.1.20. The previously recorded iPhone 17 Pro iOS 26.2
 Simulator pass measured `visualViewport.height` as `778px -> 435.44px ->
-778px`, with `visualViewport.scale` returning from `0.939` to `1.0`. Three clean
-DDS reruns on the current host are inconclusive: iOS 26.2 reports zero WebKit
-viewport metrics after loading, while iOS 27 reaches the initial `778px`
-viewport but does not expose a software-keyboard transition (`keyboardDelta=0`).
+778px`, with `visualViewport.scale` returning from `0.939` to `1.0`. A fresh
+default-DDS run on 2026-08-10 reproduces the same transition, including an
+active HTML input and zero page offset after dismissal. Earlier clean DDS
+reruns on the current host were inconclusive: iOS 26.2 reported zero WebKit
+viewport metrics after loading, while iOS 27 reached the initial `778px`
+viewport but did not expose a software-keyboard transition (`keyboardDelta=0`).
 CoreSimulatorService connection failures were also observed. The fix retains
 the pre-keyboard `UIScrollView` zoom/offset and refreshes the final frame/layout
 after dismissal. Physical iOS 17/device and native `WKWebView` comparison
-validation remain required.
+validation remain required, so the count remains 68.
 
 ## Issue register
 

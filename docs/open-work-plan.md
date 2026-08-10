@@ -127,12 +127,12 @@ iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 now retains the WebView's pre-keyboard `UIScrollView` zoom scale and content
 offset, then refreshes the final platform-view frame/layout after dismissal so
 WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. A
-previous iPhone 17 Pro iOS 26.2 run passed
-(`778px -> 435.44px -> 778px`), but current clean DDS reruns are inconclusive:
-iOS 26.2 reports zero viewport metrics and iOS 27 does not expose a software
-keyboard transition. Physical iOS 17, device, and native `WKWebView`
-comparison validation remain in the runtime register, so #2787 remains
-validation-pending.
+fresh iPhone 17 Pro iOS 26.2 Simulator run on 2026-08-10 passed
+(`778px -> 435.44px -> 778px`) and restored the scale and page offset. Earlier
+clean DDS reruns were inconclusive because iOS 26.2 reported zero viewport
+metrics and iOS 27 did not expose a software keyboard transition. Physical iOS
+17, device, and native `WKWebView` comparison validation remain in the runtime
+register, so #2787 remains validation-pending.
 
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
 now prioritizes `shouldInterceptRequest` and Service Worker interception on the

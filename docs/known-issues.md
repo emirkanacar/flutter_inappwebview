@@ -647,11 +647,11 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 ### #2787 — iOS keyboard dismissal leaves a reduced `visualViewport`
 
-**Local status:** Source-fixed in iOS 2.1.20; Simulator revalidation is currently blocked by keyboard/runtime conditions, with physical iOS 17/device validation pending. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard was dismissed, `visualViewport.height` could remain smaller than the Flutter WebView and fixed-position page elements could appear offset from the bottom. **Confidence:** Confirmed Forge-owned path with source regression coverage; current GUI evidence is inconclusive.
+**Local status:** Source-fixed in iOS 2.1.20; a fresh iPhone 17 Pro iOS 26.2 Simulator run passes, with physical iOS 17/device validation pending. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard was dismissed, `visualViewport.height` could remain smaller than the Flutter WebView and fixed-position page elements could appear offset from the bottom. **Confidence:** Confirmed Forge-owned path with source regression coverage and repeatable Simulator evidence; physical-device confidence remains pending.
 
 This report is distinct from #2859. #2859 covers stale native `UIScrollView.contentInset` restoration; #2787 exposed a second state mismatch where UIKit restored the frame and inset but WebKit retained a keyboard-induced zoom scale and DOM viewport. The fix retains the pre-keyboard `zoomScale` and `contentOffset`, restores them after `keyboardDidHide`, and refreshes the final platform-view frame/layout so WebKit recalculates its visual viewport. Upstream PR #2860 remains associated with the separate #2859 inset regression.
 
-The opt-in diagnostic deliberately uses `resizeToAvoidBottomInset: false` and blurs the HTML input before hiding Flutter's text input channel. A previous iPhone 17 Pro Simulator run measured `visualViewport.height` as `778px -> 435.44px -> 778px`, restored `visualViewport.scale` from `0.939` to `1.0`, and returned the page offset to zero. The native frame was `402x778` with zero content inset after dismissal; current simulator reruns are recorded below as inconclusive.
+The opt-in diagnostic deliberately uses `resizeToAvoidBottomInset: false` and blurs the HTML input before hiding Flutter's text input channel. A fresh default-DDS iPhone 17 Pro iOS 26.2 Simulator run on 2026-08-10 measured `visualViewport.height` as `778.0 -> 435.4375 -> 778.0`, restored `visualViewport.scale` from `0.93925` to `1.0`, and returned the page offset to zero. The native frame was `402x778` before and after dismissal, with a transient `402x812` Flutter layout while the keyboard was visible. Earlier simulator reruns were inconclusive because of WebKit metrics and software-keyboard harness conditions; no product crash was captured.
 
 **Remaining validation:** exercise HTML input focus changes, interactive dismissal, custom page zoom, and scroll-to-bottom on physical iOS 17 through the latest supported iOS release, and compare with a minimal native `WKWebView` host.
 
@@ -659,15 +659,15 @@ An opt-in integration diagnostic is available at
 [`flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart).
 Run it from `flutter_inappwebview_forge/example` with
 `fvm flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/ios_keyboard_viewport_diagnostic_test.dart -d <ios-device> --dart-define=RUN_IOS_KEYBOARD_VIEWPORT_DIAGNOSTIC=true`.
-The previously recorded iPhone 17 Pro iOS 26.2 pass is retained as historical
-evidence, but three clean DDS reruns on the current host did not reproduce it:
-the iOS 26.2 run reported zero WebKit viewport metrics after loading, while the
-iOS 27 Simulator reached the initial `778px` viewport but did not expose a
-software-keyboard transition (`keyboardDelta=0`). CoreSimulatorService also
-reported intermittent connection failures during this validation. No product
-crash was captured, so this remains a runtime/harness blocker rather than a
-regression verdict. Physical iOS 17 runtime evidence, custom page-zoom coverage,
-and the native frame/inset comparison remain required.
+A fresh default-DDS iPhone 17 Pro iOS 26.2 run on 2026-08-10 passed the full
+show/dismiss assertion with `778.0 -> 435.4375 -> 778.0` viewport heights and
+zero offset after dismissal. Earlier clean DDS reruns on the current host did
+not reproduce the transition: iOS 26.2 reported zero WebKit viewport metrics,
+while the iOS 27 Simulator reached the initial `778px` viewport but did not
+expose a software-keyboard transition (`keyboardDelta=0`). CoreSimulatorService
+also reported intermittent connection failures during that validation. No
+product crash was captured. Physical iOS 17 runtime evidence, custom page-zoom
+coverage, and the native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 
