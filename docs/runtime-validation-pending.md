@@ -124,9 +124,13 @@ for callers that require it. The Android package suite passes 49/49 tests,
 `compileDebugKotlin`, and `assembleDebug`. Android 10/provider and Play Console
 cookie-clear validation remain required. The existing remote-URL Cookie Manager
 integration test built and installed on the API 35 AVD but timed out after 60
-seconds before its assertions, with no fatal AndroidRuntime or ANR log captured;
-it is therefore not counted as a completed runtime gate. The record stays in
-this register and the count remains 68.
+seconds before its assertions, with no fatal AndroidRuntime or ANR log captured.
+A fresh isolated `flutter drive` attempt on 2026-08-10 installed the same test
+but Flutter 3.44.8 crashed in VM-service setup with
+`registerService: (-32000) Service connection disposed`; the AVD log again had
+no app `AndroidRuntime`, fatal, or ANR. Neither run reached the cookie
+assertions, so this is not counted as a completed runtime gate. The record
+stays in this register and the count remains 68.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic

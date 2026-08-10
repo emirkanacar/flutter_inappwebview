@@ -150,7 +150,10 @@ is source-hardened in Android 1.0.42. API 21+ cookie mutations no longer call
 the synchronous `CookieManager.flush()` after asynchronous updates, while the
 explicit `flush` API remains available. The Android package suite passes 49/49
 tests and the native debug compilation/AAR build pass. Android 10/provider and
-Play Console validation remain in the runtime register, so the 68 runtime-
+Play Console validation remain in the runtime register. The isolated API 35
+Cookie Manager drive attempt installed the test but Flutter 3.44.8 failed in
+VM-service setup (`registerService: (-32000) Service connection disposed`) before
+assertions; no app `AndroidRuntime`, fatal, or ANR appeared. The 68 runtime-
 pending and 41 active counts are unchanged.
 
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)

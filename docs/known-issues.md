@@ -572,8 +572,11 @@ The opt-in [`android_ime_lifecycle_diagnostic_test.dart`](../flutter_inappwebvie
 
 The existing remote-URL Cookie Manager integration test built and installed on
 the API 35 `emulator-5554`, but timed out after 60 seconds before reaching its
-cookie assertions. No fatal AndroidRuntime or ANR log was captured; because the
-test did not complete the cookie flow, this is not accepted as runtime proof.
+cookie assertions. A fresh isolated `flutter drive` attempt on 2026-08-10
+installed the test but Flutter 3.44.8 failed during VM-service setup with
+`registerService: (-32000) Service connection disposed`. Neither attempt
+captured an app fatal AndroidRuntime or ANR, but neither completed the cookie
+flow, so this is not accepted as runtime proof.
 
 The Android example build was also checked with the configured Flutter
 toolchain. JDK 24 plus Gradle 8.13 fails before plugin Kotlin compilation while
