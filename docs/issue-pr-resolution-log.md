@@ -58,6 +58,20 @@ The host Flutter runner could not complete a clean exit because DDS/golden
 stream setup was unavailable; Android 10 and affected OEM/provider validation
 remain release gates. No upstream issue state or comment was changed.
 
+## 2026-08-10 Android permission payload boundary hardening
+
+GitHub CLI review of upstream [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
+and related [#2857](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2857)
+confirmed that the upstream patch covers the nullable context-menu title only.
+The local Android 1.0.30 hardening already covered that field and the other
+optional strings, but a focused regression test then reproduced a remaining
+`String`-to-`List` cast failure when a valid permission origin was paired with a
+malformed `resources` container. Android 1.0.37/root 2.1.40 now validates the
+permission request and cancellation map, origin, and resources container before
+decoding; valid string entries are retained and unknown entries are filtered.
+The focused test and Android package suite pass. The API/provider matrix remains
+in the runtime register, and no upstream issue state or comment was changed.
+
 ## 2026-08-08 audit correction
 
 GitHub CLI review of the upstream issue bodies corrected three historical local
@@ -222,6 +236,7 @@ reduced when a record moves between the local status registers.
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.40 / Android 1.0.37 | Android nullable and malformed permission callback payloads [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) | [#2857](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2857) | Android permission request/cancellation payloads now validate the map, origin, and resources container before decoding, filter unknown resource entries, and preserve native default behavior for malformed payloads. The focused regression and Android package tests pass; API/provider validation remains required. |
 | 2.1.39 / iOS 2.1.22 | iOS popup `EXC_BAD_ACCESS` and async callback ownership [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | [#2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776) | Popup JavaScript remains in the initialized page world, and pending native/legacy async callbacks now complete with `WebView navigation started` before a new provisional navigation. Source tests and the iPhone 17 Pro iOS 26.2 three-cycle diagnostic pass; physical iOS 15–26/Xcode 16/26 validation remains required. |
 | 2.1.38 / iOS 2.1.21 / Android 1.0.36 | iOS/Android WebView disposal and pending async JavaScript callbacks [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654) | No direct PR relationship was present in the export | Native iOS 14+ and legacy callbacks plus Android callbacks now complete with `WebView disposed` before teardown, and late callbacks are ignored. The iPhone 17 Pro iOS 26.2 Simulator and API 35 AVD hybrid/virtual-display diagnostics pass; physical iOS/Android provider validation remains required. |
 | 2.1.37 / iOS 2.1.20 | iOS keyboard `visualViewport` restoration [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) addresses the separate #2859 inset regression | Root 2.1.37 depends on iOS 2.1.20. The pre-keyboard zoom/offset and final frame/layout are restored after HTML input dismissal; source coverage and the iPhone 17 Pro iOS 26.2 Simulator diagnostic pass. Physical iOS 17/device and custom page-zoom validation remain required. |

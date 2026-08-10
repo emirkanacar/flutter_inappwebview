@@ -1,3 +1,9 @@
+## 2.1.40 - 2026-08-10
+
+- Android: harden permission-request and permission-cancellation MethodChannel
+  payload decoding for [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856), rejecting malformed origin/resources containers without aborting the Dart event dispatcher and filtering unknown resource entries. Focused Android regression coverage passes; device/provider validation remains pending.
+- Update the root dependency to Android 1.0.37.
+
 ## 2.1.39 - 2026-08-10
 
 - iOS: complete pending popup callAsyncJavaScript callbacks when a new

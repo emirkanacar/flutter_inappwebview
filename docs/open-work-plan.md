@@ -138,8 +138,11 @@ are now mapped to the reported `WebSettingsCompat.setForceDarkStrategy` boundary
 their setter/getter fail-open guards and source tests are in the runtime register.
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
 also validates optional native MethodChannel string fields by runtime type before
-dispatching callbacks; malformed provider values are ignored without changing the
-public callback contract. Its API/provider matrix remains in the runtime register.
+dispatching callbacks. Android 1.0.37 additionally rejects malformed permission
+request/cancellation maps and non-list resources containers, while filtering
+unknown resource entries without changing the public callback contract. Its
+API/provider matrix remains in the runtime register, so the 69 runtime-pending
+count is unchanged.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack

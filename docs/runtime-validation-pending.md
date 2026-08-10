@@ -35,9 +35,10 @@ Three PR-only records also have local implementations but remain outside the
 | **Total** | **125** | **69** | **1** | **13** | **42** | **39** |
 
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
-now validates nullable and non-string optional callback fields before dispatch;
+now validates nullable and non-string optional callback fields before dispatch,
+including permission-request and cancellation maps plus the resources container;
 the remaining gate is the Android API/provider matrix listed in
-[`known-issues.md`](known-issues.md).
+[`known-issues.md`](known-issues.md). The count remains 69.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for nested InAppBrowser and Chrome

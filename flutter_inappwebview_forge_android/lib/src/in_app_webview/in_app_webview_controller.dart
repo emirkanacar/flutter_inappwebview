@@ -207,6 +207,34 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
     return value is String ? value : null;
   }
 
+  Map<String, dynamic>? _permissionRequestArguments(dynamic rawArguments) {
+    if (rawArguments is! Map) {
+      return null;
+    }
+
+    final String? origin = _optionalString(rawArguments["origin"]);
+    if (origin == null) {
+      return null;
+    }
+
+    final dynamic rawResources = rawArguments["resources"];
+    if (rawResources != null && rawResources is! List) {
+      return null;
+    }
+
+    final Map<String, dynamic> arguments = <String, dynamic>{};
+    rawArguments.forEach((key, value) {
+      if (key is String) {
+        arguments[key] = value;
+      }
+    });
+    arguments["origin"] = origin;
+    arguments["resources"] = rawResources is List
+        ? rawResources.whereType<String>().toList()
+        : const <String>[];
+    return arguments;
+  }
+
   Future<dynamic> _handleMethod(MethodCall call) async {
     if (PlatformInAppWebViewController.debugLoggingSettings.enabled &&
         call.method != "onCallJsHandler") {
@@ -990,11 +1018,17 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
         if ((webviewParams != null &&
                 webviewParams!.onPermissionRequestCanceled != null) ||
             _inAppBrowserEventHandler != null) {
-          Map<String, dynamic> arguments = call.arguments
-              .cast<String, dynamic>();
-          PermissionRequest permissionRequest = PermissionRequest.fromMap(
-            arguments,
-          )!;
+          final Map<String, dynamic>? arguments = _permissionRequestArguments(
+            call.arguments,
+          );
+          if (arguments == null) {
+            break;
+          }
+          final PermissionRequest? permissionRequest =
+              PermissionRequest.fromMap(arguments);
+          if (permissionRequest == null) {
+            break;
+          }
 
           if (webviewParams != null &&
               webviewParams!.onPermissionRequestCanceled != null)
@@ -1145,21 +1179,19 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
                     // ignore: deprecated_member_use_from_same_package
                     webviewParams!.androidOnPermissionRequest != null)) ||
             _inAppBrowserEventHandler != null) {
-          final String? origin = _optionalString(call.arguments["origin"]);
-          if (origin == null) {
+          final Map<String, dynamic>? arguments = _permissionRequestArguments(
+            call.arguments,
+          );
+          if (arguments == null) {
             break;
           }
-          final List<String> resources =
-              (call.arguments["resources"] as List<dynamic>? ??
-                      const <dynamic>[])
-                  .whereType<String>()
-                  .toList();
-
-          Map<String, dynamic> arguments = call.arguments
-              .cast<String, dynamic>();
-          PermissionRequest permissionRequest = PermissionRequest.fromMap(
-            arguments,
-          )!;
+          final String origin = arguments["origin"] as String;
+          final List<String> resources = arguments["resources"] as List<String>;
+          final PermissionRequest? permissionRequest =
+              PermissionRequest.fromMap(arguments);
+          if (permissionRequest == null) {
+            break;
+          }
 
           if (webviewParams != null) {
             if (webviewParams!.onPermissionRequest != null)

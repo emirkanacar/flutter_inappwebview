@@ -13,6 +13,7 @@ void main() {
       var geolocationPromptCalled = false;
       var safeBrowsingCalled = false;
       var permissionRequestCalled = false;
+      var permissionRequestCanceledCalled = false;
 
       final controller = AndroidInAppWebViewController(
         AndroidInAppWebViewControllerCreationParams(
@@ -34,6 +35,9 @@ void main() {
             onPermissionRequest: (_, __) async {
               permissionRequestCalled = true;
               return null;
+            },
+            onPermissionRequestCanceled: (_, __) {
+              permissionRequestCanceledCalled = true;
             },
           ),
         ),
@@ -78,6 +82,24 @@ void main() {
         }),
       );
       await controller.handler!(
+        const MethodCall('onPermissionRequest', {
+          'origin': 'https://example.com',
+          'resources': 'not-a-list',
+        }),
+      );
+      await controller.handler!(
+        const MethodCall('onPermissionRequestCanceled', {
+          'origin': null,
+          'resources': [],
+        }),
+      );
+      await controller.handler!(
+        const MethodCall('onPermissionRequestCanceled', {
+          'origin': 'https://example.com',
+          'resources': 'not-a-list',
+        }),
+      );
+      await controller.handler!(
         const MethodCall('onInjectedScriptLoaded', [null]),
       );
       await controller.handler!(
@@ -94,6 +116,7 @@ void main() {
       expect(geolocationPromptCalled, isFalse);
       expect(safeBrowsingCalled, isFalse);
       expect(permissionRequestCalled, isFalse);
+      expect(permissionRequestCanceledCalled, isFalse);
     },
   );
 }

@@ -1,3 +1,8 @@
+## 1.0.37 - 2026-08-10
+
+- Harden Android permission-request and permission-cancellation MethodChannel
+  payload decoding for [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856): a missing or non-string origin, or a non-list resources value, now returns native default behavior instead of aborting the event dispatcher. Unknown resource entries are filtered while valid entries and the public callback contract are preserved. Focused regression coverage passes; API/provider validation remains pending.
+
 ## 1.0.36 - 2026-08-10
 
 - Complete pending `callAsyncJavaScript` callbacks with a structured
