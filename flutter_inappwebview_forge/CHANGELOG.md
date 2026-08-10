@@ -1,3 +1,7 @@
+## 2.1.43 - 2026-08-10
+
+- iOS: prevent stale-controller `goBack()` calls from surfacing `MissingPluginException` after scene or platform-view teardown ([#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)); update the iOS implementation dependency to 2.1.23.
+
 ## 2.1.42 - 2026-08-10
 
 - Android: preserve activity results owned by other Flutter plugins while an InAppBrowser is open ([#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797)); unrelated results are no longer consumed by the WebView file chooser. Add focused coverage for the Android internal-storage path-handler serialization fix ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).

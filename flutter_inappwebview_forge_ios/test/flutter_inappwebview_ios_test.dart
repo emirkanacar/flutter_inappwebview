@@ -1,5 +1,7 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_inappwebview_forge_ios/flutter_inappwebview_forge_ios.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -16,6 +18,23 @@ void _assert(bool condition, String message) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'iOS goBack tolerates a missing native channel during teardown',
+    () async {
+      final controller = IOSInAppWebViewController(
+        const IOSInAppWebViewControllerCreationParams(id: 2711),
+      );
+
+      try {
+        await expectLater(controller.goBack(), completes);
+      } finally {
+        controller.dispose();
+      }
+    },
+  );
+
   test(
     'iOS native source contracts remain guarded',
     _runSourceContractAssertions,

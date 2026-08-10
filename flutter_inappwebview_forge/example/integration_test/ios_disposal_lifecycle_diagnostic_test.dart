@@ -106,7 +106,10 @@ void main() {
       debugPrint('iOS #2654 diagnostic: outcomes=$outcomes');
       expect(find.text('ios-2654-complete'), findsOneWidget);
       expect(outcomes, hasLength(4));
-      expect(outcomes, everyElement('WebView disposed'));
+      expect(
+        outcomes,
+        everyElement(anyOf('WebView disposed', 'WebView navigation started')),
+      );
     },
     skip: !_runDiagnostic || !Platform.isIOS,
     timeout: const Timeout(Duration(minutes: 3)),

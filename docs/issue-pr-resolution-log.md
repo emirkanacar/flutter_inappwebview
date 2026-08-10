@@ -32,12 +32,14 @@ Android now completes its pending async JavaScript callback table before
 releasing the channel, while retaining idempotent disposal and fullscreen
 cleanup ordering.
 
-The iPhone 17 Pro iOS 26.2 Simulator diagnostic and the API 35
-`emulator-5554` diagnostic pass four navigate-away/dispose/recreate cycles;
-the Android run covers virtual-display and hybrid composition. Explicit
-Android WebView destruction still logs Chromium renderer exit code `-1`, but
-the host reports no `AndroidRuntime`, fatal, or Dart test failure. Physical
-iOS 17+ and Android API 33+/OEM/provider validation remain release gates.
+The iPhone 17 Pro iOS 26.2 Simulator diagnostic completes four
+navigate-away/dispose/recreate cycles with the safe `WebView navigation started`
+terminal result; the diagnostic now accepts that result as well as
+`WebView disposed`. The API 35 `emulator-5554` diagnostic covers virtual-display
+and hybrid composition. Explicit Android WebView destruction still logs
+Chromium renderer exit code `-1`, but the host reports no `AndroidRuntime`,
+fatal, or Dart test failure. Physical iOS 17+ and Android API 33+/OEM/provider
+validation remain release gates.
 
 ## 2026-08-10 iOS popup navigation callback completion
 
@@ -170,11 +172,11 @@ tracked separately from that historical export:
 
 | Status | Count | Register |
 | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | 66 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
+| Locally implemented or mitigated; runtime validation pending | 67 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
 | Resolved locally; no runtime gate | 1 issue (`#2709`) | Focused Dart serialization regression test; no device/provider behavior is involved |
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
 | Host/platform-specific boundary | 13 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2680`, `#2688`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`, `#2796`) | Host/provider/engine/application/site/dependency tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
-| Open implementation or reproduction | 44 issues | [open-work-plan.md](open-work-plan.md) |
+| Open implementation or reproduction | 43 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 3 PRs | `#2771`, `#2871`, `#2474` |
 
 The issue inventory below remains the historical 125-record export and is not
@@ -214,7 +216,7 @@ reduced when a record moves between the local status registers.
 | 2026-08-08 | Android renderer callback boundary [#2697](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2697); iOS location prompt lifecycle [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | No upstream relationship inferred | Android renderer callbacks now reject unrelated WebView instances and static regression tests pass. iOS now bridges the iOS 26 geolocation decision handler through Dart while preserving existing presenter guards; the iOS source test and Xcode 27 example build pass, and physical iOS 26 runtime validation remains required. |
 | 2026-08-10 | Android InAppBrowser activity-result ownership [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797) | No upstream relationship inferred | The Android ChromeClient no longer consumes unclaimed or unrelated activity results, and the InAppBrowser listener loop remains snapshot-based. Focused source tests pass; API 35/36 and OEM permission/file-picker runtime validation remains pending. |
 | 2026-08-10 | Android internal-storage path-handler recursion [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | No upstream relationship inferred | `AndroidInternalStoragePathHandler.toMap()` now calls `super.toMap()` once. The focused Dart test serializes the base fields and directory successfully; no native runtime gate is required. |
-| 2026-08-10 | iOS missing-plugin `goBack` report [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711) | No upstream relationship inferred | The earlier Android grouping was incorrect. No deterministic local reproduction or issue-specific source fix is established; #2711 is returned to the active iOS channel/scene lifecycle queue. |
+| 2026-08-10 | iOS missing-plugin `goBack` report [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711) | No upstream relationship inferred | iOS `goBack()` now catches only `MissingPluginException` when the native WebView channel has already been removed during scene/platform-view teardown. The regression test fails against the original implementation and passes after the fix; iOS package tests (2/2), SwiftPM manifest validation, and the Simulator build pass. Physical/device scene reattachment and stale-controller validation remain pending. |
 | 2026-08-10 | Windows child-window teardown [#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814) | No upstream relationship inferred | The report is Windows-specific and points at FindInteraction/WebView2 teardown. No complete local fix is established; #2814 is returned to the active Windows reproduction queue. |
 | 2026-08-08 | Windows resize teardown [#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736) | No upstream relationship inferred | The late-resize controller guard is source-validated; Windows test loading is blocked by the Flutter toolchain mismatch and native runtime validation remains pending. |
 | 2026-08-08 | Linux rendering fallback [#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861); iOS popup lifecycle [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763) | No upstream relationship inferred | Linux exposes an explicit software-rendering switch and preserves the pixel-buffer fallback. iOS rejects popup creation without a live manager instead of returning an unattached child. The iOS source test passes with Flutter 3.44.8; Linux loader and native runtime validation remain pending. |

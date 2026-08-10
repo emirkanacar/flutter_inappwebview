@@ -2145,7 +2145,13 @@ class IOSInAppWebViewController extends PlatformInAppWebViewController
   @override
   Future<void> goBack() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    await channel?.invokeMethod('goBack', args);
+    try {
+      await channel?.invokeMethod('goBack', args);
+    } on MissingPluginException {
+      // The native channel can disappear while a scene or platform view is
+      // being torn down. A stale goBack call has no result to return and must
+      // not surface a MissingPluginException to the host application.
+    }
   }
 
   @override
