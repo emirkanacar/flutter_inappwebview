@@ -314,8 +314,9 @@ reported as upstream-closed:
 - [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831):
   the installed WebKit SDK declares the public geolocation decision delegate
   at iOS 27.0, not iOS 26.0. The iPhone 17 Pro iOS 26.2 diagnostic confirms
-  `callbackOrigin=null` with a secure HTTPS page, while the iOS 27 Simulator
-  receives the Dart callback and completes the deny path. iOS 26 prompt
+  `callbackOrigin=null` with a secure HTTPS page, while the fresh 2026-08-10
+  iOS 27 Simulator run receives the Dart callback and completes the deny path.
+  iOS 26 prompt
   button behavior has no public Forge-owned decision hook; private WebKit APIs
   are not an acceptable plugin fix, so the record is tracked as a host boundary.
 - [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796):

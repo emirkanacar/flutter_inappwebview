@@ -214,8 +214,8 @@ default request path, and the upstream record was stale-closed on 2026-08-07.
 iOS [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)
 is now tracked as a host/platform boundary rather than runtime-pending
 implementation work. The installed WebKit SDK declares the public geolocation
-decision delegate at iOS 27.0. The iOS 27 Simulator deny-path diagnostic
-receives `https://example.com` in Dart and returns `error:1`; the iPhone 17 Pro
+decision delegate at iOS 27.0. The fresh 2026-08-10 iOS 27 Simulator deny-path
+diagnostic receives `https://example.com` in Dart and returns `error:1`; the iPhone 17 Pro
 iOS 26.2 run leaves `callbackOrigin=null` on the same secure HTTPS page. The
 iOS 26 prompt remains owned by WebKit because no public Forge decision hook is
 available; private WebKit APIs are out of scope.
