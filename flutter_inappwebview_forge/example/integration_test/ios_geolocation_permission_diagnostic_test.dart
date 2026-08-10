@@ -32,9 +32,17 @@ const _diagnosticPage = '''
 </html>
 ''';
 
+bool _isIos27OrLater() {
+  final match = RegExp(r'(\d+)').firstMatch(Platform.operatingSystemVersion);
+  final majorVersion = int.tryParse(match?.group(1) ?? '') ?? 0;
+  return majorVersion >= 27;
+}
+
 // Opt-in diagnostic for issue #2831. It deliberately denies the request from
-// Dart so the test validates the iOS 26 decision-handler bridge without
-// depending on an interactive system location prompt.
+// Dart so the test validates the iOS 27 public decision-handler bridge without
+// depending on an interactive system location prompt. iOS 26 has no public
+// WebKit decision callback, so its prompt behavior is tracked as a host
+// boundary and this bridge diagnostic is skipped there.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -108,7 +116,7 @@ void main() {
       expect(callbackOrigin, startsWith('https://example.com'));
       expect(result, 'error:1');
     },
-    skip: !_runDiagnostic || !Platform.isIOS,
+    skip: !_runDiagnostic || !Platform.isIOS || !_isIos27OrLater(),
     timeout: const Timeout(Duration(minutes: 2)),
   );
 }

@@ -229,15 +229,15 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
 
   _assert(
-    source.contains('#if compiler(>=6.2)') &&
-        source.contains('@available(iOS 26.0, *)') &&
+    source.contains('#if compiler(>=6.4)') &&
+        source.contains('@available(iOS 27.0, *)') &&
         source.contains(
           'requestGeolocationPermissionFor origin: WKSecurityOrigin',
         ) &&
         source.contains('channelDelegate.onGeolocationPermissionsShowPrompt') &&
         source.contains('var decisionHandlerCalled = false') &&
         source.contains('decisionHandler(response.allow ? .grant : .deny)'),
-    'iOS 26 geolocation permission requests are not bridged to Dart',
+    'iOS 27 geolocation permission requests are not bridged to Dart',
   );
   _assert(
     webViewDelegateSource.contains(

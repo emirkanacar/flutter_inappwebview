@@ -1866,7 +1866,7 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
             'WKUIDelegate.webView(_:requestGeolocationPermissionFor:initiatedByFrame:decisionHandler:)',
         apiUrl:
             'https://developer.apple.com/documentation/webkit/wkuidelegate/webview(_:requestgeolocationpermissionfor:initiatedbyframe:decisionhandler:)',
-        available: '26.0',
+        available: '27.0',
       ),
     ],
   )

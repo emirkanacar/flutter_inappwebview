@@ -1,3 +1,7 @@
+## 2.1.45 - 2026-08-10
+
+- iOS: correct the public geolocation decision-handler availability for [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) to iOS 27+, keep the iOS 26 prompt path explicitly host/WebKit-owned, and update the iOS/platform-interface dependencies.
+
 ## 2.1.44 - 2026-08-10
 
 - Android: complete the local deprecation-warning compatibility pass for [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641) and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685). Legacy API 19/20 fallbacks remain intact, package-owned Android/Java deprecation diagnostics are suppressed at the native compatibility boundary, and release/provider/publish validation remains pending.

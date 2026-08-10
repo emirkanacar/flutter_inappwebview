@@ -1,3 +1,7 @@
+## 2.1.24 - 2026-08-10
+
+- Correct the geolocation decision-handler availability boundary for [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831): the public `WKUIDelegate` bridge is compiled and advertised for iOS 27+, while iOS 26 remains an Apple/WebKit-owned prompt path without a public decision callback. The iOS 27 Simulator deny-path diagnostic passes.
+
 ## 2.1.23 - 2026-08-10
 
 - iOS: tolerate a stale `goBack()` call when the native WebView channel has already been removed during scene or platform-view teardown ([#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)). Only `MissingPluginException` is treated as a teardown no-op; normal channel failures remain unchanged. Add a regression test for the missing native channel path.

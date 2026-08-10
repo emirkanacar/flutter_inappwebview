@@ -2196,8 +2196,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
     }
 
-#if compiler(>=6.2)
-    @available(iOS 26.0, *)
+    // WKUIDelegate exposes this decision callback in the iOS 27 SDK. Keep the
+    // witness out of older compiler/SDK builds, where iOS 26 WebKit owns the
+    // system prompt and exposes no public Dart decision hook.
+#if compiler(>=6.4)
+    @available(iOS 27.0, *)
     public func webView(_ webView: WKWebView,
                         requestGeolocationPermissionFor origin: WKSecurityOrigin,
                         initiatedByFrame frame: WKFrameInfo,

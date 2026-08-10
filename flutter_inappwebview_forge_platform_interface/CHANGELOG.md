@@ -1,3 +1,7 @@
+## 1.1.4 - 2026-08-10
+
+- Correct the iOS availability metadata for `onGeolocationPermissionsShowPrompt` to iOS 27+, matching the public WebKit SDK declaration ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).
+
 ## 1.1.3 - 2026-08-08
 
 - Clear the default localhost server's stale `HttpServer` reference when its request stream closes or errors, so `isRunning()` reflects externally terminated servers on iOS and Android ([#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)).

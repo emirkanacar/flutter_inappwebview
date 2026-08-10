@@ -1612,7 +1612,7 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
   ///On non-secure origins geolocation requests are automatically denied.
   ///
   ///[origin] represents the origin of the web content attempting to use the Geolocation API.
-  ///On iOS 26 and later, [allow] is translated to WebKit's geolocation permission decision.
+  ///On iOS 27 and later, [allow] is translated to WebKit's geolocation permission decision.
   ///The [retain] value is preserved in the response contract, but persistence is managed by WebKit.
   ///{@endtemplate}
   ///
@@ -1629,7 +1629,7 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
             'WKUIDelegate.webView(_:requestGeolocationPermissionFor:initiatedByFrame:decisionHandler:)',
         apiUrl:
             'https://developer.apple.com/documentation/webkit/wkuidelegate/webview(_:requestgeolocationpermissionfor:initiatedbyframe:decisionhandler:)',
-        available: '26.0',
+        available: '27.0',
       ),
     ],
   )
