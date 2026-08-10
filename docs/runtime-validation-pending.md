@@ -176,8 +176,10 @@ and
 The iPhone 17 Pro iOS 26.2 Simulator completes four cycles with each pending
 async JavaScript call reaching the safe `WebView navigation started` terminal
 error after the harness begins navigation; the diagnostic now accepts both
-that result and `WebView disposed`. The API 35 `emulator-5554` does the same
-across virtual-display and hybrid composition; explicit disposal logs
+that result and `WebView disposed`. A clean iPhone 17 Pro iOS 27 Simulator run
+also completed four cycles with outcomes `[WebView navigation started, WebView
+disposed, WebView navigation started, WebView navigation started]`. The API 35
+`emulator-5554` does the same across virtual-display and hybrid composition; explicit disposal logs
 Chromium renderer exit code `-1`, but no `AndroidRuntime`, fatal, or Dart test
 failure appears. Physical iOS 17+ and Android API 33+/OEM/provider validation
 remain required, so #2654 stays in this register and the count remains 68.
