@@ -200,9 +200,11 @@ and the count remains 68.
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android
-source regression test passes, but no available device reproduces the reported
-MediaTek gralloc/surface failure; a physical MediaTek test with fullscreen
-H.264/HLS playback and network loss remains required, so the count remains 68.
+package suite passes all 49 tests on 2026-08-10, including the renderer-loss
+fullscreen regression. No available device reproduces the reported MediaTek
+gralloc/surface failure; the API 35 AVD cannot stand in for that GPU/provider
+matrix, and a physical MediaTek test with fullscreen H.264/HLS playback and
+network loss remains required, so the count remains 68.
 
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation

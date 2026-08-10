@@ -214,7 +214,8 @@ has detached-view and stale-runtime guards. Android fullscreen surface report
 [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now also restores fullscreen state from `onRenderProcessGone` before forwarding
 renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
-fallback. All three remain runtime pending until the affected physical-device
+fallback. The Android package suite passes all 49 tests on 2026-08-10, but the
+API 35 AVD cannot validate the reported MediaTek gralloc path. All three remain runtime pending until the affected physical-device
 matrices pass. The API 35 IME diagnostic now passes for virtual-display and
 hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
 remains pending. The #2654 physical iOS 17+ and Android API 33+/OEM renderer
