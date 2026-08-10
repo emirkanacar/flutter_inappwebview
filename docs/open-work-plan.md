@@ -137,11 +137,12 @@ register, so #2787 remains validation-pending.
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
 now prioritizes `shouldInterceptRequest` and Service Worker interception on the
 main looper, removes timed-out queued dispatches, and ignores late callback
-results. The API 35 diagnostic also exposed and fixed a Kotlin overload
+results. The fresh 2026-08-10 API 35 diagnostic also exposed and fixed a Kotlin overload
 recursion in `injectDeferredObject` that caused `OutOfMemoryError` during rapid
 navigation; Android 1.0.34 calls the platform `WebView.evaluateJavascript`
-overload directly. Source tests and the API 35/WebView 124 diagnostic pass, but
-physical Android 10/11 OEM/provider and back/forward validation remain in the
+overload directly. Source tests and the API 35/WebView 124 diagnostic pass with
+no app `AndroidRuntime`, fatal, ANR, or OOM log, but physical Android 10/11
+OEM/provider and back/forward validation remain in the
 runtime register, so the active/runtime counts do not change.
 
 Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
