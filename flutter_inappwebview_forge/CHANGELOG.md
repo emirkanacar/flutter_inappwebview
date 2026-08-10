@@ -1,3 +1,8 @@
+## 2.1.42 - 2026-08-10
+
+- Android: preserve activity results owned by other Flutter plugins while an InAppBrowser is open ([#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797)); unrelated results are no longer consumed by the WebView file chooser. Add focused coverage for the Android internal-storage path-handler serialization fix ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).
+- Update the root dependency to Android 1.0.39.
+
 ## 2.1.41 - 2026-08-10
 
 - Android: harden cold-start WebView provider initialization for [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) with a bounded startup fallback while preserving bridge and document-start registration retries. The API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start cycles; physical, headless, and release/provider validation remains pending.
@@ -189,7 +194,7 @@
 
 ## 2.1.9 - 2026-08-08
 
-- Android: snapshot activity-result listeners before dispatch to make registration and teardown callbacks mutation-safe ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).
+- Android: snapshot InAppBrowser activity-result listeners before dispatch to make registration and teardown callbacks mutation-safe (internal lifecycle hardening).
 - Windows: avoid calling WebView2 bounds APIs after the browser controller has been released during resize/teardown ([#2736](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2736)).
 - Update root dependencies to Android 1.0.16 and Windows 1.0.6.
 

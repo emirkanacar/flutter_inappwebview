@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_inappwebview_forge_android/flutter_inappwebview_forge_android.dart';
+import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
 File _sourceFile(String relativePath) {
   final candidates = [
@@ -11,6 +13,8 @@ File _sourceFile(String relativePath) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('Android resource interception has bounded synchronous backpressure', () {
     final clientSource = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
@@ -56,6 +60,51 @@ void main() {
       ).readAsStringSync();
 
       expect(source, contains('activityResultListeners.toList()'));
+    },
+  );
+
+  test('Android file chooser does not consume unrelated activity results', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    final callbackSource = source.substring(
+      source.indexOf('override fun onActivityResult('),
+      source.indexOf('private fun getSelectedFiles('),
+    );
+
+    expect(
+      callbackSource,
+      contains(
+        'if (filePathCallback == null && filePathCallbackLegacy == null) {',
+      ),
+    );
+    expect(callbackSource, contains('return false'));
+    expect(callbackSource, contains('requestCode != PICKER'));
+    expect(callbackSource, contains('requestCode != PICKER_LEGACY'));
+  });
+
+  test(
+    'Android internal storage path handler serializes its base fields once',
+    () {
+      final handler = AndroidInternalStoragePathHandler(
+        PlatformInternalStoragePathHandlerCreationParams(
+          const PlatformPathHandlerCreationParams(path: '/internal/'),
+          directory: '/data/user/0/example/files',
+        ),
+      );
+
+      expect(handler.toMap(), containsPair('path', '/internal/'));
+      expect(
+        handler.toMap(),
+        containsPair('type', 'InternalStoragePathHandler'),
+      );
+      expect(
+        handler.toMap(),
+        containsPair('directory', '/data/user/0/example/files'),
+      );
+
+      handler.dispose();
     },
   );
 

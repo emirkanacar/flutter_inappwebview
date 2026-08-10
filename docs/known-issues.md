@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-10
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 69 issue records have local implementations or mitigations awaiting real runtime validation, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 42 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 66 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, and #2796 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 44 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,10 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 69 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 66 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 13 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 42 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 44 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -44,9 +45,21 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 **Local status:** Implemented and source-validated; the iOS 27 Simulator deny path is validated, while physical iOS 26 runtime validation remains pending. **Affected scope:** iOS/WebKit system geolocation prompt. **Impact:** the upstream report says the native location dialog appears but its buttons cannot be tapped. The iOS 26 SDK adds `WKUIDelegate.webView(_:requestGeolocationPermissionFor:initiatedByFrame:decisionHandler:)`; the plugin previously did not implement it, so the existing Dart `onGeolocationPermissionsShowPrompt` callback could not decide the WebKit request. **Fix:** iOS 26+ now forwards the origin through the existing channel callback, maps `allow` to `WKPermissionDecision.grant`/`.deny`, calls the decision handler once, and safely denies missing/malformed responses. Platform-interface capability metadata now marks the callback as iOS 26+; iOS source tests, platform-interface tests, and the Xcode 27 iOS example build pass. The opt-in HTTPS diagnostic passes on the iOS 27 Simulator with the Dart callback receiving `https://example.com` and returning `error:1`. Fresh iOS 26.0 and 26.2 Simulator runs build successfully but leave `callbackOrigin=null` and the DOM result unset, so they are recorded as Simulator/WebKit evidence rather than proof of a bridge failure. On the iPhone 17 Pro iOS 26.2 Simulator, granting location with `simctl privacy` produces `granted` without invoking the Dart callback, while revoking it leaves the request pending; neither state exercises the interactive system prompt. **Required evidence:** run the minimal HTTPS geolocation page on a physical iOS 26 device and verify grant/deny, repeat requests, active/inactive scenes, popup presentation, dismissal, and background/foreground transitions.
 
-#### #2814, #2797, #2711, #2709 - Android activity-result listener lifecycle
+#### #2797 - Android InAppBrowser activity-result ownership
 
-**Local status:** Implemented and source-validated; Android activity/provider validation pending. **Affected package:** Android InAppBrowser activity result dispatch. **Impact:** a listener unregistering itself during callback dispatch could mutate the active listener list and invalidate iteration or skip later callbacks. **Fix:** dispatch uses a snapshot of the listener list, preserving callback ownership while allowing safe registration teardown. **Required evidence:** activity result flows across create, rotate, detach, reattach, and dispose transitions.
+**Local status:** Implemented and source-validated; Android activity/provider validation pending. **Affected package:** Android `InAppWebViewChromeClient` and `InAppBrowserActivity`. **Impact:** the file chooser listener could return `true` with no active chooser or clear a pending chooser for an unrelated request code, allowing it to consume another plugin's activity result. **Fix:** the ChromeClient now returns `false` for unclaimed or unknown results; only picker request codes clear file callbacks, and browser dispatch continues to iterate a snapshot of its listener list. **Required evidence:** keep an InAppBrowser foreground while a permission/activity-result plugin completes a request, then cover file chooser cancel/capture flows on Android API 35/36 and OEM providers.
+
+#### #2709 - Android internal-storage path-handler serialization
+
+**Local status:** Resolved locally; source and focused Dart regression tests pass; no native runtime gate. **Affected package:** Android Dart asset-loader API. **Impact:** `AndroidInternalStoragePathHandler.toMap()` could recursively call itself and overflow the stack. **Fix:** the override calls `super.toMap()` once and adds `directory`; the regression test verifies the base fields and directory are serialized without recursion.
+
+#### #2711 - iOS missing-plugin error from a stale `goBack()` call
+
+**Local status:** Active reproduction; no local resolution claimed. **Affected package:** iOS platform-view channel and scene/engine lifecycle. **Impact:** the upstream report contains a production `MissingPluginException` for `goBack` on the WebView channel, affecting a reported subset of users after navigation/back handling. **Current evidence:** the repository has no deterministic reproduction or issue-specific source fix yet. **Required evidence:** reproduce with `PopScope`, scene background/foreground, platform-view removal/recreation, and stale-controller calls; capture channel registration, scene attachment, and controller disposal ordering before changing the API contract.
+
+#### #2814 - Windows child-window teardown
+
+**Local status:** Active reproduction; no local resolution claimed. **Affected package:** Windows WebView2/FindInteraction teardown. **Impact:** closing a child window in the reported multi-window setup exits the host process, with logs pointing at `FindInteractionController` and WebView2 environment teardown. **Current evidence:** the report is Windows-specific and unrelated to Android activity-result dispatch. **Required evidence:** reproduce on Windows 11 with the reported multi-window stack, isolate the FindInteraction controller, and capture a native crash/runtime trace before implementing a teardown change.
 
 #### #2736 - Windows InAppBrowser resize after teardown
 
@@ -226,7 +239,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-69 locally implemented or mitigated issue records and three PR-only records.
+66 locally implemented or mitigated issue records and three PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 

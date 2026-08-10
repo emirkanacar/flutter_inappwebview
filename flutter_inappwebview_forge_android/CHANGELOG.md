@@ -1,3 +1,8 @@
+## 1.0.39 - 2026-08-10
+
+- Preserve Android activity results owned by other Flutter plugins for [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797): the WebView file chooser now returns `false` when no chooser is active or when the request code is unrelated, and only clears callbacks for handled picker results.
+- Add a regression test for the Android internal-storage path-handler serialization fix in [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709). The pure Dart path now calls `super.toMap()` once and requires no device runtime gate.
+
 ## 1.0.38 - 2026-08-10
 
 - Harden Android cold-start initialization for [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849): if an asynchronous WebView provider startup callback remains pending, the first platform-view load now continues after a bounded timeout and uses the existing native bridge/document-start retry path. The API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start cycles; physical, headless, and release/provider validation remains pending.
@@ -108,7 +113,7 @@
 
 ## 1.0.16 - 2026-08-08
 
-- Snapshot Android activity-result listeners before dispatch so a listener can unregister itself without invalidating the iteration ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814), [#2797](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2797), [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711), [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)).
+- Android: snapshot InAppBrowser activity-result listeners before dispatch so a listener can unregister itself without invalidating the iteration (internal lifecycle hardening).
 
 ## 1.0.15 - 2026-08-08
 

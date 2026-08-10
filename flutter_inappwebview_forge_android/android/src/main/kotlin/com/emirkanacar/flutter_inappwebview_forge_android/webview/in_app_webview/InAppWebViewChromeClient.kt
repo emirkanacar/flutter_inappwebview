@@ -741,7 +741,13 @@ open class InAppWebViewChromeClient(
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
     if (filePathCallback == null && filePathCallbackLegacy == null) {
-      return true
+      // Do not consume results owned by another Flutter plugin.
+      return false
+    }
+
+    if (requestCode != PICKER && requestCode != PICKER_LEGACY) {
+      // Keep a pending file chooser alive while another activity result is routed.
+      return false
     }
 
     // Use the captured output URI when the camera activity does not return a filename.
