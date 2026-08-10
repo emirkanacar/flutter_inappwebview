@@ -152,6 +152,13 @@ tests and the native debug compilation/AAR build pass. Android 10/provider and
 Play Console validation remain in the runtime register, so the 68 runtime-
 pending and 41 active counts are unchanged.
 
+Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
+has a fresh 2026-08-10 API 35 AVD diagnostic pass for both virtual-display and
+hybrid composition: the Flutter keyboard reopens after WebView clear/dispose
+with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. Android
+10 physical-device and OEM/provider validation remain in the separate runtime
+register, so the 68 runtime-pending and 41 active counts are unchanged.
+
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 is source-hardened and remains outside this active plan in the runtime register.
 The existing API 35/WebView 124 diagnostic passes only with the documented

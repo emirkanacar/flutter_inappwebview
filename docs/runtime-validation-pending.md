@@ -151,12 +151,13 @@ The display-size and OEM-provider gate therefore remains pending.
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 now has an opt-in IME lifecycle diagnostic at
 [`android_ime_lifecycle_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_ime_lifecycle_diagnostic_test.dart).
-On the API 35 AVD, both virtual-display and hybrid composition cycles focus
-the HTML input, clear and dispose the WebView, then reopen the Flutter keyboard
-with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
-explicit WebView disposal also logs Chromium renderer exit code `-1`, but no
-AndroidRuntime, fatal, or IME NPE appears; Android 10 and OEM validation remain
-required.
+On 2026-08-10, a clean API 35 AVD run passed both virtual-display and hybrid
+composition cycles: each focused the HTML input, cleared and disposed the
+WebView, then reopened the Flutter keyboard with
+`keyboardInsetAfterDispose=24.0` and an active Flutter focus node. No
+AndroidRuntime, fatal, or IME NPE appeared in the run. Android 10 and OEM
+validation remain required, so this record stays in the register and the count
+remains 68.
 
 iOS [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)
 now has a targeted Dart regression test that reproduces the missing native
