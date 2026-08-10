@@ -132,11 +132,13 @@ Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2
 now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic
 at
 [`flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart).
-The API 35 `emulator-5554` with WebView 124 passes the flow with
-`insetBeforeFocus=0.0`, `insetAfterFocus=24.0`, and an active Flutter focus
-node; ADB IME history records `SHOW_SOFT_INPUT` on the host activity. Samsung
-One UI/WebView 150+ and physical-device validation remain required, so the
-record stays in this register and the count remains 68.
+The existing API 35/WebView 124 pass uses the documented
+`SystemChannels.textInput.show` workaround, so it does not independently prove
+the native fullscreen restoration path. Two workaround-free attempts lost the
+Flutter VM service and then reported `emulator-5554` offline before the keyboard
+assertion; no AndroidRuntime, ANR, or app crash was captured. Samsung One
+UI/WebView 150+ and physical-device validation remain required, so the record
+stays in this register and the count remains 68.
 
 Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
 now has an opt-in display-size recovery diagnostic at
@@ -232,13 +234,16 @@ exit; Android 10 and affected OEM/provider lock/unlock validation remain
 required and the count remains 68.
 
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
-is source-fixed in iOS 2.1.20. The opt-in diagnostic passes on the iPhone 17 Pro
-iOS 26.2 Simulator (`38B5237D-C667-489A-A7EA-F3B1CAAA0119`): the keyboard
-transition measures `visualViewport.height` as `778px -> 435.44px -> 778px`,
-with `visualViewport.scale` returning from `0.939` to `1.0` and the page offset
-returning to zero. The fix retains the pre-keyboard `UIScrollView` zoom/offset
-and refreshes the final frame/layout after dismissal. Physical iOS 17/device
-and native `WKWebView` comparison validation remain required.
+is source-fixed in iOS 2.1.20. The previously recorded iPhone 17 Pro iOS 26.2
+Simulator pass measured `visualViewport.height` as `778px -> 435.44px ->
+778px`, with `visualViewport.scale` returning from `0.939` to `1.0`. Three clean
+DDS reruns on the current host are inconclusive: iOS 26.2 reports zero WebKit
+viewport metrics after loading, while iOS 27 reaches the initial `778px`
+viewport but does not expose a software-keyboard transition (`keyboardDelta=0`).
+CoreSimulatorService connection failures were also observed. The fix retains
+the pre-keyboard `UIScrollView` zoom/offset and refreshes the final frame/layout
+after dismissal. Physical iOS 17/device and native `WKWebView` comparison
+validation remain required.
 
 ## Issue register
 

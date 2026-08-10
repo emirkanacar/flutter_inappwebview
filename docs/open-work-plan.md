@@ -126,11 +126,13 @@ manifest checks pass, and the iOS example builds with Xcode 27; exact Xcode
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 now retains the WebView's pre-keyboard `UIScrollView` zoom scale and content
 offset, then refreshes the final platform-view frame/layout after dismissal so
-WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. The
-opt-in diagnostic passes on the iPhone 17 Pro iOS 26.2 Simulator
-(`778px -> 435.44px -> 778px`, scale `1.0 -> 0.939 -> 1.0`); physical iOS 17,
-device, and native `WKWebView` comparison validation remain in the runtime
-register, so #2787 is resolved locally but still validation-pending.
+WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. A
+previous iPhone 17 Pro iOS 26.2 run passed
+(`778px -> 435.44px -> 778px`), but current clean DDS reruns are inconclusive:
+iOS 26.2 reports zero viewport metrics and iOS 27 does not expose a software
+keyboard transition. Physical iOS 17, device, and native `WKWebView`
+comparison validation remain in the runtime register, so #2787 remains
+validation-pending.
 
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
 now prioritizes `shouldInterceptRequest` and Service Worker interception on the
@@ -151,10 +153,11 @@ Play Console validation remain in the runtime register, so the 68 runtime-
 pending and 41 active counts are unchanged.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
-is also source-validated and remains outside this active plan in the runtime
-register. The API 35/WebView 124 diagnostic covers a tapped HTML5 fullscreen
-request, exit, and a separate Flutter `TextField`; it passes after the
-fullscreen input-connection restoration path runs. Samsung One UI/WebView
+is source-hardened and remains outside this active plan in the runtime register.
+The existing API 35/WebView 124 diagnostic passes only with the documented
+`SystemChannels.textInput.show` workaround; two workaround-free attempts lost
+the Flutter VM service and then reported the AVD offline before the keyboard
+assertion. This is not independent native runtime proof. Samsung One UI/WebView
 150+ and physical-device validation remain required, so the 68 runtime-pending
 count is unchanged.
 

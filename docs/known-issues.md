@@ -381,7 +381,7 @@ The macOS `WKWebView` now receives the initial and runtime `ContextMenu` configu
 
 ### #2878 — Keyboard remains unavailable after exiting HTML5 fullscreen
 
-**Status:** Source-fixed in Android 1.0.34 (root 2.1.35); the API 35/WebView 124 diagnostic passes, while the affected Samsung/WebView combinations remain pending. **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
+**Status:** Source-hardened in Android 1.0.34 (root 2.1.35); workaround-free runtime validation is still pending. **Impact:** The soft keyboard stops opening throughout the host app until the app is backgrounded/resumed or restarted. **Confidence:** Strong report.
 
 The issue reproduces after `onShowCustomView`/`onHideCustomView` fullscreen cycles with hybrid composition. The native path removes the custom view, restores system UI/orientation, invokes `onExitFullscreen`, and clears fullscreen state in `InAppWebViewChromeClient.onHideCustomView()`. The repository also has custom IME proxy/focus handling in `InputAwareWebView.kt`. Together, this points to an IME/window association that is not restored when the fullscreen view is detached.
 
@@ -390,12 +390,13 @@ The reported workaround is invoking Flutter’s `TextInput.show` after exiting f
 An opt-in diagnostic is available at
 [`flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart).
 It uses a real HTML5 fullscreen request from a tapped page button, exits through
-the page API, then focuses a separate Flutter `TextField`. On the API 35
-`emulator-5554` with WebView 124, it passed with
-`insetBeforeFocus=0.0`, `insetAfterFocus=24.0`, and the Flutter focus node
-active; the AVD IME history also records `SHOW_SOFT_INPUT` for the host
-`MainActivity`. This validates the source path on that provider, not the
-reported OEM matrix.
+the page API, then focuses a separate Flutter `TextField`. The existing API 35
+pass (`insetBeforeFocus=0.0`, `insetAfterFocus=24.0`) invokes
+`SystemChannels.textInput.show`, so it is not independent proof of the native
+restoration path. Two workaround-free attempts on `emulator-5554` with WebView
+124 lost the Flutter VM service and then reported the AVD offline before the
+keyboard assertion; no AndroidRuntime, ANR, or app crash was captured. This is
+a test-device/harness blocker, not a runtime validation pass.
 
 **Remaining validation:** run a real-device regression covering fullscreen → exit → text input in a different Flutter widget, especially Samsung One UI and WebView 150+.
 
@@ -646,11 +647,11 @@ The Forge implementation now only clears the keyboard-adjusted state in `keyboar
 
 ### #2787 — iOS keyboard dismissal leaves a reduced `visualViewport`
 
-**Local status:** Source-fixed in iOS 2.1.20; iOS 26.2 Simulator validated, with physical iOS 17/device validation pending. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard was dismissed, `visualViewport.height` could remain smaller than the Flutter WebView and fixed-position page elements could appear offset from the bottom. **Confidence:** Confirmed Forge-owned path with source and runtime regression coverage.
+**Local status:** Source-fixed in iOS 2.1.20; Simulator revalidation is currently blocked by keyboard/runtime conditions, with physical iOS 17/device validation pending. **Affected scope:** iOS WebKit visual viewport and Flutter platform-view geometry. **Impact:** after an HTML keyboard was dismissed, `visualViewport.height` could remain smaller than the Flutter WebView and fixed-position page elements could appear offset from the bottom. **Confidence:** Confirmed Forge-owned path with source regression coverage; current GUI evidence is inconclusive.
 
 This report is distinct from #2859. #2859 covers stale native `UIScrollView.contentInset` restoration; #2787 exposed a second state mismatch where UIKit restored the frame and inset but WebKit retained a keyboard-induced zoom scale and DOM viewport. The fix retains the pre-keyboard `zoomScale` and `contentOffset`, restores them after `keyboardDidHide`, and refreshes the final platform-view frame/layout so WebKit recalculates its visual viewport. Upstream PR #2860 remains associated with the separate #2859 inset regression.
 
-The opt-in diagnostic deliberately uses `resizeToAvoidBottomInset: false` and blurs the HTML input before hiding Flutter's text input channel. On iPhone 17 Pro Simulator `38B5237D-C667-489A-A7EA-F3B1CAAA0119` (iOS 26.2), the fixed path measures `visualViewport.height` as `778px -> 435.44px -> 778px`, restores `visualViewport.scale` from `0.939` to `1.0`, and returns the page offset to zero. The native frame is `402x778` with zero content inset after dismissal.
+The opt-in diagnostic deliberately uses `resizeToAvoidBottomInset: false` and blurs the HTML input before hiding Flutter's text input channel. A previous iPhone 17 Pro Simulator run measured `visualViewport.height` as `778px -> 435.44px -> 778px`, restored `visualViewport.scale` from `0.939` to `1.0`, and returned the page offset to zero. The native frame was `402x778` with zero content inset after dismissal; current simulator reruns are recorded below as inconclusive.
 
 **Remaining validation:** exercise HTML input focus changes, interactive dismissal, custom page zoom, and scroll-to-bottom on physical iOS 17 through the latest supported iOS release, and compare with a minimal native `WKWebView` host.
 
@@ -658,11 +659,15 @@ An opt-in integration diagnostic is available at
 [`flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_keyboard_viewport_diagnostic_test.dart).
 Run it from `flutter_inappwebview_forge/example` with
 `fvm flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/ios_keyboard_viewport_diagnostic_test.dart -d <ios-device> --dart-define=RUN_IOS_KEYBOARD_VIEWPORT_DIAGNOSTIC=true`.
-The iPhone 17 Pro iOS 26.2 run uses the WebKit focus fallback after the
-synthetic platform-view tap, opens the software keyboard, and passes the full
-show/blur/hide cycle. Flutter analysis, the iOS source test, and the Xcode
-example build pass. Physical iOS 17 runtime evidence, custom page-zoom
-coverage, and the native frame/inset comparison remain required.
+The previously recorded iPhone 17 Pro iOS 26.2 pass is retained as historical
+evidence, but three clean DDS reruns on the current host did not reproduce it:
+the iOS 26.2 run reported zero WebKit viewport metrics after loading, while the
+iOS 27 Simulator reached the initial `778px` viewport but did not expose a
+software-keyboard transition (`keyboardDelta=0`). CoreSimulatorService also
+reported intermittent connection failures during this validation. No product
+crash was captured, so this remains a runtime/harness blocker rather than a
+regression verdict. Physical iOS 17 runtime evidence, custom page-zoom coverage,
+and the native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 
