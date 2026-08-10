@@ -1,3 +1,8 @@
+## 2.1.41 - 2026-08-10
+
+- Android: harden cold-start WebView provider initialization for [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849) with a bounded startup fallback while preserving bridge and document-start registration retries. The API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start cycles; physical, headless, and release/provider validation remains pending.
+- Update the root dependency to Android 1.0.38.
+
 ## 2.1.40 - 2026-08-10
 
 - Android: harden permission-request and permission-cancellation MethodChannel

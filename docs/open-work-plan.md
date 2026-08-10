@@ -143,6 +143,15 @@ request/cancellation maps and non-list resources containers, while filtering
 unknown resource entries without changing the public callback contract. Its
 API/provider matrix remains in the runtime register, so the 69 runtime-pending
 count is unchanged.
+
+Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
+and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
+now also release the first-load gate after a bounded WebView provider-startup
+timeout, while preserving bridge and document-start registration retries. The
+API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start installs
+with `onWebViewCreated`, `onLoadStop`, and both bridge checks succeeding. Physical,
+headless, and release/provider validation remains in the runtime register, so the
+69 runtime-pending count is unchanged.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack

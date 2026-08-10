@@ -117,6 +117,21 @@ void main() {
   });
 
   test(
+    'Android startup coordinator cannot block the first load indefinitely',
+    () {
+      final source = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        'WebViewStartupCoordinator.kt',
+      ).readAsStringSync();
+
+      expect(source, contains('STARTUP_TIMEOUT_MS'));
+      expect(source, contains('mainHandler.postDelayed'));
+      expect(source, contains('complete(generation, timedOut = true)'));
+      expect(source, contains('bounded native registration retries'));
+    },
+  );
+
+  test(
     'Android WebStorage origin callbacks ignore malformed provider entries',
     () {
       final source = _sourceFile(

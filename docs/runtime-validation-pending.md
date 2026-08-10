@@ -40,6 +40,14 @@ including permission-request and cancellation maps plus the resources container;
 the remaining gate is the Android API/provider matrix listed in
 [`known-issues.md`](known-issues.md). The count remains 69.
 
+Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
+and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
+now include a bounded provider-startup fallback in Android 1.0.38 and an opt-in
+profile/AOT cold-start diagnostic. Four clean API 35/WebView 124 installs pass
+`onWebViewCreated`, `onLoadStop`, and the JavaScript bridge/document-start checks.
+Physical, headless, and release/provider coverage remains required, so the record
+stays in this register and the count remains 69.
+
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for nested InAppBrowser and Chrome
 Custom Tabs activity extras. The package test suite and opt-in diagnostic pass,

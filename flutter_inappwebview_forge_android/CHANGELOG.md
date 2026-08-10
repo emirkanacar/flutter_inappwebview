@@ -1,3 +1,7 @@
+## 1.0.38 - 2026-08-10
+
+- Harden Android cold-start initialization for [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843) and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849): if an asynchronous WebView provider startup callback remains pending, the first platform-view load now continues after a bounded timeout and uses the existing native bridge/document-start retry path. The API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start cycles; physical, headless, and release/provider validation remains pending.
+
 ## 1.0.37 - 2026-08-10
 
 - Harden Android permission-request and permission-cancellation MethodChannel

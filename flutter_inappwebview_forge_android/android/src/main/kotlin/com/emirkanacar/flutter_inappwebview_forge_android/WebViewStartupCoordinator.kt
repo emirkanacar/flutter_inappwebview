@@ -18,6 +18,7 @@ import java.util.concurrent.Executors
  */
 internal object WebViewStartupCoordinator {
     private const val LOG_TAG = "WebViewStartup"
+    private const val STARTUP_TIMEOUT_MS = 5_000L
 
     private val mainHandler = Handler(Looper.getMainLooper())
     private var backgroundExecutor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -82,6 +83,15 @@ internal object WebViewStartupCoordinator {
             }
         } ?: return
 
+        // Some WebView providers can leave the asynchronous startup callback pending while
+        // Chromium is still bringing up its browser process. Do not let that hold the first
+        // platform-view load forever; native bridge and document-start registration already
+        // have bounded retries for this provider state.
+        mainHandler.postDelayed(
+            { complete(generation, timedOut = true) },
+            STARTUP_TIMEOUT_MS
+        )
+
         try {
             val config = WebViewStartUpConfig.Builder(executor)
                 .setShouldRunUiThreadStartUpTasks(true)
@@ -105,7 +115,7 @@ internal object WebViewStartupCoordinator {
         }
     }
 
-    private fun complete(generation: Long) {
+    private fun complete(generation: Long, timedOut: Boolean = false) {
         val callbacks = synchronized(lock) {
             if (disposed || generation != startupGeneration || startupCompleted) {
                 return
@@ -114,6 +124,14 @@ internal object WebViewStartupCoordinator {
             val result = pendingCallbacks.toList()
             pendingCallbacks.clear()
             result
+        }
+
+        if (timedOut) {
+            Log.w(
+                LOG_TAG,
+                "WebView provider startup did not complete within ${STARTUP_TIMEOUT_MS}ms; " +
+                    "continuing with bounded native registration retries."
+            )
         }
 
         callbacks.forEach { callback ->
