@@ -259,11 +259,16 @@ package suite passes all 49 tests on 2026-08-10, including the renderer-loss
 fullscreen regression. The normal fullscreen/exit path passes on the 2026-08-11
 Samsung A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789, WebView
 150.0.7871.181), but the upstream Vimeo overlay/offline reproducer and forced
-MediaTek gralloc/surface failure were not reproduced. The API 35 AVD and this
-normal A16 path cannot stand in for that GPU/provider matrix; a physical
-MediaTek test using `https://iframely.com/domains/vimeo`, fullscreen playback,
-network loss, overlay presentation, and renderer teardown remains required, so
-the count stays 68.
+MediaTek gralloc/surface failure were not reproduced. On 2026-08-12, the
+opt-in [`android_renderer_fullscreen_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_renderer_fullscreen_diagnostic_test.dart)
+enters the IFramely-generated direct Vimeo iframe in hybrid composition; after
+Wi-Fi is disabled during fullscreen, a black/loading surface is observed, but
+`onExitFullscreen` is delivered, `onRenderProcessGone` is not delivered,
+`fullscreenState=false`, and the test exits without an app crash or ANR. The
+API 35 AVD and this normal A16 path cannot stand in for that GPU/provider
+matrix; a physical MediaTek test using `https://iframely.com/domains/vimeo`,
+network loss, banner/popup presentation, and renderer teardown remains
+required, so the count stays 68.
 
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation

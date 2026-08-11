@@ -250,10 +250,13 @@ has detached-view and stale-runtime guards. Android fullscreen surface report
 now also restores fullscreen state from `onRenderProcessGone` before forwarding
 renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
 fallback. The Android package suite passes all 49 tests on 2026-08-10, and the
-normal fullscreen/exit path passes on the MediaTek A16; the upstream Vimeo
-overlay/offline reproducer and forced MediaTek gralloc/renderer-loss path were
-not reproduced. All three remain runtime pending until the affected
-physical-device matrices pass. The A16 IME
+normal fullscreen/exit path passes on the MediaTek A16. On 2026-08-12, the
+opt-in direct Vimeo iframe diagnostic enters hybrid fullscreen on the A16; after
+Wi-Fi is disabled, a black/loading surface is observed, but `onExitFullscreen`
+is delivered, `onRenderProcessGone` is not delivered, and the test exits with
+no app crash or ANR. The upstream banner/popup and forced MediaTek
+gralloc/renderer-loss path were not reproduced. All three remain runtime
+pending until the affected physical-device matrices pass. The A16 IME
 diagnostic also passes for virtual-display and hybrid composition WebViews
 after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
 physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
