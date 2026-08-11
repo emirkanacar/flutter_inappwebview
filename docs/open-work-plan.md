@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-11
+Last reviewed: 2026-08-12
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
