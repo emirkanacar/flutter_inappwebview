@@ -453,6 +453,7 @@ void main() {
     expect(deleteCookies, isNot(contains('manager.flush()')));
     expect(deleteAllCookies, isNot(contains('manager.flush()')));
     expect(explicitFlush, contains('manager.flush()'));
+    expect(explicitFlush, contains('result.success(true)'));
   });
 
   test('Android callback handler is explicitly bound to the main looper', () {

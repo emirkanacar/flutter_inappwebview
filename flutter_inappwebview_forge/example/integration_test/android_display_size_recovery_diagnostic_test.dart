@@ -78,7 +78,7 @@ void main() {
     'Android #2721 display-size change restores WebView geometry',
     (WidgetTester tester) async {
       final controllerCompleter = Completer<InAppWebViewController>();
-      final pageLoaded = Completer<void>();
+      var created = false;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -86,10 +86,10 @@ void main() {
             body: InAppWebView(
               key: _webViewKey,
               initialData: InAppWebViewInitialData(data: _diagnosticPage),
-              onWebViewCreated: controllerCompleter.complete,
-              onLoadStop: (controller, url) {
-                if (!pageLoaded.isCompleted) {
-                  pageLoaded.complete();
+              onWebViewCreated: (controller) {
+                created = true;
+                if (!controllerCompleter.isCompleted) {
+                  controllerCompleter.complete(controller);
                 }
               },
             ),
@@ -97,9 +97,15 @@ void main() {
         ),
       );
 
+      for (var attempt = 0; attempt < 100 && !created; attempt++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(created, isTrue);
+      if (!created) {
+        return;
+      }
       final controller = await controllerCompleter.future;
-      await pageLoaded.future;
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(seconds: 2));
 
       final initialGeometry = await _readGeometry(controller);
       final initialFlutterSize = tester.getSize(find.byKey(_webViewKey));

@@ -415,6 +415,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
                 CookieSyncManager.createInstance(context).sync()
             }
         }
+        result.success(true)
     }
 
     override fun dispose() {

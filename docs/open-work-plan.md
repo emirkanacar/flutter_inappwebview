@@ -57,7 +57,9 @@ now has an idempotent native WebView geometry refresh for display-size changes
 and visibility recovery; its Android 16/API 36 and OEM provider validation is
 tracked in the runtime register. The opt-in display-size diagnostic starts on
 the API 35 AVD, but host `wm size` change/reset currently disconnects that AVD
-before the geometry assertion, so no runtime count changes.
+before the geometry assertion. The same reversible override on the 2026-08-11
+Samsung A16 restarts the example activity/VM service before geometry can be
+read; no app crash/ANR is captured, so no runtime count changes.
 
 Android [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)
 is source-validated with a focused Dart serialization test and has no device or
@@ -70,11 +72,13 @@ was previously grouped under an unrelated Android listener note and is back in
 the active reproduction queue with its actual platform scope.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
-now has Android 35 AVD happy-path evidence for the recursive activity-extra
-codec across InAppBrowser and Chrome Custom Tabs, including lifecycle callbacks.
-Malformed external extras, restore/rotation, and physical/provider coverage
-remain in the runtime register; therefore the 68 runtime-pending count includes
-this release-gate record.
+now has Android 35 AVD and 2026-08-11 Samsung A16 happy-path evidence for the
+recursive activity-extra codec across InAppBrowser and Chrome Custom Tabs,
+including lifecycle callbacks and the expected history URL. Samsung logs one
+system `ActivityManager` IntentRedirect Hardening warning for the Custom Tabs
+intent, but no app crash or ANR. Malformed external extras, restore/rotation,
+and physical/provider coverage remain in the runtime register; therefore the
+68 runtime-pending count includes this release-gate record.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
 and its related upstream [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758)
@@ -150,36 +154,43 @@ results. The fresh 2026-08-10 API 35 diagnostic also exposed and fixed a Kotlin 
 recursion in `injectDeferredObject` that caused `OutOfMemoryError` during rapid
 navigation; Android 1.0.34 calls the platform `WebView.evaluateJavascript`
 overload directly. Source tests and the API 35/WebView 124 diagnostic pass with
-no app `AndroidRuntime`, fatal, ANR, or OOM log, but physical Android 10/11
-OEM/provider and back/forward validation remain in the
-runtime register, so the active/runtime counts do not change.
+no app `AndroidRuntime`, fatal, ANR, or OOM log. The 2026-08-11 A16
+(`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181) run also passes 24
+rapid navigations with `finalLoaded=true`, the `final` DOM marker, and 31
+interception callbacks; only Chromium tile-memory warnings appear. Physical
+Android 10/11 OEM/provider and back/forward validation remain in the runtime
+register, so the active/runtime counts do not change.
 
 Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
-is source-hardened in Android 1.0.42. API 21+ cookie mutations no longer call
+is source-fixed in Android 1.0.43. API 21+ cookie mutations no longer call
 the synchronous `CookieManager.flush()` after asynchronous updates, while the
-explicit `flush` API remains available. The Android package suite passes 49/49
-tests and the native debug compilation/AAR build pass. Android 10/provider and
-Play Console validation remain in the runtime register. The isolated API 35
-Cookie Manager drive attempt installed the test but Flutter 3.44.8 failed in
-VM-service setup (`registerService: (-32000) Service connection disposed`) before
-assertions; no app `AndroidRuntime`, fatal, or ANR appeared. The 68 runtime-
-pending and 41 active counts are unchanged.
+explicit `flush` API now completes its MethodChannel result. The Android package
+suite passes 48/48 tests and the native debug compilation/AAR build pass. The
+2026-08-11 A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789, WebView
+150.0.7871.181) cookie diagnostic passes 10/10 mutation-and-explicit-flush
+cycles, records an empty final cookie list, and emits no app `AndroidRuntime`,
+fatal, or ANR; the filtered log contains only Chromium tile-memory warnings.
+Android 10/provider and Play Console validation remain in the runtime register,
+so the 68 runtime-pending and 41 active counts are unchanged.
 
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has a fresh 2026-08-10 API 35 AVD diagnostic pass for both virtual-display and
 hybrid composition: the Flutter keyboard reopens after WebView clear/dispose
-with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. Android
-10 physical-device and OEM/provider validation remain in the separate runtime
-register, so the 68 runtime-pending and 41 active counts are unchanged.
+with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
+2026-08-11 A16 run passes both modes with `keyboardInsetAfterDispose=358.4`,
+and no AndroidRuntime, fatal, or IME NPE. Android 10 physical-device and
+OEM/provider validation remain in the separate runtime register, so the 68
+runtime-pending and 41 active counts are unchanged.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 is source-hardened and remains outside this active plan in the runtime register.
 The existing API 35/WebView 124 diagnostic passes only with the documented
-`SystemChannels.textInput.show` workaround; two workaround-free attempts lost
-the Flutter VM service and then reported the AVD offline before the keyboard
-assertion. This is not independent native runtime proof. Samsung One UI/WebView
-150+ and physical-device validation remain required, so the 68 runtime-pending
-count is unchanged.
+`SystemChannels.textInput.show` workaround; the 2026-08-11 workaround-free A16
+run (`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181) reports
+`insetBeforeFocus=0.0`, `insetAfterFocus=346.31`, and an active Flutter focus
+node with no AndroidRuntime, fatal, or ANR. Android 10/OEM and broader
+physical-device validation remain required, so the 68 runtime-pending count is
+unchanged.
 
 Android file chooser PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) is implemented locally in Android 1.0.41. The native callback boundary rejects canonicalized private-sandbox `file://` URIs from single-select, multi-select, and legacy picker results while preserving `content://` and FileProvider capture URIs. The source regression and native build are release evidence; hostile external-picker/provider validation remains a separate runtime gate, and this PR-only record does not change the issue counts above.
 
@@ -229,18 +240,23 @@ is released, but no app `AndroidRuntime`, fatal, ANR, or Dart test failure
 appears. This matches the teardown signature reported by external
 [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491),
 which is outside the supplied issue export; its exact back-button/OEM path
-remains unvalidated. Android
+remains unvalidated. The 2026-08-11 Samsung A16 disposal diagnostic completes
+four `WebView disposed` outcomes across virtual-display and hybrid composition
+with no app crash, ANR, or Dart failure; only Chromium tile-memory warnings are
+logged. Android
 IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has detached-view and stale-runtime guards. Android fullscreen surface report
 [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now also restores fullscreen state from `onRenderProcessGone` before forwarding
 renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
-fallback. The Android package suite passes all 49 tests on 2026-08-10, but the
-API 35 AVD cannot validate the reported MediaTek gralloc path. All three remain runtime pending until the affected physical-device
-matrices pass. The API 35 IME diagnostic now passes for virtual-display and
-hybrid composition WebViews after clear/dispose, but the Android 10/OEM gate
-remains pending. The #2654 physical iOS 17+ and Android API 33+/OEM renderer
-matrix also remains a release gate, so the runtime-pending count stays 68.
+fallback. The Android package suite passes all 49 tests on 2026-08-10, and the
+normal fullscreen/exit path passes on the MediaTek A16; the reported forced
+MediaTek gralloc/renderer-loss path was not reproduced. All three remain runtime
+pending until the affected physical-device matrices pass. The A16 IME
+diagnostic also passes for virtual-display and hybrid composition WebViews
+after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
+physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
+gate, so the runtime-pending count stays 68.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new
@@ -251,12 +267,11 @@ dispose cycles with exit code 0 and no `EXC_BAD_ACCESS`/fatal log. Physical iOS
 runtime-pending count is unchanged.
 
 Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
-now has an API 35 AVD lock/unlock checkpoint diagnostic. Hybrid-composition
-WebView content and URL survive a real ADB keyevent lock/unlock sequence with
-no AndroidRuntime, fatal, or renderer crash in the captured log. The Flutter
-host's DDS/golden-stream connection prevents a clean integration-test exit;
-Android 10 and OEM/provider validation therefore remain in the runtime
-register and the count stays 68.
+now has API 35 AVD and 2026-08-11 Samsung A16 lock/unlock evidence. On the A16,
+both hybrid and virtual-display composition preserve the WebView marker and URL
+through a real ADB keyevent lock/unlock sequence and exit successfully. No app
+AndroidRuntime, fatal, or renderer crash appears; Android 10 and OEM/provider
+validation remain in the runtime register and the count stays 68.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned

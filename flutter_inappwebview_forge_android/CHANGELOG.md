@@ -1,3 +1,10 @@
+## 1.0.43 - 2026-08-11
+
+- Android: complete the explicit `CookieManager.flush()` MethodChannel result
+  for [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718),
+  preventing a caller-side future from hanging after the native flush request.
+  Asynchronous cookie mutations still avoid forcing a UI-thread flush.
+
 ## 1.0.42 - 2026-08-10
 
 - Android: avoid UI-thread `CookieManager.flush()` calls after asynchronous

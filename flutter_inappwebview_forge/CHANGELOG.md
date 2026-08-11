@@ -1,3 +1,11 @@
+## 2.1.48 - 2026-08-11
+
+- Android: complete the explicit `CookieManager.flush()` MethodChannel result
+  for [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718),
+  so callers do not wait indefinitely after the native persistence request.
+  The asynchronous cookie-mutation ANR mitigation remains in place.
+- Update the root dependency to Android 1.0.43.
+
 ## 2.1.47 - 2026-08-10
 
 - Android: avoid UI-thread `CookieManager.flush()` calls after asynchronous

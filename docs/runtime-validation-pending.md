@@ -76,15 +76,23 @@ also passes four headless create/load/dispose cycles with an
 passes 6/6 on the same API 35 AVD. No app `AndroidRuntime`, ANR, or native fatal
 appears; explicit headless disposal emits Chromium renderer exit code `-1`,
 which is the known teardown signature tracked separately under external #2491.
-Physical release/R8 and provider coverage remains required, so the record stays
-in this register and the count remains 68.
+On 2026-08-11, the same cold-start and four-cycle headless checks also pass on
+the Samsung A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789,
+WebView 150.0.7871.181), with no app `AndroidRuntime`, ANR, or native fatal in
+the filtered log. Physical release/R8 and broader provider coverage remains
+required, so the records stay in this register and the count remains 68.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for nested InAppBrowser and Chrome
 Custom Tabs activity extras. The package test suite and opt-in diagnostic pass,
-including open/load/close callbacks; restore/rotation, malformed external
-extras, and physical/provider coverage remain release gates, so the record stays
-in this register and the count remains 68.
+including open/load/close callbacks. On 2026-08-11, the Samsung A16
+(`SM-A165F`, Android 16/API 36) diagnostic also passes both nested InAppBrowser
+and Custom Tabs handoffs with the expected history URL and open/load/close
+callbacks. Samsung's filtered log reports an `ActivityManager` IntentRedirect
+Hardening warning for the Custom Tabs intent, but no app `AndroidRuntime`, fatal,
+or ANR. Restore/rotation, malformed external extras, and physical/provider
+coverage remain release gates, so the record stays in this register and the
+count remains 68.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
 and upstream [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758)
@@ -118,25 +126,33 @@ overload recursion in `injectDeferredObject` was also confirmed as the direct
 source of the observed `OutOfMemoryError`; Android 1.0.34 now calls the
 platform `WebView.evaluateJavascript` overload. Android source tests and the
 API 35/WebView 124 diagnostic pass (`finalLoaded=true`, final marker `final`,
-31 interception callbacks, and no app fatal crash, ANR, or OOM in the log). Physical Android 10/11
-OEM/provider validation and broader back/forward coverage remain required, so
-the record stays in this register and the count remains 68.
+31 interception callbacks, and no app fatal crash, ANR, or OOM in the log). On
+2026-08-11, the opt-in diagnostic also passes 24 rapid navigations on the
+Samsung A16 (`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181), with
+`finalLoaded=true`, the `final` DOM marker, 31 interception callbacks, and no
+app fatal, ANR, or OOM; only Chromium tile-memory warnings were emitted.
+Physical Android 10/11 OEM/provider and broader back/forward validation remain
+required, so the record stays in this register and the count remains 68.
 
 Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
-is source-hardened in Android 1.0.42. API 21+ `setCookie`, `deleteCookie`, and
+is source-fixed in Android 1.0.43. API 21+ `setCookie`, `deleteCookie`, and
 `deleteCookies` mutations no longer call the synchronous `CookieManager.flush()`
 after queuing their asynchronous updates; the explicit `flush` API is preserved
-for callers that require it. The Android package suite passes 49/49 tests,
+for callers that require it and now completes its MethodChannel result. The Android package suite passes 48/48 tests,
 `compileDebugKotlin`, and `assembleDebug`. Android 10/provider and Play Console
 cookie-clear validation remain required. The existing remote-URL Cookie Manager
 integration test built and installed on the API 35 AVD but timed out after 60
 seconds before its assertions, with no fatal AndroidRuntime or ANR log captured.
 A fresh isolated `flutter drive` attempt on 2026-08-10 installed the same test
-but Flutter 3.44.8 crashed in VM-service setup with
+but Flutter 3.44.8 failed in VM-service setup with
 `registerService: (-32000) Service connection disposed`; the AVD log again had
-no app `AndroidRuntime`, fatal, or ANR. Neither run reached the cookie
-assertions, so this is not counted as a completed runtime gate. The record
-stays in this register and the count remains 68.
+no app `AndroidRuntime`, fatal, or ANR. The new local diagnostic does not depend
+on that remote page: on 2026-08-11 it completes 10/10 mutation and explicit-
+flush cycles on the Samsung A16 (`SM-A165F`, Android 16/API 36, MediaTek
+MT6789, WebView 150.0.7871.181), with durations from 21 to 279 ms and an empty
+final cookie list. The filtered log contains only Chromium tile-memory
+warnings. Android 10/provider and Play Console validation remain required, so
+the record stays in this register and the count remains 68.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 now has an opt-in fullscreen → exit → separate Flutter `TextField` diagnostic
@@ -144,19 +160,24 @@ at
 [`flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_fullscreen_keyboard_diagnostic_test.dart).
 The existing API 35/WebView 124 pass uses the documented
 `SystemChannels.textInput.show` workaround, so it does not independently prove
-the native fullscreen restoration path. Two workaround-free attempts lost the
-Flutter VM service and then reported `emulator-5554` offline before the keyboard
-assertion; no AndroidRuntime, ANR, or app crash was captured. Samsung One
-UI/WebView 150+ and physical-device validation remain required, so the record
-stays in this register and the count remains 68.
+the native fullscreen restoration path. On 2026-08-11, the workaround-free
+diagnostic passes on the Samsung A16 (`SM-A165F`, Android 16/API 36,
+WebView 150.0.7871.181): `insetBeforeFocus=0.0`,
+`insetAfterFocus=346.31`, and the Flutter focus node remains active. No
+AndroidRuntime, fatal, or ANR appears; the record stays in this register for
+Android 10/OEM and broader physical-device validation, and the count remains
+68.
 
 Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
 now has an opt-in display-size recovery diagnostic at
 [`android_display_size_recovery_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_display_size_recovery_diagnostic_test.dart).
 The API 35 AVD builds and starts the diagnostic, but both host `wm size`
 change/reset attempts temporarily put `emulator-5554` offline before the test
-could complete its geometry assertion; no Forge/native crash was recorded.
-The display-size and OEM-provider gate therefore remains pending.
+could complete its geometry assertion. On 2026-08-11, the same reversible
+override on the Samsung A16 restarted the example activity/VM service before
+the geometry assertion; no app crash or ANR was recorded, but the run produced
+no geometry result. The display-size and OEM-provider gate therefore remains
+pending.
 
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 now has an opt-in IME lifecycle diagnostic at
@@ -164,10 +185,13 @@ now has an opt-in IME lifecycle diagnostic at
 On 2026-08-10, a clean API 35 AVD run passed both virtual-display and hybrid
 composition cycles: each focused the HTML input, cleared and disposed the
 WebView, then reopened the Flutter keyboard with
-`keyboardInsetAfterDispose=24.0` and an active Flutter focus node. No
-AndroidRuntime, fatal, or IME NPE appeared in the run. Android 10 and OEM
-validation remain required, so this record stays in the register and the count
-remains 68.
+`keyboardInsetAfterDispose=24.0` and an active Flutter focus node. On
+2026-08-11, the same two cycles pass on the Samsung A16
+(`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181), each with
+`keyboardInsetAfterDispose=358.4` and an active Flutter focus node. No
+AndroidRuntime, fatal, or IME NPE appeared; Android 10 and OEM validation
+remain required, so this record stays in the register and the count remains
+68.
 
 iOS [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)
 now has a targeted Dart regression test that reproduces the missing native
@@ -207,9 +231,12 @@ explicit disposal logs Chromium renderer exit code `-1`, but no app
 `AndroidRuntime`, fatal, ANR, or Dart test failure appears. This matches the
 renderer-teardown signature reported by external [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491),
 which is outside the supplied 125-issue export; the exact back-button and
-affected-OEM path remains unvalidated. Physical iOS 17+ and Android API
-33+/OEM/provider validation remain required, so #2654 stays in this register
-and the count remains 68.
+affected-OEM path remains unvalidated. On 2026-08-11, the Samsung A16
+diagnostic completes all four cycles with `WebView disposed` outcomes across
+virtual-display and hybrid composition; the filtered log contains only
+Chromium tile-memory warnings and no app `AndroidRuntime`, fatal, or ANR.
+Physical iOS 17+ and Android API 33+/OEM/provider validation remain required,
+so #2654 stays in this register and the count remains 68.
 
 iOS [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now has an opt-in multi-window navigation diagnostic at
@@ -229,10 +256,13 @@ Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2
 now restores fullscreen state in both the pre-destroy fallback and the
 `onRenderProcessGone` path before forwarding renderer-loss events. The Android
 package suite passes all 49 tests on 2026-08-10, including the renderer-loss
-fullscreen regression. No available device reproduces the reported MediaTek
-gralloc/surface failure; the API 35 AVD cannot stand in for that GPU/provider
-matrix, and a physical MediaTek test with fullscreen H.264/HLS playback and
-network loss remains required, so the count remains 68.
+fullscreen regression. The normal fullscreen/exit path passes on the 2026-08-11
+Samsung A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789, WebView
+150.0.7871.181), but the reported forced MediaTek gralloc/surface failure was
+not reproduced. The API 35 AVD and this normal A16 path cannot stand in for
+that GPU/provider matrix; a physical MediaTek test with fullscreen H.264/HLS
+playback, renderer loss, and network loss remains required, so the count stays
+68.
 
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation
@@ -260,11 +290,13 @@ now has an opt-in screen-lock redraw diagnostic at
 [`android_screen_lock_redraw_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_screen_lock_redraw_diagnostic_test.dart).
 On the API 35 `emulator-5554` hybrid-composition run, a real ADB lock/unlock
 checkpoint preserved the `ANDROID_SCREEN_LOCK_MARKER` DOM content and the
-WebView URL, with no AndroidRuntime, fatal, or renderer crash in the captured
-log. The Flutter host's DDS/golden-stream connection is unstable for this
-diagnostic, so the checkpoint is evidence rather than a clean integration-test
-exit; Android 10 and affected OEM/provider lock/unlock validation remain
-required and the count remains 68.
+WebView URL. On 2026-08-11, the Samsung A16 (`SM-A165F`, Android 16/API 36)
+passes the same real lock/unlock checkpoint in both hybrid and virtual-display
+composition; the marker and URL remain intact and both integration tests exit
+successfully. No app `AndroidRuntime`, fatal, or renderer crash appears; the
+hybrid run has one system `ActivityManager` freeze warning. Android 10 and
+affected OEM/provider lock/unlock validation remain required and the count
+remains 68.
 
 iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
 is source-fixed in iOS 2.1.20. The previously recorded iPhone 17 Pro iOS 26.2
