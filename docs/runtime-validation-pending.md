@@ -258,11 +258,12 @@ now restores fullscreen state in both the pre-destroy fallback and the
 package suite passes all 49 tests on 2026-08-10, including the renderer-loss
 fullscreen regression. The normal fullscreen/exit path passes on the 2026-08-11
 Samsung A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789, WebView
-150.0.7871.181), but the reported forced MediaTek gralloc/surface failure was
-not reproduced. The API 35 AVD and this normal A16 path cannot stand in for
-that GPU/provider matrix; a physical MediaTek test with fullscreen H.264/HLS
-playback, renderer loss, and network loss remains required, so the count stays
-68.
+150.0.7871.181), but the upstream Vimeo overlay/offline reproducer and forced
+MediaTek gralloc/surface failure were not reproduced. The API 35 AVD and this
+normal A16 path cannot stand in for that GPU/provider matrix; a physical
+MediaTek test using `https://iframely.com/domains/vimeo`, fullscreen playback,
+network loss, overlay presentation, and renderer teardown remains required, so
+the count stays 68.
 
 Android [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680)
 is tracked as a host/provider boundary rather than runtime-pending implementation
