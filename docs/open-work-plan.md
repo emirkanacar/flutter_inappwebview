@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-10
+Last reviewed: 2026-08-11
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -133,6 +133,15 @@ clean DDS reruns were inconclusive because iOS 26.2 reported zero viewport
 metrics and iOS 27 did not expose a software keyboard transition. Physical iOS
 17, device, and native `WKWebView` comparison validation remain in the runtime
 register, so #2787 remains validation-pending.
+
+iOS [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
+is implemented in iOS 2.1.17 and remains outside the active queue in the
+runtime-validation register. The iPhone 17 Pro iOS 26.2 Simulator
+seek/fullscreen diagnostic passes three native-container entry, runtime opt-out
+dismissal, and re-entry cycles with the expected state. Physical iOS 26/GPU and
+media evidence is still required, so the implementation is resolved with
+runtime validation pending; the 68 runtime-pending and 41 active counts are
+unchanged.
 
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
 now prioritizes `shouldInterceptRequest` and Service Worker interception on the

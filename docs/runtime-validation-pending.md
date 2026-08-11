@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-10
+Last reviewed: 2026-08-11
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -172,6 +172,17 @@ completes with `WebView navigation started` outcomes after the harness's
 navigate-away race; the test accepts that safe terminal result and records no
 missing-plugin failure or app crash. Physical/device scene reattachment and
 stale-controller validation remain required, so #2711 stays in this register.
+
+iOS [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
+now has an opt-in seek/fullscreen diagnostic at
+[`ios_fullscreen_video_seek_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_fullscreen_video_seek_diagnostic_test.dart).
+On 2026-08-11, the iPhone 17 Pro iOS 26.2 Simulator passed three cycles using a
+bundled H.264/AAC video: play, seek, native-container fullscreen entry,
+runtime opt-out dismissal, and re-entry all produced the expected state. The
+test exited 0, the iOS package tests passed 2/2, and the SwiftPM manifest
+validated with the documented module-cache workaround. Physical iOS 26/GPU,
+HLS/iframe, orientation, media-control, and consuming-app validation remain
+required, so #2710 stays in this register and the count remains 68.
 
 iOS/Android [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
 now has disposal lifecycle diagnostics at

@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-10
+Last reviewed: 2026-08-11
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,20 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-08-11 iOS fullscreen seek runtime validation
+
+Upstream [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
+remains open; no upstream state or comment was changed. Forge iOS 2.1.17's
+native-container mitigation was exercised by the opt-in
+[`ios_fullscreen_video_seek_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/ios_fullscreen_video_seek_diagnostic_test.dart).
+The iPhone 17 Pro iOS 26.2 Simulator passed three real MP4 play/seek/fullscreen
+cycles, dismissed the container through the runtime opt-out, and re-entered
+with the expected `isInFullscreen` transitions. The test exited 0; iOS package
+tests passed 2/2 and the SwiftPM manifest validated with the module-cache
+workaround. Physical iOS/GPU/media matrices remain release gates, so #2710 is
+resolved at the implementation boundary but remains runtime-pending and the
+counts are unchanged.
 
 ## 2026-08-10 Android file chooser sandbox URI
 
@@ -213,7 +227,7 @@ reduced when a record moves between the local status registers.
 | 2026-08-10 | Android fullscreen exit keyboard restoration [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878) | No upstream relationship inferred | Android 1.0.34 restores the Flutter container input connection after `onHideCustomView()` by requesting focus, resetting the non-hybrid proxy when applicable, and restarting the Android IME input. The existing API 35/WebView 124 diagnostic pass invokes `SystemChannels.textInput.show`; two workaround-free attempts lost the Flutter VM service and then reported the AVD offline before the keyboard assertion. No AndroidRuntime/ANR/app crash was captured, so Samsung/WebView 150+ and physical-device validation remain pending. |
 | 2026-08-10 | iOS popup/window-ID crashes [#2600](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2600), [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | No upstream relationship inferred | iOS now defers popup window-ID initialization off KVO, verifies observed object identity, ignores callbacks after disposal, and uses the initialized page world for popup JavaScript. A fresh iPhone 17 Pro iOS 26.2 `flutter drive` run exits 0 after three popup attach/evaluate/navigate/dispose cycles, including `shouldOverrideUrlLoading` and the async `about:blank` race; no `EXC_BAD_ACCESS`, `SIGSEGV`, `SIGABRT`, or fatal Simulator log is present. Physical iOS/Xcode validation and a symbolicated crash comparison remain pending. |
 | 2026-08-08 | iOS header replacement navigation [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568) | No upstream relationship inferred | iOS counts simultaneous navigation-policy decisions, queues replacement-header loads until the final decision handler completes, and rejects malformed URL requests safely. Source tests pass; physical navigation validation remains pending. |
-| 2026-08-08 | iOS 26 fullscreen and geolocation behavior [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | No upstream relationship inferred | The native fullscreen-container mitigation remains enabled and source-validated. #2831 is classified as an Apple/WebKit boundary: the public geolocation decision delegate is iOS 27+, the iOS 27 deny-path diagnostic passes, and the iPhone 17 Pro iOS 26.2 run does not invoke the Dart callback. No upstream state was changed. |
+| 2026-08-11 | iOS 26 fullscreen and geolocation behavior [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | No upstream relationship inferred | The native fullscreen-container mitigation is source-validated and the fresh iPhone 17 Pro iOS 26.2 Simulator diagnostic passes three seek, native-container entry, runtime opt-out dismissal, and re-entry cycles with correct fullscreen state. Physical iOS 26/GPU/media validation remains pending. #2831 is classified as an Apple/WebKit boundary: the public geolocation decision delegate is iOS 27+, the iOS 27 deny-path diagnostic passes, and the iPhone 17 Pro iOS 26.2 run does not invoke the Dart callback. No upstream state was changed. |
 | 2026-08-10 | iOS keyboard `visualViewport` restoration [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787) | [#2860](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2860) addresses the separate #2859 inset regression | iOS 2.1.20 captures the pre-keyboard `UIScrollView` zoom scale/content offset, restores them after `keyboardDidHide`, and refreshes the final platform-view frame/layout. A fresh default-DDS iPhone 17 Pro iOS 26.2 Simulator run passes with `visualViewport.height 778.0 -> 435.4375 -> 778.0`, scale `1.0 -> 0.93925 -> 1.0`, active HTML input, and zero page offset after dismissal. Earlier clean DDS runs were inconclusive because of WebKit metrics, software-keyboard, and CoreSimulatorService conditions. Physical iOS 17/device, custom page-zoom, and native `WKWebView` comparison validation remain pending. |
 | 2026-08-08 | iOS draggable overlay gesture ownership [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598) | No upstream relationship inferred | Source review confirms that the overlay belongs to Flutter's host gesture arena: Forge forwards `gestureRecognizers` to `UiKitView`, and its opt-in `preventGestureDelay` hook only runs when the WebView itself is hit-tested. The reported iOS 18/18.6 overlay-drag/underlying-scroll behavior is therefore tracked as a host/platform boundary with no package code change; a minimal Flutter 3.38.6+ comparison remains the required follow-up. |
 | 2026-08-08 | iOS Password AutoFill ownership [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570) | No upstream relationship inferred | Source review found the standard `WKWebViewConfiguration` path and no Forge-owned Password AutoFill switch. Apple requires host-app associated domains and semantically marked HTML fields; the plugin cannot modify consuming-app entitlements, the site's AASA response, or third-party login markup. The report remains a host/application/site boundary pending the same-domain physical-device and native `WKWebView` comparison. |
