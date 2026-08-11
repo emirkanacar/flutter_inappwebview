@@ -1,3 +1,11 @@
+## 1.0.9 - 2026-08-12
+
+- Update the Windows WIL package and apply MSVC `/FS` and experimental
+  coroutine compatibility settings for Visual Studio 2026 / MSVC 14.5x
+  builds ([#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2869](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2869)).
+  Windows native build and runtime validation on the affected toolchain
+  remain pending.
+
 ## 1.0.8 - 2026-08-12
 
 - Dispose the Windows `FindInteractionController` before stopping or closing

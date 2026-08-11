@@ -1,3 +1,10 @@
+## 2.1.50 - 2026-08-12
+
+- Windows: update WIL and add MSVC 14.5x `/FS` and experimental coroutine
+  compatibility settings for Visual Studio 2026 builds ([#2839](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2839), [#2869](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2869)).
+  Affected-toolchain native build and runtime validation remains pending.
+- Update the Windows implementation dependency to 1.0.9.
+
 ## 2.1.49 - 2026-08-12
 
 - Windows: detach `FindInteractionController` before WebView2 teardown so

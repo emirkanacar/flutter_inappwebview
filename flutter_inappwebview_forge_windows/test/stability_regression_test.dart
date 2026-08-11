@@ -29,6 +29,7 @@ void _runSourceContractAssertions() {
   final nativeViewSource = _sourceFile(
     'windows/in_app_webview/in_app_webview.cpp',
   ).readAsStringSync();
+  final cmakeSource = _sourceFile('windows/CMakeLists.txt').readAsStringSync();
   final settingsSource = _sourceFile(
     'windows/in_app_webview/in_app_webview_settings.cpp',
   ).readAsStringSync();
@@ -139,4 +140,20 @@ void _runSourceContractAssertions() {
       'FindInteractionController must detach before WebView2 Stop/Close',
     );
   }
+
+  _expectContains(
+    cmakeSource,
+    'set(WIL_VERSION "1.0.260126.7")',
+    'the MSVC 14.5-compatible WIL package version',
+  );
+  _expectContains(
+    cmakeSource,
+    'target_compile_options(${TARGET} PRIVATE /FS)',
+    'the serialized MSVC PDB write option',
+  );
+  _expectContains(
+    cmakeSource,
+    '_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS',
+    'the MSVC experimental coroutine compatibility definition',
+  );
 }
