@@ -1,3 +1,11 @@
+## 1.0.44 - 2026-08-12
+
+- Android: add audio capture intents to file chooser requests for
+  `audio/*`, including direct capture for `capture` inputs and a chooser
+  option when supported ([PR #2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823)).
+  Audio capture remains independent of camera permission checks and runtime
+  validation on devices with recorder providers is pending.
+
 ## 1.0.43 - 2026-08-11
 
 - Android: complete the explicit `CookieManager.flush()` MethodChannel result

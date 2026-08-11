@@ -243,7 +243,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-70 locally implemented or mitigated issue records and four PR-only records.
+70 locally implemented or mitigated issue records and five PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -272,6 +272,28 @@ external picker under test control to return private `file://` URIs, including
 provider variants; confirm the WebView receives no rejected URI and normal
 content/capture selection still works. PR #2243 remains open upstream; no
 upstream comment or state change was made.
+
+### PR #2823 - Android audio capture file chooser
+
+**Local status:** Implemented in Android 1.0.44 and root 2.1.51; audio
+recorder/provider runtime validation pending. **Impact:** A page requesting
+`audio/*` could open only the generic picker because the native chooser did not
+offer or directly launch an audio recorder. **Confidence:** Confirmed missing
+native intent path in the upstream PR and the Forge chooser implementation.
+
+The Android `InAppWebViewChromeClient` now recognizes audio MIME types for
+single-string and array accept lists. Capture-only audio requests use
+`MediaStore.Audio.Media.RECORD_SOUND_ACTION` when the host has a recorder
+provider; mixed chooser requests add the same intent only when it resolves.
+Audio capture is intentionally independent of the camera permission guard used
+for image and video capture. Recorder results continue through the existing
+`Uri` callback path, so no channel or public Dart contract changes are needed.
+
+**Remaining validation:** test `audio/*` and `audio/* capture`, mixed
+`image/*,audio/*`, cancellation, returned `content://` URIs, missing recorder
+providers, and camera-permission denied states on Android 10-16 and OEM WebView
+providers. PR #2823 remains open upstream; no upstream state or comment was
+changed.
 
 ### #2873 — Restrict `FileProvider` paths
 

@@ -871,12 +871,14 @@ open class InAppWebViewChromeClient(
     filePathCallbackLegacy = filePathCallback
     val images = acceptsImages(acceptType)
     val video = acceptsVideo(acceptType)
+    val audio = acceptsAudio(acceptType)
     var pickerIntent: Intent? = null
 
-    if (captureEnabled && !needsCameraPermission()) {
+    if (captureEnabled) {
       pickerIntent = when {
-        images -> getPhotoIntent()
-        video -> getVideoIntent()
+        images && !needsCameraPermission() -> getPhotoIntent()
+        video && !needsCameraPermission() -> getVideoIntent()
+        audio -> getAudioIntent().takeIf(::canResolveIntent)
         else -> null
       }
     }
@@ -887,6 +889,7 @@ open class InAppWebViewChromeClient(
         if (images) extraIntents.add(getPhotoIntent())
         if (video) extraIntents.add(getVideoIntent())
       }
+      getAudioIntent().takeIf { audio && canResolveIntent(it) }?.let(extraIntents::add)
       pickerIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents.toTypedArray())
     }
 
@@ -908,12 +911,14 @@ open class InAppWebViewChromeClient(
     filePathCallback = callback
     val images = acceptsImages(acceptTypes)
     val video = acceptsVideo(acceptTypes)
+    val audio = acceptsAudio(acceptTypes)
     var pickerIntent: Intent? = null
 
-    if (captureEnabled && !needsCameraPermission()) {
+    if (captureEnabled) {
       pickerIntent = when {
-        images -> getPhotoIntent()
-        video -> getVideoIntent()
+        images && !needsCameraPermission() -> getPhotoIntent()
+        video && !needsCameraPermission() -> getVideoIntent()
+        audio -> getAudioIntent().takeIf(::canResolveIntent)
         else -> null
       }
     }
@@ -923,6 +928,7 @@ open class InAppWebViewChromeClient(
         if (images) extraIntents.add(getPhotoIntent())
         if (video) extraIntents.add(getVideoIntent())
       }
+      getAudioIntent().takeIf { audio && canResolveIntent(it) }?.let(extraIntents::add)
       val fileSelectionIntent = getFileChooserIntent(acceptTypes, allowMultiple)
       pickerIntent = Intent(Intent.ACTION_CHOOSER).apply {
         putExtra(Intent.EXTRA_INTENT, fileSelectionIntent)
@@ -967,6 +973,15 @@ open class InAppWebViewChromeClient(
     videoOutputFileUri = getOutputUri(MediaStore.ACTION_VIDEO_CAPTURE)
     intent.putExtra(MediaStore.EXTRA_OUTPUT, videoOutputFileUri)
     return intent
+  }
+
+  private fun getAudioIntent(): Intent {
+    return Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+  }
+
+  private fun canResolveIntent(intent: Intent): Boolean {
+    val activity = getActivity() ?: return false
+    return intent.resolveActivity(activity.packageManager) != null
   }
 
   private fun getFileChooserIntent(acceptTypes: String): Intent {
@@ -1031,6 +1046,19 @@ open class InAppWebViewChromeClient(
   private fun acceptsVideo(types: Array<String>): Boolean {
     val mimeTypes = getAcceptedMimeType(types)
     return acceptsAny(types) || arrayContainsString(mimeTypes, "video")
+  }
+
+  private fun acceptsAudio(types: String): Boolean {
+    var mimeType = types
+    if (Regex("\\.\\w+").matches(types)) {
+      mimeType = getMimeTypeFromExtension(types.replace(".", "")) ?: ""
+    }
+    return mimeType.isEmpty() || mimeType.lowercase().contains("audio")
+  }
+
+  private fun acceptsAudio(types: Array<String>): Boolean {
+    val mimeTypes = getAcceptedMimeType(types)
+    return acceptsAny(types) || arrayContainsString(mimeTypes, "audio")
   }
 
   private fun arrayContainsString(array: Array<String?>, pattern: String): Boolean {

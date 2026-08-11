@@ -148,7 +148,7 @@ void _runSourceContractAssertions() {
   );
   _expectContains(
     cmakeSource,
-    'target_compile_options(${TARGET} PRIVATE /FS)',
+    r'target_compile_options(${TARGET} PRIVATE /FS)',
     'the serialized MSVC PDB write option',
   );
   _expectContains(

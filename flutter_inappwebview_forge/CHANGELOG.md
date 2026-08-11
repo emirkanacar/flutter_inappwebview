@@ -1,3 +1,10 @@
+## 2.1.51 - 2026-08-12
+
+- Android: support `audio/*` file chooser capture and chooser options without
+  coupling audio recording to camera permission checks ([PR #2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823)).
+  Device/provider validation remains pending.
+- Update the Android implementation dependency to 1.0.44.
+
 ## 2.1.50 - 2026-08-12
 
 - Windows: update WIL and add MSVC 14.5x `/FS` and experimental coroutine

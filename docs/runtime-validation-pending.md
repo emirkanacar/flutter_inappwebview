@@ -24,11 +24,12 @@ each note was recorded.
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 39 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Four PR-only records also have local implementations but remain outside the
+Five PR-only records also have local implementations but remain outside the
 125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
 [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
-[#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), and
-[#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474).
+[#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871),
+[#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), and
+[#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823).
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
@@ -39,6 +40,15 @@ and the `assembleDebug` AAR task. The Flutter APK wrapper is blocked by the
 existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
 an adversarial external-picker/provider matrix across API levels also remains
 pending. This PR-only record does not change the 70-issue count.
+
+Android PR [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823)
+is source-fixed in Android 1.0.44: `audio/*` file chooser requests now detect
+audio capture, launch the recorder directly for capture-only inputs when a
+provider resolves the intent, and add the recorder as a chooser option without
+coupling it to camera permission. The Android source regression suite and
+native build remain the local gates; recorder-provider, permission, cancel,
+and returned-URI validation on physical Android devices remains pending. This
+PR-only record does not change the 70-issue count.
 
 ### Count by exported category
 

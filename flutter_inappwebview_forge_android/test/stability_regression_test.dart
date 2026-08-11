@@ -84,6 +84,26 @@ void main() {
     expect(callbackSource, contains('requestCode != PICKER_LEGACY'));
   });
 
+  test('Android file chooser supports audio capture independently of camera', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('MediaStore.Audio.Media.RECORD_SOUND_ACTION'));
+    expect(source, contains('private fun acceptsAudio(types: String)'));
+    expect(source, contains('private fun acceptsAudio(types: Array<String>)'));
+    expect(
+      source,
+      contains('audio -> getAudioIntent().takeIf(::canResolveIntent)'),
+    );
+    expect(
+      source,
+      contains('getAudioIntent().takeIf { audio && canResolveIntent(it) }'),
+    );
+    expect(source, contains('private fun canResolveIntent(intent: Intent)'));
+  });
+
   test('Android file chooser rejects private sandbox file URIs', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
