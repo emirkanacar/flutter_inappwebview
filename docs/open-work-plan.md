@@ -58,8 +58,9 @@ and visibility recovery; its Android 16/API 36 and OEM provider validation is
 tracked in the runtime register. The opt-in display-size diagnostic starts on
 the API 35 AVD, but host `wm size` change/reset currently disconnects that AVD
 before the geometry assertion. The same reversible override on the 2026-08-11
-Samsung A16 restarts the example activity/VM service before geometry can be
-read; no app crash/ANR is captured, so no runtime count changes.
+and 2026-08-12 Samsung A16 runs restarts the example activity/VM service before
+geometry can be read; the Activity remains up and no app crash/ANR is captured,
+so no runtime count changes.
 
 Android [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)
 is source-validated with a focused Dart serialization test and has no device or

@@ -173,11 +173,11 @@ now has an opt-in display-size recovery diagnostic at
 [`android_display_size_recovery_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_display_size_recovery_diagnostic_test.dart).
 The API 35 AVD builds and starts the diagnostic, but both host `wm size`
 change/reset attempts temporarily put `emulator-5554` offline before the test
-could complete its geometry assertion. On 2026-08-11, the same reversible
-override on the Samsung A16 restarted the example activity/VM service before
-the geometry assertion; no app crash or ANR was recorded, but the run produced
-no geometry result. The display-size and OEM-provider gate therefore remains
-pending.
+could complete its geometry assertion. On 2026-08-11 and again on 2026-08-12,
+the same reversible override on the Samsung A16 restarted the example
+activity/VM service before the geometry assertion; the Activity remained up,
+no app crash or ANR was recorded, but neither run produced a geometry result.
+The display-size and OEM-provider gate therefore remains pending.
 
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 now has an opt-in IME lifecycle diagnostic at
