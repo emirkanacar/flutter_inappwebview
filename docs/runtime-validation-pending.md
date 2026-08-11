@@ -70,8 +70,14 @@ and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
 now include a bounded provider-startup fallback in Android 1.0.38 and an opt-in
 profile/AOT cold-start diagnostic. Four clean API 35/WebView 124 installs pass
 `onWebViewCreated`, `onLoadStop`, and the JavaScript bridge/document-start checks.
-Physical, headless, and release/provider coverage remains required, so the record
-stays in this register and the count remains 68.
+The opt-in [`android_headless_cold_start_diagnostic_test.dart`](../flutter_inappwebview_forge/example/integration_test/android_headless_cold_start_diagnostic_test.dart)
+also passes four headless create/load/dispose cycles with an
+`AT_DOCUMENT_START` bridge marker, and the general HeadlessInAppWebView suite
+passes 6/6 on the same API 35 AVD. No app `AndroidRuntime`, ANR, or native fatal
+appears; explicit headless disposal emits Chromium renderer exit code `-1`,
+which is the known teardown signature tracked separately under external #2491.
+Physical release/R8 and provider coverage remains required, so the record stays
+in this register and the count remains 68.
 
 Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
 now has Android 35 AVD happy-path evidence for nested InAppBrowser and Chrome

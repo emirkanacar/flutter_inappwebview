@@ -205,9 +205,12 @@ and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
 now also release the first-load gate after a bounded WebView provider-startup
 timeout, while preserving bridge and document-start registration retries. The
 API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start installs
-with `onWebViewCreated`, `onLoadStop`, and both bridge checks succeeding. Physical,
-headless, and release/provider validation remains in the runtime register, so the
-68 runtime-pending count is unchanged.
+with `onWebViewCreated`, `onLoadStop`, and both bridge checks succeeding. The
+opt-in headless document-start diagnostic passes four create/load/dispose cycles
+and the general headless suite passes 6/6 on the API 35 AVD. Explicit disposal
+emits the known Chromium renderer exit code `-1`, but no app fatal/ANR/native
+fatal appears and the tests exit 0. Physical release/R8 and provider validation
+remains in the runtime register, so the 68 runtime-pending count is unchanged.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack
