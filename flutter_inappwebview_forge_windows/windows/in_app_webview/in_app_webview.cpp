@@ -4216,6 +4216,14 @@ namespace flutter_inappwebview_plugin
   InAppWebView::~InAppWebView()
   {
     debugLog("dealloc InAppWebView");
+    // Detach FindInteraction's WebView2 event handlers before stopping or
+    // closing the controller. Removing them after Close() can return a
+    // WebView2 invalid-state error and tear down the shared environment when
+    // a child window is destroyed.
+    if (findInteractionController) {
+      findInteractionController->dispose();
+      findInteractionController.reset();
+    }
     userContentController = nullptr;
     if (webView) {
       failedLog(webView->Stop());
@@ -4246,10 +4254,6 @@ namespace flutter_inappwebview_plugin
       printJobManager.reset();
     }
     disposeAllWebNotificationControllers();
-    if (findInteractionController) {
-      findInteractionController->dispose();
-      findInteractionController.reset();
-    }
     navigationActions_.clear();
     inAppBrowser = nullptr;
     plugin = nullptr;

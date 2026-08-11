@@ -11,25 +11,28 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 ## Scope and counts
 
-The export contains 125 issues and 73 PRs. Eighty-four issue records have a
+The export contains 125 issues and 73 PRs. Eighty-five issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 68 await real runtime validation, #2709 is source-validated with no
+boundary: 69 await real runtime validation, #2709 is source-validated with no
 native runtime gate, #2745 is closed by source review, and
 #2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796/#2831 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 41 issue records
+The other 40 issue records
 remain in this active plan. Four additional PR-only records
 (`#2243`, `#2771`, `#2871`, and `#2474`) are implemented locally and await
 runtime validation; they do not change the issue counts below.
 
+The scope table and priority queue are authoritative for the current snapshot;
+dated validation notes below retain their contemporaneous counts.
+
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 54 | 1 | 1 | 14 | 28 | Technical work, validation, or reproduction required |
+| Bugs | 98 | 55 | 1 | 1 | 14 | 27 | Technical work, validation, or reproduction required |
 | Enhancements | 16 | 6 | 0 | 0 | 0 | 10 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **68** | **1** | **1** | **14** | **41** | **38 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **69** | **1** | **1** | **14** | **40** | **37 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -47,7 +50,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 68 implementation or mitigation records awaiting real validation are
+The 69 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the four PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -79,7 +82,7 @@ including lifecycle callbacks and the expected history URL. Samsung logs one
 system `ActivityManager` IntentRedirect Hardening warning for the Custom Tabs
 intent, but no app crash or ANR. Malformed external extras, restore/rotation,
 and physical/provider coverage remain in the runtime register; therefore the
-68 runtime-pending count includes this release-gate record.
+69 runtime-pending count includes this release-gate record.
 
 Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
 and its related upstream [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758)
@@ -145,7 +148,7 @@ runtime-validation register. The iPhone 17 Pro iOS 26.2 Simulator
 seek/fullscreen diagnostic passes three native-container entry, runtime opt-out
 dismissal, and re-entry cycles with the expected state. Physical iOS 26/GPU and
 media evidence is still required, so the implementation is resolved with
-runtime validation pending; the 68 runtime-pending and 41 active counts are
+runtime validation pending; the 69 runtime-pending and 40 active counts are
 unchanged.
 
 Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
@@ -172,7 +175,7 @@ suite passes 48/48 tests and the native debug compilation/AAR build pass. The
 cycles, records an empty final cookie list, and emits no app `AndroidRuntime`,
 fatal, or ANR; the filtered log contains only Chromium tile-memory warnings.
 Android 10/provider and Play Console validation remain in the runtime register,
-so the 68 runtime-pending and 41 active counts are unchanged.
+so the 69 runtime-pending and 40 active counts are unchanged.
 
 Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
 has a fresh 2026-08-10 API 35 AVD diagnostic pass for both virtual-display and
@@ -180,8 +183,8 @@ hybrid composition: the Flutter keyboard reopens after WebView clear/dispose
 with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
 2026-08-11 A16 run passes both modes with `keyboardInsetAfterDispose=358.4`,
 and no AndroidRuntime, fatal, or IME NPE. Android 10 physical-device and
-OEM/provider validation remain in the separate runtime register, so the 68
-runtime-pending and 41 active counts are unchanged.
+OEM/provider validation remain in the separate runtime register, so the 69
+runtime-pending and 40 active counts are unchanged.
 
 Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
 is source-hardened and remains outside this active plan in the runtime register.
@@ -190,7 +193,7 @@ The existing API 35/WebView 124 diagnostic passes only with the documented
 run (`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181) reports
 `insetBeforeFocus=0.0`, `insetAfterFocus=346.31`, and an active Flutter focus
 node with no AndroidRuntime, fatal, or ANR. Android 10/OEM and broader
-physical-device validation remain required, so the 68 runtime-pending count is
+physical-device validation remain required, so the 69 runtime-pending count is
 unchanged.
 
 Android file chooser PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) is implemented locally in Android 1.0.41. The native callback boundary rejects canonicalized private-sandbox `file://` URIs from single-select, multi-select, and legacy picker results while preserving `content://` and FileProvider capture URIs. The source regression and native build are release evidence; hostile external-picker/provider validation remains a separate runtime gate, and this PR-only record does not change the issue counts above.
@@ -209,7 +212,7 @@ also validates optional native MethodChannel string fields by runtime type befor
 dispatching callbacks. Android 1.0.37 additionally rejects malformed permission
 request/cancellation maps and non-list resources containers, while filtering
 unknown resource entries without changing the public callback contract. Its
-API/provider matrix remains in the runtime register, so the 68 runtime-pending
+API/provider matrix remains in the runtime register, so the 69 runtime-pending
 count is unchanged.
 
 Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
@@ -222,7 +225,7 @@ opt-in headless document-start diagnostic passes four create/load/dispose cycles
 and the general headless suite passes 6/6 on the API 35 AVD. Explicit disposal
 emits the known Chromium renderer exit code `-1`, but no app fatal/ANR/native
 fatal appears and the tests exit 0. Physical release/R8 and provider validation
-remains in the runtime register, so the 68 runtime-pending count is unchanged.
+remains in the runtime register, so the 69 runtime-pending count is unchanged.
 The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
 contains only provider/Chromium termination evidence and provider rollback
 results, so it is tracked as a host/platform boundary until a Forge-owned stack
@@ -261,14 +264,14 @@ pending until the affected physical-device matrices pass. The A16 IME
 diagnostic also passes for virtual-display and hybrid composition WebViews
 after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
 physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
-gate, so the runtime-pending count stays 68.
+gate, so the runtime-pending count stays 69.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new
 provisional navigation starts. A fresh 2026-08-10 `flutter drive` run on the
 iPhone 17 Pro iOS 26.2 Simulator passes three popup attach/evaluate/navigate/
 dispose cycles with exit code 0 and no `EXC_BAD_ACCESS`/fatal log. Physical iOS
-15–26 and Xcode 16/26 validation remains in the runtime register, so the 68
+15–26 and Xcode 16/26 validation remains in the runtime register, so the 69
 runtime-pending count is unchanged.
 
 Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
@@ -276,7 +279,7 @@ now has API 35 AVD and 2026-08-11 Samsung A16 lock/unlock evidence. On the A16,
 both hybrid and virtual-display composition preserve the WebView marker and URL
 through a real ADB keyevent lock/unlock sequence and exit successfully. No app
 AndroidRuntime, fatal, or renderer crash appears; Android 10 and OEM/provider
-validation remain in the runtime register and the count stays 68.
+validation remain in the runtime register and the count stays 69.
 
 The following records are outside the implementation queue because the
 available evidence identifies a host/platform failure with no package-owned
@@ -397,7 +400,7 @@ iOS 26 prompt ownership remains with WebKit.
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| [#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814) | Windows child-window teardown | Reproduce the reported multi-window exit with and without `FindInteractionController`, then capture the WebView2 environment and child-window teardown order before changing native ownership. |
+| None currently | Windows child-window teardown | #2814 now detaches `FindInteractionController` before WebView2 `Stop`/`Close`; keep it in the runtime register until the reported Windows 11 multi-window close/recreate flow is validated. |
 | [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752), [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2807](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2807) | Native startup and renderer failures | Reproduce on Arch Linux/WPE and affected Windows machines with full native logs. Test create/destroy/recreate, graphics-context invalidation, bundled/system WPE, and WebView2 runtime versions. |
 | [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Windows focus, transparency, hit testing, and release behavior | Add a Windows native smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Verify C++ child-window state after every async callback. |
 | [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot/video and missing-plugin behavior | Reproduce with hardware video frames and generated plugin registrants. Define whether the native backend can capture video surfaces; otherwise return a documented unsupported result instead of a black image or missing method. |
@@ -439,10 +442,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 68 issue records and four PR-only
+items. The complete register contains 69 issue records and four PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 41 issue records that still need implementation, design, or
+keeps only the 40 issue records that still need implementation, design, or
 reproduction. Fourteen host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
@@ -496,11 +499,11 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-10 status pass has 68 locally implemented or mitigated issue
+The 2026-08-12 status pass has 69 locally implemented or mitigated issue
 records awaiting runtime validation, one source-validated issue (#2709) with
 no runtime gate, one issue (#2745) closed by source review, fourteen
 host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
-#2698, #2713, #2723, #2727, #2753, #2796, and #2831), and 41 active issue records in this plan. The runtime-pending
+#2698, #2713, #2723, #2727, #2753, #2796, and #2831), and 40 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
  live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and

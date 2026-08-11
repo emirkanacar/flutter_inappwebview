@@ -1,3 +1,10 @@
+## 1.0.8 - 2026-08-12
+
+- Dispose the Windows `FindInteractionController` before stopping or closing
+  WebView2, preventing child-window teardown from removing find event handlers
+  from an invalid controller state ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814)).
+  Windows 11/WebView2 multi-window runtime validation remains pending.
+
 ## 1.0.7 - 2026-08-08
 
 - Guard headless WebView size callbacks after the WebView2 controller has been released during startup or renderer teardown ([#2778](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2778)).

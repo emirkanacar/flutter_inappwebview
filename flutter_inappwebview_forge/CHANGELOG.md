@@ -1,3 +1,11 @@
+## 2.1.49 - 2026-08-12
+
+- Windows: detach `FindInteractionController` before WebView2 teardown so
+  closing a child window does not invalidate the shared WebView2 environment
+  ([#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814)).
+  Windows 11/WebView2 multi-window runtime validation remains pending.
+- Update the Windows implementation dependency to 1.0.8.
+
 ## 2.1.48 - 2026-08-11
 
 - Android: complete the explicit `CookieManager.flush()` MethodChannel result

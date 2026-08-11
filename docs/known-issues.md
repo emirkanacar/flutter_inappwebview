@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-12
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 68 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 41 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 69 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 40 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 68 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 69 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 14 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 41 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 40 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -59,7 +59,7 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 #### #2814 - Windows child-window teardown
 
-**Local status:** Active reproduction; no local resolution claimed. **Affected package:** Windows WebView2/FindInteraction teardown. **Impact:** closing a child window in the reported multi-window setup exits the host process, with logs pointing at `FindInteractionController` and WebView2 environment teardown. **Current evidence:** the report is Windows-specific and unrelated to Android activity-result dispatch. **Required evidence:** reproduce on Windows 11 with the reported multi-window stack, isolate the FindInteraction controller, and capture a native crash/runtime trace before implementing a teardown change.
+**Local status:** Implemented and source-validated; Windows/WebView2 runtime validation pending. **Affected package:** Windows WebView2/FindInteraction teardown. **Impact:** closing a child window in the reported multi-window setup exits the host process, with logs pointing at `FindInteractionController` and WebView2 environment teardown. **Root cause:** the controller removed its WebView2 find event handlers after `Stop()`/`Close()`, when the WebView2 object could already be in an invalid state. **Fix:** `InAppWebView::~InAppWebView()` now disposes and releases `FindInteractionController` before stopping, destroying, or closing the WebView2 controller. Static source regression coverage passes. **Required evidence:** reproduce the reported Windows 11 multi-window flow with and without `FindInteractionController`, then run child-window close/recreate cycles on supported WebView2 versions and confirm the host process remains alive.
 
 #### #2736 - Windows InAppBrowser resize after teardown
 
@@ -239,7 +239,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-68 locally implemented or mitigated issue records and four PR-only records.
+69 locally implemented or mitigated issue records and four PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 

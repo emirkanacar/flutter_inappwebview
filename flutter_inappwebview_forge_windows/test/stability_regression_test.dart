@@ -120,4 +120,23 @@ void _runSourceContractAssertions() {
     '!webView || !webView->webViewController',
     'the headless WebView controller lifetime guard',
   );
+
+  final findDispose = nativeViewSource.indexOf(
+    'findInteractionController->dispose();',
+  );
+  final stopWebView = nativeViewSource.lastIndexOf(
+    'failedLog(webView->Stop());',
+  );
+  final closeWebView = nativeViewSource.lastIndexOf(
+    'failedLog(webViewController->Close());',
+  );
+  if (findDispose < 0 ||
+      stopWebView < 0 ||
+      closeWebView < 0 ||
+      findDispose > stopWebView ||
+      findDispose > closeWebView) {
+    throw StateError(
+      'FindInteractionController must detach before WebView2 Stop/Close',
+    );
+  }
 }
