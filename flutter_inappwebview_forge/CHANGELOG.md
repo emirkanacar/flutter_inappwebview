@@ -1,3 +1,11 @@
+## 2.1.61 - 2026-08-12
+
+- Route iOS cookie operations scoped with `webViewController` to the WebView's
+  `WKWebsiteDataStore`, completing the container storage isolation path.
+  Default cookie operations remain unchanged. Physical Android and iOS
+  container validation remains pending.
+- Update the iOS implementation dependency to 2.1.27.
+
 ## 2.1.60 - 2026-08-12
 
 - Add the additive `ContainerController` API and persistent WebView storage

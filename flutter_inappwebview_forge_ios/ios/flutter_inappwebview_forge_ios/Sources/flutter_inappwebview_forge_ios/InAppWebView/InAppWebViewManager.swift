@@ -16,6 +16,7 @@ public class InAppWebViewManager: ChannelDelegate {
     var defaultUserAgent: String?
     
     var keepAliveWebViews: [String:FlutterWebViewController?] = [:]
+    var webViews: [String: InAppWebView] = [:]
     var windowWebViews: [Int64:WebViewTransport] = [:]
     var windowAutoincrementId: Int64 = 0
     
@@ -125,6 +126,7 @@ public class InAppWebViewManager: ChannelDelegate {
             }
         }
         keepAliveWebViews.removeAll()
+        webViews.removeAll()
         windowWebViews.removeAll()
         webViewForUserAgent = nil
         defaultUserAgent = nil

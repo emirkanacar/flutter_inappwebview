@@ -21,11 +21,12 @@ Upstream [PR #2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 requested named persistent WebView containers, `InAppWebViewSettings.containerId`,
 container enumeration/deletion, and per-container proxy support. Forge now
 implements the Android and iOS storage portion in platform-interface 1.1.9,
-Android 1.0.50, iOS 2.1.26, and root 2.1.60: `ContainerController` exposes
+Android 1.0.50, iOS 2.1.27, and root 2.1.61: `ContainerController` exposes
 named container management; Android binds `ProfileStore` before bridge,
 cookie, or other WebView state initialization and routes scoped cookie calls to
 that WebView's profile cookie store; iOS 17+ binds UUID identifiers to
-`WKWebsiteDataStore` and exposes enumeration/deletion. The source regression
+`WKWebsiteDataStore` and exposes enumeration/deletion; iOS cookie calls scoped
+with `webViewController` now use that WebView data store. The source regression
 suite, Android Kotlin compile, and Xcode iOS example build pass. Android
 WebView 110+/`MULTI_PROFILE` and physical iOS 17+ validation are still
 required; macOS/Linux adapters and per-container proxy configuration remain

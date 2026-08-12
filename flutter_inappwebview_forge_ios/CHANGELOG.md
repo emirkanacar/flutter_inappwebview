@@ -1,3 +1,10 @@
+## 2.1.27 - 2026-08-12
+
+- Route iOS cookie operations that receive `webViewController` through that
+  WebView's `WKWebsiteDataStore`, keeping container-scoped cookies isolated.
+  Default cookie operations remain on the default data store. Physical iOS
+  container and cookie validation remains pending.
+
 ## 2.1.26 - 2026-08-12
 
 - Add iOS 17+ persistent WebView containers through `ContainerController` and

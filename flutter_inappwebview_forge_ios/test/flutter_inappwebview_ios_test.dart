@@ -71,6 +71,23 @@ void _runSourceContractAssertions() {
         source.contains('settings.containerId'),
     'iOS WebView configuration does not bind containerId to its data store',
   );
+  final cookieSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/MyCookieManager.swift',
+  ).readAsStringSync();
+  final managerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/InAppWebViewManager.swift',
+  ).readAsStringSync();
+  _assert(
+    managerSource.contains('var webViews: [String: InAppWebView]'),
+    'iOS WebView manager does not retain WebViews for scoped cookie routing',
+  );
+  _assert(
+    cookieSource.contains('webViewId') &&
+        cookieSource.contains('configuration.websiteDataStore.httpCookieStore'),
+    'iOS cookie manager does not route scoped calls to the WebView data store',
+  );
   _assert(
     source.contains('guard let presentingViewController') &&
         source.contains('visibleViewController'),
@@ -85,10 +102,6 @@ void _runSourceContractAssertions() {
         customSchemeSource.contains('didFailWithError'),
     'custom scheme handler does not guard non-plugin WebViews',
   );
-  final cookieSource = _sourceFile(
-    'ios/flutter_inappwebview_forge_ios/Sources/'
-    'flutter_inappwebview_forge_ios/MyCookieManager.swift',
-  ).readAsStringSync();
   _assert(
     cookieSource.contains('cookie.properties?[.originURL] as? String') &&
         cookieSource.contains('websiteDataTypes as? Set<String>'),
