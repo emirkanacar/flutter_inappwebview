@@ -1,3 +1,11 @@
+## 2.1.57 - 2026-08-12
+
+- Add the additive `InAppWebViewController.bridgeEvents` helper for
+  JavaScript event communication and typed JSON/serialized handlers
+  ([#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793)).
+- Update the platform interface dependency to 1.1.8. Existing
+  `addJavaScriptHandler` behavior remains unchanged.
+
 ## 2.1.56 - 2026-08-12
 
 - Update the Android implementation to 1.0.48 for conditional KGP

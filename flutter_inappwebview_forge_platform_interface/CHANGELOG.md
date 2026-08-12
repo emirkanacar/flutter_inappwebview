@@ -1,3 +1,11 @@
+## 1.1.8 - 2026-08-12
+
+- Add the additive `JavaScriptBridgeEvents` helper for event-style bridge
+  communication and typed JSON/serialized JavaScript handler codecs
+  ([#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793)).
+  The helper reuses the existing JavaScript handler and bridge-name contracts;
+  no native channel or security model changes are introduced.
+
 ## 1.1.7 - 2026-08-12
 
 - Add Android-only `userAgentMetadata` settings and

@@ -38,6 +38,13 @@ class InAppWebViewController {
   /// Implementation of [PlatformInAppWebViewController] for the current platform.
   final PlatformInAppWebViewController platform;
 
+  /// Additive typed event and JavaScript handler helpers built on the existing
+  /// bridge. Use after the WebView can evaluate JavaScript, such as in
+  /// `onLoadStop`.
+  late final JavaScriptBridgeEvents bridgeEvents = JavaScriptBridgeEvents(
+    controller: platform,
+  );
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.webStorage}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.webStorage.supported_platforms}

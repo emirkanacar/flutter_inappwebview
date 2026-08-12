@@ -1,4 +1,5 @@
 export 'platform_inappwebview_controller.dart';
+export 'javascript_bridge_events.dart';
 export 'platform_inappwebview_widget.dart';
 export 'platform_webview.dart';
 export 'in_app_webview_settings.dart' hide InAppWebViewSettings_;

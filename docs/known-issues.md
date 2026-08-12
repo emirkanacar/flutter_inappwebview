@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-12
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 73 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 36 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 74 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 34 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 73 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 74 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
-| Host/platform-specific boundary | 14 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 36 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Host/platform-specific boundary | 15 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
+| Open implementation or reproduction | 34 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -229,6 +229,59 @@ The report's moving overlay is owned by the host Flutter widget tree, while the 
 
 **Required evidence:** reproduce a minimal overlay/WebView example on Flutter 3.38.6 and current stable across iOS 18+, compare a plain `UiKitView`, another WebView plugin, and a native view, and record whether the underlying scroll begins before or after the overlay's drag recognizer wins. Only add a Forge change if the failure crosses the Flutter hit-testing boundary and a stable plugin-owned control point is identified.
 
+### #2815 — Android Firebase Auth reports missing initial state
+
+**Local status:** Host/application/Firebase configuration boundary; no Forge
+package fix. **Affected scope:** Android WebView auth redirects, Firebase
+Authorized Domains, the consuming app's custom JavaScript, and the identity
+provider flow. **Impact:** the reported Google sign-in flow reaches a white
+page with `Unable to process request due to missing initial state` after the
+account-selection redirect. **Confidence:** Strong host-boundary evidence;
+the report uses Flutter 3.41.6/Android 12 and includes app-specific scripts
+that rewrite the viewport, install a MutationObserver, save/restore auth
+state, and reload the Firebase auth handler.
+
+The supplied log also contains a `404` for the app's
+`__/firebase/init.json`. A follow-up comment reports that adding the Android
+package name to Firebase Authentication's Authorized Domains resolved the
+same symptom. Forge exposes Web Storage and DOM storage through the Android
+WebView, but does not automatically clear `sessionStorage` during navigation;
+the reported snippet itself controls the auth-page reload and state restore.
+There is therefore no reproducible plugin-owned storage or channel failure to
+patch, and changing WebView storage semantics would risk breaking unrelated
+OAuth flows.
+
+**Required evidence:** reproduce with a minimal Firebase app and no custom
+auth-page injection; verify the exact Firebase project, Authorized Domains,
+OAuth redirect URI, SHA-1/package configuration, and WebView DOM-storage
+settings; compare Android WebView with a native browser and a minimal
+`InAppWebView` host. Reopen implementation work only if the minimal host still
+loses state with valid Firebase configuration.
+
+### #2793 — Typed JavaScript bridge events and handlers
+
+**Local status:** Implemented additively in platform-interface 1.1.8 and root
+2.1.57; WebView/browser runtime validation pending. **Impact:** applications
+must currently repeat low-level `evaluateJavascript` and handler boilerplate
+for event-style communication and typed payload conversion. **Fix:** the new
+`InAppWebViewController.bridgeEvents` helper installs an event API on the
+runtime-configured bridge name, supports Dart and JavaScript listener
+registration, dispatches JavaScript events through the existing handler
+contract, and provides JSON/serialized typed handler codecs. Existing
+`addJavaScriptHandler`, bridge readiness, forbidden-name, and native channel
+contracts remain unchanged.
+
+**Regression evidence:** platform-interface tests cover one-time installation,
+duplicate listener suppression, JavaScript-to-Dart event dispatch, Dart-to-
+JavaScript dispatch, and typed request/response conversion. Platform-interface
+tests pass 7/7 and changed-file analysis reports no issues.
+
+**Required validation:** Android, iOS, Web, Windows, macOS, and Linux examples
+must verify bridge readiness, event ordering, listener removal, page reload,
+disposal, handler exceptions, JSON-compatible payloads, and backpressure under
+rapid emits. The helper must not be used before the WebView can evaluate
+JavaScript.
+
 ### #2570 — iOS Password AutoFill is not offered in `InAppWebView`
 
 **Local status:** Host/application/site configuration boundary; no Forge package fix. **Affected scope:** iOS Password AutoFill, WKWebView, host-app entitlements, and the login site's HTML/domain association. **Impact:** iCloud Keychain suggestions appear in `ChromeSafariBrowser` but not in the reported `InAppWebView` login flow. **Confidence:** Needs host/device reproduction; the report has no HTML markup, Associated Domains entitlement, AASA response, or native comparison.
@@ -243,7 +296,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-73 locally implemented or mitigated issue records and seven PR-only records.
+74 locally implemented or mitigated issue records and seven PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
