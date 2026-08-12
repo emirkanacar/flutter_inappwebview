@@ -71,6 +71,12 @@ void _runSourceContractAssertions() {
         source.contains('settings.containerId'),
     'iOS WebView configuration does not bind containerId to its data store',
   );
+  _assert(
+    source.contains('settings.proxySettings') &&
+        source.contains('proxyConfigurations') &&
+        source.contains('ProxySettings.fromMap'),
+    'iOS WebView configuration does not bind proxySettings to its data store',
+  );
   final cookieSource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/MyCookieManager.swift',

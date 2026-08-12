@@ -1,3 +1,9 @@
+## 2.1.28 - 2026-08-12
+
+- Apply `InAppWebViewSettings.proxySettings` to the WebView's
+  `WKWebsiteDataStore` on iOS 17+, keeping proxy configuration aligned with
+  container storage isolation. Older iOS versions retain existing behavior.
+
 ## 2.1.27 - 2026-08-12
 
 - Route iOS cookie operations that receive `webViewController` through that

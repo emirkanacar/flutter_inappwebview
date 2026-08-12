@@ -844,6 +844,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 } else if settings.cacheEnabled {
                     configuration.websiteDataStore = WKWebsiteDataStore.default()
                 }
+                if let proxyMap = settings.proxySettings,
+                   #available(iOS 17.0, *),
+                   let proxy = ProxySettings.fromMap(map: proxyMap) {
+                    configuration.websiteDataStore.proxyConfigurations =
+                        proxy.toProxyConfigurations()
+                }
                 if !settings.applicationNameForUserAgent.isEmpty {
                     if let applicationNameForUserAgent = configuration.applicationNameForUserAgent {
                         configuration.applicationNameForUserAgent = applicationNameForUserAgent + " " + settings.applicationNameForUserAgent

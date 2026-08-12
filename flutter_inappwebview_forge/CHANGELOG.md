@@ -1,3 +1,10 @@
+## 2.1.62 - 2026-08-12
+
+- Add iOS 17+ per-WebView proxy configuration through
+  `InAppWebViewSettings.proxySettings`; Android's existing global proxy API is
+  unchanged.
+- Update platform-interface to 1.1.10 and iOS implementation to 2.1.28.
+
 ## 2.1.61 - 2026-08-12
 
 - Route iOS cookie operations scoped with `webViewController` to the WebView's

@@ -10,6 +10,40 @@ void main() {
     expect(settings.copy().containerId, 'account-a');
   });
 
+  test('proxySettings is included in settings serialization', () {
+    final settings = InAppWebViewSettings(
+      proxySettings: ProxySettings(
+        proxyRules: [ProxyRule(url: 'http://127.0.0.1:8080')],
+      ),
+    );
+
+    expect(
+      settings.toMap()['proxySettings'],
+      containsPair('proxyRules', isA<List<dynamic>>()),
+    );
+    expect(
+      settings.copy().proxySettings?.proxyRules.single.url,
+      'http://127.0.0.1:8080',
+    );
+  });
+
+  test('proxySettings is supported only on Apple WebKit platforms', () {
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.proxySettings,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.proxySettings,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
+  });
+
   test('container capability metadata covers Android and iOS', () {
     const params = PlatformContainerControllerCreationParams();
 

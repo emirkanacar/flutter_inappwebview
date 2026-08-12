@@ -1,3 +1,8 @@
+## 1.1.10 - 2026-08-12
+
+- Add `InAppWebViewSettings.proxySettings` for iOS 17+ per-WebView proxy
+  configuration through `WKWebsiteDataStore.proxyConfigurations`.
+
 ## 1.1.9 - 2026-08-12
 
 - Add the `PlatformContainerController` API and

@@ -23,6 +23,7 @@ import '../types/scrollview_deceleration_rate.dart';
 import '../types/selection_granularity.dart';
 import '../types/user_preferred_content_mode.dart';
 import '../types/vertical_scrollbar_position.dart';
+import '../platform_proxy_controller.dart';
 import '../types/web_authentication_support.dart';
 
 part 'in_app_webview_settings.g.dart';
@@ -1478,6 +1479,22 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     ],
   )
   String? containerId;
+
+  ///Sets proxy settings for this WebView's data store on iOS 17+.
+  ///
+  ///When used with [containerId], the proxy is isolated with that container's
+  ///`WKWebsiteDataStore`. Other platforms keep their existing proxy behavior.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        apiName: "WKWebsiteDataStore.proxyConfigurations",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations",
+        available: "17.0",
+      ),
+    ],
+  )
+  ProxySettings_? proxySettings;
 
   ///Enables the Android Payment Request API for this WebView.
   ///
@@ -3477,6 +3494,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.enterpriseAuthenticationAppLinkPolicyEnabled = true,
     this.webAuthenticationSupport,
     this.containerId,
+    this.proxySettings,
     this.paymentRequestEnabled,
     this.defaultVideoPoster,
     this.requestedWithHeaderOriginAllowList,
