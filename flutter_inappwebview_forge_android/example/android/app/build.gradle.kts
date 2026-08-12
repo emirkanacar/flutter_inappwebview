@@ -1,10 +1,15 @@
 import java.util.Properties
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    .substringBefore('.')
+    .toInt()
+
+if (agpMajor < 9) {
+    apply(plugin = "org.jetbrains.kotlin.android")
 }
 
 val localProperties = Properties()
@@ -29,12 +34,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
     defaultConfig {
         applicationId = "com.emirkanacar.flutter_inappwebview_forge_android_example"
         minSdk = flutter.minSdkVersion
@@ -55,6 +54,14 @@ android {
 
     lint {
         disable.add("InvalidPackage")
+    }
+}
+
+project.extensions.configure(
+    org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension::class.java,
+) {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 

@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-12
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 72 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 37 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 73 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 36 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 72 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 73 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 14 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 37 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 36 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -243,7 +243,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-72 locally implemented or mitigated issue records and seven PR-only records.
+73 locally implemented or mitigated issue records and seven PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -365,6 +365,24 @@ Google WebView and representative OEM providers, comparing configured
 metadata with request headers and `navigator.userAgentData`, including custom
 User-Agent strings, empty/partial metadata, feature-unavailable providers,
 and navigation/request interception behavior.
+
+### #2846 - Android AGP 9 built-in Kotlin compatibility
+
+**Local status:** Implemented in Android 1.0.48 and root 2.1.56; AGP 9,
+Flutter >=3.47, and consuming-app validation pending. **Impact:** AGP 9's
+built-in Kotlin model rejects plugins that force-apply the Kotlin Gradle
+plugin. **Fix:** the Android library and both Forge example application
+modules no longer apply `org.jetbrains.kotlin.android` from the `plugins`
+block. They apply it only when the AGP major version is below 9 and configure
+the Kotlin JVM target through `KotlinAndroidProjectExtension`. The root
+example also no longer forces `android.builtInKotlin=false` or
+`android.newDsl=false`.
+
+**Required validation:** Flutter >=3.47 with AGP 9, Gradle 9, JDK 17, and
+`android.builtInKotlin=true`; the legacy AGP 8/Flutter 3.44 path; both example
+applications; plugin compile, release, and AAB tasks; and generated plugin
+registrants. The Android static migration regression passes, but the current
+environment does not provide the target Flutter/AGP 9 matrix.
 
 ### PR #2853 - iOS platform-view focus recovery
 

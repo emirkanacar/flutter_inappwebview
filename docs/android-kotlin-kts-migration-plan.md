@@ -1,7 +1,7 @@
 # Android Kotlin/KTS and Native Package Migration Plan
 
 Last reviewed: 2026-08-06  
-Status: Implementation in progress; the Java-to-Kotlin migration is complete, while API/performance validation and the built-in Kotlin toolchain migration remain  
+Status: Conditional AGP 9 compatibility is implemented; Flutter/AGP runtime validation and API/performance validation remain  
 Scope: `flutter_inappwebview_forge_android` and the Android example applications
 
 ## Objective
@@ -28,11 +28,26 @@ Current Flutter documentation presents Kotlin as the default language for Androi
 | --- | --- | --- |
 | Native language | 157 Kotlin files under `android/src/main/kotlin`; no plugin native Java source remains | All native sources in Kotlin under `android/src/main/kotlin` |
 | Gradle | `build.gradle.kts` and `settings.gradle.kts` using the transition plugin model | `build.gradle.kts`, `plugins {}` DSL, and the supported built-in Kotlin model |
-| Kotlin build model | Flutter 3.44.8 template with KTS and transitional KGP; built-in Kotlin is not enabled | AGP 9+ built-in Kotlin with no `kotlin-android` plugin |
+| Kotlin build model | Android 1.0.48 applies KGP only for AGP <9 and configures JVM 17 through the Kotlin extension | AGP 9+ built-in Kotlin with no forced KGP application |
 | Native namespace | `com.pichillilorenzo.flutter_inappwebview_android` | `com.emirkanacar.flutter_inappwebview_forge_android` |
 | Flutter baseline | Flutter `3.44.8`, Dart `3.12.2` | Flutter `>=3.47.0`, Dart `^3.12.0` for built-in Kotlin |
 | Java/Kotlin bytecode | Java 17 target | Java/Kotlin JVM 17 target |
 | Android build | AGP `8.13.2` with the transitional KTS toolchain | Flutter-template-compatible AGP 9.x and matching Gradle |
+
+## Built-in Kotlin compatibility checkpoint — 2026-08-12
+
+The Android library and both Forge example application modules now use the
+Flutter plugin-author migration shape: `org.jetbrains.kotlin.android` is not
+declared in the `plugins` block, is applied conditionally only when the AGP
+major version is below 9, and the JVM 17 target is configured through
+`KotlinAndroidProjectExtension`. The root example no longer forces
+`android.builtInKotlin=false` or `android.newDsl=false`.
+
+This keeps the current Flutter 3.44.8/AGP 8.13.2 development path working while
+allowing a Flutter >=3.47/AGP 9 consumer to use built-in Kotlin. The Android
+static migration regression passes. The target Flutter >=3.47, AGP 9, Gradle
+9, JDK 17, built-in-Kotlin, release/AAB, and consuming-app validation remains a
+runtime/toolchain gate.
 
 ## Initial implementation checkpoint — 2026-08-06
 

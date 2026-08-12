@@ -230,6 +230,37 @@ void main() {
     expect(webViewSource, contains('mapNotNull'));
   });
 
+  test('Android Gradle scripts do not force KGP on AGP 9', () {
+    final rootExampleFile = [
+      File(
+        '../flutter_inappwebview_forge/example/android/app/build.gradle.kts',
+      ),
+      File('flutter_inappwebview_forge/example/android/app/build.gradle.kts'),
+    ].firstWhere((file) => file.existsSync());
+    final buildFiles = [
+      _sourceFile('android/build.gradle.kts'),
+      _sourceFile('example/android/app/build.gradle.kts'),
+      rootExampleFile,
+    ];
+
+    for (final file in buildFiles) {
+      final source = file.readAsStringSync();
+      expect(
+        source,
+        contains(
+          'val agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION',
+        ),
+      );
+      expect(source, contains('if (agpMajor < 9)'));
+      expect(
+        source,
+        contains('apply(plugin = "org.jetbrains.kotlin.android")'),
+      );
+      expect(source, contains('KotlinAndroidProjectExtension'));
+      expect(source, isNot(contains('id("org.jetbrains.kotlin.android")')));
+    }
+  });
+
   test('Android file chooser rejects private sandbox file URIs', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

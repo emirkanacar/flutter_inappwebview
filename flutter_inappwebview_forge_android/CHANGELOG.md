@@ -1,3 +1,10 @@
+## 1.0.48 - 2026-08-12
+
+- Make the Android library and example apply the Kotlin Gradle Plugin only
+  for AGP versions below 9, allowing AGP 9 built-in Kotlin consumers to build
+  without a forced KGP application ([#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846)).
+  Legacy AGP/Kotlin builds retain the conditional compatibility path.
+
 ## 1.0.47 - 2026-08-12
 
 - Add feature-gated Android User-Agent Client Hints metadata customization

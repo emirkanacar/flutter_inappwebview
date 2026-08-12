@@ -1,3 +1,9 @@
+## 2.1.56 - 2026-08-12
+
+- Update the Android implementation to 1.0.48 for conditional KGP
+  application and AGP 9 built-in Kotlin compatibility
+  ([#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846)).
+
 ## 2.1.55 - 2026-08-12
 
 - Add Android User-Agent Client Hints metadata customization through the new

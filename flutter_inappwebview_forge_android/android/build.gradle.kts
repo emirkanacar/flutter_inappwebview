@@ -1,8 +1,13 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+}
+
+val agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    .substringBefore('.')
+    .toInt()
+
+if (agpMajor < 9) {
+    apply(plugin = "org.jetbrains.kotlin.android")
 }
 
 group = "com.emirkanacar.flutter_inappwebview_forge_android"
@@ -22,12 +27,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
     }
 
     sourceSets {
@@ -68,5 +67,13 @@ android {
         implementation("androidx.browser:browser:1.10.0")
         implementation("androidx.appcompat:appcompat:1.7.1")
         implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")
+    }
+}
+
+project.extensions.configure(
+    org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension::class.java,
+) {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
