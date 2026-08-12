@@ -1,6 +1,6 @@
 ## 1.1.12 - 2026-08-12
 
-- Advertise the persistent container API on macOS, Windows, and Linux.
+- Extend persistent container API support to macOS, Windows, and Linux.
 
 ## 1.1.11 - 2026-08-12
 
