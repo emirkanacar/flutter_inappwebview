@@ -15,13 +15,14 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
-## 2026-08-12 Android and iOS container API implementation
+## 2026-08-12 Cross-platform container API implementation
 
 Upstream [PR #2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
 requested named persistent WebView containers, `InAppWebViewSettings.containerId`,
 container enumeration/deletion, and per-container proxy support. Forge now
-implements the Android and iOS storage portion in platform-interface 1.1.11,
-Android 1.0.52, iOS 2.1.29, and root 2.1.64: `ContainerController` exposes
+implements the Android, iOS, macOS, Windows, and Linux storage portion in
+platform-interface 1.1.12, Android 1.0.52, iOS 2.1.29, macOS 1.1.7, Windows
+1.0.11, Linux 1.0.6, and root 2.1.65: `ContainerController` exposes
 named container management; Android binds `ProfileStore` before bridge,
 cookie, or other WebView state initialization and routes scoped cookie calls to
 that WebView's profile cookie store; iOS 17+ binds UUID identifiers to
@@ -32,8 +33,9 @@ fans out to all container profile cookie stores; `clearContainerData` clears
 supported container data without deleting the profile. The source regression
 suite, Android Kotlin compile, and Xcode iOS example build pass. Android
 WebView 110+/`MULTI_PROFILE` and physical iOS 17+ validation are still
-required; macOS/Linux adapters and per-container proxy configuration remain
-follow-up work. The upstream PR state was not changed.
+required; desktop target-OS builds/runtime validation remain pending and
+per-container proxy configuration remains follow-up work. The upstream PR
+state was not changed.
 
 ## 2026-08-12 iOS physical popup validation
 

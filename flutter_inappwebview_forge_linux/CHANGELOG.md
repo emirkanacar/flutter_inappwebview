@@ -1,3 +1,8 @@
+## 1.0.6 - 2026-08-12
+
+- Add persistent WPE WebKit data containers through `ContainerController` and
+  `InAppWebViewSettings.containerId`.
+
 ## 1.0.5 - 2026-08-08
 
 - Make `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` force software WPE buffers before startup and skip DMA-BUF/EGL import in the pixel-buffer path, addressing white/transparent output reports on affected Intel/X11 systems ([#2861](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2861)).

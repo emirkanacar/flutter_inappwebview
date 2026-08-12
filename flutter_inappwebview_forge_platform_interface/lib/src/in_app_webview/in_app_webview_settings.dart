@@ -1476,6 +1476,23 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
         available: "17.0",
         note: "The identifier must be a valid UUID string on iOS.",
       ),
+      MacOSPlatform(
+        apiName: "WKWebsiteDataStore(forIdentifier:)",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4055360-init",
+        available: "14.0",
+        note: "The identifier must be a valid UUID string on macOS.",
+      ),
+      WindowsPlatform(
+        apiName: "CoreWebView2Environment user data folder",
+        note:
+            "The identifier is sanitized and used as a persistent profile name.",
+      ),
+      LinuxPlatform(
+        apiName: "WebKitWebsiteDataManager",
+        note:
+            "The identifier is sanitized and used as a persistent profile name.",
+      ),
     ],
   )
   String? containerId;

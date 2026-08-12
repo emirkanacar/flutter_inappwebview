@@ -244,6 +244,7 @@ list(APPEND PLUGIN_SOURCES
   "in_app_browser/in_app_browser_channel_delegate.cpp"
   "in_app_browser/in_app_browser_channel_delegate.h"
   "cookie_manager.cpp"
+  "container_manager.cpp"
   "cookie_manager.h"
   "platform_util.cpp"
   "platform_util.h"

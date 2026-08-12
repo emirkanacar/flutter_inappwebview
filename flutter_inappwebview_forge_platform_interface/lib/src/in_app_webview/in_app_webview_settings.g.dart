@@ -368,6 +368,12 @@ class InAppWebViewSettings {
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier)):
   ///    - The identifier must be a valid UUID string on iOS.
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore(forIdentifier:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4055360-init)):
+  ///    - The identifier must be a valid UUID string on macOS.
+  ///- Windows WebView2 (Official API - CoreWebView2Environment user data folder):
+  ///    - The identifier is sanitized and used as a persistent profile name.
+  ///- Linux WPE WebKit (Official API - WebKitWebsiteDataManager):
+  ///    - The identifier is sanitized and used as a persistent profile name.
   String? containerId;
 
   ///List of [ContentBlocker] that are a set of rules used to block content in the browser window.
@@ -3504,6 +3510,12 @@ enum InAppWebViewSettingsProperty {
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier)):
   ///    - The identifier must be a valid UUID string on iOS.
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore(forIdentifier:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4055360-init)):
+  ///    - The identifier must be a valid UUID string on macOS.
+  ///- Windows WebView2 (Official API - CoreWebView2Environment user data folder):
+  ///    - The identifier is sanitized and used as a persistent profile name.
+  ///- Linux WPE WebKit (Official API - WebKitWebsiteDataManager):
+  ///    - The identifier is sanitized and used as a persistent profile name.
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -5733,6 +5745,9 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.contentBlockers:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

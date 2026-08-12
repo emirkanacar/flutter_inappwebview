@@ -1,3 +1,8 @@
+## 1.0.11 - 2026-08-12
+
+- Add persistent WebView2 user-data containers through
+  `ContainerController` and `InAppWebViewSettings.containerId`.
+
 ## 1.0.10 - 2026-08-12
 
 - Serialize WebView2 controller resize, position, visibility, and teardown

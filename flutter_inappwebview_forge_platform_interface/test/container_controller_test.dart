@@ -20,6 +20,21 @@ void main() {
 
     expect(settings.toMap()['containerId'], 'account-a');
     expect(settings.copy().containerId, 'account-a');
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      expect(
+        InAppWebViewSettings.isPropertySupported(
+          InAppWebViewSettingsProperty.containerId,
+          platform: platform,
+        ),
+        isTrue,
+      );
+    }
   });
 
   test('proxySettings is included in settings serialization', () {
@@ -56,15 +71,21 @@ void main() {
     );
   });
 
-  test('container capability metadata covers Android and iOS', () {
+  test('container capability metadata covers supported platforms', () {
     const params = PlatformContainerControllerCreationParams();
 
     expect(params.isClassSupported(platform: TargetPlatform.android), isTrue);
     expect(params.isClassSupported(platform: TargetPlatform.iOS), isTrue);
-    expect(params.isClassSupported(platform: TargetPlatform.linux), isFalse);
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      expect(params.isClassSupported(platform: platform), isTrue);
+    }
   });
 
-  test('clearContainerData capability covers Android and iOS', () {
+  test('clearContainerData capability covers supported platforms', () {
     InAppWebViewPlatform.instance = _TestInAppWebViewPlatform();
 
     expect(
@@ -81,5 +102,18 @@ void main() {
       ),
       isTrue,
     );
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      expect(
+        PlatformContainerController.static().isMethodSupported(
+          PlatformContainerControllerMethod.clearContainerData,
+          platform: platform,
+        ),
+        isTrue,
+      );
+    }
   });
 }

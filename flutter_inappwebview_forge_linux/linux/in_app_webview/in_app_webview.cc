@@ -71,6 +71,7 @@
 #include "../utils/log.h"
 #include "../utils/uri.h"
 #include "in_app_webview_manager.h"
+#include "../container_manager.h"
 #include "simd_convert.h"
 #include "user_content_controller.h"
 #include "webview_channel_delegate.h"
@@ -673,6 +674,27 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
   }
   
   WebKitWebContext* webContext = params.webContext;
+  WebKitWebContext* containerContext = nullptr;
+  WebKitWebsiteDataManager* containerDataManager = nullptr;
+  if (webContext == nullptr && params.initialSettings &&
+      params.initialSettings->containerId.has_value()) {
+    const auto dataDirectory = ContainerManager::dataDirectoryFor(
+        params.initialSettings->containerId.value());
+    if (dataDirectory.has_value()) {
+      const auto cacheDirectory = dataDirectory.value().parent_path() / "cache";
+      std::error_code error;
+      std::filesystem::create_directories(dataDirectory.value(), error);
+      std::filesystem::create_directories(cacheDirectory, error);
+      containerDataManager = webkit_website_data_manager_new(
+          dataDirectory.value().c_str(), cacheDirectory.c_str());
+      if (containerDataManager != nullptr) {
+        containerContext = webkit_web_context_new_with_website_data_manager(
+            containerDataManager);
+        g_object_unref(containerDataManager);
+        webContext = containerContext;
+      }
+    }
+  }
   
   // Check if we're creating a related webview (for multi-window support)
   if (params.relatedWebView != nullptr) {
@@ -718,6 +740,9 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
       g_object_unref(networkSession);
     }
     return;
+  }
+  if (containerContext != nullptr) {
+    g_object_unref(containerContext);
   }
   
   // Get WPEView from the WebView (created automatically by WebKit)
@@ -836,6 +861,27 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
 
     // Check if a custom WebKitWebContext is provided
     WebKitWebContext* webContext = params.webContext;
+    WebKitWebContext* containerContext = nullptr;
+    WebKitWebsiteDataManager* containerDataManager = nullptr;
+    if (webContext == nullptr && params.initialSettings &&
+        params.initialSettings->containerId.has_value()) {
+      const auto dataDirectory = ContainerManager::dataDirectoryFor(
+          params.initialSettings->containerId.value());
+      if (dataDirectory.has_value()) {
+        const auto cacheDirectory = dataDirectory.value().parent_path() / "cache";
+        std::error_code error;
+        std::filesystem::create_directories(dataDirectory.value(), error);
+        std::filesystem::create_directories(cacheDirectory, error);
+        containerDataManager = webkit_website_data_manager_new(
+            dataDirectory.value().c_str(), cacheDirectory.c_str());
+        if (containerDataManager != nullptr) {
+          containerContext = webkit_web_context_new_with_website_data_manager(
+              containerDataManager);
+          g_object_unref(containerDataManager);
+          webContext = containerContext;
+        }
+      }
+    }
 
     if (webContext != nullptr) {
       debugLog("InAppWebView: Creating WebView with custom WebKitWebContext");
@@ -882,6 +928,9 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
 
     webkit_web_view_set_settings(webview_, settings);
     g_object_unref(settings);
+    if (containerContext != nullptr) {
+      g_object_unref(containerContext);
+    }
   }
 #endif
 

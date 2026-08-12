@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "cookie_manager.h"
+#include "container_manager.h"
 #include "credential_database.h"
 #include "headless_in_app_webview/headless_in_app_webview_manager.h"
 #include "in_app_browser/in_app_browser_manager.h"
@@ -40,6 +41,7 @@ struct _FlutterInappwebviewLinuxPlugin {
   std::unique_ptr<flutter_inappwebview_plugin::ProxyManager> proxy_manager;
   std::unique_ptr<flutter_inappwebview_plugin::WebStorageManager> web_storage_manager;
   std::unique_ptr<flutter_inappwebview_plugin::WebViewEnvironment> webview_environment;
+  std::unique_ptr<flutter_inappwebview_plugin::ContainerManager> container_manager;
 };
 
 G_DEFINE_TYPE(FlutterInappwebviewLinuxPlugin, flutter_inappwebview_linux_plugin,
@@ -57,6 +59,7 @@ static void flutter_inappwebview_linux_plugin_dispose(GObject* object) {
   self->proxy_manager.reset();
   self->web_storage_manager.reset();
   self->webview_environment.reset();
+  self->container_manager.reset();
   
   // Clean up the plugin instance last (after managers are gone)
   self->plugin_instance.reset();
@@ -116,6 +119,8 @@ void flutter_inappwebview_linux_plugin_register_with_registrar(FlPluginRegistrar
 
   plugin->webview_environment = std::make_unique<flutter_inappwebview_plugin::WebViewEnvironment>(pluginInstance);
   pluginInstance->webViewEnvironment = plugin->webview_environment.get();
+  plugin->container_manager = std::make_unique<flutter_inappwebview_plugin::ContainerManager>(pluginInstance);
+  pluginInstance->containerManager = plugin->container_manager.get();
 
   // Note: We don't unref the plugin here as it needs to stay alive
   // for the lifetime of the application
@@ -179,4 +184,3 @@ int flutter_inappwebview_linux_plugin_get_monitor_refresh_rate_for_window(GtkWin
   // (e.g., 60000 for 60 Hz)
   return gdk_monitor_get_refresh_rate(monitor);
 }
-

@@ -24,6 +24,7 @@ namespace flutter_inappwebview_plugin
     bool isInspectable = true;
     bool disableContextMenu = false;
     bool incognito = false;
+    std::optional<std::string> containerId = std::optional<std::string>{};
     std::optional<std::vector<std::string>> javaScriptHandlersOriginAllowList = std::optional<std::vector<std::string>>{};
     bool javaScriptHandlersForMainFrameOnly = false;
     bool javaScriptBridgeEnabled = true;

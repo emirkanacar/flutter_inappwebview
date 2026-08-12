@@ -26,6 +26,22 @@ part 'platform_container_controller.g.dart';
           'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier',
       available: '17.0',
     ),
+    MacOSPlatform(
+      apiName: 'WKWebsiteDataStore(forIdentifier:)',
+      apiUrl:
+          'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4055360-init',
+      available: '14.0',
+    ),
+    WindowsPlatform(
+      apiName: 'CoreWebView2Environment userDataFolder',
+      apiUrl:
+          'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+    ),
+    LinuxPlatform(
+      apiName: 'WebKitWebsiteDataManager persistent directories',
+      apiUrl:
+          'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
+    ),
   ],
 )
 @immutable
@@ -58,6 +74,22 @@ class PlatformContainerControllerCreationParams {
       apiUrl:
           'https://developer.apple.com/documentation/webkit/wkwebsitedatastore',
       available: '17.0',
+    ),
+    MacOSPlatform(
+      apiName: 'WKWebsiteDataStore',
+      apiUrl:
+          'https://developer.apple.com/documentation/webkit/wkwebsitedatastore',
+      available: '14.0',
+    ),
+    WindowsPlatform(
+      apiName: 'CoreWebView2Environment userDataFolder',
+      apiUrl:
+          'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+    ),
+    LinuxPlatform(
+      apiName: 'WebKitWebsiteDataManager persistent directories',
+      apiUrl:
+          'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
     ),
   ],
 )
@@ -116,6 +148,22 @@ abstract class PlatformContainerController extends PlatformInterface {
             'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
         available: '17.0',
       ),
+      MacOSPlatform(
+        apiName: 'WKWebsiteDataStore.fetchAllDataStoreIdentifiers',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
+        available: '14.0',
+      ),
+      WindowsPlatform(
+        apiName: 'CoreWebView2Environment userDataFolder',
+        apiUrl:
+            'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+      ),
+      LinuxPlatform(
+        apiName: 'WebKitWebsiteDataManager persistent directories',
+        apiUrl:
+            'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
+      ),
     ],
   )
   Future<List<String>> getAllContainerNames() {
@@ -138,6 +186,22 @@ abstract class PlatformContainerController extends PlatformInterface {
         apiUrl:
             'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
         available: '17.0',
+      ),
+      MacOSPlatform(
+        apiName: 'WKWebsiteDataStore.fetchAllDataStoreIdentifiers',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
+        available: '14.0',
+      ),
+      WindowsPlatform(
+        apiName: 'CoreWebView2Environment userDataFolder',
+        apiUrl:
+            'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+      ),
+      LinuxPlatform(
+        apiName: 'WebKitWebsiteDataManager persistent directories',
+        apiUrl:
+            'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
       ),
     ],
   )
@@ -162,6 +226,22 @@ abstract class PlatformContainerController extends PlatformInterface {
             'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier',
         available: '17.0',
       ),
+      MacOSPlatform(
+        apiName: 'WKWebsiteDataStore.remove(forIdentifier:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier',
+        available: '14.0',
+      ),
+      WindowsPlatform(
+        apiName: 'CoreWebView2Environment userDataFolder',
+        apiUrl:
+            'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+      ),
+      LinuxPlatform(
+        apiName: 'WebKitWebsiteDataManager persistent directories',
+        apiUrl:
+            'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
+      ),
     ],
   )
   Future<bool> deleteContainer(String containerId) {
@@ -185,6 +265,23 @@ abstract class PlatformContainerController extends PlatformInterface {
         apiUrl:
             'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata',
         available: '17.0',
+      ),
+      MacOSPlatform(
+        apiName:
+            'WKWebsiteDataStore.removeData(ofTypes:modifiedSince:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata',
+        available: '14.0',
+      ),
+      WindowsPlatform(
+        apiName: 'CoreWebView2Environment userDataFolder',
+        apiUrl:
+            'https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder',
+      ),
+      LinuxPlatform(
+        apiName: 'WebKitWebsiteDataManager persistent directories',
+        apiUrl:
+            'https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html',
       ),
     ],
   )

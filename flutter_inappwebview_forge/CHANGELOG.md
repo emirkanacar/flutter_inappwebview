@@ -1,3 +1,8 @@
+## 2.1.65 - 2026-08-12
+
+- Add persistent `ContainerController` support for macOS, Windows, and Linux
+  through each platform's native WebView data profile.
+
 ## 2.1.64 - 2026-08-12
 
 - Add `ContainerController.clearContainerData` for clearing Android and iOS

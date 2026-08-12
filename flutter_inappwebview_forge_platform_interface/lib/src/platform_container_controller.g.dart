@@ -13,6 +13,9 @@ extension _PlatformContainerControllerCreationParamsClassSupported
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore(forIdentifier:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4055360-init))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///Use the [PlatformContainerControllerCreationParams.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -21,6 +24,9 @@ extension _PlatformContainerControllerCreationParamsClassSupported
         [
           TargetPlatform.android,
           TargetPlatform.iOS,
+          TargetPlatform.macOS,
+          TargetPlatform.windows,
+          TargetPlatform.linux,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -32,6 +38,9 @@ extension _PlatformContainerControllerClassSupported
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore](https://developer.apple.com/documentation/webkit/wkwebsitedatastore))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore](https://developer.apple.com/documentation/webkit/wkwebsitedatastore))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///Use the [PlatformContainerController.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -40,6 +49,9 @@ extension _PlatformContainerControllerClassSupported
         [
           TargetPlatform.android,
           TargetPlatform.iOS,
+          TargetPlatform.macOS,
+          TargetPlatform.windows,
+          TargetPlatform.linux,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -53,6 +65,9 @@ enum PlatformContainerControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - Profile.getCookieManager / getWebStorage](https://developer.android.com/reference/androidx/webkit/Profile))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.removeData(ofTypes:modifiedSince:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.removeData(ofTypes:modifiedSince:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [containerId]: all platforms
@@ -68,6 +83,9 @@ enum PlatformContainerControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.deleteProfile](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.removeDataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.remove(forIdentifier:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [containerId]: all platforms
@@ -83,6 +101,9 @@ enum PlatformContainerControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.getAllProfileNames](https://developer.android.com/reference/androidx/webkit/ProfileStore#getAllProfileNames()))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -95,6 +116,9 @@ enum PlatformContainerControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.getProfile](https://developer.android.com/reference/androidx/webkit/ProfileStore))
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
+  ///- Windows WebView2 ([Official API - CoreWebView2Environment userDataFolder](https://learn.microsoft.com/microsoft-edge/webview2/concepts/user-data-folder))
+  ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager persistent directories](https://webkitgtk.org/reference/webkit2gtk/stable/class.WebsiteDataManager.html))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [containerId]: all platforms
@@ -116,24 +140,36 @@ extension _PlatformContainerControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.deleteContainer:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.getAllContainerNames:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.hasContainer:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.windows,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }

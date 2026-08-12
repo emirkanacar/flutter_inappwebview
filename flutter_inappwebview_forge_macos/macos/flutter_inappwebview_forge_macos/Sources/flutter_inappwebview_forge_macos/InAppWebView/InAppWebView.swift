@@ -337,6 +337,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             
             if settings.incognito {
                 configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
+            } else if #available(macOS 14.0, *), let containerId = settings.containerId,
+                      let identifier = UUID(uuidString: containerId) {
+                configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: identifier)
             } else if settings.cacheEnabled {
                 configuration.websiteDataStore = WKWebsiteDataStore.default()
             }

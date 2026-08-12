@@ -1,3 +1,8 @@
+## 1.1.7 - 2026-08-12
+
+- Add persistent WebKit containers through `ContainerController` and
+  `InAppWebViewSettings.containerId` on macOS 14+.
+
 ## 1.1.6 - 2026-08-09
 
 - Isolate the macOS 10.15+ `ASWebAuthenticationPresentationContextProviding` implementation from `WebAuthenticationSession`, preventing the Xcode availability compile failure ([#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)). Source tests and Swift Package manifest checks pass; consuming-app validation remains pending.

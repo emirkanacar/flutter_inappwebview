@@ -35,8 +35,9 @@ Eight PR-only records also have local implementations but remain outside the
 [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825).
 
 PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
-is source-fixed in Android 1.0.52, iOS 2.1.29, platform-interface 1.1.11, and
-root 2.1.64 for the first Android/iOS container API slice.
+is source-fixed in Android 1.0.52, iOS 2.1.29, macOS 1.1.7, Windows 1.0.11,
+Linux 1.0.6, platform-interface 1.1.12, and root 2.1.65 for the
+Android/iOS/desktop container API slice.
 `ContainerController` manages named containers; AndroidX WebKit profiles are
 bound before WebView state setup and scoped cookie calls resolve the profile
 cookie store through the WebView controller id; iOS 17+ binds UUID identifiers
@@ -49,8 +50,9 @@ The Android source suite, `compileDebugKotlin`, and Xcode iOS example build
 pass. A physical Android provider with WebView 110+
 must still verify two same-origin WebViews, cookie/local-storage separation,
 profile deletion after disposal, and fallback behavior without `MULTI_PROFILE`;
-physical iOS 17+ must verify the same data-store lifecycle. macOS/Linux
-adapters and per-container proxy support remain outside this first slice.
+physical iOS 17+ must verify the same data-store lifecycle. The desktop
+adapters are source-complete; target-OS builds/runtime validation remain
+pending. Per-container proxy support remains outside this first slice.
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and

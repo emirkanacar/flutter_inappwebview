@@ -140,6 +140,7 @@ class InAppWebViewSettings {
   // === Incognito mode ===
   // When true, creates an ephemeral network session (no persistent storage)
   bool incognito = false;
+  std::optional<std::string> containerId = std::optional<std::string>{};
 
   // === CORS allowlist ===
   // List of URI patterns for which CORS checks are disabled

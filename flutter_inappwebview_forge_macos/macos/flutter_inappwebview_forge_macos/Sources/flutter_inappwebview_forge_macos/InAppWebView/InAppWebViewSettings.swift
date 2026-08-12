@@ -30,6 +30,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var interceptOnlyAsyncAjaxRequests = true
     var useShouldInterceptFetchRequest = false
     var incognito = false
+    var containerId: String? = nil
     var cacheEnabled = true
     var transparentBackground = false
     var supportZoom = true

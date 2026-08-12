@@ -205,6 +205,7 @@ InAppWebViewSettings::InAppWebViewSettings(FlValue* map) : InAppWebViewSettings(
 
   // === Incognito mode ===
   incognito = get_fl_map_value(map, "incognito", incognito);
+  containerId = get_optional_fl_map_value<std::string>(map, "containerId");
 
   // === CORS allowlist ===
   if (fl_map_contains_not_null(map, "corsAllowlist")) {
@@ -582,6 +583,7 @@ FlValue* InAppWebViewSettings::toFlValue() const {
 
       // === Incognito mode ===
       {"incognito", make_fl_value(incognito)},
+      {"containerId", make_fl_value(containerId)},
 
       // === CORS allowlist (handles std::optional automatically) ===
       {"corsAllowlist", make_fl_value(corsAllowlist)},

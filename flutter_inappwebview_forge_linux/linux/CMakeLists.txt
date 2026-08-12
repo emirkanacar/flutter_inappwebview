@@ -182,6 +182,7 @@ list(APPEND PLUGIN_SOURCES
   "flutter_inappwebview_linux_plugin.cc"
   "plugin_instance.cc"
   "cookie_manager.cc"
+  "container_manager.cc"
   "credential_database.cc"
   "proxy_manager.cc"
   "utils/software_rendering.cc"

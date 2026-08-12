@@ -50,6 +50,7 @@
 #include "../print_job/print_job_manager.h"
 #include "in_app_webview.h"
 #include "in_app_webview_manager.h"
+#include "../container_manager.h"
 
 namespace flutter_inappwebview_plugin
 {
@@ -240,8 +241,19 @@ namespace flutter_inappwebview_plugin
       hr = callback(S_OK, webViewEnvironment->getEnvironment());
     }
     else {
+      std::wstring userDataFolder;
+      LPCWSTR userDataFolderPtr = nullptr;
+      if (initialSettings && initialSettings->containerId.has_value()) {
+        const auto folder = ContainerManager::userDataFolderFor(initialSettings->containerId.value());
+        if (folder.has_value()) {
+          std::error_code error;
+          std::filesystem::create_directories(folder.value(), error);
+          userDataFolder = folder.value().wstring();
+          userDataFolderPtr = userDataFolder.c_str();
+        }
+      }
       hr = CreateCoreWebView2EnvironmentWithOptions(
-        nullptr, nullptr, nullptr,
+        nullptr, userDataFolderPtr, nullptr,
         Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(callback).Get());
     }
 

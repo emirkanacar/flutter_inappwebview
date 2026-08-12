@@ -1,6 +1,7 @@
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
 import 'cookie_manager/cookie_manager.dart';
+import 'container_controller.dart';
 import 'find_interaction/find_interaction_controller.dart';
 import 'http_auth_credentials_database.dart';
 import 'in_app_browser/in_app_browser.dart';
@@ -20,6 +21,18 @@ class LinuxInAppWebViewPlatform extends InAppWebViewPlatform {
   /// Registers this class as the default instance of [InAppWebViewPlatform].
   static void registerWith() {
     InAppWebViewPlatform.instance = LinuxInAppWebViewPlatform();
+  }
+
+  @override
+  LinuxContainerController createPlatformContainerController(
+    PlatformContainerControllerCreationParams params,
+  ) {
+    return LinuxContainerController(params);
+  }
+
+  @override
+  LinuxContainerController createPlatformContainerControllerStatic() {
+    return LinuxContainerController.static();
   }
 
   /// Creates a new [LinuxInAppWebViewController].

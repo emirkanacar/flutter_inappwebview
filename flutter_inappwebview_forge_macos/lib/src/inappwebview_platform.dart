@@ -1,6 +1,7 @@
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
 import 'cookie_manager.dart';
+import 'container_controller.dart';
 import 'find_interaction/main.dart';
 import 'http_auth_credentials_database.dart';
 import 'in_app_browser/in_app_browser.dart';
@@ -16,6 +17,18 @@ class MacOSInAppWebViewPlatform extends InAppWebViewPlatform {
   /// Registers this class as the default instance of [InAppWebViewPlatform].
   static void registerWith() {
     InAppWebViewPlatform.instance = MacOSInAppWebViewPlatform();
+  }
+
+  @override
+  MacOSContainerController createPlatformContainerController(
+    PlatformContainerControllerCreationParams params,
+  ) {
+    return MacOSContainerController(params);
+  }
+
+  @override
+  MacOSContainerController createPlatformContainerControllerStatic() {
+    return MacOSContainerController.static();
   }
 
   /// Creates a new [MacOSCookieManager].

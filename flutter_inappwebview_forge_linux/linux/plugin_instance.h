@@ -15,6 +15,7 @@ class CredentialDatabase;
 class ProxyManager;
 class WebStorageManager;
 class WebViewEnvironment;
+class ContainerManager;
 
 /// Plugin instance - provides access to all managers
 /// This is the C++ equivalent of FlutterInappwebviewWindowsPlugin
@@ -55,6 +56,7 @@ public:
   ProxyManager* proxyManager = nullptr;
   WebStorageManager* webStorageManager = nullptr;
   WebViewEnvironment* webViewEnvironment = nullptr;
+  ContainerManager* containerManager = nullptr;
 
 private:
   FlPluginRegistrar* registrar_ = nullptr;

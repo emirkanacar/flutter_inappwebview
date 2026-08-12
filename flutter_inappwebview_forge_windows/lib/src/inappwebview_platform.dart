@@ -1,6 +1,7 @@
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
 import 'cookie_manager.dart';
+import 'container_controller.dart';
 import 'find_interaction/find_interaction_controller.dart';
 import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/headless_in_app_webview.dart';
@@ -18,6 +19,18 @@ class WindowsInAppWebViewPlatform extends InAppWebViewPlatform {
   /// Registers this class as the default instance of [InAppWebViewPlatform].
   static void registerWith() {
     InAppWebViewPlatform.instance = WindowsInAppWebViewPlatform();
+  }
+
+  @override
+  WindowsContainerController createPlatformContainerController(
+    PlatformContainerControllerCreationParams params,
+  ) {
+    return WindowsContainerController(params);
+  }
+
+  @override
+  WindowsContainerController createPlatformContainerControllerStatic() {
+    return WindowsContainerController.static();
   }
 
   /// Creates a new [WindowsCookieManager].
