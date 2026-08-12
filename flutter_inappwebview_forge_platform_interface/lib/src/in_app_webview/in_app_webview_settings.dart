@@ -1426,6 +1426,24 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   WebAuthenticationSupport_? webAuthenticationSupport;
 
+  ///Enables the Android Payment Request API for this WebView.
+  ///
+  ///Payment Request is disabled by default. Google Pay integrations also
+  ///require the host app's payment-provider setup and Android manifest
+  ///queries.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "WebSettingsCompat.setPaymentRequestEnabled",
+        apiUrl:
+            "https://developer.android.com/reference/androidx/webkit/WebSettingsCompat#setPaymentRequestEnabled(android.webkit.WebSettings,boolean)",
+        note:
+            "available on Android only if [WebViewFeature.PAYMENT_REQUEST] feature is supported.",
+      ),
+    ],
+  )
+  bool? paymentRequestEnabled;
+
   ///When not playing, video elements are represented by a 'poster' image.
   ///The image to use can be specified by the poster attribute of the video tag in HTML.
   ///If the attribute is absent, then a default poster will be used.
@@ -3405,6 +3423,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.algorithmicDarkeningAllowed = false,
     this.enterpriseAuthenticationAppLinkPolicyEnabled = true,
     this.webAuthenticationSupport,
+    this.paymentRequestEnabled,
     this.defaultVideoPoster,
     this.requestedWithHeaderOriginAllowList,
     this.disallowOverScroll = false,

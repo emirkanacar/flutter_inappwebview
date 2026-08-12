@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-12
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 70 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 39 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 71 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 38 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 70 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 71 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 14 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 39 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 38 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -318,6 +318,32 @@ providers, verify `NONE`, `FOR_APP` with valid Digital Asset Links, and
 cancelled, and unavailable authenticator flows and confirm the effective
 setting reported by `getRealSettings`. PR #2743 remains open upstream; no
 upstream state or comment was changed.
+
+### #2660 - Android Payment Request / Google Pay
+
+**Local status:** Implemented in Android 1.0.46, platform interface 1.1.6,
+and root 2.1.54; WebView-provider and physical-device validation pending.
+**Impact:** Android WebView keeps the Payment Request API disabled by default,
+so Google Pay pages cannot reach the Android WebView payment bridge unless the
+embedding app explicitly enables the capability and satisfies Google's host,
+provider, and merchant requirements. **Fix:** the public nullable
+`InAppWebViewSettings.paymentRequestEnabled` setting is serialized through the
+platform interface, exposed by `WebViewFeature.PAYMENT_REQUEST`, applied only
+after `WebViewFeature.isFeatureSupported`, and returned by `getRealSettings`.
+The Android library manifest declares the Chromium `PAY`, `IS_READY_TO_PAY`,
+and `UPDATE_PAYMENT_DETAILS` intent queries required by the Payment Request
+bridge. When the feature is unavailable or the setting is `null`, the plugin
+does not make an unguarded compat call and preserves the WebView default.
+
+**Required validation:** exercise enabled and disabled Payment Request flows
+on Android 12-16 with current Google WebView and representative OEM providers;
+verify `IS_READY_TO_PAY`, successful and cancelled transactions, missing or
+unavailable payment apps, merchant/host publication requirements, and the
+`GOOGLE_PAY_SUPPORTED` suffix when a host supplies a custom user agent. The
+manifest queries are plugin support; merchant configuration, Google Pay
+publication, and any host-app permissions or policy remain the consuming
+application's responsibility. The focused platform-interface and Android
+tests plus `compileDebugKotlin` and `assembleDebug` pass.
 
 ### PR #2853 - iOS platform-view focus recovery
 

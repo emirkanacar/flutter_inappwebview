@@ -102,6 +102,12 @@ class WebViewFeature {
     'OFF_SCREEN_PRERASTER',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
+  static const PAYMENT_REQUEST = WebViewFeature._internal(
+    'PAYMENT_REQUEST',
+    'PAYMENT_REQUEST',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.postWebMessage].
   static const POST_WEB_MESSAGE = WebViewFeature._internal(
     'POST_WEB_MESSAGE',
@@ -351,6 +357,7 @@ class WebViewFeature {
     WebViewFeature.GET_WEB_VIEW_RENDERER,
     WebViewFeature.MULTI_PROCESS,
     WebViewFeature.OFF_SCREEN_PRERASTER,
+    WebViewFeature.PAYMENT_REQUEST,
     WebViewFeature.POST_WEB_MESSAGE,
     WebViewFeature.PROXY_OVERRIDE,
     WebViewFeature.PROXY_OVERRIDE_REVERSE_BYPASS,
@@ -496,6 +503,8 @@ class WebViewFeature {
         return 'MULTI_PROCESS';
       case 'OFF_SCREEN_PRERASTER':
         return 'OFF_SCREEN_PRERASTER';
+      case 'PAYMENT_REQUEST':
+        return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
       case 'PROXY_OVERRIDE':
@@ -678,6 +687,12 @@ class AndroidWebViewFeature {
   static const OFF_SCREEN_PRERASTER = AndroidWebViewFeature._internal(
     'OFF_SCREEN_PRERASTER',
     'OFF_SCREEN_PRERASTER',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
+  static const PAYMENT_REQUEST = AndroidWebViewFeature._internal(
+    'PAYMENT_REQUEST',
+    'PAYMENT_REQUEST',
   );
 
   ///
@@ -914,6 +929,7 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.GET_WEB_VIEW_RENDERER,
     AndroidWebViewFeature.MULTI_PROCESS,
     AndroidWebViewFeature.OFF_SCREEN_PRERASTER,
+    AndroidWebViewFeature.PAYMENT_REQUEST,
     AndroidWebViewFeature.POST_WEB_MESSAGE,
     AndroidWebViewFeature.PROXY_OVERRIDE,
     AndroidWebViewFeature.RECEIVE_HTTP_ERROR,
@@ -1053,6 +1069,8 @@ class AndroidWebViewFeature {
         return 'MULTI_PROCESS';
       case 'OFF_SCREEN_PRERASTER':
         return 'OFF_SCREEN_PRERASTER';
+      case 'PAYMENT_REQUEST':
+        return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
       case 'PROXY_OVERRIDE':

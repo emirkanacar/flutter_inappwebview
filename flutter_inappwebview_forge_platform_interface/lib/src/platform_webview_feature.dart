@@ -390,6 +390,11 @@ class WebViewFeature_ {
     "WEB_AUTHENTICATION",
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
+  static const PAYMENT_REQUEST = const WebViewFeature_._internal(
+    "PAYMENT_REQUEST",
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.getVariationsHeader].
   static const GET_VARIATIONS_HEADER = const WebViewFeature_._internal(
     "GET_VARIATIONS_HEADER",
@@ -675,6 +680,11 @@ class AndroidWebViewFeature_ {
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.webAuthenticationSupport].
   static const WEB_AUTHENTICATION = const AndroidWebViewFeature_._internal(
     "WEB_AUTHENTICATION",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
+  static const PAYMENT_REQUEST = const AndroidWebViewFeature_._internal(
+    "PAYMENT_REQUEST",
   );
 
   ///Return whether a feature is supported at run-time. On devices running Android version `Build.VERSION_CODES.LOLLIPOP` and higher,

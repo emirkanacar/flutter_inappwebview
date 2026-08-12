@@ -147,6 +147,57 @@ void main() {
     );
   });
 
+  test('Android Payment Request setting is feature-gated and manifest-ready', () {
+    final settingsSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final manifestSource = _sourceFile(
+      'android/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+
+    expect(
+      settingsSource,
+      contains('var paymentRequestEnabled: Boolean? = null'),
+    );
+    expect(
+      settingsSource,
+      contains(
+        '"paymentRequestEnabled" -> paymentRequestEnabled = value as Boolean',
+      ),
+    );
+    expect(
+      settingsSource,
+      contains('put("paymentRequestEnabled", paymentRequestEnabled)'),
+    );
+    expect(settingsSource, contains('WebViewFeature.PAYMENT_REQUEST'));
+    expect(
+      settingsSource,
+      contains('WebSettingsCompat.getPaymentRequestEnabled(settings)'),
+    );
+    expect(
+      webViewSource,
+      contains('customSettings.paymentRequestEnabled?.let'),
+    );
+    expect(
+      webViewSource,
+      contains('WebSettingsCompat.setPaymentRequestEnabled(settings, enabled)'),
+    );
+    expect(manifestSource, contains('org.chromium.intent.action.PAY'));
+    expect(
+      manifestSource,
+      contains('org.chromium.intent.action.IS_READY_TO_PAY'),
+    );
+    expect(
+      manifestSource,
+      contains('org.chromium.intent.action.UPDATE_PAYMENT_DETAILS'),
+    );
+  });
+
   test('Android file chooser rejects private sandbox file URIs', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

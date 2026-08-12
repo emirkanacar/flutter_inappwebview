@@ -1,3 +1,13 @@
+## 2.1.54 - 2026-08-12
+
+- Add Android Payment Request / Google Pay configuration through the new
+  `paymentRequestEnabled` setting and `PAYMENT_REQUEST` capability
+  ([#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660)).
+  Android WebView/provider, host manifest, Google Pay, and physical-device
+  validation remains pending.
+- Update the platform interface dependency to 1.1.6 and the Android
+  implementation dependency to 1.0.46.
+
 ## 2.1.53 - 2026-08-12
 
 - Add Android WebAuthn support configuration through the new

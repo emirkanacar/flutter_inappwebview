@@ -567,6 +567,12 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       }
     }
 
+    customSettings.paymentRequestEnabled?.let { enabled ->
+      if (WebViewFeature.isFeatureSupported(WebViewFeature.PAYMENT_REQUEST)) {
+        WebSettingsCompat.setPaymentRequestEnabled(settings, enabled)
+      }
+    }
+
     if (
       customSettings.requestedWithHeaderOriginAllowList != null &&
       WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)

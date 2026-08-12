@@ -13,12 +13,12 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 The export contains 125 issues and 73 PRs. Eighty-six issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 70 await real runtime validation, #2709 is source-validated with no
+boundary: 71 await real runtime validation, #2709 is source-validated with no
 native runtime gate, #2745 is closed by source review, and
 #2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796/#2831 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 39 issue records
+The other 38 issue records
 remain in this active plan. Seven additional PR-only records
 (`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, and `#2743`) are implemented locally and await
 runtime validation; they do not change the issue counts below.
@@ -29,10 +29,10 @@ dated validation notes below retain their contemporaneous counts.
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | Bugs | 98 | 56 | 1 | 1 | 14 | 26 | Technical work, validation, or reproduction required |
-| Enhancements | 16 | 6 | 0 | 0 | 0 | 10 | API/design decision and implementation required |
+| Enhancements | 16 | 7 | 0 | 0 | 0 | 9 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **70** | **1** | **1** | **14** | **39** | **36 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **71** | **1** | **1** | **14** | **38** | **35 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -50,7 +50,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 70 implementation or mitigation records awaiting real validation are
+The 71 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the seven PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -427,7 +427,6 @@ These items must not be implemented by copying an upstream PR directly. Each one
 | [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Define whether URL/resource interception is sufficient; do not promise DNS control from an iframe/WebView callback. | Threat model, platform feasibility decision, and documentation before API work. |
 | [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Convert the vague request into a concrete DOM event/API and test case. | JavaScript bridge only after security and event-volume review. |
 | [#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690) | Apple Intelligence Writing Tools | Confirm public WebKit/UIKit API availability and deployment targets. | iOS/macOS settings only if a stable native API exists. |
-| [#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660) | Android Payment Request / Google Pay | Validate Android WebView feature availability, permissions, and app/browser requirements. | Android feature check, callback contract, and a real-device integration test. |
 
 ### P3: Low-detail and product backlog
 
@@ -442,10 +441,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 70 issue records and seven PR-only
+items. The complete register contains 71 issue records and seven PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 39 issue records that still need implementation, design, or
+keeps only the 38 issue records that still need implementation, design, or
 reproduction. Fourteen host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 

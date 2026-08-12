@@ -1,3 +1,11 @@
+## 1.0.46 - 2026-08-12
+
+- Add feature-gated Android Payment Request support through
+  `WebSettingsCompat.setPaymentRequestEnabled` for Google Pay integrations
+  ([#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660)).
+  The required Chromium payment intent queries are included in the plugin
+  manifest; host app/provider and physical-device validation remains pending.
+
 ## 1.0.45 - 2026-08-12
 
 - Add feature-gated WebAuthn support configuration through

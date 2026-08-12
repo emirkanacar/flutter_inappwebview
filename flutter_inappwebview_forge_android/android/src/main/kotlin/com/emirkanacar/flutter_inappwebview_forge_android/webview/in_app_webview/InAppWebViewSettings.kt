@@ -120,6 +120,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var algorithmicDarkeningAllowed: Boolean? = false
     @JvmField var enterpriseAuthenticationAppLinkPolicyEnabled: Boolean? = true
     @JvmField var webAuthenticationSupport: Int? = null
+    @JvmField var paymentRequestEnabled: Boolean? = null
     @JvmField var webViewAssetLoader: MutableMap<String, Any?>? = null
     @JvmField var defaultVideoPoster: ByteArray? = null
     @JvmField var requestedWithHeaderOriginAllowList: MutableSet<String>? = null
@@ -227,6 +228,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "algorithmicDarkeningAllowed" -> algorithmicDarkeningAllowed = value as Boolean
                 "enterpriseAuthenticationAppLinkPolicyEnabled" -> enterpriseAuthenticationAppLinkPolicyEnabled = value as Boolean
                 "webAuthenticationSupport" -> webAuthenticationSupport = (value as Number).toInt()
+                "paymentRequestEnabled" -> paymentRequestEnabled = value as Boolean
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
                 "defaultVideoPoster" -> defaultVideoPoster = value as ByteArray
@@ -345,6 +347,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("algorithmicDarkeningAllowed", algorithmicDarkeningAllowed)
         put("enterpriseAuthenticationAppLinkPolicyEnabled", enterpriseAuthenticationAppLinkPolicyEnabled)
         put("webAuthenticationSupport", webAuthenticationSupport)
+        put("paymentRequestEnabled", paymentRequestEnabled)
         put("allowBackgroundAudioPlaying", allowBackgroundAudioPlaying)
         put("defaultVideoPoster", defaultVideoPoster)
         put("requestedWithHeaderOriginAllowList", requestedWithHeaderOriginAllowList?.toList())
@@ -463,6 +466,10 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
             realSettings["webAuthenticationSupport"] =
                 WebSettingsCompat.getWebAuthenticationSupport(settings)
+        }
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.PAYMENT_REQUEST)) {
+            realSettings["paymentRequestEnabled"] =
+                WebSettingsCompat.getPaymentRequestEnabled(settings)
         }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) {
             realSettings["requestedWithHeaderOriginAllowList"] =

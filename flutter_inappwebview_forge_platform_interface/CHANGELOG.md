@@ -1,3 +1,11 @@
+## 1.1.6 - 2026-08-12
+
+- Add Android `paymentRequestEnabled` settings and `PAYMENT_REQUEST`
+  capability metadata for Payment Request / Google Pay integrations
+  ([#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660)).
+  The setting remains nullable and feature-gated; device/provider validation
+  remains pending.
+
 ## 1.1.5 - 2026-08-12
 
 - Add Android `WebAuthenticationSupport` settings and `WEB_AUTHENTICATION`
