@@ -24,13 +24,14 @@ each note was recorded.
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 39 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Six PR-only records also have local implementations but remain outside the
+Seven PR-only records also have local implementations but remain outside the
 125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
 [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
 [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871),
 [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474),
-[#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), and
-[#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853).
+[#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823),
+[#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), and
+[#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743).
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
@@ -41,6 +42,17 @@ and the `assembleDebug` AAR task. The Flutter APK wrapper is blocked by the
 existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
 an adversarial external-picker/provider matrix across API levels also remains
 pending. This PR-only record does not change the 70-issue count.
+
+Android PR [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743)
+is source-fixed in Android 1.0.45 and root 2.1.53: the nullable
+`WebAuthenticationSupport` setting is serialized through the platform
+interface, applied with `WebSettingsCompat.setWebAuthenticationSupport` only
+when `WebViewFeature.WEB_AUTHENTICATION` is supported, and reported back by
+`getRealSettings`. Platform-interface and Android tests plus the native
+Kotlin/AAR build pass. Physical Android WebView-provider validation for
+`NONE`, `FOR_APP`, and `FOR_BROWSER`, including Digital Asset Links and
+WebAuthn flows, remains pending. This PR-only record does not change the
+70-issue count.
 
 Android PR [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823)
 is source-fixed in Android 1.0.44: `audio/*` file chooser requests now detect

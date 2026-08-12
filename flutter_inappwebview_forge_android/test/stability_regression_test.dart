@@ -106,6 +106,47 @@ void main() {
     expect(source, contains('private fun canResolveIntent(intent: Intent)'));
   });
 
+  test('Android WebAuthn setting is feature-gated and round-trips', () {
+    final settingsSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(
+      settingsSource,
+      contains('var webAuthenticationSupport: Int? = null'),
+    );
+    expect(
+      settingsSource,
+      contains(
+        '"webAuthenticationSupport" -> webAuthenticationSupport = (value as Number).toInt()',
+      ),
+    );
+    expect(
+      settingsSource,
+      contains('put("webAuthenticationSupport", webAuthenticationSupport)'),
+    );
+    expect(settingsSource, contains('WebViewFeature.WEB_AUTHENTICATION'));
+    expect(
+      settingsSource,
+      contains('WebSettingsCompat.getWebAuthenticationSupport(settings)'),
+    );
+    expect(
+      webViewSource,
+      contains('customSettings.webAuthenticationSupport?.let'),
+    );
+    expect(
+      webViewSource,
+      contains(
+        'WebSettingsCompat.setWebAuthenticationSupport(settings, support)',
+      ),
+    );
+  });
+
   test('Android file chooser rejects private sandbox file URIs', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

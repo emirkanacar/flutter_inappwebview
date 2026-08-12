@@ -1,3 +1,12 @@
+## 2.1.53 - 2026-08-12
+
+- Add Android WebAuthn support configuration through the new
+  `WebAuthenticationSupport` setting and `WEB_AUTHENTICATION` capability
+  metadata ([PR #2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743)).
+  Android runtime/provider validation remains pending.
+- Update the platform interface dependency to 1.1.5 and the Android
+  implementation dependency to 1.0.45.
+
 ## 2.1.52 - 2026-08-12
 
 - iOS: fix `requestFocus()` for Flutter platform views by searching for the

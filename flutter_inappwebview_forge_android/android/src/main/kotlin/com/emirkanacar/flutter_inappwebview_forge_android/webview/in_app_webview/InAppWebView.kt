@@ -561,6 +561,12 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       )
     }
 
+    customSettings.webAuthenticationSupport?.let { support ->
+      if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
+        WebSettingsCompat.setWebAuthenticationSupport(settings, support)
+      }
+    }
+
     if (
       customSettings.requestedWithHeaderOriginAllowList != null &&
       WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)

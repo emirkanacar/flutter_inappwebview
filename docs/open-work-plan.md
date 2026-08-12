@@ -19,8 +19,8 @@ native runtime gate, #2745 is closed by source review, and
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
 The other 39 issue records
-remain in this active plan. Six additional PR-only records
-(`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, and `#2853`) are implemented locally and await
+remain in this active plan. Seven additional PR-only records
+(`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, and `#2743`) are implemented locally and await
 runtime validation; they do not change the issue counts below.
 
 The scope table and priority queue are authoritative for the current snapshot;
@@ -52,7 +52,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 The 70 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
-along with the six PR-only records. They are resolved implementation work,
+along with the seven PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
 above. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)
 is closed by source review and has no package runtime gate. Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
@@ -198,7 +198,7 @@ unchanged.
 
 Android file chooser PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) is implemented locally in Android 1.0.41. The native callback boundary rejects canonicalized private-sandbox `file://` URIs from single-select, multi-select, and legacy picker results while preserving `content://` and FileProvider capture URIs. The source regression and native build are release evidence; hostile external-picker/provider validation remains a separate runtime gate, and this PR-only record does not change the issue counts above.
 
-The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), and [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), together with the Android compatibility work from PRs [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474) and [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
+The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), and [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), together with the Android compatibility work from PRs [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), and [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
 
 Their remaining device/build checks are included in the runtime register. Do
 not reopen their implementation without new failing evidence.
@@ -442,7 +442,7 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 70 issue records and six PR-only
+items. The complete register contains 70 issue records and seven PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
 keeps only the 39 issue records that still need implementation, design, or

@@ -23,6 +23,7 @@ import '../types/scrollview_deceleration_rate.dart';
 import '../types/selection_granularity.dart';
 import '../types/user_preferred_content_mode.dart';
 import '../types/vertical_scrollbar_position.dart';
+import '../types/web_authentication_support.dart';
 
 part 'in_app_webview_settings.g.dart';
 
@@ -1408,6 +1409,22 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     ],
   )
   bool? enterpriseAuthenticationAppLinkPolicyEnabled;
+
+  ///Sets the WebAuthn support level for the Android WebView.
+  ///
+  ///The default value is [WebAuthenticationSupport.NONE].
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "WebSettingsCompat.setWebAuthenticationSupport",
+        apiUrl:
+            "https://developer.android.com/reference/androidx/webkit/WebSettingsCompat#setWebAuthenticationSupport(android.webkit.WebSettings,int)",
+        note:
+            "available on Android only if [WebViewFeature.WEB_AUTHENTICATION] feature is supported.",
+      ),
+    ],
+  )
+  WebAuthenticationSupport_? webAuthenticationSupport;
 
   ///When not playing, video elements are represented by a 'poster' image.
   ///The image to use can be specified by the poster attribute of the video tag in HTML.
@@ -3387,6 +3404,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.horizontalScrollbarTrackColor,
     this.algorithmicDarkeningAllowed = false,
     this.enterpriseAuthenticationAppLinkPolicyEnabled = true,
+    this.webAuthenticationSupport,
     this.defaultVideoPoster,
     this.requestedWithHeaderOriginAllowList,
     this.disallowOverScroll = false,

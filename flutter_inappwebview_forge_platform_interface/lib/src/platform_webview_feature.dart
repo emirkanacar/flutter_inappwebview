@@ -385,6 +385,11 @@ class WebViewFeature_ {
         "ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY",
       );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.webAuthenticationSupport].
+  static const WEB_AUTHENTICATION = const WebViewFeature_._internal(
+    "WEB_AUTHENTICATION",
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.getVariationsHeader].
   static const GET_VARIATIONS_HEADER = const WebViewFeature_._internal(
     "GET_VARIATIONS_HEADER",
@@ -666,6 +671,11 @@ class AndroidWebViewFeature_ {
       const AndroidWebViewFeature_._internal(
         "ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY",
       );
+
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.webAuthenticationSupport].
+  static const WEB_AUTHENTICATION = const AndroidWebViewFeature_._internal(
+    "WEB_AUTHENTICATION",
+  );
 
   ///Return whether a feature is supported at run-time. On devices running Android version `Build.VERSION_CODES.LOLLIPOP` and higher,
   ///this will check whether a feature is supported, depending on the combination of the desired feature, the Android version of device,

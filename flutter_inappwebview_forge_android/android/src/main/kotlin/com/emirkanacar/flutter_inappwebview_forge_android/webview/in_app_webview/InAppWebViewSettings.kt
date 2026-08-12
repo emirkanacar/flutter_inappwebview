@@ -119,6 +119,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var horizontalScrollbarTrackColor: String? = null
     @JvmField var algorithmicDarkeningAllowed: Boolean? = false
     @JvmField var enterpriseAuthenticationAppLinkPolicyEnabled: Boolean? = true
+    @JvmField var webAuthenticationSupport: Int? = null
     @JvmField var webViewAssetLoader: MutableMap<String, Any?>? = null
     @JvmField var defaultVideoPoster: ByteArray? = null
     @JvmField var requestedWithHeaderOriginAllowList: MutableSet<String>? = null
@@ -225,6 +226,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "horizontalScrollbarTrackColor" -> horizontalScrollbarTrackColor = value as String
                 "algorithmicDarkeningAllowed" -> algorithmicDarkeningAllowed = value as Boolean
                 "enterpriseAuthenticationAppLinkPolicyEnabled" -> enterpriseAuthenticationAppLinkPolicyEnabled = value as Boolean
+                "webAuthenticationSupport" -> webAuthenticationSupport = (value as Number).toInt()
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
                 "defaultVideoPoster" -> defaultVideoPoster = value as ByteArray
@@ -342,6 +344,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("horizontalScrollbarTrackColor", horizontalScrollbarTrackColor)
         put("algorithmicDarkeningAllowed", algorithmicDarkeningAllowed)
         put("enterpriseAuthenticationAppLinkPolicyEnabled", enterpriseAuthenticationAppLinkPolicyEnabled)
+        put("webAuthenticationSupport", webAuthenticationSupport)
         put("allowBackgroundAudioPlaying", allowBackgroundAudioPlaying)
         put("defaultVideoPoster", defaultVideoPoster)
         put("requestedWithHeaderOriginAllowList", requestedWithHeaderOriginAllowList?.toList())
@@ -456,6 +459,10 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY)) {
             realSettings["enterpriseAuthenticationAppLinkPolicyEnabled"] =
                 WebSettingsCompat.getEnterpriseAuthenticationAppLinkPolicyEnabled(settings)
+        }
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
+            realSettings["webAuthenticationSupport"] =
+                WebSettingsCompat.getWebAuthenticationSupport(settings)
         }
         if (WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)) {
             realSettings["requestedWithHeaderOriginAllowList"] =

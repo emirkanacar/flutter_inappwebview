@@ -243,7 +243,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-70 locally implemented or mitigated issue records and six PR-only records.
+70 locally implemented or mitigated issue records and seven PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -294,6 +294,30 @@ for image and video capture. Recorder results continue through the existing
 providers, and camera-permission denied states on Android 10-16 and OEM WebView
 providers. PR #2823 remains open upstream; no upstream state or comment was
 changed.
+
+### PR #2743 - Android WebAuthn support setting
+
+**Local status:** Implemented in Android 1.0.45, platform interface 1.1.5,
+and root 2.1.53; physical WebView-provider validation pending. **Impact:**
+Android WebView pages can explicitly opt into WebAuthn support for the
+embedding app or, where the host has the required privileges, browser-wide
+support. **Confidence:** Confirmed AndroidX WebKit API and feature-gated
+settings path; runtime credential behavior is not yet validated.
+
+The platform interface now exposes `WebAuthenticationSupport.NONE`,
+`FOR_APP`, and `FOR_BROWSER`, together with `WebViewFeature.WEB_AUTHENTICATION`.
+Android preserves WebView's default disabled behavior when the setting is
+`null`, applies the selected level only after the AndroidX feature check, and
+round-trips the effective value through `getRealSettings`. Unsupported WebView
+providers therefore keep the existing default path rather than receiving an
+unguarded compat call.
+
+**Remaining validation:** on Android 12-16 and representative OEM WebView
+providers, verify `NONE`, `FOR_APP` with valid Digital Asset Links, and
+`FOR_BROWSER` only for an appropriately privileged host. Exercise successful,
+cancelled, and unavailable authenticator flows and confirm the effective
+setting reported by `getRealSettings`. PR #2743 remains open upstream; no
+upstream state or comment was changed.
 
 ### PR #2853 - iOS platform-view focus recovery
 

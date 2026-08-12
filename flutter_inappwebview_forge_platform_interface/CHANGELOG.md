@@ -1,3 +1,8 @@
+## 1.1.5 - 2026-08-12
+
+- Add Android `WebAuthenticationSupport` settings and `WEB_AUTHENTICATION`
+  capability metadata for WebAuthn support ([PR #2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743)).
+
 ## 1.1.4 - 2026-08-10
 
 - Correct the iOS availability metadata for `onGeolocationPermissionsShowPrompt` to iOS 27+, matching the public WebKit SDK declaration ([#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)).

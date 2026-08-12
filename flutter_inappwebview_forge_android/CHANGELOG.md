@@ -1,3 +1,11 @@
+## 1.0.45 - 2026-08-12
+
+- Add feature-gated WebAuthn support configuration through
+  `WebSettingsCompat.setWebAuthenticationSupport` ([PR #2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743)).
+  The default remains Android WebView's disabled WebAuthn behavior until the
+  new setting is explicitly selected; device/provider validation remains
+  pending.
+
 ## 1.0.44 - 2026-08-12
 
 - Android: add audio capture intents to file chooser requests for
