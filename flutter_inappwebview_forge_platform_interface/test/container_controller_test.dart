@@ -123,4 +123,31 @@ void main() {
       );
     }
   });
+
+  test('Windows pull-to-refresh no-scrollbar setting is serialized', () {
+    final settings = PullToRefreshSettings(allowWithNoScrollbar: true);
+
+    expect(settings.toMap()['allowWithNoScrollbar'], isTrue);
+    expect(settings.copy().allowWithNoScrollbar, isTrue);
+    expect(
+      PullToRefreshSettings.isPropertySupported(
+        PullToRefreshSettingsProperty.allowWithNoScrollbar,
+        platform: TargetPlatform.windows,
+      ),
+      isTrue,
+    );
+    expect(
+      PullToRefreshSettings.isPropertySupported(
+        PullToRefreshSettingsProperty.allowWithNoScrollbar,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
+    expect(
+      PlatformPullToRefreshControllerCreationParams().isClassSupported(
+        platform: TargetPlatform.windows,
+      ),
+      isTrue,
+    );
+  });
 }

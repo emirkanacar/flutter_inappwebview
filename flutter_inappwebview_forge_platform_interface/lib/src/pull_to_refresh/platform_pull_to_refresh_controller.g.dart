@@ -13,6 +13,7 @@ extension _PlatformPullToRefreshControllerCreationParamsClassSupported
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformPullToRefreshControllerCreationParams.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -21,6 +22,7 @@ extension _PlatformPullToRefreshControllerCreationParamsClassSupported
         [
           TargetPlatform.android,
           TargetPlatform.iOS,
+          TargetPlatform.windows,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -34,6 +36,7 @@ enum PlatformPullToRefreshControllerCreationParamsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformPullToRefreshControllerCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -46,6 +49,7 @@ enum PlatformPullToRefreshControllerCreationParamsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformPullToRefreshControllerCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -59,6 +63,7 @@ enum PlatformPullToRefreshControllerCreationParamsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformPullToRefreshControllerCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -77,18 +82,21 @@ extension _PlatformPullToRefreshControllerCreationParamsPropertySupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerCreationParamsProperty.options:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerCreationParamsProperty.settings:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }
@@ -102,6 +110,8 @@ extension _PlatformPullToRefreshControllerClassSupported
   ///- Android WebView:
   ///    - **NOTE**: to be able to use the "pull-to-refresh" feature, [InAppWebViewSettings.useHybridComposition] must be `true`.
   ///- iOS WKWebView
+  ///- Windows WebView2:
+  ///    - Implemented in the Flutter platform-view gesture layer and WebView2 JavaScript scroll-position check.
   ///
   ///Use the [PlatformPullToRefreshController.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -110,6 +120,7 @@ extension _PlatformPullToRefreshControllerClassSupported
         [
           TargetPlatform.android,
           TargetPlatform.iOS,
+          TargetPlatform.windows,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -123,6 +134,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.setRefreshing](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#setRefreshing(boolean)))
   ///- iOS WKWebView ([Official API - UIRefreshControl.beginRefreshing](https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624842-beginrefreshing))
+  ///- Windows WebView2 (Official API - Flutter pull-to-refresh indicator state)
   ///
   ///Use the [PlatformPullToRefreshController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -135,6 +147,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [isKeepAlive]: all platforms
@@ -150,6 +163,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.setRefreshing](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#setRefreshing(boolean)))
   ///- iOS WKWebView ([Official API - UIRefreshControl.endRefreshing](https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624846-endrefreshing))
+  ///- Windows WebView2 (Official API - Flutter pull-to-refresh indicator state)
   ///
   ///Use the [PlatformPullToRefreshController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -173,6 +187,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - View.isEnabled](https://developer.android.com/reference/android/view/View#isEnabled()))
   ///- iOS WKWebView ([Official API - UIScrollView.refreshControl](https://developer.apple.com/documentation/uikit/uiscrollview/2127691-refreshcontrol))
+  ///- Windows WebView2 ([Official API - Flutter pointer events + WebView2 ExecuteScript](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2#execute-script))
   ///
   ///Use the [PlatformPullToRefreshController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -185,6 +200,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.isRefreshing](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#isRefreshing()))
   ///- iOS WKWebView ([Official API - UIRefreshControl.isRefreshing](https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624844-isrefreshing))
+  ///- Windows WebView2 (Official API - Flutter pull-to-refresh indicator state)
   ///
   ///Use the [PlatformPullToRefreshController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -212,6 +228,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.setProgressBackgroundColorSchemeColor](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#setProgressBackgroundColorSchemeColor(int)))
   ///- iOS WKWebView ([Official API - UIView.backgroundColor](https://developer.apple.com/documentation/uikit/uiview/1622591-backgroundcolor))
+  ///- Windows WebView2 (Official API - Flutter refresh indicator background color)
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [color]: all platforms
@@ -227,6 +244,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.setColorSchemeColors](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#setColorSchemeColors(int...)))
   ///- iOS WKWebView ([Official API - UIRefreshControl.tintColor](https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624847-tintcolor))
+  ///- Windows WebView2 (Official API - Flutter CircularProgressIndicator.color)
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [color]: all platforms
@@ -256,6 +274,7 @@ enum PlatformPullToRefreshControllerMethod {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - SwipeRefreshLayout.setEnabled](https://developer.android.com/reference/androidx/swiperefreshlayout/widget/SwipeRefreshLayout#setEnabled(boolean)))
   ///- iOS WKWebView ([Official API - UIScrollView.refreshControl](https://developer.apple.com/documentation/uikit/uiscrollview/2127691-refreshcontrol))
+  ///- Windows WebView2 ([Official API - Flutter pointer events + WebView2 ExecuteScript](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2#execute-script))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [enabled]: all platforms
@@ -334,18 +353,21 @@ extension _PlatformPullToRefreshControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.dispose:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.endRefreshing:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.getDefaultSlingshotDistance:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -357,12 +379,14 @@ extension _PlatformPullToRefreshControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.isRefreshing:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.setAttributedTitle:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -372,12 +396,14 @@ extension _PlatformPullToRefreshControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.setColor:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.setDistanceToTriggerSync:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -389,6 +415,7 @@ extension _PlatformPullToRefreshControllerMethodSupported
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformPullToRefreshControllerMethod.setIndicatorSize:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

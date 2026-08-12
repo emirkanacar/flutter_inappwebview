@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-08-13
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -13,12 +13,12 @@ source tree, package changelogs, and [`known-issues.md`](known-issues.md).
 
 The export contains 125 issues and 73 PRs. Ninety-two issue records have a
 documented local implementation, mitigation, source-review, or host/platform
-boundary: 75 await real runtime validation, #2709 is source-validated with no
+boundary: 76 await real runtime validation, #2709 is source-validated with no
 native runtime gate, #2745 is closed by source review, and
 #2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796/#2815/#2831 have no Forge-owned fix because
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 33 issue records
+The other 32 issue records
 remain in this active plan. Eight additional PR-only records
 (`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, and `#2825`) are implemented locally and await
 runtime validation; they do not change the issue counts below.
@@ -29,10 +29,10 @@ dated validation notes below retain their contemporaneous counts.
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 | Bugs | 98 | 57 | 1 | 1 | 15 | 24 | Technical work, validation, or reproduction required |
-| Enhancements | 16 | 10 | 0 | 0 | 0 | 6 | API/design decision and implementation required |
+| Enhancements | 16 | 11 | 0 | 0 | 0 | 5 | API/design decision and implementation required |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | Triage before implementation |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **75** | **1** | **1** | **15** | **33** | **30 active technical records after excluding showcase entries** |
+| **Total issue records** | **125** | **76** | **1** | **1** | **15** | **32** | **29 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
 
@@ -50,7 +50,7 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
-The 75 implementation or mitigation records awaiting real validation are
+The 76 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the eight PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
@@ -432,7 +432,7 @@ These items must not be implemented by copying an upstream PR directly. Each one
 | --- | --- | --- | --- |
 | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | WebAssembly support | Define whether this means browser WASM compilation, embedded WASM execution, or a native backend requirement. | Reproduce with a minimal WASM page before changing plugin code; likely a support/documentation item. |
 | [#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793) | Typed `bridgeEvents` API | Implemented additively in platform-interface 1.1.8/root 2.1.57; validate event ordering, bridge readiness, backpressure, payload typing, and compatibility with current JavaScript handlers. | `JavaScriptBridgeEvents`, existing handler bridge on all active platforms, and integration/runtime tests. |
-| [#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760) | Windows pull-to-refresh without a scrollbar | Confirm WebView2 gesture support and whether this is a plugin overlay or native capability. | Windows-only capability with an explicit unsupported fallback. |
+| [#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760) | Windows pull-to-refresh without a scrollbar | Implemented as an opt-in Flutter platform-view gesture; verify the document top-edge check and WebView2 touch forwarding on Windows. | `PullToRefreshSettings.allowWithNoScrollbar`, Windows controller state/indicator, and `onRefresh` callback. Runtime validation remains pending. |
 | [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Define whether URL/resource interception is sufficient; do not promise DNS control from an iframe/WebView callback. | Threat model, platform feasibility decision, and documentation before API work. |
 | [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Convert the vague request into a concrete DOM event/API and test case. | JavaScript bridge only after security and event-volume review. |
 | [#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690) | Apple Intelligence Writing Tools | Confirm public WebKit/UIKit API availability and deployment targets. | iOS/macOS settings only if a stable native API exists. |
@@ -450,10 +450,10 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 75 issue records and eight PR-only
+items. The complete register contains 76 issue records and eight PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 33 issue records that still need implementation, design, or
+keeps only the 32 issue records that still need implementation, design, or
 reproduction. Fifteen host/platform boundaries are tracked above and are not
 counted as resolved implementations.
 
@@ -507,16 +507,16 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-12 status pass has 75 locally implemented or mitigated issue
+The 2026-08-13 status pass has 76 locally implemented or mitigated issue
 records awaiting runtime validation, one source-validated issue (#2709) with
 no runtime gate, one issue (#2745) closed by source review, fifteen
 host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
-#2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831), and 33 active issue records in this plan. The runtime-pending
+#2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831), and 32 active issue records in this plan. The runtime-pending
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
  live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
  [`known-issues.md`](known-issues.md). The active queue contains 24 bugs, 6
- enhancements, 0 unlabelled records, and 3 showcase records (30 active
+ enhancements, 0 unlabelled records, and 3 showcase records (29 active
 technical records after excluding showcases).
 
 An issue leaves this plan for the runtime register when:

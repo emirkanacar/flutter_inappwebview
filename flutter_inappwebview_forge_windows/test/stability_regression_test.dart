@@ -36,6 +36,9 @@ void _runSourceContractAssertions() {
   final dartViewSource = _sourceFile(
     'lib/src/in_app_webview/custom_platform_view.dart',
   ).readAsStringSync();
+  final dartWidgetSource = _sourceFile(
+    'lib/src/in_app_webview/in_app_webview.dart',
+  ).readAsStringSync();
 
   _expectContains(
     platformUtilSource,
@@ -66,6 +69,34 @@ void _runSourceContractAssertions() {
     dartViewSource,
     '_setVisibility(true)',
     'the restore callback',
+  );
+  _expectContains(
+    dartViewSource,
+    '_startPullToRefreshCandidate',
+    'the Windows pull-to-refresh gesture candidate',
+  );
+  _expectContains(
+    dartWidgetSource,
+    'window.scrollY <= 0',
+    'the document top-edge check',
+  );
+  _expectContains(
+    dartViewSource,
+    'triggerDistance',
+    'the pull-to-refresh threshold',
+  );
+  final pullToRefreshSource = _sourceFile(
+    'lib/src/pull_to_refresh_controller.dart',
+  ).readAsStringSync();
+  _expectContains(
+    pullToRefreshSource,
+    'allowWithNoScrollbar',
+    'the Windows no-scrollbar opt-in',
+  );
+  _expectContains(
+    pullToRefreshSource,
+    'onRefresh?.call()',
+    'the Windows refresh callback',
   );
 
   _expectContains(

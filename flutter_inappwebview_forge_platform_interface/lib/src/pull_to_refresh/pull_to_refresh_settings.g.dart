@@ -11,7 +11,17 @@ part of 'pull_to_refresh_settings.dart';
 ///**Officially Supported Platforms/Implementations**:
 ///- Android WebView
 ///- iOS WKWebView
+///- Windows WebView2
 class PullToRefreshSettings {
+  ///Allows pull-to-refresh to start when the document has no vertical scrollbar.
+  ///
+  ///On Windows this is an opt-in Flutter gesture implementation. The gesture
+  ///is accepted only when the document is already at its top edge.
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Windows WebView2
+  bool? allowWithNoScrollbar;
+
   ///The title text to display in the refresh control.
   ///
   ///**Officially Supported Platforms/Implementations**:
@@ -23,6 +33,7 @@ class PullToRefreshSettings {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   Color? backgroundColor;
 
   ///The color of the refresh control.
@@ -30,6 +41,7 @@ class PullToRefreshSettings {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   Color? color;
 
   ///The distance to trigger a sync in dips.
@@ -44,6 +56,7 @@ class PullToRefreshSettings {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   bool? enabled;
 
   ///The size of the refresh indicator.
@@ -62,7 +75,9 @@ class PullToRefreshSettings {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   PullToRefreshSettings({
+    this.allowWithNoScrollbar = false,
     this.attributedTitle,
     this.backgroundColor,
     this.color,
@@ -101,6 +116,7 @@ class PullToRefreshSettings {
       },
       slingshotDistance: map['slingshotDistance'],
     );
+    instance.allowWithNoScrollbar = map['allowWithNoScrollbar'];
     instance.enabled = map['enabled'];
     return instance;
   }
@@ -117,6 +133,7 @@ class PullToRefreshSettings {
   ///Converts instance to a map.
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) {
     return {
+      "allowWithNoScrollbar": allowWithNoScrollbar,
       "attributedTitle": attributedTitle?.toMap(enumMethod: enumMethod),
       "backgroundColor": backgroundColor?.toHex(),
       "color": color?.toHex(),
@@ -143,7 +160,7 @@ class PullToRefreshSettings {
 
   @override
   String toString() {
-    return 'PullToRefreshSettings{attributedTitle: $attributedTitle, backgroundColor: $backgroundColor, color: $color, distanceToTriggerSync: $distanceToTriggerSync, enabled: $enabled, size: $size, slingshotDistance: $slingshotDistance}';
+    return 'PullToRefreshSettings{allowWithNoScrollbar: $allowWithNoScrollbar, attributedTitle: $attributedTitle, backgroundColor: $backgroundColor, color: $color, distanceToTriggerSync: $distanceToTriggerSync, enabled: $enabled, size: $size, slingshotDistance: $slingshotDistance}';
   }
 }
 
@@ -153,6 +170,17 @@ class PullToRefreshSettings {
 
 ///List of [PullToRefreshSettings]'s properties that can be used to check i they are supported or not by the current platform.
 enum PullToRefreshSettingsProperty {
+  ///Can be used to check if the [PullToRefreshSettings.allowWithNoScrollbar] property is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PullToRefreshSettings.allowWithNoScrollbar.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Windows WebView2
+  ///
+  ///Use the [PullToRefreshSettings.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  allowWithNoScrollbar,
+
   ///Can be used to check if the [PullToRefreshSettings.attributedTitle] property is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PullToRefreshSettings.attributedTitle.supported_platforms}
@@ -171,6 +199,7 @@ enum PullToRefreshSettingsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PullToRefreshSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -183,6 +212,7 @@ enum PullToRefreshSettingsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PullToRefreshSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -206,6 +236,7 @@ enum PullToRefreshSettingsProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PullToRefreshSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -240,6 +271,11 @@ extension _PullToRefreshSettingsPropertySupported on PullToRefreshSettings {
     TargetPlatform? platform,
   }) {
     switch (property) {
+      case PullToRefreshSettingsProperty.allowWithNoScrollbar:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
       case PullToRefreshSettingsProperty.attributedTitle:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [TargetPlatform.iOS].contains(platform ?? defaultTargetPlatform);
@@ -248,12 +284,14 @@ extension _PullToRefreshSettingsPropertySupported on PullToRefreshSettings {
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PullToRefreshSettingsProperty.color:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PullToRefreshSettingsProperty.distanceToTriggerSync:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -265,6 +303,7 @@ extension _PullToRefreshSettingsPropertySupported on PullToRefreshSettings {
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PullToRefreshSettingsProperty.size:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

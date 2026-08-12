@@ -23,7 +23,9 @@ part 'platform_pull_to_refresh_controller.g.dart';
 ///{@endtemplate}
 ///
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.supported_platforms}
-@SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+@SupportedPlatforms(
+  platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+)
 class PlatformPullToRefreshControllerCreationParams {
   /// Used by the platform implementation to create a new [PlatformPullToRefreshController].
   PlatformPullToRefreshControllerCreationParams({
@@ -38,7 +40,9 @@ class PlatformPullToRefreshControllerCreationParams {
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.options.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   @Deprecated("Use settings instead")
   late PullToRefreshOptions options;
 
@@ -47,7 +51,9 @@ class PlatformPullToRefreshControllerCreationParams {
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.settings.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   late PullToRefreshSettings settings;
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.onRefresh}
@@ -55,7 +61,9 @@ class PlatformPullToRefreshControllerCreationParams {
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.onRefresh.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   final void Function()? onRefresh;
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.isClassSupported}
@@ -95,6 +103,10 @@ class PlatformPullToRefreshControllerCreationParams {
           '**NOTE**: to be able to use the "pull-to-refresh" feature, [InAppWebViewSettings.useHybridComposition] must be `true`.',
     ),
     IOSPlatform(),
+    WindowsPlatform(
+      note:
+          'Implemented in the Flutter platform-view gesture layer and WebView2 JavaScript scroll-position check.',
+    ),
   ],
 )
 abstract class PlatformPullToRefreshController extends PlatformInterface
@@ -183,6 +195,11 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uiscrollview/2127691-refreshcontrol',
       ),
+      WindowsPlatform(
+        apiName: 'Flutter pointer events + WebView2 ExecuteScript',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2#execute-script',
+      ),
     ],
   )
   Future<void> setEnabled(bool enabled) {
@@ -207,6 +224,11 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiName: 'UIScrollView.refreshControl',
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uiscrollview/2127691-refreshcontrol',
+      ),
+      WindowsPlatform(
+        apiName: 'Flutter pointer events + WebView2 ExecuteScript',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2#execute-script',
       ),
     ],
   )
@@ -237,6 +259,7 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624842-beginrefreshing',
       ),
+      WindowsPlatform(apiName: 'Flutter pull-to-refresh indicator state'),
     ],
   )
   Future<void> beginRefreshing() {
@@ -267,6 +290,7 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624846-endrefreshing',
       ),
+      WindowsPlatform(apiName: 'Flutter pull-to-refresh indicator state'),
     ],
   )
   Future<void> endRefreshing() {
@@ -292,6 +316,7 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624844-isrefreshing',
       ),
+      WindowsPlatform(apiName: 'Flutter pull-to-refresh indicator state'),
     ],
   )
   Future<bool> isRefreshing() {
@@ -317,6 +342,7 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uirefreshcontrol/1624847-tintcolor',
       ),
+      WindowsPlatform(apiName: 'Flutter CircularProgressIndicator.color'),
     ],
   )
   Future<void> setColor(Color color) {
@@ -342,6 +368,7 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
         apiUrl:
             'https://developer.apple.com/documentation/uikit/uiview/1622591-backgroundcolor',
       ),
+      WindowsPlatform(apiName: 'Flutter refresh indicator background color'),
     ],
   )
   Future<void> setBackgroundColor(Color color) {
@@ -497,7 +524,9 @@ abstract class PlatformPullToRefreshController extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshController.dispose.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   @override
   void dispose({bool isKeepAlive = false}) {
     throw UnimplementedError(

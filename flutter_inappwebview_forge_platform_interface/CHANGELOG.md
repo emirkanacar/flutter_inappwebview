@@ -1,3 +1,9 @@
+## 1.1.14 - 2026-08-13
+
+- Add Windows pull-to-refresh capability metadata and the
+  `PullToRefreshSettings.allowWithNoScrollbar` opt-in for WebView2 platform
+  views ([#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760)).
+
 ## 1.1.13 - 2026-08-13
 
 - Advertise desktop per-WebView proxy settings and scoped cookie behavior in

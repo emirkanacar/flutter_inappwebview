@@ -5,8 +5,10 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 import '../platform_util.dart';
 import '_static_channel.dart';
+import '../pull_to_refresh_controller.dart';
 
 const Map<String, SystemMouseCursor> _cursors = {
   'none': SystemMouseCursors.none,
@@ -289,9 +291,15 @@ class CustomPlatformView extends StatefulWidget {
 
   final Function(int id)? onPlatformViewCreated;
 
+  final PlatformPullToRefreshController? pullToRefreshController;
+
+  final Future<bool> Function()? canStartPullToRefresh;
+
   const CustomPlatformView({
     this.creationParams,
     this.onPlatformViewCreated,
+    this.pullToRefreshController,
+    this.canStartPullToRefresh,
     this.scaleFactor,
     this.filterQuality = FilterQuality.none,
   });
@@ -304,6 +312,12 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
     with PlatformUtilListener {
   final GlobalKey _key = GlobalKey();
   final _downButtons = <int, PointerButton>{};
+
+  int? _pullPointer;
+  int _pullGestureGeneration = 0;
+  Offset? _pullStartPosition;
+  double _pullDistance = 0;
+  bool _pullTopConfirmed = false;
 
   PointerDeviceKind _pointerKind = PointerDeviceKind.unknown;
 
@@ -423,6 +437,7 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
 
                   _pointerKind = ev.kind;
                   if (ev.kind == PointerDeviceKind.touch) {
+                    _startPullToRefreshCandidate(ev);
                     _controller._setPointerUpdate(
                       InAppWebViewPointerEventKind.down,
                       ev.pointer,
@@ -442,6 +457,7 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
                 onPointerUp: (ev) {
                   _pointerKind = ev.kind;
                   if (ev.kind == PointerDeviceKind.touch) {
+                    _resetPullToRefreshCandidate(ev.pointer);
                     _controller._setPointerUpdate(
                       InAppWebViewPointerEventKind.up,
                       ev.pointer,
@@ -461,6 +477,7 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
                 },
                 onPointerCancel: (ev) {
                   _pointerKind = ev.kind;
+                  _resetPullToRefreshCandidate(ev.pointer);
                   final button = _downButtons.remove(ev.pointer);
                   if (button != null) {
                     _controller._setPointerButtonState(
@@ -472,6 +489,7 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
                 onPointerMove: (ev) {
                   _pointerKind = ev.kind;
                   if (ev.kind == PointerDeviceKind.touch) {
+                    _updatePullToRefreshCandidate(ev);
                     _controller._setPointerUpdate(
                       InAppWebViewPointerEventKind.update,
                       ev.pointer,
@@ -510,13 +528,116 @@ class _CustomPlatformViewState extends State<CustomPlatformView>
                       button,
                     );
                   },
-                  child: Texture(
-                    textureId: _controller._textureId,
-                    filterQuality: widget.filterQuality,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Texture(
+                        textureId: _controller._textureId,
+                        filterQuality: widget.filterQuality,
+                      ),
+                      _buildRefreshIndicator(),
+                    ],
                   ),
                 ),
               )
             : const SizedBox(),
+      ),
+    );
+  }
+
+  void _startPullToRefreshCandidate(PointerDownEvent event) {
+    final controller = widget.pullToRefreshController;
+    final canStart = widget.canStartPullToRefresh;
+    if (controller is! WindowsPullToRefreshController ||
+        !controller.allowWithNoScrollbar ||
+        controller.settings.enabled == false ||
+        canStart == null) {
+      return;
+    }
+
+    final generation = ++_pullGestureGeneration;
+    _pullPointer = event.pointer;
+    _pullStartPosition = event.localPosition;
+    _pullDistance = 0;
+    _pullTopConfirmed = false;
+
+    unawaited(
+      canStart().then((atTop) {
+        if (!mounted ||
+            generation != _pullGestureGeneration ||
+            _pullPointer != event.pointer) {
+          return;
+        }
+        _pullTopConfirmed = atTop;
+      }),
+    );
+  }
+
+  void _updatePullToRefreshCandidate(PointerMoveEvent event) {
+    final controller = widget.pullToRefreshController;
+    final startPosition = _pullStartPosition;
+    if (controller is! WindowsPullToRefreshController ||
+        !_pullTopConfirmed ||
+        _pullPointer != event.pointer ||
+        startPosition == null) {
+      return;
+    }
+
+    final distance = event.localPosition.dy - startPosition.dy;
+    if (distance <= _pullDistance) {
+      return;
+    }
+    _pullDistance = distance;
+    if (_pullDistance >= controller.triggerDistance) {
+      _pullTopConfirmed = false;
+      controller.triggerRefresh();
+    }
+  }
+
+  void _resetPullToRefreshCandidate(int pointer) {
+    if (_pullPointer != pointer) {
+      return;
+    }
+    _pullGestureGeneration++;
+    _pullPointer = null;
+    _pullStartPosition = null;
+    _pullDistance = 0;
+    _pullTopConfirmed = false;
+  }
+
+  Widget _buildRefreshIndicator() {
+    final controller = widget.pullToRefreshController;
+    if (controller is! WindowsPullToRefreshController) {
+      return const SizedBox.shrink();
+    }
+    return Positioned(
+      top: 12,
+      left: 0,
+      right: 0,
+      child: IgnorePointer(
+        child: ValueListenableBuilder<bool>(
+          valueListenable: controller.refreshState,
+          builder: (context, refreshing, child) {
+            if (!refreshing) {
+              return const SizedBox.shrink();
+            }
+            return Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: controller.backgroundColor ?? Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: controller.indicatorColor,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

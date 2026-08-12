@@ -7,6 +7,7 @@ import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/headless_in_app_webview.dart';
 import 'in_app_webview/in_app_webview.dart';
 import 'in_app_webview/in_app_webview_controller.dart';
+import 'pull_to_refresh_controller.dart';
 import 'web_message/web_message_channel.dart';
 import 'web_message/web_message_listener.dart';
 import 'web_message/web_message_port.dart';
@@ -407,9 +408,16 @@ class WindowsInAppWebViewPlatform extends InAppWebViewPlatform {
   /// This function should only be called by the app-facing package.
   /// Look at using [PullToRefreshController] in `flutter_inappwebview_forge` instead.
   @override
+  PlatformPullToRefreshController createPlatformPullToRefreshController(
+    PlatformPullToRefreshControllerCreationParams params,
+  ) {
+    return WindowsPullToRefreshController(params);
+  }
+
+  @override
   PlatformPullToRefreshController
   createPlatformPullToRefreshControllerStatic() {
-    return _PlatformPullToRefreshController.static();
+    return WindowsPullToRefreshController.static();
   }
 
   /// Creates a new empty [PlatformWebAuthenticationSession] to access static methods.
@@ -570,19 +578,6 @@ class _PlatformPrintJobController extends PlatformPrintJobController {
       );
 
   factory _PlatformPrintJobController.static() => _staticValue;
-}
-
-class _PlatformPullToRefreshController extends PlatformPullToRefreshController {
-  _PlatformPullToRefreshController(
-    PlatformPullToRefreshControllerCreationParams params,
-  ) : super.implementation(params);
-
-  static final _PlatformPullToRefreshController _staticValue =
-      _PlatformPullToRefreshController(
-        PlatformPullToRefreshControllerCreationParams(),
-      );
-
-  factory _PlatformPullToRefreshController.static() => _staticValue;
 }
 
 class _PlatformWebAuthenticationSession

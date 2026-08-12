@@ -1,3 +1,11 @@
+## 1.0.13 - 2026-08-13
+
+- Add opt-in pull-to-refresh for WebView2 pages without a vertical scrollbar
+  through `PullToRefreshSettings.allowWithNoScrollbar`. The gesture verifies
+  the document is at the top edge and uses the existing `onRefresh` callback
+  ([#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760)).
+  Windows native build and runtime validation remain pending.
+
 ## 1.0.12 - 2026-08-13
 
 - Apply per-WebView proxy server and bypass settings to newly created WebView2

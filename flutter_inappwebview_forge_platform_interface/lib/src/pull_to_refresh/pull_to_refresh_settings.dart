@@ -11,21 +11,36 @@ import 'platform_pull_to_refresh_controller.dart';
 part 'pull_to_refresh_settings.g.dart';
 
 ///Pull-To-Refresh Settings for [PlatformPullToRefreshController].
-@SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+@SupportedPlatforms(
+  platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+)
 @ExchangeableObject(copyMethod: true)
 class PullToRefreshSettings_ {
   ///Sets whether the pull-to-refresh feature is enabled or not.
   ///The default value is `true`.
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   bool? enabled;
 
   ///The color of the refresh control.
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   Color_? color;
 
   ///The background color of the refresh control.
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   Color_? backgroundColor;
+
+  ///Allows pull-to-refresh to start when the document has no vertical scrollbar.
+  ///
+  ///On Windows this is an opt-in Flutter gesture implementation. The gesture
+  ///is accepted only when the document is already at its top edge.
+  @SupportedPlatforms(platforms: [WindowsPlatform()])
+  bool? allowWithNoScrollbar;
 
   ///The distance to trigger a sync in dips.
   @SupportedPlatforms(platforms: [AndroidPlatform()])
@@ -47,6 +62,7 @@ class PullToRefreshSettings_ {
     this.enabled = true,
     this.color,
     this.backgroundColor,
+    this.allowWithNoScrollbar = false,
     this.distanceToTriggerSync,
     this.slingshotDistance,
     this.size,
@@ -75,6 +91,11 @@ class PullToRefreshOptions {
   ///The background color of the refresh control.
   Color? backgroundColor;
 
+  ///Allows pull-to-refresh to start when the document has no vertical scrollbar.
+  ///
+  ///**NOTE**: Available only on Windows.
+  bool allowWithNoScrollbar;
+
   ///The distance to trigger a sync in dips.
   ///
   ///**NOTE**: Available only on Android.
@@ -99,6 +120,7 @@ class PullToRefreshOptions {
     this.enabled = true,
     this.color,
     this.backgroundColor,
+    this.allowWithNoScrollbar = false,
     this.distanceToTriggerSync,
     this.slingshotDistance,
     this.size,
@@ -110,6 +132,7 @@ class PullToRefreshOptions {
       "enabled": enabled,
       "color": color?.toHex(),
       "backgroundColor": backgroundColor?.toHex(),
+      "allowWithNoScrollbar": allowWithNoScrollbar,
       "distanceToTriggerSync": distanceToTriggerSync,
       "slingshotDistance": slingshotDistance,
       "size": size?.toNativeValue(),

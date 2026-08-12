@@ -330,6 +330,8 @@ class WindowsInAppWebViewWidget extends PlatformInAppWebViewWidget {
 
     return CustomPlatformView(
       onPlatformViewCreated: _onPlatformViewCreated,
+      pullToRefreshController: params.pullToRefreshController,
+      canStartPullToRefresh: _canStartPullToRefresh,
       creationParams: <String, dynamic>{
         'initialUrlRequest': params.initialUrlRequest?.toMap(),
         'initialFile': params.initialFile,
@@ -346,6 +348,21 @@ class WindowsInAppWebViewWidget extends PlatformInAppWebViewWidget {
         'webViewEnvironmentId': params.webViewEnvironment?.id,
       },
     );
+  }
+
+  Future<bool> _canStartPullToRefresh() async {
+    final controller = _controller;
+    if (controller == null) {
+      return false;
+    }
+    try {
+      final result = await controller.evaluateJavascript(
+        source: 'window.scrollY <= 0',
+      );
+      return result == true || result == 1 || result == 1.0;
+    } catch (_) {
+      return false;
+    }
   }
 
   void _onPlatformViewCreated(int id) {

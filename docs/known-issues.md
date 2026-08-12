@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-13
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 75 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 33 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 76 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 32 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -42,11 +42,11 @@ Windows/Linux target builds and macOS runtime validation remain pending.
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 75 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 76 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 15 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 33 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 32 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -402,11 +402,40 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-75 locally implemented or mitigated issue records and eight PR-only records.
+76 locally implemented or mitigated issue records and eight PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
 ## Detailed findings
+
+### #2760 — Windows pull-to-refresh without a vertical scrollbar
+
+**Local status:** Implemented in platform-interface 1.1.14, Windows 1.0.13,
+and root 2.1.67; Windows native build and runtime validation pending.
+**Affected package/platform:** Windows WebView2 inline `InAppWebView` and the
+Flutter platform-view pointer bridge. **Impact:** pages that intentionally
+hide or do not have a vertical scrollbar can opt into pull-to-refresh instead
+of losing the refresh gesture. **Confidence:** Confirmed platform-view path;
+WebView2 has no native refresh-control equivalent in the current adapter.
+
+`PullToRefreshSettings.allowWithNoScrollbar` is an additive Windows-only
+opt-in. When enabled, the Flutter pointer layer checks `window.scrollY <= 0`
+on touch-down, accumulates a downward drag, and triggers the existing
+`onRefresh` callback after the 80 logical-pixel threshold. A lightweight
+Flutter indicator uses the controller's existing begin/end and color APIs.
+The default remains disabled, so existing Windows WebView2 gestures are
+unchanged; failed JavaScript top-edge checks safely disable the candidate
+gesture. InAppBrowser and headless WebViews do not gain this inline platform
+view gesture path.
+
+The platform-interface capability metadata, generated serializer, Windows
+controller, widget wiring, and regression source contracts are updated. The
+platform-interface suite passes 14 tests and the Windows source-contract suite
+passes 1 test. **Required evidence:** build the Windows example and a consuming
+app on a supported Windows/WebView2 runtime; verify a no-scrollbar page
+refreshes only from the top edge, a scrollable page does not refresh from the
+middle, callback/end-refresh lifecycle works, color settings are honored,
+and disabled/default settings preserve normal touch scrolling.
 
 ### PR #2243 - Android file chooser private-sandbox URI
 

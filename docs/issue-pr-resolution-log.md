@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-08-13
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -41,6 +41,23 @@ required; desktop target-OS builds/runtime validation remain pending. An
 explicit Windows `WebViewEnvironment` cannot be reconfigured after creation.
 The upstream PR
 state was not changed.
+
+## 2026-08-13 Windows pull-to-refresh without a scrollbar
+
+Upstream [issue #2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760)
+requested an option to keep pull-to-refresh available for Windows pages that
+do not expose a vertical scrollbar. Forge implements the additive
+`PullToRefreshSettings.allowWithNoScrollbar` setting in platform-interface
+1.1.14 and root 2.1.67. Windows 1.0.13 wires the setting through
+`WindowsPullToRefreshController` and `CustomPlatformView`: a touch gesture is
+eligible only after `window.scrollY <= 0` succeeds, then the existing
+`onRefresh` callback fires after an 80 logical-pixel downward drag. The
+indicator state is exposed through the existing begin/end/color controller
+methods. The default remains disabled and failed top-edge checks fail closed.
+Platform-interface tests pass 14/14 and Windows source-contract tests pass
+1/1. Windows example/consuming-app build and WebView2 runtime gesture
+validation remain pending. The upstream issue state and comments were not
+changed.
 
 ## 2026-08-12 iOS physical popup validation
 

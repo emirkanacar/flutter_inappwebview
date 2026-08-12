@@ -1,3 +1,10 @@
+## 2.1.67 - 2026-08-13
+
+- Add Windows pull-to-refresh support for pages without a vertical scrollbar
+  through `PullToRefreshSettings.allowWithNoScrollbar` and the existing
+  `PullToRefreshController.onRefresh` callback ([#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760)).
+- Update the platform-interface to 1.1.14 and Windows implementation to 1.0.13.
+
 ## 2.1.66 - 2026-08-13
 
 - Complete desktop container parity for scoped cookie operations on macOS and
