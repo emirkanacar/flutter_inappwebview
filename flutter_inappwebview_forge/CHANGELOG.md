@@ -1,3 +1,10 @@
+## 2.1.63 - 2026-08-12
+
+- Make Android `CookieManager.flush` persist cookies from all container
+  profiles, preventing recent container session cookies from being lost when
+  the app process is killed.
+- Update the Android implementation to 1.0.51.
+
 ## 2.1.62 - 2026-08-12
 
 - Add iOS 17+ per-WebView proxy configuration through

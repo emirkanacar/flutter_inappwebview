@@ -690,7 +690,10 @@ void main() {
     expect(deleteCookies, contains('remaining.decrementAndGet()'));
     expect(deleteCookies, isNot(contains('manager.flush()')));
     expect(deleteAllCookies, isNot(contains('manager.flush()')));
-    expect(explicitFlush, contains('manager.flush()'));
+    expect(explicitFlush, contains('managers.forEach { it.flush() }'));
+    expect(explicitFlush, contains('getCookieManagersForFlush()'));
+    expect(source, contains('profileStore.allProfileNames'));
+    expect(source, contains('getProfile(profileName)?.getCookieManager()'));
     expect(explicitFlush, contains('result.success(true)'));
   });
 

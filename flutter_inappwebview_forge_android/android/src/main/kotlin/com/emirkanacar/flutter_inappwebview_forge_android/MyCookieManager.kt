@@ -98,6 +98,38 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         return getCookieManager()
     }
 
+    /**
+     * Returns the default cookie jar and every persistent container jar.
+     * AndroidX keeps profile cookie managers separate from the process-global
+     * CookieManager, so flushing only the default jar can lose a container's
+     * newest session cookies when the process is killed.
+     */
+    private fun getCookieManagersForFlush(): List<CookieManager> {
+        val managers = ArrayList<CookieManager>()
+        getCookieManager()?.let { managers.add(it) }
+        if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            return managers
+        }
+
+        try {
+            val profileStore = ProfileStore.getInstance()
+            profileStore.allProfileNames.forEach { profileName ->
+                try {
+                    profileStore.getProfile(profileName)?.getCookieManager()?.let { manager ->
+                        if (managers.none { it === manager }) {
+                            managers.add(manager)
+                        }
+                    }
+                } catch (_: RuntimeException) {
+                    // A profile can disappear while its WebView is tearing down.
+                }
+            }
+        } catch (_: RuntimeException) {
+            // Preserve the default-jar flush when profile enumeration fails.
+        }
+        return managers
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         init()
         when (call.method) {
@@ -447,14 +479,13 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
 
     @Suppress("DEPRECATION")
     fun flush(result: MethodChannel.Result) {
-        val manager = getCookieManager()
-        cookieManager = manager
-        if (manager == null) {
+        val managers = getCookieManagersForFlush()
+        if (managers.isEmpty()) {
             result.success(false)
             return
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            manager.flush()
+            managers.forEach { it.flush() }
         } else {
             plugin?.applicationContext?.let { context ->
                 CookieSyncManager.createInstance(context).sync()

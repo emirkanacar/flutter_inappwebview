@@ -1,3 +1,10 @@
+## 1.0.51 - 2026-08-12
+
+- Make `CookieManager.flush` persist cookies from every AndroidX WebKit
+  container profile in addition to the default profile. This prevents recent
+  container session cookies from being lost when the app process is killed.
+  Physical provider validation remains pending.
+
 ## 1.0.50 - 2026-08-12
 
 - Add Android WebView container profiles through `ContainerController` and
