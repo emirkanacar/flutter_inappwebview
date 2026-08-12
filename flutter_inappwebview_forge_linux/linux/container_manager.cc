@@ -81,9 +81,14 @@ void ContainerManager::HandleMethodCall(FlMethodCall* method_call) {
       fl_method_call_respond_success(method_call, fl_value_new_bool(FALSE), nullptr);
       return;
     }
-    for (const auto& entry : std::filesystem::directory_iterator(directory.value(), error)) {
+    const auto container_directory = directory.value().parent_path();
+    for (const auto& entry : std::filesystem::directory_iterator(container_directory, error)) {
       if (error) break;
       std::filesystem::remove_all(entry.path(), error);
+    }
+    if (!error) {
+      std::filesystem::create_directories(directory.value(), error);
+      std::filesystem::create_directories(container_directory / "cache", error);
     }
     fl_method_call_respond_success(method_call, fl_value_new_bool(!error), nullptr);
   } else {
