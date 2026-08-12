@@ -46,6 +46,21 @@ extension _PlatformContainerControllerClassSupported
 
 ///List of [PlatformContainerController]'s methods that can be used to check if they are supported or not by the current platform.
 enum PlatformContainerControllerMethod {
+  ///Can be used to check if the [PlatformContainerController.clearContainerData] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.clearContainerData.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 110+ ([Official API - Profile.getCookieManager / getWebStorage](https://developer.android.com/reference/androidx/webkit/Profile))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.removeData(ofTypes:modifiedSince:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  clearContainerData,
+
   ///Can be used to check if the [PlatformContainerController.deleteContainer] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.deleteContainer.supported_platforms}
@@ -96,6 +111,12 @@ extension _PlatformContainerControllerMethodSupported
     TargetPlatform? platform,
   }) {
     switch (method) {
+      case PlatformContainerControllerMethod.clearContainerData:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.deleteContainer:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [

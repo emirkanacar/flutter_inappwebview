@@ -1,3 +1,8 @@
+## 1.1.11 - 2026-08-12
+
+- Add `PlatformContainerController.clearContainerData` for clearing a named
+  container without deleting it.
+
 ## 1.1.10 - 2026-08-12
 
 - Add `InAppWebViewSettings.proxySettings` for iOS 17+ per-WebView proxy

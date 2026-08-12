@@ -1,3 +1,10 @@
+## 1.0.52 - 2026-08-12
+
+- Add `ContainerController.clearContainerData` for clearing AndroidX WebKit
+  container cookies, Web Storage, and geolocation permissions while keeping
+  the profile available. HTTP cache and global service-worker state remain
+  outside this best-effort operation.
+
 ## 1.0.51 - 2026-08-12
 
 - Make `CookieManager.flush` persist cookies from every AndroidX WebKit

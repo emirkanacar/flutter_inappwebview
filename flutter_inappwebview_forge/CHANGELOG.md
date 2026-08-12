@@ -1,3 +1,9 @@
+## 2.1.64 - 2026-08-12
+
+- Add `ContainerController.clearContainerData` for clearing Android and iOS
+  container data without removing the container.
+- Update platform-interface to 1.1.11, Android to 1.0.52, and iOS to 2.1.29.
+
 ## 2.1.63 - 2026-08-12
 
 - Make Android `CookieManager.flush` persist cookies from all container

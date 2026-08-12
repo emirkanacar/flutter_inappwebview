@@ -54,6 +54,19 @@ public class ContainerManager: ChannelDelegate {
                     }
                 }
             }
+        case "clearContainerData":
+            guard let containerId = arguments?["containerId"] as? String,
+                  let identifier = UUID(uuidString: containerId) else {
+                result(false)
+                return
+            }
+            let dataStore = WKWebsiteDataStore(forIdentifier: identifier)
+            dataStore.removeData(
+                ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+                modifiedSince: Date(timeIntervalSince1970: 0)
+            ) {
+                result(true)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

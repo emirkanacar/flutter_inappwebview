@@ -170,6 +170,30 @@ abstract class PlatformContainerController extends PlatformInterface {
     );
   }
 
+  /// Clears data in [containerId] without removing the container.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.getCookieManager / getWebStorage',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/Profile',
+        available: '110',
+      ),
+      IOSPlatform(
+        apiName:
+            'WKWebsiteDataStore.removeData(ofTypes:modifiedSince:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata',
+        available: '17.0',
+      ),
+    ],
+  )
+  Future<bool> clearContainerData(String containerId) {
+    throw UnimplementedError(
+      'clearContainerData is not implemented on the current platform',
+    );
+  }
+
   /// Checks whether this controller is available on [platform].
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

@@ -78,4 +78,11 @@ class AndroidContainerController extends PlatformContainerController {
         'containerId': containerId,
       }) ??
       false;
+
+  @override
+  Future<bool> clearContainerData(String containerId) async =>
+      await _channel.invokeMethod<bool>('clearContainerData', <String, dynamic>{
+        'containerId': containerId,
+      }) ??
+      false;
 }

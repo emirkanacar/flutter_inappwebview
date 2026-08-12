@@ -263,6 +263,8 @@ void main() {
     expect(managerSource, contains('ProfileStore.getInstance()'));
     expect(managerSource, contains('getAllContainerNames'));
     expect(managerSource, contains('deleteProfile(containerId)'));
+    expect(managerSource, contains('"clearContainerData"'));
+    expect(managerSource, contains('getWebStorage().deleteAllData()'));
   });
 
   test('Android cookie APIs forward the WebView id for container routing', () {

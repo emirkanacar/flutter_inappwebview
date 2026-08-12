@@ -43,6 +43,10 @@ class ContainerController {
   Future<bool> deleteContainer(String containerId) =>
       platform.deleteContainer(containerId);
 
+  /// Clears data in [containerId] without removing the container.
+  Future<bool> clearContainerData(String containerId) =>
+      platform.clearContainerData(containerId);
+
   /// Checks whether this API is available on [platform].
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformContainerController.static().isClassSupported(platform: platform);

@@ -19,8 +19,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 ### Android and iOS container API (upstream PR #2825)
 
-The first Android and iOS storage slice is available in root 2.1.63, Android
-1.0.50, iOS 2.1.28, and platform-interface 1.1.10. On Android,
+The first Android and iOS storage slice is available in root 2.1.64, Android
+1.0.52, iOS 2.1.29, and platform-interface 1.1.11. On Android,
 `InAppWebViewSettings.containerId` binds an AndroidX WebKit `ProfileStore`
 profile before WebView state initialization; on iOS 17+, it binds a UUID to a
 `WKWebsiteDataStore`. `ContainerController` lists, checks, and deletes named
@@ -30,7 +30,8 @@ WebView's profile/data-store cookie store on Android and iOS. On iOS 17+,
 store; Android keeps its existing process-wide proxy API. Android WebView
 110+ with `MULTI_PROFILE` and iOS 17+ are required. Source tests, the Kotlin
 build, and the Xcode iOS example build pass. Android cookie flush now fans out
-to all container profiles. Physical Android/iOS
+to all container profiles. `ContainerController.clearContainerData` now clears
+supported container data without deleting the profile. Physical Android/iOS
 validation remains pending.
 macOS/Linux adapters and per-container proxy configuration remain follow-up
 work.

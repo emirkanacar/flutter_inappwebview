@@ -58,6 +58,26 @@ open class ContainerManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     }
                 }
             }
+            "clearContainerData" -> {
+                val containerId = call.argument<String>("containerId")
+                if (profileStore == null || containerId.isNullOrEmpty()) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    val profile = profileStore.getProfile(containerId)
+                    if (profile == null) {
+                        result.success(false)
+                        return
+                    }
+                    profile.getCookieManager().removeAllCookies(null)
+                    profile.getWebStorage().deleteAllData()
+                    profile.getGeolocationPermissions().clearAll()
+                    result.success(true)
+                } catch (_: RuntimeException) {
+                    result.success(false)
+                }
+            }
             else -> result.notImplemented()
         }
     }

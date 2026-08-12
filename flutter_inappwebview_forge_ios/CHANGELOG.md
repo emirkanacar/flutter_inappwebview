@@ -1,3 +1,8 @@
+## 2.1.29 - 2026-08-12
+
+- Add `ContainerController.clearContainerData` to clear all website data in an
+  iOS 17+ container without deleting the underlying `WKWebsiteDataStore`.
+
 ## 2.1.28 - 2026-08-12
 
 - Apply `InAppWebViewSettings.proxySettings` to the WebView's
