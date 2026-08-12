@@ -4002,7 +4002,15 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     public func requestFocus() -> Bool {
-        return self.scrollView.subviews.first?.becomeFirstResponder() ?? false
+        var stack: [UIView] = subviews
+        while !stack.isEmpty {
+            let view = stack.removeFirst()
+            if view.canBecomeFirstResponder, view.becomeFirstResponder() {
+                return true
+            }
+            stack.append(contentsOf: view.subviews)
+        }
+        return becomeFirstResponder()
     }
     
     public func getCertificate() -> SslCertificate? {

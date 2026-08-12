@@ -95,7 +95,9 @@ void main() {
     expect(source, contains('private fun acceptsAudio(types: Array<String>)'));
     expect(
       source,
-      contains('audio -> getAudioIntent().takeIf(::canResolveIntent)'),
+      contains(
+        'audio && !images && !video -> getAudioIntent().takeIf(::canResolveIntent)',
+      ),
     );
     expect(
       source,

@@ -24,12 +24,13 @@ each note was recorded.
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 39 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Five PR-only records also have local implementations but remain outside the
+Six PR-only records also have local implementations but remain outside the
 125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
 [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
 [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871),
-[#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), and
-[#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823).
+[#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474),
+[#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), and
+[#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853).
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
@@ -49,6 +50,15 @@ coupling it to camera permission. The Android source regression suite and
 native build remain the local gates; recorder-provider, permission, cancel,
 and returned-URI validation on physical Android devices remains pending. This
 PR-only record does not change the 70-issue count.
+
+iOS PR [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853)
+is source-fixed in iOS 2.1.25: `requestFocus()` now traverses the WebView
+subtree and makes the first focusable native content view first responder,
+then falls back to the WebView. The existing channel and public Dart contract
+are unchanged. iOS source tests and SwiftPM manifest validation pass; physical
+iOS platform-view, `document.hasFocus()`, focus-event, and tab/reattachment
+validation remain pending. This PR-only record does not change the 70-issue
+count.
 
 ### Count by exported category
 

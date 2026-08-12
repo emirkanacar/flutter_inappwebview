@@ -878,7 +878,7 @@ open class InAppWebViewChromeClient(
       pickerIntent = when {
         images && !needsCameraPermission() -> getPhotoIntent()
         video && !needsCameraPermission() -> getVideoIntent()
-        audio -> getAudioIntent().takeIf(::canResolveIntent)
+        audio && !images && !video -> getAudioIntent().takeIf(::canResolveIntent)
         else -> null
       }
     }
@@ -918,7 +918,7 @@ open class InAppWebViewChromeClient(
       pickerIntent = when {
         images && !needsCameraPermission() -> getPhotoIntent()
         video && !needsCameraPermission() -> getVideoIntent()
-        audio -> getAudioIntent().takeIf(::canResolveIntent)
+        audio && !images && !video -> getAudioIntent().takeIf(::canResolveIntent)
         else -> null
       }
     }

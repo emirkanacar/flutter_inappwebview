@@ -455,6 +455,14 @@ void _runSourceContractAssertions() {
   );
 
   _assert(
+    source.contains('var stack: [UIView] = subviews') &&
+        source.contains('view.canBecomeFirstResponder') &&
+        source.contains('stack.append(contentsOf: view.subviews)') &&
+        source.contains('return becomeFirstResponder()'),
+    'iOS requestFocus must search the WKWebView view hierarchy',
+  );
+
+  _assert(
     source.contains('IOSFullscreenVideoJS.messageHandlerName'),
     'iOS 26 fullscreen video message handler is not wired',
   );

@@ -243,7 +243,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-70 locally implemented or mitigated issue records and five PR-only records.
+70 locally implemented or mitigated issue records and six PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -293,6 +293,25 @@ for image and video capture. Recorder results continue through the existing
 `image/*,audio/*`, cancellation, returned `content://` URIs, missing recorder
 providers, and camera-permission denied states on Android 10-16 and OEM WebView
 providers. PR #2823 remains open upstream; no upstream state or comment was
+changed.
+
+### PR #2853 - iOS platform-view focus recovery
+
+**Local status:** Implemented in iOS 2.1.25 and root 2.1.52; physical focus
+validation pending. **Impact:** `requestFocus()` could return `false` and leave
+`document.hasFocus()` false when an iOS WebView was embedded as a Flutter
+platform view. **Confidence:** Confirmed native responder-selection path in
+the upstream PR and the Forge implementation.
+
+The iOS `InAppWebView.requestFocus()` implementation now walks the WebView
+subtree, selects the first view that can become first responder, and falls back
+to the WebView itself. Dart, platform-interface, and channel contracts remain
+unchanged; `clearFocus()` is intentionally outside this focused fix.
+
+**Remaining validation:** exercise `requestFocus()` after tab/platform-view
+reattachment, verify `document.hasFocus()` and window focus events without a
+physical tap, and compare iOS 15-26 device behavior with a minimal native
+`WKWebView`. PR #2853 remains open upstream; no upstream state or comment was
 changed.
 
 ### #2873 — Restrict `FileProvider` paths

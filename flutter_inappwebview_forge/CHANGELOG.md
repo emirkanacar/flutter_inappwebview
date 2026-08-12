@@ -1,3 +1,10 @@
+## 2.1.52 - 2026-08-12
+
+- iOS: fix `requestFocus()` for Flutter platform views by searching for the
+  focusable WebKit content view ([PR #2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853)).
+  Physical iOS focus and document-visibility validation remains pending.
+- Update the iOS implementation dependency to 2.1.25.
+
 ## 2.1.51 - 2026-08-12
 
 - Android: support `audio/*` file chooser capture and chooser options without

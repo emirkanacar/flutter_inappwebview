@@ -1,3 +1,11 @@
+## 2.1.25 - 2026-08-12
+
+- iOS: make `requestFocus()` search the WebView hierarchy for the focusable
+  `WKContentView` before falling back to the WebView itself, restoring
+  `document.hasFocus()` and focus events when embedded as a Flutter platform
+  view ([PR #2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853)).
+  Physical iOS focus validation remains pending.
+
 ## 2.1.24 - 2026-08-10
 
 - Correct the geolocation decision-handler availability boundary for [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831): the public `WKUIDelegate` bridge is compiled and advertised for iOS 27+, while iOS 26 remains an Apple/WebKit-owned prompt path without a public decision callback. The iOS 27 Simulator deny-path diagnostic passes.
