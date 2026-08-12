@@ -1,7 +1,9 @@
 #ifndef FLUTTER_INAPPWEBVIEW_PLUGIN_IN_APP_WEBVIEW_H_
 #define FLUTTER_INAPPWEBVIEW_PLUGIN_IN_APP_WEBVIEW_H_
 
+#include <atomic>
 #include <functional>
+#include <mutex>
 #include <WebView2.h>
 #include <wil/com.h>
 #include <windows.ui.composition.desktop.h>
@@ -268,6 +270,8 @@ namespace flutter_inappwebview_plugin
     std::map<std::string, std::unique_ptr<WebMessageListener>> webMessageListeners_;
     std::map<std::string, std::shared_ptr<WebNotificationController>> webNotificationControllers_;
     std::map<std::string, std::shared_ptr<PrintJobController>> printJobControllers_;
+    std::atomic<bool> disposed_{ false };
+    std::mutex controllerMutex_;
 
     void registerEventHandlers();
     void registerSurfaceEventHandlers();

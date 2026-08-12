@@ -1,3 +1,10 @@
+## 2.1.59 - 2026-08-12
+
+- Update the Windows implementation to 1.0.10 to serialize WebView2
+  controller resize and teardown calls, preventing the reported native crash
+  when a late resize reaches a closing controller
+  ([#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752)).
+
 ## 2.1.58 - 2026-08-12
 
 - Update the Android implementation to 1.0.49 to contain Android 16/OEM

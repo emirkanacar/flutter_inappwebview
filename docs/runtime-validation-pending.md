@@ -17,11 +17,11 @@ each note was recorded.
 
 | Local status | Issue records | Count | Meaning |
 | --- | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | Issue register below | 74 | Source, regression, and host/build checks pass; real validation remains. |
+| Locally implemented or mitigated; runtime validation pending | Issue register below | 75 | Source, regression, and host/build checks pass; real validation remains. |
 | Resolved locally; no runtime gate | [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | 1 | Pure Dart serialization is covered by a focused regression test; no device/provider behavior is involved. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
 | Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | 15 | Strong evidence points to Apple/WebKit Simulator or callback limitations, Android framework/provider/dependency, host app/site/Firebase configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 34 | No complete local implementation boundary has been established. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 33 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Seven PR-only records also have local implementations but remain outside the
@@ -122,11 +122,11 @@ count.
 
 | Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Still open | Technical open after showcase |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Bugs | 98 | 56 | 1 | 1 | 15 | 25 | 25 |
+| Bugs | 98 | 57 | 1 | 1 | 15 | 24 | 24 |
 | Enhancements | 16 | 10 | 0 | 0 | 0 | 6 | 6 |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **74** | **1** | **1** | **15** | **34** | **31** |
+| **Total** | **125** | **75** | **1** | **1** | **15** | **33** | **30** |
 
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
 now validates nullable and non-string optional callback fields before dispatch,
@@ -402,7 +402,7 @@ validation remain required, so the count remains 68.
 
 ## Issue register
 
-The following 74 issue records have moved out of the active implementation
+The following 75 issue records have moved out of the active implementation
 queue. They remain release gates until the required real validation is
 recorded:
 
@@ -413,7 +413,7 @@ recorded:
 `#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2819`, `#2826`, `#2830`,
 `#2793`, `#2834`, `#2835`, `#2837`, `#2840`, `#2841`, `#2842`, `#2843`, `#2846`, `#2848`, `#2849`,
 `#2850`, `#2852`, `#2855`, `#2856`, `#2859`, `#2861`, `#2862`, `#2863`,
-`#2660`, `#2814`, `#2839`, `#2867`, `#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880`.
+`#2660`, `#2752`, `#2814`, `#2839`, `#2867`, `#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880`.
 
 ## Validation tracks
 

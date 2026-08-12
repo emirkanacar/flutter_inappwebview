@@ -3666,7 +3666,12 @@ namespace flutter_inappwebview_plugin
   // flutter_view
   void InAppWebView::setSurfaceSize(size_t width, size_t height, float scale_factor)
   {
-    if (!webViewController) {
+    if (disposed_.load(std::memory_order_acquire)) {
+      return;
+    }
+
+    std::lock_guard<std::mutex> controllerLock(controllerMutex_);
+    if (disposed_.load(std::memory_order_relaxed) || !webViewController) {
       return;
     }
 
@@ -3700,7 +3705,13 @@ namespace flutter_inappwebview_plugin
 
   void InAppWebView::setPosition(size_t x, size_t y, float scale_factor)
   {
-    if (!webViewController || !plugin || !plugin->registrar) {
+    if (disposed_.load(std::memory_order_acquire)) {
+      return;
+    }
+
+    std::lock_guard<std::mutex> controllerLock(controllerMutex_);
+    if (disposed_.load(std::memory_order_relaxed) ||
+        !webViewController || !plugin || !plugin->registrar) {
       return;
     }
 
@@ -3730,7 +3741,12 @@ namespace flutter_inappwebview_plugin
 
   void InAppWebView::setVisibility(bool visible)
   {
-    if (!webViewController) {
+    if (disposed_.load(std::memory_order_acquire)) {
+      return;
+    }
+
+    std::lock_guard<std::mutex> controllerLock(controllerMutex_);
+    if (disposed_.load(std::memory_order_relaxed) || !webViewController) {
       return;
     }
 
@@ -4216,6 +4232,7 @@ namespace flutter_inappwebview_plugin
   InAppWebView::~InAppWebView()
   {
     debugLog("dealloc InAppWebView");
+    disposed_.store(true, std::memory_order_release);
     // Detach FindInteraction's WebView2 event handlers before stopping or
     // closing the controller. Removing them after Close() can return a
     // WebView2 invalid-state error and tear down the shared environment when
@@ -4225,17 +4242,20 @@ namespace flutter_inappwebview_plugin
       findInteractionController.reset();
     }
     userContentController = nullptr;
-    if (webView) {
-      failedLog(webView->Stop());
-    }
-    HWND parentWindow = nullptr;
-    if (webViewCompositionController && webViewController && succeededOrLog(webViewController->get_ParentWindow(&parentWindow))) {
-      // if it's an InAppWebView (so webViewCompositionController will be not a nullptr!),
-      // then destroy the Window created with it
-      DestroyWindow(parentWindow);
-    }
-    if (webViewController) {
-      failedLog(webViewController->Close());
+    {
+      std::lock_guard<std::mutex> controllerLock(controllerMutex_);
+      if (webView) {
+        failedLog(webView->Stop());
+      }
+      HWND parentWindow = nullptr;
+      if (webViewCompositionController && webViewController && succeededOrLog(webViewController->get_ParentWindow(&parentWindow))) {
+        // if it's an InAppWebView (so webViewCompositionController will be not a nullptr!),
+        // then destroy the Window created with it
+        DestroyWindow(parentWindow);
+      }
+      if (webViewController) {
+        failedLog(webViewController->Close());
+      }
     }
     for (auto& [id, channel] : webMessageChannels_) {
       if (channel) {

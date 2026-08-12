@@ -95,6 +95,16 @@ void _runSourceContractAssertions() {
   );
   _expectContains(
     nativeViewSource,
+    'disposed_.store(true, std::memory_order_release)',
+    'the WebView disposal gate',
+  );
+  _expectContains(
+    nativeViewSource,
+    'std::lock_guard<std::mutex> controllerLock(controllerMutex_)',
+    'the serialized WebView2 controller lifetime calls',
+  );
+  _expectContains(
+    nativeViewSource,
     'put_ZoomFactor',
     'the WebView2 page zoom setter',
   );

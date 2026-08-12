@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-08-12
 
-Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 74 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 34 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
+Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 75 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 33 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
 The confidence labels below describe the evidence available during this review:
 
@@ -19,11 +19,11 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 74 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 75 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 15 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 34 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 33 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2673, #2594 - Android provider-specific `forceDarkStrategy` casts
 
@@ -68,6 +68,10 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 #### #2736 - Windows InAppBrowser resize after teardown
 
 **Local status:** Implemented and source-validated; Windows native validation pending. **Affected package:** Windows InAppBrowser. **Impact:** a late `WM_SIZE` callback could reach a released WebView2 controller during focus/resize or window teardown. **Fix:** the resize path now checks both the browser wrapper and WebView2 controller before updating bounds. **Required evidence:** minimize/restore, close/resize races, focus transitions, and release builds on supported Windows/WebView2 versions.
+
+#### #2752 - Windows WebView2 controller crashes during resize/teardown
+
+**Local status:** Implemented and source-validated in Windows 1.0.10; Windows native runtime validation pending. **Affected package:** Windows WebView2 controller lifetime. **Impact:** the upstream stack reaches `put_Bounds` and `put_RasterizationScale` while the controller is being closed, producing a native access violation in the WebView2/VC runtime path. **Root cause hypothesis:** late Flutter platform-view geometry callbacks can overlap controller teardown. **Fix:** resize, position, and visibility callbacks now stop immediately after disposal begins and serialize controller access with teardown through a mutex. **Required evidence:** reproduce transparent-background WebView creation on the affected Windows/WebView2 matrix, then run resize, minimize/restore, navigation, close, and recreate cycles in debug and release builds; confirm no access violation and no leaked child window.
 
 #### #2861 - Linux software-rendering fallback
 
@@ -282,6 +286,75 @@ disposal, handler exceptions, JSON-compatible payloads, and backpressure under
 rapid emits. The helper must not be used before the WebView can evaluate
 JavaScript.
 
+### #2824 — iOS WebView URL does not load in an incomplete reproduction
+
+**Local status:** Application callback configuration is the first confirmed
+boundary; WebKit unresponsiveness still needs reproduction. **Affected scope:**
+iOS navigation policy callback and WebKit page-process lifecycle. **Confidence:**
+Strong application-level explanation, insufficient native evidence for a
+plugin fix.
+
+The upstream sample sets `shouldOverrideUrlLoading` to always return
+`NavigationActionPolicy.CANCEL`. That explicitly prevents every navigation
+from proceeding, including the initial page URL and subsequent redirects, so
+the reported "URL not load" behavior is explained by the host callback. The
+same report contains a `WebPageProxy::processDidBecomeUnresponsive` message,
+but no complete stack trace, reproducible URL, native comparison, or minimal
+page that separates a WebKit process hang from the unconditional cancellation.
+
+**Required evidence:** first return `ALLOW` for the minimal sample and remove
+the permission grant/callback overrides; then compare Safari, a minimal native
+`WKWebView`, and Forge on the same HTTPS URL under the reported Xcode/Flutter
+versions. Reopen Forge implementation work only if the page still fails with
+an `ALLOW` policy and a reproducible WebKit/native trace.
+
+### #2795 — iOS gesture ownership is lost around Flutter overlays
+
+**Local status:** Active reproduction; no Forge-owned source fix established.
+**Affected scope:** Flutter iOS platform-view gesture arena, `UiKitView`, and
+Flutter controls layered above the WebView. **Confidence:** Strong report but
+missing a native event trace.
+
+The upstream report describes a `touchstart` reaching the WebView while a
+Flutter `Slider` is touched above it, followed by a missing WebView
+`touchend`. The current Forge path passes the caller's `gestureRecognizers`
+directly to `UiKitView`. Its `preventGestureDelay` option only disables
+Flutter's delaying recognizer after the WebView has already been hit; it cannot
+identify an arbitrary Flutter overlay that owns the touch sequence. The iOS
+native `hitTest` implementation likewise receives the platform-view hit, not
+the Flutter overlay's ownership decision. Adding a global native recognizer or
+forcing simultaneous recognition would risk stealing scroll, slider, and
+WebView gestures from the host app.
+
+**Required evidence:** reproduce with a minimal Flutter 3.38.6+ app containing
+only an `InAppWebView` and a positioned `Slider`; capture Flutter gesture-arena
+logs, `touchesBegan`/`touchesEnded`, the exact `gestureRecognizers` set, and
+composition mode. Compare an empty set, an explicit vertical-drag set, and
+the current `preventGestureDelay` setting. Reopen implementation work only if
+the same ownership failure occurs in a minimal host without an overlay or
+older Flutter engine.
+
+### #2804 — iOS Passkey prompt is not shown
+
+**Local status:** Active reproduction; no Forge-owned source fix established.
+**Affected scope:** iOS 26 WebKit WebAuthn/passkey flow, relying-party site
+configuration, and host-app entitlements. **Confidence:** Needs reproduction.
+
+The upstream report is labeled as an iOS 26 issue, but contains no native
+stack trace, passkey/WebAuthn JavaScript, relying-party ID, Associated Domains
+configuration, or comparison with Safari and a minimal native `WKWebView`.
+The supplied snippet is also incomplete. Forge's iOS implementation creates a
+standard `WKWebViewConfiguration` and has no private or plugin-owned API that
+can force WebKit to display a passkey prompt. Adding speculative JavaScript or
+native credential code would risk changing the WebAuthn security boundary.
+
+**Required evidence:** reproduce with a minimal HTTPS relying-party page on a
+physical iOS 26 device; capture the WebAuthn exception/result, relying-party
+ID, `apple-app-site-association`/associated-domain state, screen-lock and
+passkey availability, and compare Safari, native `WKWebView`, and Forge. Only
+reopen implementation work if the same valid page succeeds in Safari/native
+WebKit but fails in Forge.
+
 ### #2570 — iOS Password AutoFill is not offered in `InAppWebView`
 
 **Local status:** Host/application/site configuration boundary; no Forge package fix. **Affected scope:** iOS Password AutoFill, WKWebView, host-app entitlements, and the login site's HTML/domain association. **Impact:** iCloud Keychain suggestions appear in `ChromeSafariBrowser` but not in the reported `InAppWebView` login flow. **Confidence:** Needs host/device reproduction; the report has no HTML markup, Associated Domains entitlement, AASA response, or native comparison.
@@ -296,7 +369,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-74 locally implemented or mitigated issue records and seven PR-only records.
+75 locally implemented or mitigated issue records and seven PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -544,16 +617,6 @@ The initial configuration path, runtime settings update path, and real-settings 
 
 The Android Gradle configuration uses the available `proguard-android-optimize.txt` default file for release and profile configurations. A package test asserts that the optimized filename remains present and the legacy filename does not regress into the build configuration.
 
-### #2868 — Android 16/OEM text-selection action-mode resource crash
-
-**Status:** Hardened in Android 1.0.49; Android 16/OEM provider validation remains pending. **Impact:** Selecting text in a WebView can terminate the host app while Android WebView creates its action mode. **Confidence:** Confirmed native stack trace and source control point.
-
-The supplied trace ends in Chromium WebView `onCreateActionMode`, where an OEM/provider resource lookup throws `Resources.NotFoundException` for resource ID `0x30c0008`. The exception crosses the WebView JNI boundary as `org.chromium.base.JniAndroid$UncaughtExceptionException` and reaches the plugin's `InAppWebView.startActionMode` path. This is consistent with the existing Android selection-menu issue where provider metadata can expose invalid or icon-only action items.
-
-Android 1.0.49 now contains both the specific `Resources.NotFoundException` guard and a `RuntimeException` fallback around native action-mode creation. If the provider wraps the original exception, the plugin logs the failure and skips the custom selection action mode instead of allowing the host process to terminate. The existing filtering of OEM `false` titles and icon-only items remains in place. Android package tests pass; no claim is made that the provider resource itself is corrected.
-
-**Required validation:** reproduce on an Android 16 device with the exact System WebView provider version, select text in plain and editable content, verify the app remains alive, and confirm that copy/share/select-all still work when the provider action mode is valid.
-
 ### #2837 — Android WebView white screen after screen lock
 
 **Status:** Fixed in Android 1.0.8; validate on Android 10 and affected OEM/device combinations. **Impact:** After a long screen-lock period, the WebView could remain visually blank until a touch or scroll triggered a redraw. **Confidence:** Strong report with a lifecycle rendering path.
@@ -626,11 +689,11 @@ Issue [#2762](https://github.com/pichillilorenzo/flutter_inappwebview/issues/276
 
 ### #2868 — Samsung One UI custom selection toolbar renders `false`
 
-**Status:** Fixed in Android 1.0.6; Samsung One UI device validation remains. **Impact:** Visible Android text-selection UI corruption on Samsung One UI when the custom context menu is used. **Confidence:** Strong report; code path confirmed.
+**Status:** Hardened in Android 1.0.49; Android 16/OEM provider validation remains. **Impact:** Visible Android text-selection UI corruption or a host crash when the custom context menu/action mode is used. **Confidence:** Strong report and confirmed native stack path.
 
 The custom action-mode implementation in `InAppWebView.kt` clears the native menu and rebuilds it as Flutter/plugin UI. It previously converted every native item title with `menuItem.title.toString()` and rendered it as a `TextView`. An OEM item that is icon-only or has a non-user-facing title could therefore appear as the literal string `false`. Hybrid composition avoids the custom toolbar in the reported configuration, but has a performance cost.
 
-**Implementation:** Android 1.0.6 preserves a native icon for icon-only entries, skips entries with neither a usable title nor icon, and treats the OEM placeholder `false` as non-user-facing metadata. Native action-mode creation and title/icon lookups also catch `Resources.NotFoundException` so malformed OEM resources do not escape as an application crash. A Samsung One UI regression test matrix is still required.
+**Implementation:** Android 1.0.49 preserves a native icon for icon-only entries, skips entries with neither a usable title nor icon, and treats the OEM placeholder `false` as non-user-facing metadata. Native action-mode creation and title/icon lookups catch both `Resources.NotFoundException` and JNI-wrapped `RuntimeException` failures, so malformed provider resources are logged and the action mode is skipped instead of escaping as an application crash. The Android source regression suite passes; an Android 16/OEM regression test matrix is still required.
 
 **Relation to the reported `Resources$NotFoundException`:** the supplied crash also enters `InAppWebView.startActionMode` through Chromium’s selection popup. It is not proof that #2868 has the same root cause, but both symptoms make the custom action-mode path a high-value shared investigation target. The Samsung issue is a UI rendering defect; the supplied stack is a resource lookup failure.
 
@@ -947,8 +1010,7 @@ records already listed in [runtime-validation-pending.md](runtime-validation-pen
 have a documented local implementation or mitigation boundary; their next
 action is target validation, not speculative code change. The remaining
 active examples that still need a reproducible matrix before implementation
-are [#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752),
-[#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
+are [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)

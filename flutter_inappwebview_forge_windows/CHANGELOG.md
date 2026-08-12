@@ -1,3 +1,11 @@
+## 1.0.10 - 2026-08-12
+
+- Serialize WebView2 controller resize, position, visibility, and teardown
+  calls and reject late callbacks after disposal, preventing a native crash
+  when `put_Bounds` or `put_RasterizationScale` races with `Close()`
+  ([#2752](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2752)).
+  Windows runtime validation remains pending.
+
 ## 1.0.9 - 2026-08-12
 
 - Update the Windows WIL package and apply MSVC `/FS` and experimental
