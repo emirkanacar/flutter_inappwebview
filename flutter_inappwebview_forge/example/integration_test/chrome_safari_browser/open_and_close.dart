@@ -39,7 +39,7 @@ void openAndClose() {
         activityButton: ActivityButton(
           templateImage: UIImage(systemName: "sun.max"),
           extensionIdentifier:
-              "com.pichillilorenzo.flutterinappwebview-ios-example5.test",
+              "com.emirkanacar.flutterinappwebview-ios-example5.test",
         ),
       ),
     );

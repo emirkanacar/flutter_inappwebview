@@ -43,6 +43,21 @@ existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
 an adversarial external-picker/provider matrix across API levels also remains
 pending. This PR-only record does not change the 74-issue count.
 
+### 2026-08-12 Android 16/API 36 validation note
+
+The connected physical Android 16/API 36 device with WebView 151.0.7922.83
+passed the IME lifecycle (#2555), fullscreen keyboard (#2878), disposal
+lifecycle (#2654), renderer/fullscreen (#2819), screen-lock redraw (#2837),
+cold-start/headless bridge (#2843/#2849), Bundle codec/activity handoff
+(#2536), WebView-to-Flutter transition (#2688), rapid interception/navigation
+(#2580), and cookie mutation/explicit flush (#2718) diagnostics. Four
+headless document-start cycles also passed. These results narrow the remaining
+gates but do not remove Android 10/11, OEM/provider, release, or exact
+renderer-loss requirements from the register. The #2721 display-size override
+was restored to the physical size, but the Activity/VM service restarted during
+the override before the geometry assertion; it remains pending. The counts are
+unchanged.
+
 Android issue [#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660)
 is source-fixed in Android 1.0.46 and root 2.1.54: the nullable
 `paymentRequestEnabled` setting is serialized through platform-interface 1.1.6,
@@ -292,9 +307,12 @@ On 2026-08-11, the iPhone 17 Pro iOS 26.2 Simulator passed three cycles using a
 bundled H.264/AAC video: play, seek, native-container fullscreen entry,
 runtime opt-out dismissal, and re-entry all produced the expected state. The
 test exited 0, the iOS package tests passed 2/2, and the SwiftPM manifest
-validated with the documented module-cache workaround. Physical iOS 26/GPU,
-HLS/iframe, orientation, media-control, and consuming-app validation remain
-required, so #2710 stays in this register and the count remains 68.
+validated with the documented module-cache workaround. The 2026-08-12 physical
+iOS run returned `request=null` after seek and did not receive
+`onEnterFullscreen` before the diagnostic timeout, failing the first cycle.
+Physical iOS 26/GPU, HLS/iframe, orientation, media-control, and consuming-app
+validation remain required, so #2710 stays in this register and the count
+remains 68.
 
 iOS/Android [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
 now has disposal lifecycle diagnostics at
@@ -317,8 +335,13 @@ affected-OEM path remains unvalidated. On 2026-08-11, the Samsung A16
 diagnostic completes all four cycles with `WebView disposed` outcomes across
 virtual-display and hybrid composition; the filtered log contains only
 Chromium tile-memory warnings and no app `AndroidRuntime`, fatal, or ANR.
-Physical iOS 17+ and Android API 33+/OEM/provider validation remain required,
-so #2654 stays in this register and the count remains 68.
+The connected physical iOS device also installed and launched the signed
+example, and two `ios_disposal_lifecycle_diagnostic_test.dart` runs passed
+after provisioning approval; the rerun completed four cycles with safe
+`WebView disposed`/`WebView navigation started` outcomes. Repeated physical
+cycles, iOS 15-26 coverage,
+and Android API 33+/OEM/provider validation remain required, so #2654 stays in
+this register and the count remains 68.
 
 iOS [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now has an opt-in multi-window navigation diagnostic at
@@ -332,7 +355,10 @@ JavaScript, `shouldOverrideUrlLoading`, and an async call raced with
 pending native and legacy async callbacks with `WebView navigation started`
 before the new provisional navigation and ignores late completions. Physical
 iOS 15–26, Xcode 16/26, and symbolicated-crash validation remain required, so
-#2867 stays in this register and the count remains 68.
+#2867 also passes three popup attach/evaluate/navigate/dispose cycles on the
+connected physical iOS device with `--no-uninstall`; the app remains installed.
+Broader iOS 15-26/Xcode coverage and symbolicated-crash comparison remain
+required, so #2867 stays in this register and the count remains 68.
 
 Android [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
 now restores fullscreen state in both the pre-destroy fallback and the
@@ -367,11 +393,12 @@ iOS 26 prompt remains owned by WebKit because no public Forge decision hook is
 available; private WebKit APIs are out of scope.
 
 iOS [#2763](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2763)
-now has successful opt-in diagnostics on iOS 26.0, 26.2, and 27.0 Simulators:
+now has successful opt-in diagnostics on iOS 26.0, 26.2, and 27.0 Simulators,
+plus one physical iOS device run with `--no-uninstall`:
 `window.open` sends `https://example.com/popup` to `onCreateWindow`, the callback
 returns `false`, and the caller remains at `https://example.com/`. The record
-remains in this register until physical iOS 15-26 popup attachment, navigation,
-disposal, and scene-transition coverage is completed.
+remains in this register until repeated physical iOS 15-26 popup attachment,
+navigation, disposal, and scene-transition coverage is completed.
 
 Android [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
 now has an opt-in screen-lock redraw diagnostic at
@@ -397,8 +424,10 @@ viewport metrics after loading, while iOS 27 reached the initial `778px`
 viewport but did not expose a software-keyboard transition (`keyboardDelta=0`).
 CoreSimulatorService connection failures were also observed. The fix retains
 the pre-keyboard `UIScrollView` zoom/offset and refreshes the final frame/layout
-after dismissal. Physical iOS 17/device and native `WKWebView` comparison
-validation remain required, so the count remains 68.
+after dismissal. The physical iOS device run passed with `839px -> 487.8125px
+-> 839px` and zero final offset. Custom page-zoom, native `WKWebView`
+comparison, and broader physical-device validation remain required, so the
+count remains 68.
 
 ## Issue register
 

@@ -138,9 +138,10 @@ WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. A
 fresh iPhone 17 Pro iOS 26.2 Simulator run on 2026-08-10 passed
 (`778px -> 435.44px -> 778px`) and restored the scale and page offset. Earlier
 clean DDS reruns were inconclusive because iOS 26.2 reported zero viewport
-metrics and iOS 27 did not expose a software keyboard transition. Physical iOS
-17, device, and native `WKWebView` comparison validation remain in the runtime
-register, so #2787 remains validation-pending.
+metrics and iOS 27 did not expose a software keyboard transition. One physical
+iOS device run now passes the keyboard transition and restoration. Custom
+page-zoom, native `WKWebView` comparison, and broader physical iOS validation
+remain in the runtime register, so #2787 remains validation-pending.
 
 iOS [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
 is implemented in iOS 2.1.17 and remains outside the active queue in the
@@ -164,6 +165,14 @@ rapid navigations with `finalLoaded=true`, the `final` DOM marker, and 31
 interception callbacks; only Chromium tile-memory warnings appear. Physical
 Android 10/11 OEM/provider and back/forward validation remain in the runtime
 register, so the active/runtime counts do not change.
+
+The 2026-08-12 Android 16/API 36 physical run also passes the rapid
+interception diagnostic on WebView 151.0.7922.83; the IME, fullscreen keyboard,
+disposal, renderer/fullscreen, screen-lock, cold-start, activity-handoff,
+transition, and cookie diagnostics pass as well. The display-size diagnostic
+remains a harness limitation because the reversible `wm size` override restarts
+the Activity/VM service before geometry can be asserted. These results do not
+change the runtime register or active counts.
 
 Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
 is source-fixed in Android 1.0.43. API 21+ cookie mutations no longer call
@@ -264,7 +273,9 @@ pending until the affected physical-device matrices pass. The A16 IME
 diagnostic also passes for virtual-display and hybrid composition WebViews
 after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
 physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
-gate, so the runtime-pending count stays 69.
+gate. One signed physical iOS disposal cycle passed on 2026-08-12 after
+provisioning approval, but repeated iOS cycles remain required, so the
+runtime-pending count stays 69.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new

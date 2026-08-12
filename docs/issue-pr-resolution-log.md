@@ -15,6 +15,16 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-12 iOS physical popup validation
+
+The physical iOS device ran `ios_popup_default_handling_diagnostic_test.dart`
+with `--no-uninstall`. The test received `https://example.com/popup` in
+`onCreateWindow`, returned `false`, kept the caller at
+`https://example.com/`, and finished with `All tests passed!`. The app and
+provisioning profile remained installed on the device. Repeated popup
+attachment, navigation, disposal, and scene-transition coverage across iOS
+15-26 remains pending. No upstream issue state or comment was changed.
+
 ## 2026-08-11 iOS fullscreen seek runtime validation
 
 Upstream [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
@@ -52,6 +62,77 @@ warnings; #2837 also has one system `ActivityManager` freeze warning, while
 back/forward, and Play Console/release validation remain pending, so the
 records stay in the runtime register and the counts do not change. No upstream
 issue or PR state/comment was changed.
+
+## 2026-08-12 iOS physical-device signing and disposal validation
+
+The iOS example was updated to use the local team `2A93W9KX49` and the
+`com.emirkanacar.flutterinappwebview-ios-example5` bundle-id prefix while
+retaining the existing example target structure. Xcode's automatic signing
+then produced a valid device-signed app after the provisioning approval was
+accepted. The physical iOS device installed and launched the app, and
+`ios_disposal_lifecycle_diagnostic_test.dart` passed with `All tests passed!`.
+This is one physical-device lifecycle checkpoint; repeated cycles and the
+broader iOS 15-26/provider matrix remain pending. No upstream issue or PR
+state/comment was changed.
+
+## 2026-08-12 Android action-mode and display-size validation continuation
+
+The Android package suite passes 53/53 tests, including the #2868 action-mode
+regression that prevents OEM icon-only placeholders and guards malformed
+provider resources. The Android example `:app:compileDebugKotlin` task also
+passes. On the connected Android 16 device, #2721 applied and reset the
+`wm size` override, restoring the physical `1080x2340` size, but the Activity
+and VM service restarted during the configuration change before the geometry
+assertion could complete. The app remained installed and resumed normally.
+
+The physical iOS disposal diagnostic was rerun with `--no-uninstall` and
+completed four cycles with outcomes `[WebView disposed, WebView disposed,
+WebView navigation started, WebView navigation started]`; the test passed and
+the app remained installed.
+
+## 2026-08-12 iOS physical keyboard viewport validation
+
+The physical iOS device ran `ios_keyboard_viewport_diagnostic_test.dart` with
+`--no-uninstall`. The WebKit visual viewport changed from `839px` to
+`487.8125px` while the native keyboard was visible, then returned to `839px`
+with `visualViewportOffsetTop=0` after dismissal. The test finished with
+`All tests passed!`; the app and provisioning profile remained installed.
+Custom page-zoom and broader iOS 17+ comparison coverage remain pending.
+
+## 2026-08-12 iOS physical fullscreen validation gate
+
+The physical iOS device ran `ios_fullscreen_video_seek_diagnostic_test.dart`
+with `--no-uninstall`. The first bundled-video seek/fullscreen cycle returned
+`request=null` and did not deliver the `onEnterFullscreen` callback within the
+diagnostic timeout, so the test failed before exercising the three-cycle
+mitigation. The app and provisioning profile remained installed. This is
+recorded as a physical WebKit/media validation failure; no source change is
+claimed from this run.
+
+## 2026-08-12 iOS physical multi-window navigation validation
+
+The physical iOS device ran `ios_multi_window_navigation_diagnostic_test.dart`
+with `--no-uninstall`. Three popup attach/evaluate/navigate/dispose cycles
+completed, with popup navigation callbacks including
+`https://example.com/popup-0` and the expected `about:blank` transitions. The
+test finished with `All tests passed!`; the app and provisioning profile
+remained installed. Broader iOS 15-26/Xcode matrix and symbolicated-crash
+comparison remain pending.
+
+## 2026-08-12 Android 16/API 36 physical validation continuation
+
+The connected Android 16/API 36 device, using WebView 151.0.7922.83, passed
+the opt-in diagnostics for #2555 IME lifecycle, #2878 fullscreen keyboard,
+#2654 disposal/recreate, #2819 renderer/fullscreen, #2837 screen-lock redraw,
+#2843/#2849 cold-start bridge, #2536 Bundle codec/activity handoff, #2688
+WebView-to-Flutter transition, #2580 rapid interception/navigation, and #2718
+cookie mutation/explicit flush. The headless cold-start diagnostic also passed
+four document-start cycles. The #2721 display-size override was applied and
+reset successfully, but Android restarted the example Activity/VM service on
+the resize path before the geometry assertion, so that issue remains runtime-
+pending. The #2868 resource/action-mode crash has not yet had a dedicated
+selection-toolbar reproduction on this device. No upstream issue or PR
+state/comment was changed.
 
 ## 2026-08-10 Android file chooser sandbox URI
 
