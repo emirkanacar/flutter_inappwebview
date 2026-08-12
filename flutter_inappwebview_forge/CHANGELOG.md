@@ -1,3 +1,12 @@
+## 2.1.55 - 2026-08-12
+
+- Add Android User-Agent Client Hints metadata customization through the new
+  `userAgentMetadata` setting and `USER_AGENT_METADATA` capability
+  ([#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834)).
+  Update the platform interface dependency to 1.1.7 and the Android
+  implementation dependency to 1.0.47. Chromium/WebView policy may still
+  generate or suppress headers independently of this setting.
+
 ## 2.1.54 - 2026-08-12
 
 - Add Android Payment Request / Google Pay configuration through the new

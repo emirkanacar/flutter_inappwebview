@@ -30,6 +30,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var clearCache: Boolean? = false
 
     @JvmField var userAgent: String = ""
+    @JvmField var userAgentMetadata: MutableMap<String, Any?>? = null
     @JvmField var applicationNameForUserAgent: String = ""
     @JvmField var javaScriptEnabled: Boolean? = true
     @JvmField var javaScriptCanOpenWindowsAutomatically: Boolean? = false
@@ -144,6 +145,10 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "useOnDownloadStart" -> useOnDownloadStart = value as Boolean
                 "clearCache" -> clearCache = value as Boolean
                 "userAgent" -> userAgent = value as String
+                "userAgentMetadata" -> userAgentMetadata = (value as? Map<*, *>)
+                    ?.entries
+                    ?.associate { it.key.toString() to it.value }
+                    ?.toMutableMap()
                 "applicationNameForUserAgent" -> applicationNameForUserAgent = value as String
                 "javaScriptEnabled" -> javaScriptEnabled = value as Boolean
                 "javaScriptCanOpenWindowsAutomatically" -> javaScriptCanOpenWindowsAutomatically = value as Boolean
@@ -263,6 +268,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("useOnDownloadStart", useOnDownloadStart)
         put("clearCache", clearCache)
         put("userAgent", userAgent)
+        put("userAgentMetadata", userAgentMetadata)
         put("applicationNameForUserAgent", applicationNameForUserAgent)
         put("javaScriptEnabled", javaScriptEnabled)
         put("javaScriptCanOpenWindowsAutomatically", javaScriptCanOpenWindowsAutomatically)

@@ -17,11 +17,11 @@ each note was recorded.
 
 | Local status | Issue records | Count | Meaning |
 | --- | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | Issue register below | 71 | Source, regression, and host/build checks pass; real validation remains. |
+| Locally implemented or mitigated; runtime validation pending | Issue register below | 72 | Source, regression, and host/build checks pass; real validation remains. |
 | Resolved locally; no runtime gate | [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | 1 | Pure Dart serialization is covered by a focused regression test; no device/provider behavior is involved. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
 | Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | 14 | Strong evidence points to Apple/WebKit Simulator or callback limitations, Android framework/provider/dependency, host app/site configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 38 | No complete local implementation boundary has been established. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 37 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Seven PR-only records also have local implementations but remain outside the
@@ -41,7 +41,7 @@ remain allowed. The Android package suite passes 48/48 tests, `compileDebugKotli
 and the `assembleDebug` AAR task. The Flutter APK wrapper is blocked by the
 existing Gradle 8.13/JDK `OutgoingVariantsReportTask` compatibility failure;
 an adversarial external-picker/provider matrix across API levels also remains
-pending. This PR-only record does not change the 71-issue count.
+pending. This PR-only record does not change the 72-issue count.
 
 Android issue [#2660](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2660)
 is source-fixed in Android 1.0.46 and root 2.1.54: the nullable
@@ -55,6 +55,17 @@ remains pending on Android 12-16/OEM WebView providers with Google Pay's
 configuration, and custom-user-agent requirements. This issue remains outside
 the active queue and increases the runtime-pending issue count to 71.
 
+Android issue [#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834)
+is source-fixed in Android 1.0.47, platform-interface 1.1.7, and root 2.1.55:
+the Android-only `userAgentMetadata` setting is serialized, feature-gated by
+`WebViewFeature.USER_AGENT_METADATA`, and applied through
+`WebSettingsCompat.setUserAgentMetadata` with malformed brand entries ignored.
+The setting customizes metadata but cannot guarantee suppression of every
+Chromium Client Hints header. Platform-interface and Android source tests pass;
+Android provider/device request-header validation remains pending. This issue
+remains outside the active queue and increases the runtime-pending issue count
+to 72.
+
 Android PR [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743)
 is source-fixed in Android 1.0.45 and root 2.1.53: the nullable
 `WebAuthenticationSupport` setting is serialized through the platform
@@ -64,7 +75,7 @@ when `WebViewFeature.WEB_AUTHENTICATION` is supported, and reported back by
 Kotlin/AAR build pass. Physical Android WebView-provider validation for
 `NONE`, `FOR_APP`, and `FOR_BROWSER`, including Digital Asset Links and
 WebAuthn flows, remains pending. This PR-only record does not change the
-71-issue count.
+72-issue count.
 
 Android PR [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823)
 is source-fixed in Android 1.0.44: `audio/*` file chooser requests now detect
@@ -73,7 +84,7 @@ provider resolves the intent, and add the recorder as a chooser option without
 coupling it to camera permission. The Android source regression suite and
 native build remain the local gates; recorder-provider, permission, cancel,
 and returned-URI validation on physical Android devices remains pending. This
-PR-only record does not change the 71-issue count.
+PR-only record does not change the 72-issue count.
 
 iOS PR [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853)
 is source-fixed in iOS 2.1.25: `requestFocus()` now traverses the WebView
@@ -81,7 +92,7 @@ subtree and makes the first focusable native content view first responder,
 then falls back to the WebView. The existing channel and public Dart contract
 are unchanged. iOS source tests and SwiftPM manifest validation pass; physical
 iOS platform-view, `document.hasFocus()`, focus-event, and tab/reattachment
-validation remain pending. This PR-only record does not change the 71-issue
+validation remain pending. This PR-only record does not change the 72-issue
 count.
 
 ### Count by exported category
@@ -92,7 +103,7 @@ count.
 | Enhancements | 16 | 7 | 0 | 0 | 0 | 9 | 9 |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
-| **Total** | **125** | **71** | **1** | **1** | **14** | **38** | **35** |
+| **Total** | **125** | **72** | **1** | **1** | **14** | **37** | **34** |
 
 Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
 now validates nullable and non-string optional callback fields before dispatch,
@@ -368,7 +379,7 @@ validation remain required, so the count remains 68.
 
 ## Issue register
 
-The following 71 issue records have moved out of the active implementation
+The following 72 issue records have moved out of the active implementation
 queue. They remain release gates until the required real validation is
 recorded:
 
@@ -377,7 +388,7 @@ recorded:
 `#2717`, `#2718`, `#2720`, `#2721`, `#2725`, `#2728`, `#2733`, `#2736`, `#2737`,
 `#2741`, `#2757`, `#2762`, `#2763`, `#2778`, `#2780`, `#2782`, `#2783`, `#2787`, `#2789`,
 `#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2819`, `#2826`, `#2830`,
-`#2835`, `#2837`, `#2840`, `#2841`, `#2842`, `#2843`, `#2848`, `#2849`,
+`#2834`, `#2835`, `#2837`, `#2840`, `#2841`, `#2842`, `#2843`, `#2848`, `#2849`,
 `#2850`, `#2852`, `#2855`, `#2856`, `#2859`, `#2861`, `#2862`, `#2863`,
 `#2660`, `#2814`, `#2839`, `#2867`, `#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880`.
 

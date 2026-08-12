@@ -262,6 +262,12 @@ class WebViewFeature {
     'TRACING_CONTROLLER_BASIC_USAGE',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].
+  static const USER_AGENT_METADATA = WebViewFeature._internal(
+    'USER_AGENT_METADATA',
+    'USER_AGENT_METADATA',
+  );
+
   ///
   static const VISUAL_STATE_CALLBACK = WebViewFeature._internal(
     'VISUAL_STATE_CALLBACK',
@@ -383,6 +389,7 @@ class WebViewFeature {
     WebViewFeature.STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS,
     WebViewFeature.START_SAFE_BROWSING,
     WebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
+    WebViewFeature.USER_AGENT_METADATA,
     WebViewFeature.VISUAL_STATE_CALLBACK,
     WebViewFeature.WEB_AUTHENTICATION,
     WebViewFeature.WEB_MESSAGE_ARRAY_BUFFER,
@@ -555,6 +562,8 @@ class WebViewFeature {
         return 'START_SAFE_BROWSING';
       case 'TRACING_CONTROLLER_BASIC_USAGE':
         return 'TRACING_CONTROLLER_BASIC_USAGE';
+      case 'USER_AGENT_METADATA':
+        return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
       case 'WEB_AUTHENTICATION':
@@ -838,6 +847,12 @@ class AndroidWebViewFeature {
     'TRACING_CONTROLLER_BASIC_USAGE',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].
+  static const USER_AGENT_METADATA = AndroidWebViewFeature._internal(
+    'USER_AGENT_METADATA',
+    'USER_AGENT_METADATA',
+  );
+
   ///
   static const VISUAL_STATE_CALLBACK = AndroidWebViewFeature._internal(
     'VISUAL_STATE_CALLBACK',
@@ -953,6 +968,7 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.START_SAFE_BROWSING,
     AndroidWebViewFeature.SUPPRESS_ERROR_PAGE,
     AndroidWebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
+    AndroidWebViewFeature.USER_AGENT_METADATA,
     AndroidWebViewFeature.VISUAL_STATE_CALLBACK,
     AndroidWebViewFeature.WEB_AUTHENTICATION,
     AndroidWebViewFeature.WEB_MESSAGE_CALLBACK_ON_MESSAGE,
@@ -1117,6 +1133,8 @@ class AndroidWebViewFeature {
         return 'SUPPRESS_ERROR_PAGE';
       case 'TRACING_CONTROLLER_BASIC_USAGE':
         return 'TRACING_CONTROLLER_BASIC_USAGE';
+      case 'USER_AGENT_METADATA':
+        return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
       case 'WEB_AUTHENTICATION':

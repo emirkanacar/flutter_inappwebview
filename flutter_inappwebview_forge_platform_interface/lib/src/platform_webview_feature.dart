@@ -395,6 +395,11 @@ class WebViewFeature_ {
     "PAYMENT_REQUEST",
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].
+  static const USER_AGENT_METADATA = const WebViewFeature_._internal(
+    "USER_AGENT_METADATA",
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.getVariationsHeader].
   static const GET_VARIATIONS_HEADER = const WebViewFeature_._internal(
     "GET_VARIATIONS_HEADER",
@@ -685,6 +690,11 @@ class AndroidWebViewFeature_ {
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
   static const PAYMENT_REQUEST = const AndroidWebViewFeature_._internal(
     "PAYMENT_REQUEST",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].
+  static const USER_AGENT_METADATA = const AndroidWebViewFeature_._internal(
+    "USER_AGENT_METADATA",
   );
 
   ///Return whether a feature is supported at run-time. On devices running Android version `Build.VERSION_CODES.LOLLIPOP` and higher,

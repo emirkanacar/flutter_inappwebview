@@ -198,6 +198,38 @@ void main() {
     );
   });
 
+  test('Android User-Agent metadata is feature-gated and null-tolerant', () {
+    final settingsSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(
+      settingsSource,
+      contains('var userAgentMetadata: MutableMap<String, Any?>? = null'),
+    );
+    expect(
+      settingsSource,
+      contains('"userAgentMetadata" -> userAgentMetadata ='),
+    );
+    expect(
+      settingsSource,
+      contains('put("userAgentMetadata", userAgentMetadata)'),
+    );
+    expect(webViewSource, contains('customSettings.userAgentMetadata?.let'));
+    expect(
+      webViewSource,
+      contains(
+        'WebSettingsCompat.setUserAgentMetadata(settings, metadataBuilder.build())',
+      ),
+    );
+    expect(webViewSource, contains('mapNotNull'));
+  });
+
   test('Android file chooser rejects private sandbox file URIs', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

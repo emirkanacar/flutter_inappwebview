@@ -356,6 +356,41 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         userAgent + " " + customSettings.applicationNameForUserAgent
     }
 
+    customSettings.userAgentMetadata?.let { metadataMap ->
+      if (WebViewFeature.isFeatureSupported(WebViewFeature.USER_AGENT_METADATA)) {
+        val metadataBuilder = UserAgentMetadata.Builder()
+        if (metadataMap.containsKey("brandVersionList")) {
+          val brandVersions = (metadataMap["brandVersionList"] as? List<*>)
+            ?.mapNotNull { entry ->
+              val brandVersion = entry as? Map<*, *>
+              val brand = brandVersion?.get("brand") as? String
+              val majorVersion = brandVersion?.get("majorVersion") as? String
+              val fullVersion = brandVersion?.get("fullVersion") as? String
+              if (brand == null || majorVersion == null || fullVersion == null) {
+                null
+              } else {
+                UserAgentMetadata.BrandVersion.Builder()
+                  .setBrand(brand)
+                  .setMajorVersion(majorVersion)
+                  .setFullVersion(fullVersion)
+                  .build()
+              }
+            }
+            ?: emptyList()
+          metadataBuilder.setBrandVersionList(brandVersions)
+        }
+        (metadataMap["fullVersion"] as? String)?.let(metadataBuilder::setFullVersion)
+        (metadataMap["platform"] as? String)?.let(metadataBuilder::setPlatform)
+        (metadataMap["platformVersion"] as? String)?.let(metadataBuilder::setPlatformVersion)
+        (metadataMap["architecture"] as? String)?.let(metadataBuilder::setArchitecture)
+        (metadataMap["model"] as? String)?.let(metadataBuilder::setModel)
+        (metadataMap["mobile"] as? Boolean)?.let(metadataBuilder::setMobile)
+        (metadataMap["bitness"] as? Number)?.let { metadataBuilder.setBitness(it.toInt()) }
+        (metadataMap["wow64"] as? Boolean)?.let(metadataBuilder::setWow64)
+        WebSettingsCompat.setUserAgentMetadata(settings, metadataBuilder.build())
+      }
+    }
+
     if (customSettings.clearCache == true) {
       clearAllCache()
     } else if (customSettings.clearSessionCache == true) {

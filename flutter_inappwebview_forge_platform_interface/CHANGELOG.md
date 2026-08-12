@@ -1,3 +1,11 @@
+## 1.1.7 - 2026-08-12
+
+- Add Android-only `userAgentMetadata` settings and
+  `USER_AGENT_METADATA` capability metadata for customizing User-Agent Client
+  Hints ([#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834)).
+  Chromium and the installed WebView remain responsible for final header
+  generation; suppression of every Client Hints header is not guaranteed.
+
 ## 1.1.6 - 2026-08-12
 
 - Add Android `paymentRequestEnabled` settings and `PAYMENT_REQUEST`

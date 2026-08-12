@@ -1,3 +1,11 @@
+## 1.0.47 - 2026-08-12
+
+- Add feature-gated Android User-Agent Client Hints metadata customization
+  through `WebSettingsCompat.setUserAgentMetadata`
+  ([#2834](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2834)).
+  The setting is additive and does not promise suppression of all Chromium
+  Client Hints headers.
+
 ## 1.0.46 - 2026-08-12
 
 - Add feature-gated Android Payment Request support through
