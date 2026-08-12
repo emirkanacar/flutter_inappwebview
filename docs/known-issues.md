@@ -544,6 +544,16 @@ The initial configuration path, runtime settings update path, and real-settings 
 
 The Android Gradle configuration uses the available `proguard-android-optimize.txt` default file for release and profile configurations. A package test asserts that the optimized filename remains present and the legacy filename does not regress into the build configuration.
 
+### #2868 — Android 16/OEM text-selection action-mode resource crash
+
+**Status:** Hardened in Android 1.0.49; Android 16/OEM provider validation remains pending. **Impact:** Selecting text in a WebView can terminate the host app while Android WebView creates its action mode. **Confidence:** Confirmed native stack trace and source control point.
+
+The supplied trace ends in Chromium WebView `onCreateActionMode`, where an OEM/provider resource lookup throws `Resources.NotFoundException` for resource ID `0x30c0008`. The exception crosses the WebView JNI boundary as `org.chromium.base.JniAndroid$UncaughtExceptionException` and reaches the plugin's `InAppWebView.startActionMode` path. This is consistent with the existing Android selection-menu issue where provider metadata can expose invalid or icon-only action items.
+
+Android 1.0.49 now contains both the specific `Resources.NotFoundException` guard and a `RuntimeException` fallback around native action-mode creation. If the provider wraps the original exception, the plugin logs the failure and skips the custom selection action mode instead of allowing the host process to terminate. The existing filtering of OEM `false` titles and icon-only items remains in place. Android package tests pass; no claim is made that the provider resource itself is corrected.
+
+**Required validation:** reproduce on an Android 16 device with the exact System WebView provider version, select text in plain and editable content, verify the app remains alive, and confirm that copy/share/select-all still work when the provider action mode is valid.
+
 ### #2837 — Android WebView white screen after screen lock
 
 **Status:** Fixed in Android 1.0.8; validate on Android 10 and affected OEM/device combinations. **Impact:** After a long screen-lock period, the WebView could remain visually blank until a touch or scroll triggered a redraw. **Confidence:** Strong report with a lifecycle rendering path.

@@ -1,3 +1,9 @@
+## 2.1.58 - 2026-08-12
+
+- Update the Android implementation to 1.0.49 to contain Android 16/OEM
+  WebView text-selection action-mode resource failures
+  ([#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868)).
+
 ## 2.1.57 - 2026-08-12
 
 - Add the additive `InAppWebViewController.bridgeEvents` helper for

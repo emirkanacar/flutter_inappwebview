@@ -1,3 +1,11 @@
+## 1.0.49 - 2026-08-12
+
+- Harden Android text-selection action-mode startup for Android 16/WebView
+  providers that wrap `Resources.NotFoundException` in a JNI runtime exception
+  on Android 16 OEM devices. The provider failure is logged and the
+  selection action mode is skipped instead of terminating the host app
+  ([#2868](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2868)).
+
 ## 1.0.48 - 2026-08-12
 
 - Make the Android library and example apply the Kotlin Gradle Plugin only

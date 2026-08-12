@@ -742,6 +742,7 @@ void main() {
 
     expect(source, contains('startNativeActionMode'));
     expect(source, contains('Resources.NotFoundException'));
+    expect(source, contains('catch (exception: RuntimeException)'));
     expect(source, contains('equals("false", ignoreCase = true)'));
     expect(source, contains('setCompoundDrawablesRelative'));
     expect(source, contains('if (!hasMeaningfulTitle && itemIcon == null)'));

@@ -2233,6 +2233,13 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     } catch (exception: Resources.NotFoundException) {
       Log.w(LOG_TAG, "Unable to create the native text-selection action mode", exception)
       null
+    } catch (exception: RuntimeException) {
+      // Some Android 16/WebView providers rethrow callback failures through
+      // Chromium's JNI exception wrapper instead of preserving the original
+      // Resources.NotFoundException type. Do not let a provider-owned action
+      // mode resource failure terminate the host application.
+      Log.w(LOG_TAG, "Unable to create the native text-selection action mode", exception)
+      null
     }
   }
 
