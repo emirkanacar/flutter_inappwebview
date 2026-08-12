@@ -247,6 +247,17 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
         }
     }
+
+    @objc func keyboardWillShowForInputAccessoryView(notification: NSNotification) {
+        guard settings?.disableInputAccessoryView == true else {
+            return
+        }
+
+        reloadInputViewsForWebViewHierarchy()
+        DispatchQueue.main.async { [weak self] in
+            self?.reloadInputViewsForWebViewHierarchy()
+        }
+    }
     
     required public init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
@@ -521,6 +532,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         windowIdJSInitializationInFlight = false
         windowIdJSInitializedForCurrentNavigation = false
 
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShowForInputAccessoryView(notification:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+
         if #available(iOS 17.2, *) {
             // Fix https://github.com/pichillilorenzo/flutter_inappwebview/issues/1947
             NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)),
@@ -750,6 +765,15 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             return
         }
         configuration.userContentController.initialize()
+
+        if settings?.disableAutocorrection == true {
+            configuration.userContentController.addPluginScript(
+                DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+                    allowedOriginRules: settings?.pluginScriptsOriginAllowList,
+                    forMainFrameOnly: settings?.pluginScriptsForMainFrameOnly ?? false
+                )
+            )
+        }
 
         if #available(iOS 26.0, *) {
             configuration.userContentController.addPluginScript(
@@ -1678,9 +1702,37 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
         }
 
+        let inputAccessoryViewSettingChanged = newSettingsMap["disableInputAccessoryView"] != nil &&
+            settings?.disableInputAccessoryView != newSettings.disableInputAccessoryView
+        let autocorrectionSettingChanged = newSettingsMap["disableAutocorrection"] != nil &&
+            settings?.disableAutocorrection != newSettings.disableAutocorrection
+
         scrollView.isScrollEnabled = !(newSettings.disableVerticalScroll && newSettings.disableHorizontalScroll)
-        
+
         self.settings = newSettings
+
+        if inputAccessoryViewSettingChanged {
+            reloadInputViewsForWebViewHierarchy()
+        }
+
+        if autocorrectionSettingChanged {
+            let pluginScriptGroupName = DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME
+            if newSettings.disableAutocorrection {
+                configuration.userContentController.addPluginScript(
+                    DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+                        allowedOriginRules: newSettings.pluginScriptsOriginAllowList,
+                        forMainFrameOnly: newSettings.pluginScriptsForMainFrameOnly
+                    )
+                )
+                evaluateJavascript(source: DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_SOURCE())
+            } else {
+                configuration.userContentController.removePluginScripts(
+                    with: pluginScriptGroupName,
+                    shouldAddPreviousScripts: false
+                )
+                evaluateJavascript(source: DisableAutocorrectionJS.ENABLE_AUTOCORRECTION_JS_SOURCE())
+            }
+        }
     }
     
     func getSettings() -> [String: Any?]? {
@@ -4143,6 +4195,21 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     // https://stackoverflow.com/a/58001395/4637638
     public override var inputAccessoryView: UIView? {
         return settings?.disableInputAccessoryView ?? false ? nil : super.inputAccessoryView
+    }
+
+    private func reloadInputViewsForWebViewHierarchy() {
+        reloadInputViews()
+
+        func reloadInputViews(in view: UIView) {
+            view.reloadInputViews()
+            for subview in view.subviews {
+                reloadInputViews(in: subview)
+            }
+        }
+
+        for subview in subviews {
+            reloadInputViews(in: subview)
+        }
     }
 
     private var _inputMethodEnabled = true

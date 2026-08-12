@@ -107,6 +107,12 @@
 - First `flutter_inappwebview_forge_platform_interface` release as part of the Forge federated plugin.
 - Reset the platform interface version to `1.0.0`.
 - Original project attribution: [Lorenzo Pichilli and contributors](https://github.com/pichillilorenzo/flutter_inappwebview).
+
+## 1.1.16 - 2026-08-13
+
+- Add the iOS-only `InAppWebViewSettings.disableAutocorrection` setting for
+  disabling autocorrection and spelling suggestions in editable HTML fields.
+
 ## 1.1.15 - 2026-08-13
 
 - Add the iOS 18+ `IOSWritingToolsBehavior` enum and

@@ -574,6 +574,13 @@
 - Updated the Android and iOS dependency/stability baseline for the initial Forge release.
 - Original project attribution: [Lorenzo Pichilli and contributors](https://github.com/pichillilorenzo/flutter_inappwebview).
 - See [ATTRIBUTION.md](https://github.com/emirkanacar/flutter_inappwebview/blob/main/ATTRIBUTION.md) and the retained Apache License 2.0 notices for licensing information.
+
+## 2.1.69 - 2026-08-13
+
+- iOS: refresh WebKit input views when `disableInputAccessoryView` is enabled,
+  and add the iOS-only `InAppWebViewSettings.disableAutocorrection` option for
+  editable HTML fields.
+
 ## 2.1.68 - 2026-08-13
 
 - Add the iOS 18+ `InAppWebViewSettings.writingToolsBehavior` setting for

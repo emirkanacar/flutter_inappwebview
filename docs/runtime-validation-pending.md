@@ -58,6 +58,16 @@ bypass list to WebView2 environment arguments; an explicitly supplied
 `WebViewEnvironment` cannot be reconfigured after creation. Target-OS
 builds/runtime validation remain pending.
 
+### Local iOS input accessory and autocorrection validation
+
+The iOS input responder refresh and `disableAutocorrection` document-start
+setting are source-complete in root 2.1.69, iOS 2.1.31, and
+platform-interface 1.1.16. This local feature is not part of the 125-record
+upstream issue count. Validate on physical iOS 15+ with repeated focus changes
+between HTML inputs, accessory enabled/disabled, and editable input, textarea,
+contenteditable, and dynamically-created fields. Confirm that the page-level
+autocorrection/spellcheck hints do not alter unrelated WebViews.
+
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
 rejects private-sandbox `/data/` `file://` results across single, multi-select,

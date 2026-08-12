@@ -193,6 +193,14 @@
 - Reset the iOS implementation version to `1.0.0`.
 - Includes the iOS keyboard, scroll callback, disposal, and dependency baseline improvements prepared for the Forge release.
 - Original project attribution: [Lorenzo Pichilli and contributors](https://github.com/pichillilorenzo/flutter_inappwebview).
+
+## 2.1.31 - 2026-08-13
+
+- Refresh the iOS WebView input hierarchy when `disableInputAccessoryView` is
+  enabled, including when an HTML input receives focus again.
+- Add document-start autocorrection and spelling-suggestion hints for editable
+  HTML elements through `InAppWebViewSettings.disableAutocorrection`.
+
 ## 2.1.30 - 2026-08-13
 
 - Add iOS 18+ support for configuring the WebView's Apple Writing Tools

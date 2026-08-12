@@ -63,8 +63,34 @@ void _runSourceContractAssertions() {
   );
   _assert(
     source.contains('configuration.writingToolsBehavior') &&
-        source.contains('UIWritingToolsBehavior(rawValue: writingToolsBehavior)'),
+        source.contains(
+          'UIWritingToolsBehavior(rawValue: writingToolsBehavior)',
+        ),
     'iOS Writing Tools behavior is not applied to the initial WKWebView configuration',
+  );
+  _assert(
+    source.contains('reloadInputViewsForWebViewHierarchy') &&
+        source.contains('inputAccessoryViewSettingChanged') &&
+        source.contains('keyboardWillShow'),
+    'iOS input accessory changes are not refreshed for WebKit responders',
+  );
+  _assert(
+    settingsSource.contains('disableAutocorrection') &&
+        source.contains(
+          'DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
+        ),
+    'iOS autocorrection setting is not wired to the document-start script',
+  );
+  final autocorrectionSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PluginScriptsJS/DisableAutocorrectionJS.swift',
+  ).readAsStringSync();
+  _assert(
+    autocorrectionSource.contains('autocorrect') &&
+        autocorrectionSource.contains('spellcheck') &&
+        autocorrectionSource.contains('MutationObserver') &&
+        autocorrectionSource.contains('ENABLE_AUTOCORRECTION_JS_SOURCE'),
+    'iOS autocorrection script does not cover editable and dynamic elements',
   );
 
   _assert(

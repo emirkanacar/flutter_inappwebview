@@ -76,6 +76,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var allowingReadAccessTo: String? = nil
     var disableLongPressContextMenuOnLinks = false
     var disableInputAccessoryView = false
+    var disableAutocorrection = false
     var underPageBackgroundColor: String?
     var isTextInteractionEnabled = true
     var writingToolsBehavior: Int? = nil

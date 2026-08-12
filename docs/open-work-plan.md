@@ -50,6 +50,11 @@ The upstream export marks every record `OPEN`. That value is historical metadata
 
 ## Local resolutions outside this plan
 
+The local iOS input accessory refresh and `disableAutocorrection` setting are
+implemented in root 2.1.69, iOS 2.1.31, and platform-interface 1.1.16. They are
+not an exported issue record and therefore do not change the 125-issue counts;
+physical iOS keyboard/WebKit validation is tracked in the runtime register.
+
 The 77 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the eight PR-only records. They are resolved implementation work,

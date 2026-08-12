@@ -176,4 +176,29 @@ void main() {
       isFalse,
     );
   });
+
+  test('iOS input editing settings are serialized and capability-gated', () {
+    final settings = InAppWebViewSettings(
+      disableInputAccessoryView: true,
+      disableAutocorrection: true,
+    );
+
+    expect(settings.toMap()['disableInputAccessoryView'], isTrue);
+    expect(settings.toMap()['disableAutocorrection'], isTrue);
+    expect(settings.copy().disableAutocorrection, isTrue);
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.disableAutocorrection,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.disableAutocorrection,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
+  });
 }

@@ -2085,6 +2085,14 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   @SupportedPlatforms(platforms: [IOSPlatform()])
   bool? disableInputAccessoryView;
 
+  ///Set to `true` to disable autocorrection and spelling suggestions for editable HTML elements in the WebView.
+  ///This applies the HTML `autocorrect="off"` and `spellcheck="false"` hints at document start,
+  ///including editable elements added later by the page.
+  ///This is a WebKit content hint and does not change the system keyboard setting globally.
+  ///The default value is `false`.
+  @SupportedPlatforms(platforms: [IOSPlatform()])
+  bool? disableAutocorrection;
+
   ///The color the web view displays behind the active page, visible when the user scrolls beyond the bounds of the page.
   ///
   ///The web view derives the default value of this property from the content of the page,
@@ -3586,6 +3594,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.allowingReadAccessTo,
     this.disableLongPressContextMenuOnLinks = false,
     this.disableInputAccessoryView = false,
+    this.disableAutocorrection = false,
     this.underPageBackgroundColor,
     this.isTextInteractionEnabled = true,
     this.writingToolsBehavior,

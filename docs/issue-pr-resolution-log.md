@@ -31,6 +31,22 @@ Platform-interface tests and iOS source-contract tests pass. Physical iOS
 18+ Writing Tools UI, capability fallback, and readback validation remain
 pending. The upstream issue state was not changed.
 
+## 2026-08-13 iOS input accessory and autocorrection controls (local)
+
+No upstream issue or PR reference was supplied for this local reproduction.
+`disableInputAccessoryView` previously only changed the WebView subclass
+getter; after an HTML input regained focus, WebKit could retain the accessory
+view because the active responder's input views were not reloaded. iOS 2.1.31
+now calls `reloadInputViews()` across the WebView hierarchy after the setting
+changes and during keyboard presentation. Platform-interface 1.1.16 and root
+2.1.69 add the iOS-only `InAppWebViewSettings.disableAutocorrection` option.
+When enabled at WebView creation, the iOS document-start script applies
+`autocorrect="off"` and `spellcheck="false"` to existing and dynamically-added
+editable HTML elements. Platform-interface and iOS source-contract tests cover
+serialization, capability metadata, responder refresh, and script coverage.
+Physical iOS keyboard and WebKit validation remains pending. No upstream issue
+state was changed.
+
 ## 2026-08-13 Cross-platform container API parity
 
 Upstream [PR #2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
