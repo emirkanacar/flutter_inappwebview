@@ -1468,6 +1468,13 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
             "https://developer.android.com/reference/androidx/webkit/ProfileStore",
         available: "110",
       ),
+      IOSPlatform(
+        apiName: "WKWebsiteDataStore.dataStoreForIdentifier",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier",
+        available: "17.0",
+        note: "The identifier must be a valid UUID string on iOS.",
+      ),
     ],
   )
   String? containerId;

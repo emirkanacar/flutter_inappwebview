@@ -33,6 +33,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var useShouldInterceptFetchRequest = false
     var incognito = false
     var cacheEnabled = true
+    var containerId: String? = nil
     var transparentBackground = false
     var disableVerticalScroll = false
     var disableHorizontalScroll = false

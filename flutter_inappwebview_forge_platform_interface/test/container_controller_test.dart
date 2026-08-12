@@ -10,11 +10,11 @@ void main() {
     expect(settings.copy().containerId, 'account-a');
   });
 
-  test('container capability metadata is Android-only', () {
+  test('container capability metadata covers Android and iOS', () {
     const params = PlatformContainerControllerCreationParams();
 
     expect(params.isClassSupported(platform: TargetPlatform.android), isTrue);
-    expect(params.isClassSupported(platform: TargetPlatform.iOS), isFalse);
+    expect(params.isClassSupported(platform: TargetPlatform.iOS), isTrue);
     expect(params.isClassSupported(platform: TargetPlatform.linux), isFalse);
   });
 }

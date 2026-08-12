@@ -20,6 +20,12 @@ part 'platform_container_controller.g.dart';
           'https://developer.android.com/reference/androidx/webkit/ProfileStore',
       available: '110',
     ),
+    IOSPlatform(
+      apiName: 'WKWebsiteDataStore.dataStoreForIdentifier',
+      apiUrl:
+          'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier',
+      available: '17.0',
+    ),
   ],
 )
 @immutable
@@ -46,6 +52,12 @@ class PlatformContainerControllerCreationParams {
       apiUrl:
           'https://developer.android.com/reference/androidx/webkit/ProfileStore',
       available: '110',
+    ),
+    IOSPlatform(
+      apiName: 'WKWebsiteDataStore',
+      apiUrl:
+          'https://developer.apple.com/documentation/webkit/wkwebsitedatastore',
+      available: '17.0',
     ),
   ],
 )
@@ -98,6 +110,12 @@ abstract class PlatformContainerController extends PlatformInterface {
             'https://developer.android.com/reference/androidx/webkit/ProfileStore#getAllProfileNames()',
         available: '110',
       ),
+      IOSPlatform(
+        apiName: 'WKWebsiteDataStore.fetchAllDataStoreIdentifiers',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
+        available: '17.0',
+      ),
     ],
   )
   Future<List<String>> getAllContainerNames() {
@@ -115,6 +133,12 @@ abstract class PlatformContainerController extends PlatformInterface {
             'https://developer.android.com/reference/androidx/webkit/ProfileStore',
         available: '110',
       ),
+      IOSPlatform(
+        apiName: 'WKWebsiteDataStore.fetchAllDataStoreIdentifiers',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers',
+        available: '17.0',
+      ),
     ],
   )
   Future<bool> hasContainer(String containerId) {
@@ -131,6 +155,12 @@ abstract class PlatformContainerController extends PlatformInterface {
         apiUrl:
             'https://developer.android.com/reference/androidx/webkit/ProfileStore',
         available: '110',
+      ),
+      IOSPlatform(
+        apiName: 'WKWebsiteDataStore.removeDataStoreForIdentifier',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier',
+        available: '17.0',
       ),
     ],
   )

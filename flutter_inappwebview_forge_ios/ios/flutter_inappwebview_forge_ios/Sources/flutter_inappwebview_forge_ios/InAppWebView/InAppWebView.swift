@@ -834,6 +834,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             if #available(iOS 9.0, *) {
                 if settings.incognito {
                     configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
+                } else if #available(iOS 17.0, *),
+                          let containerId = settings.containerId,
+                          let identifier = UUID(uuidString: containerId) {
+                    configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: identifier)
                 } else if settings.cacheEnabled {
                     configuration.websiteDataStore = WKWebsiteDataStore.default()
                 }

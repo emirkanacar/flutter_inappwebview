@@ -12,12 +12,16 @@ extension _PlatformContainerControllerCreationParamsClassSupported
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier))
   ///
   ///Use the [PlatformContainerControllerCreationParams.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
   static bool isClassSupported({TargetPlatform? platform}) {
     return ((kIsWeb && platform != null) || !kIsWeb) &&
-        [TargetPlatform.android].contains(platform ?? defaultTargetPlatform);
+        [
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+        ].contains(platform ?? defaultTargetPlatform);
   }
 }
 
@@ -27,12 +31,16 @@ extension _PlatformContainerControllerClassSupported
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore](https://developer.apple.com/documentation/webkit/wkwebsitedatastore))
   ///
   ///Use the [PlatformContainerController.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
   static bool isClassSupported({TargetPlatform? platform}) {
     return ((kIsWeb && platform != null) || !kIsWeb) &&
-        [TargetPlatform.android].contains(platform ?? defaultTargetPlatform);
+        [
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+        ].contains(platform ?? defaultTargetPlatform);
   }
 }
 
@@ -44,6 +52,7 @@ enum PlatformContainerControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.deleteProfile](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.removeDataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041133-removedatastoreforidentifier))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [containerId]: all platforms
@@ -58,6 +67,7 @@ enum PlatformContainerControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.getAllProfileNames](https://developer.android.com/reference/androidx/webkit/ProfileStore#getAllProfileNames()))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
   ///
   ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -69,6 +79,7 @@ enum PlatformContainerControllerMethod {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - ProfileStore.getProfile](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.fetchAllDataStoreIdentifiers](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041132-fetchalldatastoreidentifiers))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
   ///- [containerId]: all platforms
@@ -89,16 +100,19 @@ extension _PlatformContainerControllerMethodSupported
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.iOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.getAllContainerNames:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.iOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.hasContainer:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.iOS,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
 import 'chrome_safari_browser/chrome_safari_browser.dart';
+import 'container_controller.dart';
 import 'cookie_manager.dart';
 import 'find_interaction/main.dart';
 import 'http_auth_credentials_database.dart';
@@ -406,6 +407,20 @@ class IOSInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   IOSProxyController createPlatformProxyControllerStatic() {
     return IOSProxyController.static();
+  }
+
+  /// Creates an iOS container controller.
+  @override
+  IOSContainerController createPlatformContainerController(
+    PlatformContainerControllerCreationParams params,
+  ) {
+    return IOSContainerController(params);
+  }
+
+  /// Creates an iOS container controller for static methods.
+  @override
+  IOSContainerController createPlatformContainerControllerStatic() {
+    return IOSContainerController.static();
   }
 
   // ************************************************************************ //

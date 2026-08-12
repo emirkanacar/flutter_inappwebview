@@ -17,17 +17,19 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 ## Resolution summary
 
-### Android container API (upstream PR #2825)
+### Android and iOS container API (upstream PR #2825)
 
-The Android-first implementation is available in root 2.1.60, Android 1.0.50,
-and platform-interface 1.1.9. `InAppWebViewSettings.containerId` binds an
-AndroidX WebKit `ProfileStore` profile before WebView state initialization;
-`ContainerController` lists, checks, and deletes named profiles; and cookie
-operations scoped with `webViewController` use that WebView's profile cookie
-store. Android WebView 110+ with `MULTI_PROFILE` is required. Source tests and
-the Kotlin build pass, but physical provider validation remains pending. iOS,
-macOS, and Linux adapters and per-container proxy configuration are not yet
-implemented in this Android-first slice.
+The first Android and iOS storage slice is available in root 2.1.60, Android
+1.0.50, iOS 2.1.26, and platform-interface 1.1.9. On Android,
+`InAppWebViewSettings.containerId` binds an AndroidX WebKit `ProfileStore`
+profile before WebView state initialization; on iOS 17+, it binds a UUID to a
+`WKWebsiteDataStore`. `ContainerController` lists, checks, and deletes named
+containers. Android cookie operations scoped with `webViewController` use that
+WebView's profile cookie store. Android WebView 110+ with `MULTI_PROFILE` and
+iOS 17+ are required. Source tests, the Kotlin build, and the Xcode iOS
+example build pass, but physical Android/iOS validation remains pending.
+macOS/Linux adapters and per-container proxy configuration remain follow-up
+work.
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |

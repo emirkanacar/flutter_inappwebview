@@ -56,6 +56,21 @@ void _runSourceContractAssertions() {
     source.contains('keyboardDidHideNotification'),
     'keyboardDidHideNotification is not registered',
   );
+  final containerManagerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/ContainerManager.swift',
+  ).readAsStringSync();
+  _assert(
+    containerManagerSource.contains('@available(iOS 17.0, *)') &&
+        containerManagerSource.contains('fetchAllDataStoreIdentifiers') &&
+        containerManagerSource.contains('remove(forIdentifier: identifier)'),
+    'iOS container manager is missing the guarded website-data-store lifecycle',
+  );
+  _assert(
+    source.contains('WKWebsiteDataStore(forIdentifier: identifier)') &&
+        source.contains('settings.containerId'),
+    'iOS WebView configuration does not bind containerId to its data store',
+  );
   _assert(
     source.contains('guard let presentingViewController') &&
         source.contains('visibleViewController'),

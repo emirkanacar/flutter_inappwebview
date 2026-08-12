@@ -1,3 +1,11 @@
+## 2.1.26 - 2026-08-12
+
+- Add iOS 17+ persistent WebView containers through `ContainerController` and
+  `InAppWebViewSettings.containerId`, backed by `WKWebsiteDataStore`.
+  Container identifiers must be valid UUID strings on iOS; iOS versions below
+  17 retain the default WebKit data store behavior. Physical iOS validation
+  remains pending.
+
 ## 2.1.25 - 2026-08-12
 
 - iOS: make `requestFocus()` search the WebView hierarchy for the focusable

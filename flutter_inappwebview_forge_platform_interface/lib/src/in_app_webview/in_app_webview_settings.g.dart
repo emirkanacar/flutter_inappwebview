@@ -366,6 +366,8 @@ class InAppWebViewSettings {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier)):
+  ///    - The identifier must be a valid UUID string on iOS.
   String? containerId;
 
   ///List of [ContentBlocker] that are a set of rules used to block content in the browser window.
@@ -3485,6 +3487,8 @@ enum InAppWebViewSettingsProperty {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView 110+ ([Official API - androidx.webkit.ProfileStore](https://developer.android.com/reference/androidx/webkit/ProfileStore))
+  ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.dataStoreForIdentifier](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4041131-datastoreforidentifier)):
+  ///    - The identifier must be a valid UUID string on iOS.
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -5702,6 +5706,7 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.iOS,
             ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.contentBlockers:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

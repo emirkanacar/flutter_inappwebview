@@ -1,11 +1,13 @@
 ## 2.1.60 - 2026-08-12
 
-- Add the additive `ContainerController` API and Android
-  `InAppWebViewSettings.containerId` support for isolated persistent WebView
-  storage. The Android implementation uses ProfileStore on WebView 110+;
-  unsupported platforms retain their existing profile behavior.
+- Add the additive `ContainerController` API and persistent WebView storage
+  support for Android and iOS through `InAppWebViewSettings.containerId`.
+  Android uses ProfileStore on WebView 110+; iOS uses
+  `WKWebsiteDataStore` on iOS 17+ and requires a UUID container identifier.
+  Unsupported platform/version combinations retain their existing profile
+  behavior. Physical Android and iOS validation remains pending.
 - Update the platform-interface dependency to 1.1.9 and the Android
-  implementation dependency to 1.0.50.
+  implementation dependency to 1.0.50 and the iOS implementation to 2.1.26.
 
 ## 2.1.59 - 2026-08-12
 

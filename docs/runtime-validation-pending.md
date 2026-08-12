@@ -34,15 +34,17 @@ Eight PR-only records also have local implementations but remain outside the
 [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), and
 [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825).
 
-Android PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
-is source-fixed in Android 1.0.50, platform-interface 1.1.9, and root 2.1.60
-for the Android-first container API. `ContainerController` manages named
-AndroidX WebKit profiles, `containerId` is bound before WebView state setup,
-and scoped cookie calls resolve the profile cookie store through the WebView
-controller id. The Android source suite and `compileDebugKotlin` pass. A
-physical Android provider with WebView 110+ must still verify two same-origin
-WebViews, cookie/local-storage separation, profile deletion after disposal,
-and fallback behavior on providers without `MULTI_PROFILE`; iOS/macOS/Linux
+PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
+is source-fixed in Android 1.0.50, iOS 2.1.26, platform-interface 1.1.9, and
+root 2.1.60 for the first Android/iOS container API slice.
+`ContainerController` manages named containers; AndroidX WebKit profiles are
+bound before WebView state setup and scoped cookie calls resolve the profile
+cookie store through the WebView controller id; iOS 17+ binds UUID identifiers
+to `WKWebsiteDataStore`. The Android source suite, `compileDebugKotlin`, and
+Xcode iOS example build pass. A physical Android provider with WebView 110+
+must still verify two same-origin WebViews, cookie/local-storage separation,
+profile deletion after disposal, and fallback behavior without `MULTI_PROFILE`;
+physical iOS 17+ must verify the same data-store lifecycle. macOS/Linux
 adapters and per-container proxy support remain outside this first slice.
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)

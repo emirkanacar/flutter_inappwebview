@@ -2,6 +2,7 @@ export 'inappwebview_platform.dart';
 export 'in_app_webview/main.dart';
 export 'in_app_browser/main.dart';
 export 'chrome_safari_browser/main.dart';
+export 'container_controller.dart';
 export 'web_storage/main.dart';
 export 'cookie_manager.dart' hide InternalCookieManager;
 export 'http_auth_credentials_database.dart'
