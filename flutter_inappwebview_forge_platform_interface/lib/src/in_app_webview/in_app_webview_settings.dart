@@ -1453,6 +1453,25 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   WebAuthenticationSupport_? webAuthenticationSupport;
 
+  ///Joins the named Android WebView storage container at construction time.
+  ///
+  ///Container data is isolated from the default profile and includes cookies,
+  ///DOM storage, IndexedDB, service workers, and HTTP cache. The value cannot
+  ///be changed after the WebView has been constructed. Android WebView 110+
+  ///with the `MULTI_PROFILE` feature is required; unsupported versions use the
+  ///default profile.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "androidx.webkit.ProfileStore",
+        apiUrl:
+            "https://developer.android.com/reference/androidx/webkit/ProfileStore",
+        available: "110",
+      ),
+    ],
+  )
+  String? containerId;
+
   ///Enables the Android Payment Request API for this WebView.
   ///
   ///Payment Request is disabled by default. Google Pay integrations also
@@ -3450,6 +3469,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.algorithmicDarkeningAllowed = false,
     this.enterpriseAuthenticationAppLinkPolicyEnabled = true,
     this.webAuthenticationSupport,
+    this.containerId,
     this.paymentRequestEnabled,
     this.defaultVideoPoster,
     this.requestedWithHeaderOriginAllowList,

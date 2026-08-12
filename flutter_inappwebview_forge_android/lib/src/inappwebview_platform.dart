@@ -9,6 +9,7 @@ import 'in_app_webview/main.dart';
 import 'print_job/main.dart';
 import 'process_global_config.dart';
 import 'proxy_controller.dart';
+import 'container_controller.dart';
 import 'pull_to_refresh/main.dart';
 import 'service_worker_controller.dart';
 import 'tracing_controller.dart';
@@ -371,6 +372,20 @@ class AndroidInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   AndroidProxyController createPlatformProxyControllerStatic() {
     return AndroidProxyController.static();
+  }
+
+  /// Creates an Android container controller.
+  @override
+  AndroidContainerController createPlatformContainerController(
+    PlatformContainerControllerCreationParams params,
+  ) {
+    return AndroidContainerController(params);
+  }
+
+  /// Creates an Android container controller for static methods.
+  @override
+  AndroidContainerController createPlatformContainerControllerStatic() {
+    return AndroidContainerController.static();
   }
 
   /// Creates a new [AndroidServiceWorkerController].

@@ -40,6 +40,10 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
     @JvmField
     val keepAliveWebViews: MutableMap<String, FlutterWebView?> = HashMap()
 
+    /** Active WebViews indexed by the platform-view/controller id. */
+    @JvmField
+    val webViews: MutableMap<Any, FlutterWebView> = HashMap()
+
     @JvmField
     val windowWebViewMessages: MutableMap<Int, Message> = HashMap()
 
@@ -198,6 +202,7 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
             }
         }
         keepAliveWebViews.clear()
+        webViews.clear()
         windowWebViewMessages.clear()
         plugin = null
     }

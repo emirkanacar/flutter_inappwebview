@@ -8,6 +8,7 @@ import android.webkit.CookieManager
 import android.webkit.CookieSyncManager
 import android.webkit.ValueCallback
 import androidx.webkit.CookieManagerCompat
+import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewFeature
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import io.flutter.plugin.common.MethodCall
@@ -75,6 +76,28 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
     @JvmField
     var plugin: InAppWebViewFlutterPlugin? = initialPlugin
 
+    /**
+     * Resolves the cookie store belonging to the WebView identified by Dart.
+     * Unknown or unsupported ids deliberately fall back to the legacy default
+     * CookieManager so existing unscoped calls retain their behavior.
+     */
+    private fun getCookieManager(webViewId: Any?): CookieManager? {
+        if (webViewId != null && WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            val webView = plugin?.inAppWebViewManager?.webViews?.get(webViewId)?.webView
+            val containerId = webView?.customSettings?.containerId
+            if (!containerId.isNullOrBlank()) {
+                return try {
+                    ProfileStore.getInstance()
+                        .getProfile(containerId)
+                        ?.getCookieManager()
+                } catch (_: RuntimeException) {
+                    null
+                }
+            }
+        }
+        return getCookieManager()
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         init()
         when (call.method) {
@@ -99,6 +122,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     call.argument<Boolean>("isSecure"),
                     call.argument<Boolean>("isHttpOnly"),
                     call.argument<String>("sameSite"),
+                    call.argument<Any?>("webViewId"),
                     result
                 )
             }
@@ -108,7 +132,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.error("invalid_arguments", "url is required.", null)
                     return
                 }
-                result.success(getCookies(url))
+                result.success(getCookies(url, call.argument<Any?>("webViewId")))
             }
             "deleteCookie" -> {
                 val url = call.argument<String>("url")
@@ -118,7 +142,14 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.error("invalid_arguments", "url, name, and path are required.", null)
                     return
                 }
-                deleteCookie(url, name, call.argument<String>("domain"), path, result)
+                deleteCookie(
+                    url,
+                    name,
+                    call.argument<String>("domain"),
+                    path,
+                    call.argument<Any?>("webViewId"),
+                    result
+                )
             }
             "deleteCookies" -> {
                 val url = call.argument<String>("url")
@@ -127,7 +158,13 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.error("invalid_arguments", "url and path are required.", null)
                     return
                 }
-                deleteCookies(url, call.argument<String>("domain"), path, result)
+                deleteCookies(
+                    url,
+                    call.argument<String>("domain"),
+                    path,
+                    call.argument<Any?>("webViewId"),
+                    result
+                )
             }
             "deleteAllCookies" -> deleteAllCookies(result)
             "removeSessionCookies" -> removeSessionCookies(result)
@@ -148,10 +185,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         isSecure: Boolean?,
         isHttpOnly: Boolean?,
         sameSite: String?,
+        webViewId: Any?,
         result: MethodChannel.Result
     ) {
-        val manager = getCookieManager()
-        cookieManager = manager
+        val manager = getCookieManager(webViewId)
+        if (webViewId == null) cookieManager = manager
         if (manager == null) {
             result.success(false)
             return
@@ -187,10 +225,10 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
     }
 
-    fun getCookies(url: String): MutableList<MutableMap<String, Any?>> {
+    fun getCookies(url: String, webViewId: Any?): MutableList<MutableMap<String, Any?>> {
         val cookieListMap = mutableListOf<MutableMap<String, Any?>>()
-        val manager = getCookieManager()
-        cookieManager = manager
+        val manager = getCookieManager(webViewId)
+        if (webViewId == null) cookieManager = manager
         if (manager == null) return cookieListMap
 
         val cookies: List<String> = if (WebViewFeature.isFeatureSupported(WebViewFeature.GET_COOKIE_INFO)) {
@@ -260,10 +298,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         name: String,
         domain: String?,
         path: String,
+        webViewId: Any?,
         result: MethodChannel.Result
     ) {
-        val manager = getCookieManager()
-        cookieManager = manager
+        val manager = getCookieManager(webViewId)
+        if (webViewId == null) cookieManager = manager
         if (manager == null) {
             result.success(false)
             return
@@ -295,9 +334,15 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
     }
 
     @Suppress("DEPRECATION")
-    fun deleteCookies(url: String, domain: String?, path: String, result: MethodChannel.Result) {
-        val manager = getCookieManager()
-        cookieManager = manager
+    fun deleteCookies(
+        url: String,
+        domain: String?,
+        path: String,
+        webViewId: Any?,
+        result: MethodChannel.Result
+    ) {
+        val manager = getCookieManager(webViewId)
+        if (webViewId == null) cookieManager = manager
         if (manager == null) {
             result.success(false)
             return

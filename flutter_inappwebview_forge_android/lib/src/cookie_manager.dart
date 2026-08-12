@@ -103,6 +103,7 @@ class AndroidCookieManager extends PlatformCookieManager
     args.putIfAbsent('isSecure', () => isSecure);
     args.putIfAbsent('isHttpOnly', () => isHttpOnly);
     args.putIfAbsent('sameSite', () => sameSite?.toNativeValue());
+    args.putIfAbsent('webViewId', () => webViewController?.params.id);
 
     return await channel?.invokeMethod<bool>('setCookie', args) ?? false;
   }
@@ -120,6 +121,7 @@ class AndroidCookieManager extends PlatformCookieManager
 
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url.toString());
+    args.putIfAbsent('webViewId', () => webViewController?.params.id);
     List<dynamic> cookieListMap =
         await channel?.invokeMethod<List>('getCookies', args) ?? [];
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
@@ -196,6 +198,7 @@ class AndroidCookieManager extends PlatformCookieManager
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url.toString());
     args.putIfAbsent('name', () => name);
+    args.putIfAbsent('webViewId', () => webViewController?.params.id);
     args.putIfAbsent('domain', () => domain);
     args.putIfAbsent('path', () => path);
     return await channel?.invokeMethod<bool>('deleteCookie', args) ?? false;
@@ -216,6 +219,7 @@ class AndroidCookieManager extends PlatformCookieManager
     args.putIfAbsent('url', () => url.toString());
     args.putIfAbsent('domain', () => domain);
     args.putIfAbsent('path', () => path);
+    args.putIfAbsent('webViewId', () => webViewController?.params.id);
     return await channel?.invokeMethod<bool>('deleteCookies', args) ?? false;
   }
 

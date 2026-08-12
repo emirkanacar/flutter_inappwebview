@@ -24,14 +24,26 @@ each note was recorded.
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 33 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Seven PR-only records also have local implementations but remain outside the
+Eight PR-only records also have local implementations but remain outside the
 125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
 [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
 [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871),
 [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474),
 [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823),
 [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), and
-[#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743).
+[#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), and
+[#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825).
+
+Android PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
+is source-fixed in Android 1.0.50, platform-interface 1.1.9, and root 2.1.60
+for the Android-first container API. `ContainerController` manages named
+AndroidX WebKit profiles, `containerId` is bound before WebView state setup,
+and scoped cookie calls resolve the profile cookie store through the WebView
+controller id. The Android source suite and `compileDebugKotlin` pass. A
+physical Android provider with WebView 110+ must still verify two same-origin
+WebViews, cookie/local-storage separation, profile deletion after disposal,
+and fallback behavior on providers without `MULTI_PROFILE`; iOS/macOS/Linux
+adapters and per-container proxy support remain outside this first slice.
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and
@@ -64,8 +76,11 @@ is source-fixed in Android 1.0.46 and root 2.1.54: the nullable
 applied only when `WebViewFeature.PAYMENT_REQUEST` is supported, and reported
 back by `getRealSettings`. The Android library manifest declares the Chromium
 Payment Request intent queries required by Google Pay. Platform-interface and
-Android tests, `compileDebugKotlin`, and the debug AAR build pass. Validation
-remains pending on Android 12-16/OEM WebView providers with Google Pay's
+Android tests, `compileDebugKotlin`, and the debug AAR build pass. The
+2026-08-12 physical Android diagnostic reports `PAYMENT_REQUEST=true` and
+effective `paymentRequestEnabled=true` through `getSettings()`, using
+`--no-uninstall`. Validation remains pending on Android 12-16/OEM WebView
+providers with Google Pay's
 `IS_READY_TO_PAY`, success/cancel flows, host app publication and merchant
 configuration, and custom-user-agent requirements. This issue remains outside
 the active queue and increases the runtime-pending issue count to 71.
@@ -89,7 +104,11 @@ is source-fixed in platform-interface 1.1.8 and root 2.1.57: the additive
 routes page events through the existing JavaScript handler contract, and adds
 typed JSON/serialized handler codecs. No native channel or existing handler
 contract changes. Platform-interface tests pass 7/7 and changed-file analysis
-reports no issues; cross-platform example/runtime validation remains pending.
+reports no issues. The opt-in Android physical-device diagnostic passed on
+2026-08-12 for JavaScript-to-Dart events, Dart-to-JavaScript dispatch, and an
+asynchronous typed handler response; it used `--no-uninstall` and preserved the
+existing app installation. Broader Android provider coverage and iOS, Web,
+Windows, macOS, and Linux example/runtime validation remain pending.
 This issue remains outside the active queue and increases the runtime-pending
 issue count to 74.
 
@@ -99,8 +118,12 @@ the Android-only `userAgentMetadata` setting is serialized, feature-gated by
 `WebViewFeature.USER_AGENT_METADATA`, and applied through
 `WebSettingsCompat.setUserAgentMetadata` with malformed brand entries ignored.
 The setting customizes metadata but cannot guarantee suppression of every
-Chromium Client Hints header. Platform-interface and Android source tests pass;
-Android provider/device request-header validation remains pending. This issue
+Chromium Client Hints header. Platform-interface and Android source tests pass.
+The opt-in physical Android diagnostic passed on 2026-08-12: configured
+platform, platform version, model, mobile state, and full version list were
+returned by `navigator.userAgentData.getHighEntropyValues`, using
+`--no-uninstall`. Android provider/device request-header validation remains
+pending. This issue
 remains outside the active queue; it was the 72nd runtime-pending issue before
 #2846 was added.
 
@@ -110,7 +133,9 @@ is source-fixed in Android 1.0.45 and root 2.1.53: the nullable
 interface, applied with `WebSettingsCompat.setWebAuthenticationSupport` only
 when `WebViewFeature.WEB_AUTHENTICATION` is supported, and reported back by
 `getRealSettings`. Platform-interface and Android tests plus the native
-Kotlin/AAR build pass. Physical Android WebView-provider validation for
+Kotlin/AAR build pass. The 2026-08-12 physical Android diagnostic reports
+`WEB_AUTHENTICATION=true` and effective `FOR_APP=1` through `getSettings()`,
+using `--no-uninstall`. Physical Android WebView-provider validation for
 `NONE`, `FOR_APP`, and `FOR_BROWSER`, including Digital Asset Links and
 WebAuthn flows, remains pending. This PR-only record does not change the
 74-issue count.

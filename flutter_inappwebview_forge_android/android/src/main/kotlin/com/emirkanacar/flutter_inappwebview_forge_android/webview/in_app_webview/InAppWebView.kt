@@ -263,6 +263,26 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   @SuppressLint("RestrictedApi")
   fun prepare(deferNativeRegistrations: Boolean) {
     isDisposed = false
+
+    // A profile must be attached before JavaScript interfaces, cookies, or
+    // other WebView state are initialized. Incognito intentionally keeps its
+    // existing ephemeral/default-profile semantics.
+    val containerId = customSettings.containerId
+    if (customSettings.incognito != true && !containerId.isNullOrBlank() &&
+      WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)
+    ) {
+      try {
+        ProfileStore.getInstance().getOrCreateProfile(containerId)
+        WebViewCompat.setProfile(this, containerId)
+      } catch (error: RuntimeException) {
+        Log.w(
+          LOG_TAG,
+          "Unable to bind WebView to container '$containerId'; using the default profile.",
+          error
+        )
+      }
+    }
+
     mainLooperHandler.removeCallbacks(dispatchPendingScrollChanged)
     removeCallbacks(dispatchPendingScrollChanged)
     pendingScrollX = null

@@ -1,3 +1,11 @@
+## 1.0.50 - 2026-08-12
+
+- Add Android WebView container profiles through `ContainerController` and
+  `InAppWebViewSettings.containerId`, using AndroidX WebKit `ProfileStore`.
+  Cookie operations that receive `webViewController` now use that WebView's
+  profile cookie store. The API falls back to the default profile when
+  `MULTI_PROFILE` is unavailable; physical provider validation remains pending.
+
 ## 1.0.49 - 2026-08-12
 
 - Harden Android text-selection action-mode startup for Android 16/WebView

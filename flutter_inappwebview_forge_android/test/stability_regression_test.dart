@@ -230,6 +230,67 @@ void main() {
     expect(webViewSource, contains('mapNotNull'));
   });
 
+  test('Android container profiles bind before WebView state initialization', () {
+    final settingsSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final managerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'container/ContainerManager.kt',
+    ).readAsStringSync();
+
+    expect(settingsSource, contains('var containerId: String? = null'));
+    expect(
+      settingsSource,
+      contains('"containerId" -> containerId = value as? String'),
+    );
+    expect(settingsSource, contains('put("containerId", containerId)'));
+    expect(webViewSource, contains('WebViewFeature.MULTI_PROFILE'));
+    expect(
+      webViewSource,
+      contains('WebViewCompat.setProfile(this, containerId)'),
+    );
+    expect(webViewSource, contains('customSettings.incognito != true'));
+    expect(
+      webViewSource.indexOf('WebViewCompat.setProfile(this, containerId)'),
+      lessThan(webViewSource.indexOf('CookieManager.getInstance()')),
+    );
+    expect(managerSource, contains('ProfileStore.getInstance()'));
+    expect(managerSource, contains('getAllContainerNames'));
+    expect(managerSource, contains('deleteProfile(containerId)'));
+  });
+
+  test('Android cookie APIs forward the WebView id for container routing', () {
+    final dartSource = _sourceFile(
+      'lib/src/cookie_manager.dart',
+    ).readAsStringSync();
+    final nativeSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'MyCookieManager.kt',
+    ).readAsStringSync();
+
+    expect(
+      dartSource,
+      contains("'webViewId', () => webViewController?.params.id"),
+    );
+    expect(nativeSource, contains('ProfileStore.getInstance()'));
+    expect(nativeSource, contains('getCookieManager(webViewId)'));
+    expect(
+      nativeSource,
+      contains('inAppWebViewManager?.webViews?.get(webViewId)'),
+    );
+    expect(nativeSource, contains('?.getCookieManager()'));
+    expect(
+      nativeSource,
+      contains('if (webViewId == null) cookieManager = manager'),
+    );
+  });
+
   test('Android Gradle scripts do not force KGP on AGP 9', () {
     final rootExampleFile = [
       File(

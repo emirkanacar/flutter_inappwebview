@@ -17,6 +17,18 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 ## Resolution summary
 
+### Android container API (upstream PR #2825)
+
+The Android-first implementation is available in root 2.1.60, Android 1.0.50,
+and platform-interface 1.1.9. `InAppWebViewSettings.containerId` binds an
+AndroidX WebKit `ProfileStore` profile before WebView state initialization;
+`ContainerController` lists, checks, and deletes named profiles; and cookie
+operations scoped with `webViewController` use that WebView's profile cookie
+store. Android WebView 110+ with `MULTI_PROFILE` is required. Source tests and
+the Kotlin build pass, but physical provider validation remains pending. iOS,
+macOS, and Linux adapters and per-container proxy configuration are not yet
+implemented in this Android-first slice.
+
 | Local status | Count | Meaning |
 | --- | ---: | --- |
 | Resolved locally; runtime validation pending | 75 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
@@ -268,7 +280,8 @@ loses state with valid Firebase configuration.
 ### #2793 — Typed JavaScript bridge events and handlers
 
 **Local status:** Implemented additively in platform-interface 1.1.8 and root
-2.1.57; WebView/browser runtime validation pending. **Impact:** applications
+2.1.57; the Android physical-device diagnostic passes, while broader Android
+provider and other platform runtime validation remains pending. **Impact:** applications
 must currently repeat low-level `evaluateJavascript` and handler boilerplate
 for event-style communication and typed payload conversion. **Fix:** the new
 `InAppWebViewController.bridgeEvents` helper installs an event API on the
@@ -283,7 +296,13 @@ duplicate listener suppression, JavaScript-to-Dart event dispatch, Dart-to-
 JavaScript dispatch, and typed request/response conversion. Platform-interface
 tests pass 7/7 and changed-file analysis reports no issues.
 
-**Required validation:** Android, iOS, Web, Windows, macOS, and Linux examples
+**Runtime evidence:** The opt-in Android diagnostic passed on 2026-08-12 with
+JavaScript-to-Dart events, Dart-to-JavaScript dispatch, and an asynchronous
+typed handler response. It used `--no-uninstall`, so the existing app install
+was preserved.
+
+**Required validation:** broader Android provider coverage, plus iOS, Web,
+Windows, macOS, and Linux examples
 must verify bridge readiness, event ordering, listener removal, page reload,
 disposal, handler exceptions, JSON-compatible payloads, and backpressure under
 rapid emits. The helper must not be used before the WebView can evaluate
@@ -372,7 +391,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-75 locally implemented or mitigated issue records and seven PR-only records.
+75 locally implemented or mitigated issue records and eight PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -427,7 +446,8 @@ changed.
 ### PR #2743 - Android WebAuthn support setting
 
 **Local status:** Implemented in Android 1.0.45, platform interface 1.1.5,
-and root 2.1.53; physical WebView-provider validation pending. **Impact:**
+and root 2.1.53; physical setting round-trip passes, while provider and
+authenticator-flow validation remains pending. **Impact:**
 Android WebView pages can explicitly opt into WebAuthn support for the
 embedding app or, where the host has the required privileges, browser-wide
 support. **Confidence:** Confirmed AndroidX WebKit API and feature-gated
@@ -440,6 +460,9 @@ Android preserves WebView's default disabled behavior when the setting is
 round-trips the effective value through `getRealSettings`. Unsupported WebView
 providers therefore keep the existing default path rather than receiving an
 unguarded compat call.
+
+**Runtime evidence:** the 2026-08-12 physical Android diagnostic reports
+`WEB_AUTHENTICATION=true` and effective `FOR_APP=1` through `getSettings()`.
 
 **Remaining validation:** on Android 12-16 and representative OEM WebView
 providers, verify `NONE`, `FOR_APP` with valid Digital Asset Links, and
@@ -464,6 +487,10 @@ and `UPDATE_PAYMENT_DETAILS` intent queries required by the Payment Request
 bridge. When the feature is unavailable or the setting is `null`, the plugin
 does not make an unguarded compat call and preserves the WebView default.
 
+**Runtime evidence:** the 2026-08-12 physical Android diagnostic reports
+`PAYMENT_REQUEST=true` and effective `paymentRequestEnabled=true` through
+`getSettings()`.
+
 **Required validation:** exercise enabled and disabled Payment Request flows
 on Android 12-16 with current Google WebView and representative OEM providers;
 verify `IS_READY_TO_PAY`, successful and cancelled transactions, missing or
@@ -477,7 +504,8 @@ tests plus `compileDebugKotlin` and `assembleDebug` pass.
 ### #2834 - Android Sec-CH-UA and Client Hints customization
 
 **Local status:** Implemented in Android 1.0.47, platform interface 1.1.7,
-and root 2.1.55; WebView-provider and physical-device validation pending.
+and root 2.1.55; the physical Android User-Agent Client Hints diagnostic
+passes, while the provider/request-header matrix remains pending.
 **Impact:** Android WebView can emit `Sec-CH-UA` and related User-Agent Client
 Hints while the plugin previously exposed only the legacy User-Agent string.
 **Fix:** the Android-only nullable `InAppWebViewSettings.userAgentMetadata`
@@ -489,7 +517,10 @@ are ignored and unsupported WebViews retain their previous behavior.
 
 This is a metadata customization API, not a guarantee that all Client Hints
 headers can be suppressed: Chromium and the installed WebView still control
-final header generation. **Required validation:** Android 12-16 with current
+final header generation. **Runtime evidence:** the 2026-08-12 physical Android
+diagnostic confirmed the configured platform, platform version, model, mobile
+state, and full version list through `navigator.userAgentData`.
+**Required validation:** Android 12-16 with current
 Google WebView and representative OEM providers, comparing configured
 metadata with request headers and `navigator.userAgentData`, including custom
 User-Agent strings, empty/partial metadata, feature-unavailable providers,

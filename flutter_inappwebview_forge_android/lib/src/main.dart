@@ -13,6 +13,7 @@ export 'find_interaction/main.dart';
 export 'service_worker_controller.dart';
 export 'webview_feature.dart' hide InternalWebViewFeature;
 export 'proxy_controller.dart' hide InternalProxyController;
+export 'container_controller.dart';
 export 'webview_asset_loader.dart';
 export 'tracing_controller.dart' hide InternalTracingController;
 export 'process_global_config.dart' hide InternalProcessGlobalConfig;

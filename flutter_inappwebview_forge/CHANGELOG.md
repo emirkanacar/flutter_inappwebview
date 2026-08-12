@@ -1,3 +1,12 @@
+## 2.1.60 - 2026-08-12
+
+- Add the additive `ContainerController` API and Android
+  `InAppWebViewSettings.containerId` support for isolated persistent WebView
+  storage. The Android implementation uses ProfileStore on WebView 110+;
+  unsupported platforms retain their existing profile behavior.
+- Update the platform-interface dependency to 1.1.9 and the Android
+  implementation dependency to 1.0.50.
+
 ## 2.1.59 - 2026-08-12
 
 - Update the Windows implementation to 1.0.10 to serialize WebView2

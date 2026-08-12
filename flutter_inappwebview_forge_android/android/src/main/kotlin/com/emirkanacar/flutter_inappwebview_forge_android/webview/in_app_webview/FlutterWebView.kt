@@ -84,6 +84,7 @@ open class FlutterWebView : PlatformWebView {
             userScripts
         )
         webView = currentWebView
+        plugin.inAppWebViewManager?.webViews?.set(id, this)
         displayListenerProxy.onPostWebViewInitialization(displayManager)
 
         // Set MATCH_PARENT layout params to the WebView, otherwise it won't take all
@@ -190,6 +191,7 @@ open class FlutterWebView : PlatformWebView {
         if (keepAliveId == null) {
             val currentWebView = webView
             if (currentWebView != null) {
+                currentWebView.plugin?.inAppWebViewManager?.webViews?.remove(currentWebView.id)
                 // A renderer/GPU failure can dispose the platform view without
                 // delivering WebChromeClient.onHideCustomView(). Clean up the
                 // fullscreen state before destroying the WebView so Flutter

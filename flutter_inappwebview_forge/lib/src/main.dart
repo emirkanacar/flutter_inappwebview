@@ -12,6 +12,7 @@ export 'print_job/main.dart';
 export 'find_interaction/main.dart';
 export 'service_worker_controller.dart';
 export 'proxy_controller.dart';
+export 'container_controller.dart';
 export 'webview_asset_loader.dart';
 export 'tracing_controller.dart';
 export 'process_global_config.dart';

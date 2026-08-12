@@ -121,6 +121,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var algorithmicDarkeningAllowed: Boolean? = false
     @JvmField var enterpriseAuthenticationAppLinkPolicyEnabled: Boolean? = true
     @JvmField var webAuthenticationSupport: Int? = null
+    @JvmField var containerId: String? = null
     @JvmField var paymentRequestEnabled: Boolean? = null
     @JvmField var webViewAssetLoader: MutableMap<String, Any?>? = null
     @JvmField var defaultVideoPoster: ByteArray? = null
@@ -233,6 +234,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "algorithmicDarkeningAllowed" -> algorithmicDarkeningAllowed = value as Boolean
                 "enterpriseAuthenticationAppLinkPolicyEnabled" -> enterpriseAuthenticationAppLinkPolicyEnabled = value as Boolean
                 "webAuthenticationSupport" -> webAuthenticationSupport = (value as Number).toInt()
+                "containerId" -> containerId = value as? String
                 "paymentRequestEnabled" -> paymentRequestEnabled = value as Boolean
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
@@ -353,6 +355,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("algorithmicDarkeningAllowed", algorithmicDarkeningAllowed)
         put("enterpriseAuthenticationAppLinkPolicyEnabled", enterpriseAuthenticationAppLinkPolicyEnabled)
         put("webAuthenticationSupport", webAuthenticationSupport)
+        put("containerId", containerId)
         put("paymentRequestEnabled", paymentRequestEnabled)
         put("allowBackgroundAudioPlaying", allowBackgroundAudioPlaying)
         put("defaultVideoPoster", defaultVideoPoster)

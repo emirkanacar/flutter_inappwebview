@@ -1,3 +1,10 @@
+## 1.1.9 - 2026-08-12
+
+- Add the Android-only `PlatformContainerController` API and
+  `InAppWebViewSettings.containerId` serialization for persistent WebView
+  storage profiles. Android WebView 110+ and the `MULTI_PROFILE` feature are
+  required; unsupported platforms retain their default profile behavior.
+
 ## 1.1.8 - 2026-08-12
 
 - Add the additive `JavaScriptBridgeEvents` helper for event-style bridge
