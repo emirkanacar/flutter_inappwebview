@@ -899,6 +899,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             if #available(iOS 15.0, *) {
                 configuration.upgradeKnownHostsToHTTPS = settings.upgradeKnownHostsToHTTPS
             }
+            if #available(iOS 18.0, *),
+               let writingToolsBehavior = settings.writingToolsBehavior,
+               let behavior = UIWritingToolsBehavior(rawValue: writingToolsBehavior) {
+                configuration.writingToolsBehavior = behavior
+            }
         }
         
         return configuration

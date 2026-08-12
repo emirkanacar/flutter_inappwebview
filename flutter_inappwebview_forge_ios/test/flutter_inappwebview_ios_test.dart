@@ -52,6 +52,21 @@ void _runSourceContractAssertions() {
     'iOS WebView disposal is not idempotent',
   );
 
+  final settingsSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/InAppWebViewSettings.swift',
+  ).readAsStringSync();
+  _assert(
+    settingsSource.contains('writingToolsBehavior') &&
+        settingsSource.contains('if #available(iOS 18.0, *)'),
+    'iOS Writing Tools readback is not availability guarded',
+  );
+  _assert(
+    source.contains('configuration.writingToolsBehavior') &&
+        source.contains('UIWritingToolsBehavior(rawValue: writingToolsBehavior)'),
+    'iOS Writing Tools behavior is not applied to the initial WKWebView configuration',
+  );
+
   _assert(
     source.contains('keyboardDidHideNotification'),
     'keyboardDidHideNotification is not registered',

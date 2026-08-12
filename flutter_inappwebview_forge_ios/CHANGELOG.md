@@ -193,3 +193,9 @@
 - Reset the iOS implementation version to `1.0.0`.
 - Includes the iOS keyboard, scroll callback, disposal, and dependency baseline improvements prepared for the Forge release.
 - Original project attribution: [Lorenzo Pichilli and contributors](https://github.com/pichillilorenzo/flutter_inappwebview).
+## 2.1.30 - 2026-08-13
+
+- Add iOS 18+ support for configuring the WebView's Apple Writing Tools
+  behavior through `InAppWebViewSettings.writingToolsBehavior` ([#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690)).
+  The setting is applied to the initial `WKWebViewConfiguration`; older iOS
+  versions keep WebKit's default behavior.

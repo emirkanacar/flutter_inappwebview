@@ -25,6 +25,7 @@ import '../types/user_preferred_content_mode.dart';
 import '../types/vertical_scrollbar_position.dart';
 import '../platform_proxy_controller.dart';
 import '../types/web_authentication_support.dart';
+import '../types/writing_tools_behavior.dart';
 
 part 'in_app_webview_settings.g.dart';
 
@@ -2127,6 +2128,24 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   bool? isTextInteractionEnabled;
 
+  ///Sets the preferred Apple Writing Tools experience for text in the WebView.
+  ///
+  ///This setting is applied when the WebView is created and is available on
+  ///iOS 18.0 and later. The system may provide a more limited experience when
+  ///the requested behavior is not available on the device. The default value
+  ///is `null`, which preserves WebKit's default behavior.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: "18.0",
+        apiName: "WKWebViewConfiguration.writingToolsBehavior",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/writingtoolsbehavior",
+      ),
+    ],
+  )
+  IOSWritingToolsBehavior_? writingToolsBehavior;
+
   ///A Boolean value indicating whether WebKit will apply built-in workarounds (quirks)
   ///to improve compatibility with certain known websites. You can disable site-specific quirks
   ///to help test your website without these workarounds. The default value is `true`.
@@ -3569,6 +3588,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.disableInputAccessoryView = false,
     this.underPageBackgroundColor,
     this.isTextInteractionEnabled = true,
+    this.writingToolsBehavior,
     this.isSiteSpecificQuirksModeEnabled = true,
     this.upgradeKnownHostsToHTTPS = true,
     this.isElementFullscreenEnabled = true,

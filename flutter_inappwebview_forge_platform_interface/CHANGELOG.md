@@ -107,3 +107,8 @@
 - First `flutter_inappwebview_forge_platform_interface` release as part of the Forge federated plugin.
 - Reset the platform interface version to `1.0.0`.
 - Original project attribution: [Lorenzo Pichilli and contributors](https://github.com/pichillilorenzo/flutter_inappwebview).
+## 1.1.15 - 2026-08-13
+
+- Add the iOS 18+ `IOSWritingToolsBehavior` enum and
+  `InAppWebViewSettings.writingToolsBehavior` capability metadata for
+  configuring Writing Tools when an iOS WebView is created ([#2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690)).

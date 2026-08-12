@@ -78,6 +78,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var disableInputAccessoryView = false
     var underPageBackgroundColor: String?
     var isTextInteractionEnabled = true
+    var writingToolsBehavior: Int? = nil
     var isSiteSpecificQuirksModeEnabled = true
     var upgradeKnownHostsToHTTPS = true
     var isElementFullscreenEnabled = true
@@ -194,6 +195,9 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
             if #available(iOS 16.4, *) {
                 realSettings["isInspectable"] = webView.isInspectable
                 realSettings["shouldPrintBackgrounds"] = configuration.preferences.shouldPrintBackgrounds
+            }
+            if #available(iOS 18.0, *) {
+                realSettings["writingToolsBehavior"] = configuration.writingToolsBehavior.rawValue
             }
         }
         return realSettings

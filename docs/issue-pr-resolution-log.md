@@ -15,6 +15,22 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-13 iOS Writing Tools settings (#2690)
+
+Upstream [issue #2690](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2690)
+requested an API for Apple Intelligence Writing Tools settings. The installed
+iOS SDK exposes the public `WKWebViewConfiguration.writingToolsBehavior` API
+from iOS 18.0, backed by `UIWritingToolsBehavior` values `none`, `default`,
+`complete`, and `limited`. Forge now implements the additive
+`IOSWritingToolsBehavior` enum and
+`InAppWebViewSettings.writingToolsBehavior` in platform-interface 1.1.15 and
+applies it to the initial iOS `WKWebViewConfiguration` in iOS 2.1.30. The
+setting is availability-guarded, serialized, capability-advertised, and
+reported by `getSettings()`; iOS 15-17 preserve WebKit's default behavior.
+Platform-interface tests and iOS source-contract tests pass. Physical iOS
+18+ Writing Tools UI, capability fallback, and readback validation remain
+pending. The upstream issue state was not changed.
+
 ## 2026-08-13 Cross-platform container API parity
 
 Upstream [PR #2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)

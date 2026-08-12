@@ -150,4 +150,30 @@ void main() {
       isTrue,
     );
   });
+
+  test('iOS Writing Tools behavior is serialized and capability-gated', () {
+    final settings = InAppWebViewSettings(
+      writingToolsBehavior: IOSWritingToolsBehavior.COMPLETE,
+    );
+
+    expect(settings.toMap()['writingToolsBehavior'], 1);
+    expect(
+      settings.copy().writingToolsBehavior,
+      IOSWritingToolsBehavior.COMPLETE,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.writingToolsBehavior,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.writingToolsBehavior,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
+  });
 }
