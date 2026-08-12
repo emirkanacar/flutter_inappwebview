@@ -1,3 +1,8 @@
+## 1.0.7 - 2026-08-13
+
+- Scope cookie operations with `webViewController` to the WebView's network
+  session and apply per-WebView proxy settings to container sessions.
+
 ## 1.0.6 - 2026-08-12
 
 - Add persistent WPE WebKit data containers through `ContainerController` and

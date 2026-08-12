@@ -75,6 +75,16 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
 
   Future<dynamic> _handleMethod(MethodCall call) async {}
 
+  void _addWebViewId(
+    Map<String, dynamic> args,
+    PlatformInAppWebViewController? webViewController,
+  ) {
+    final webViewId = webViewController?.getViewId();
+    if (webViewId != null) {
+      args['webViewId'] = webViewId.toString();
+    }
+  }
+
   @override
   Future<bool> setCookie({
     required WebUri url,
@@ -124,6 +134,7 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
     args.putIfAbsent('isSecure', () => isSecure);
     args.putIfAbsent('isHttpOnly', () => isHttpOnly);
     args.putIfAbsent('sameSite', () => sameSite?.toNativeValue());
+    _addWebViewId(args, webViewController);
 
     return await channel?.invokeMethod<bool>('setCookie', args) ?? false;
   }
@@ -206,6 +217,7 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
 
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url.toString());
+    _addWebViewId(args, webViewController);
     List<dynamic> cookieListMap =
         await channel?.invokeMethod<List>('getCookies', args) ?? [];
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
@@ -316,6 +328,7 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
 
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('url', () => url.toString());
+    _addWebViewId(args, webViewController);
     List<dynamic> cookies =
         await channel?.invokeMethod<List>('getCookies', args) ?? [];
     cookies = cookies.cast<Map<dynamic, dynamic>>();
@@ -372,6 +385,7 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
     args.putIfAbsent('name', () => name);
     args.putIfAbsent('domain', () => domain);
     args.putIfAbsent('path', () => path);
+    _addWebViewId(args, webViewController);
     return await channel?.invokeMethod<bool>('deleteCookie', args) ?? false;
   }
 
@@ -411,6 +425,7 @@ class MacOSCookieManager extends PlatformCookieManager with ChannelController {
     args.putIfAbsent('url', () => url.toString());
     args.putIfAbsent('domain', () => domain);
     args.putIfAbsent('path', () => path);
+    _addWebViewId(args, webViewController);
     return await channel?.invokeMethod<bool>('deleteCookies', args) ?? false;
   }
 

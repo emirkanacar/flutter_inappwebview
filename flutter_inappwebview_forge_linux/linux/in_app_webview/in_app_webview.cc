@@ -72,6 +72,7 @@
 #include "../utils/uri.h"
 #include "in_app_webview_manager.h"
 #include "../container_manager.h"
+#include "../proxy_manager.h"
 #include "simd_convert.h"
 #include "user_content_controller.h"
 #include "webview_channel_delegate.h"
@@ -744,6 +745,12 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
   if (containerContext != nullptr) {
     g_object_unref(containerContext);
   }
+
+  if (params.initialSettings != nullptr && params.initialSettings->proxySettings.has_value()) {
+    ProxyManager::applyProxySettings(
+        webkit_web_view_get_network_session(webview_),
+        params.initialSettings->proxySettings.value());
+  }
   
   // Get WPEView from the WebView (created automatically by WebKit)
   wpe_view_ = webkit_web_view_get_wpe_view(webview_);
@@ -930,6 +937,12 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
     g_object_unref(settings);
     if (containerContext != nullptr) {
       g_object_unref(containerContext);
+    }
+
+    if (params.initialSettings != nullptr && params.initialSettings->proxySettings.has_value()) {
+      ProxyManager::applyProxySettings(
+          webkit_web_view_get_network_session(webview_),
+          params.initialSettings->proxySettings.value());
     }
   }
 #endif

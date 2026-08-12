@@ -1,3 +1,8 @@
+## 1.1.8 - 2026-08-13
+
+- Scope cookie operations with `webViewController` to the WebView's selected
+  data store and apply per-WebView proxy settings on macOS 14+.
+
 ## 1.1.7 - 2026-08-12
 
 - Add persistent WebKit containers through `ContainerController` and

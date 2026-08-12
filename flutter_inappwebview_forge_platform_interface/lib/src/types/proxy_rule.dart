@@ -30,6 +30,11 @@ class ProxyRule_ {
       IOSPlatform(),
       MacOSPlatform(),
       LinuxPlatform(),
+      WindowsPlatform(
+        apiName: 'CoreWebView2EnvironmentOptions.AdditionalBrowserArguments',
+        note:
+            'The first supported proxy URL is mapped to the WebView2 proxy-server argument.',
+      ),
     ],
   )
   String url;

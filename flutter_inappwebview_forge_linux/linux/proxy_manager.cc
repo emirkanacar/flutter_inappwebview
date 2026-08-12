@@ -38,6 +38,13 @@ ProxyRule::ProxyRule(FlValue* map) {
   }
 }
 
+FlValue* ProxyRule::toFlValue() const {
+  return to_fl_map({
+      {"url", make_fl_value(url)},
+      {"schemeFilter", make_fl_value(schemeFilter)},
+  });
+}
+
 // === ProxySettings ===
 
 ProxySettings::ProxySettings(FlValue* map) {
@@ -58,6 +65,17 @@ ProxySettings::ProxySettings(FlValue* map) {
       }
     }
   }
+}
+
+FlValue* ProxySettings::toFlValue() const {
+  g_autoptr(FlValue) rules = fl_value_new_list();
+  for (const auto& rule : proxyRules) {
+    fl_value_append_take(rules, rule.toFlValue());
+  }
+  return to_fl_map({
+      {"bypassRules", make_fl_value(bypassRules)},
+      {"proxyRules", fl_value_ref(rules)},
+  });
 }
 
 // === ProxyManager ===
@@ -102,9 +120,19 @@ void ProxyManager::setProxyOverride(const ProxySettings& settings) {
     return;
   }
 
-  // If no proxy rules, clear the proxy
+  applyProxySettings(session, settings);
+}
+
+void ProxyManager::applyProxySettings(WebKitNetworkSession* session,
+                                      const ProxySettings& settings) {
+  if (session == nullptr) {
+    errorLog("ProxyManager: Failed to get network session");
+    return;
+  }
+
+  // If no proxy rules, clear the proxy.
   if (settings.proxyRules.empty()) {
-    clearProxyOverride();
+    clearProxySettings(session);
     return;
   }
 
@@ -192,7 +220,15 @@ void ProxyManager::clearProxyOverride() {
     return;
   }
 
-  // Revert to system default proxy settings
+  clearProxySettings(session);
+}
+
+void ProxyManager::clearProxySettings(WebKitNetworkSession* session) {
+  if (session == nullptr) {
+    errorLog("ProxyManager: Failed to get network session");
+    return;
+  }
+  // Revert to system default proxy settings.
   webkit_network_session_set_proxy_settings(
       session, WEBKIT_NETWORK_PROXY_MODE_DEFAULT, nullptr);
 }

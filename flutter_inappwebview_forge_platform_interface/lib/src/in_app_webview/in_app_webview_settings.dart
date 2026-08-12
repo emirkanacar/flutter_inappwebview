@@ -1497,10 +1497,11 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   String? containerId;
 
-  ///Sets proxy settings for this WebView's data store on iOS 17+.
+  ///Sets proxy settings for this WebView's data store or network session.
   ///
   ///When used with [containerId], the proxy is isolated with that container's
-  ///`WKWebsiteDataStore`. Other platforms keep their existing proxy behavior.
+  ///`WKWebsiteDataStore`. On Windows, proxy arguments are applied when the
+  ///WebView2 environment is created.
   @SupportedPlatforms(
     platforms: [
       IOSPlatform(
@@ -1508,6 +1509,24 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
         apiUrl:
             "https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations",
         available: "17.0",
+      ),
+      MacOSPlatform(
+        apiName: "WKWebsiteDataStore.proxyConfigurations",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations",
+        available: "14.0",
+      ),
+      LinuxPlatform(
+        apiName: "webkit_network_session_set_proxy_settings",
+        apiUrl:
+            "https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.NetworkSession.set_proxy_settings.html",
+      ),
+      WindowsPlatform(
+        apiName: "CoreWebView2EnvironmentOptions.AdditionalBrowserArguments",
+        apiUrl:
+            "https://learn.microsoft.com/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions",
+        note:
+            "Proxy server and bypass arguments are applied when the WebView2 environment is created.",
       ),
     ],
   )

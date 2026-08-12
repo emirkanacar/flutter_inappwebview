@@ -1564,13 +1564,18 @@ class InAppWebViewSettings {
   ///- macOS WKWebView 10.15+ ([Official API - WKWebpagePreferences.preferredContentMode](https://developer.apple.com/documentation/webkit/wkwebpagepreferences/3194426-preferredcontentmode/))
   UserPreferredContentMode? preferredContentMode;
 
-  ///Sets proxy settings for this WebView's data store on iOS 17+.
+  ///Sets proxy settings for this WebView's data store or network session.
   ///
   ///When used with [containerId], the proxy is isolated with that container's
-  ///`WKWebsiteDataStore`. Other platforms keep their existing proxy behavior.
+  ///`WKWebsiteDataStore`. On Windows, proxy arguments are applied when the
+  ///WebView2 environment is created.
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.proxyConfigurations](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.proxyConfigurations](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations))
+  ///- Linux WPE WebKit ([Official API - webkit_network_session_set_proxy_settings](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.NetworkSession.set_proxy_settings.html))
+  ///- Windows WebView2 ([Official API - CoreWebView2EnvironmentOptions.AdditionalBrowserArguments](https://learn.microsoft.com/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions)):
+  ///    - Proxy server and bypass arguments are applied when the WebView2 environment is created.
   ProxySettings? proxySettings;
 
   ///Regular expression used on native side by the [PlatformWebViewCreationParams.shouldOverrideUrlLoading]
@@ -4956,6 +4961,10 @@ enum InAppWebViewSettingsProperty {
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- iOS WKWebView 17.0+ ([Official API - WKWebsiteDataStore.proxyConfigurations](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations))
+  ///- macOS WKWebView 14.0+ ([Official API - WKWebsiteDataStore.proxyConfigurations](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/4264546-proxyconfigurations))
+  ///- Linux WPE WebKit ([Official API - webkit_network_session_set_proxy_settings](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.NetworkSession.set_proxy_settings.html))
+  ///- Windows WebView2 ([Official API - CoreWebView2EnvironmentOptions.AdditionalBrowserArguments](https://learn.microsoft.com/microsoft-edge/webview2/reference/win32/icorewebview2environmentoptions)):
+  ///    - Proxy server and bypass arguments are applied when the WebView2 environment is created.
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -6346,7 +6355,12 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
             ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.proxySettings:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
-            [TargetPlatform.iOS].contains(platform ?? defaultTargetPlatform);
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.linux,
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.regexToAllowSyncUrlLoading:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [

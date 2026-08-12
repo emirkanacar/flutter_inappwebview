@@ -74,6 +74,23 @@ void _runSourceContractAssertions() {
       'macOS upgradeKnownHostsToHTTPS is not guarded in real settings',
     );
   }
+  if (!settingsSource.contains('var proxySettings: [String: Any?]? = nil') ||
+      !webViewSource.contains('settings.proxySettings') ||
+      !webViewSource.contains('webViews[String(describing: id)] = self')) {
+    throw StateError(
+      'macOS container proxy settings are not bound to the WebView store',
+    );
+  }
+  final cookieManagerSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/MyCookieManager.swift',
+  ).readAsStringSync();
+  if (!cookieManagerSource.contains('cookieStore(for webViewId: String?)') ||
+      !cookieManagerSource.contains('cookieStore: cookieStore')) {
+    throw StateError(
+      'macOS cookie operations do not select the WebView cookie store',
+    );
+  }
   if (!webViewSource.contains('override func willOpenMenu')) {
     throw StateError('macOS custom context menu hook is missing');
   }

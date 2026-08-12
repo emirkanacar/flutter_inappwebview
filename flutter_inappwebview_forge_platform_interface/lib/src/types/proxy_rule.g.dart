@@ -54,6 +54,8 @@ class ProxyRule {
   ///- iOS WKWebView
   ///- macOS WKWebView
   ///- Linux WPE WebKit
+  ///- Windows WebView2 (Official API - CoreWebView2EnvironmentOptions.AdditionalBrowserArguments):
+  ///    - The first supported proxy URL is mapped to the WebView2 proxy-server argument.
   String url;
 
   ///Sets a username to use as authentication for a proxy configuration.

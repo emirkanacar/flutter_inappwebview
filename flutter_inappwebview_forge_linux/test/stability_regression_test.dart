@@ -34,6 +34,8 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
   final cmakeSource = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
   final readmeSource = _sourceFile('README.md').readAsStringSync();
+  final cookieManagerSource = _sourceFile('linux/cookie_manager.cc').readAsStringSync();
+  final proxySource = _sourceFile('linux/proxy_manager.cc').readAsStringSync();
 
   _expectContains(
     source,
@@ -112,5 +114,20 @@ void _runSourceContractAssertions() {
     softwareRenderingHeader,
     'software WPE buffers',
     'the software-buffer fallback documentation',
+  );
+  _expectContains(
+    cookieManagerSource,
+    'getCookieManager(FlValue* args)',
+    'the WebView-scoped cookie manager lookup',
+  );
+  _expectContains(
+    cookieManagerSource,
+    'webkit_web_view_get_network_session',
+    'the WebView network-session cookie scope',
+  );
+  _expectContains(
+    proxySource,
+    'applyProxySettings(WebKitNetworkSession* session',
+    'the per-session proxy application path',
   );
 }

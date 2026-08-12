@@ -3,6 +3,8 @@
 
 #include <optional>
 #include <string>
+#include <vector>
+#include <flutter/encodable_value.h>
 #include <WebView2.h>
 
 namespace flutter_inappwebview_plugin
@@ -25,6 +27,10 @@ namespace flutter_inappwebview_plugin
     bool disableContextMenu = false;
     bool incognito = false;
     std::optional<std::string> containerId = std::optional<std::string>{};
+    // WebView2 consumes proxy configuration at environment creation time.
+    std::optional<std::string> proxyServer = std::optional<std::string>{};
+    std::optional<std::vector<std::string>> proxyBypassRules = std::optional<std::vector<std::string>>{};
+    std::optional<flutter::EncodableMap> proxySettings = std::optional<flutter::EncodableMap>{};
     std::optional<std::vector<std::string>> javaScriptHandlersOriginAllowList = std::optional<std::vector<std::string>>{};
     bool javaScriptHandlersForMainFrameOnly = false;
     bool javaScriptBridgeEnabled = true;

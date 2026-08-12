@@ -28,6 +28,8 @@ class ProxySettings {
   ///- Android WebView
   ///- Linux WPE WebKit ([Official API - webkit_network_proxy_settings_new (ignore_hosts)](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/ctor.NetworkProxySettings.new.html)):
   ///    - Mapped to ignore_hosts; bypass rules are passed as host patterns to WebKitNetworkProxySettings.
+  ///- Windows WebView2 (Official API - CoreWebView2EnvironmentOptions.AdditionalBrowserArguments):
+  ///    - Mapped to the WebView2 proxy-bypass-list argument at environment creation.
   List<String> bypassRules;
 
   ///Hostnames without a period in them (and that are not IP literals) will skip proxy settings and be connected to directly instead. Examples: `"abc"`, `"local"`, `"some-domain"`.
@@ -60,6 +62,7 @@ class ProxySettings {
   ///- iOS WKWebView
   ///- macOS WKWebView
   ///- Linux WPE WebKit
+  ///- Windows WebView2
   List<ProxyRule> proxyRules;
 
   ///By default, certain hostnames implicitly bypass the proxy if they are link-local IPs, or localhost addresses.
@@ -329,6 +332,8 @@ enum ProxySettingsProperty {
   ///- Android WebView
   ///- Linux WPE WebKit ([Official API - webkit_network_proxy_settings_new (ignore_hosts)](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/ctor.NetworkProxySettings.new.html)):
   ///    - Mapped to ignore_hosts; bypass rules are passed as host patterns to WebKitNetworkProxySettings.
+  ///- Windows WebView2 (Official API - CoreWebView2EnvironmentOptions.AdditionalBrowserArguments):
+  ///    - Mapped to the WebView2 proxy-bypass-list argument at environment creation.
   ///
   ///Use the [ProxySettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -365,6 +370,7 @@ enum ProxySettingsProperty {
   ///- iOS WKWebView
   ///- macOS WKWebView
   ///- Linux WPE WebKit
+  ///- Windows WebView2
   ///
   ///Use the [ProxySettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -404,6 +410,7 @@ extension _ProxySettingsPropertySupported on ProxySettings {
             [
               TargetPlatform.android,
               TargetPlatform.linux,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case ProxySettingsProperty.bypassSimpleHostnames:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -422,6 +429,7 @@ extension _ProxySettingsPropertySupported on ProxySettings {
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case ProxySettingsProperty.removeImplicitRules:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

@@ -31,6 +31,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var useShouldInterceptFetchRequest = false
     var incognito = false
     var containerId: String? = nil
+    var proxySettings: [String: Any?]? = nil
     var cacheEnabled = true
     var transparentBackground = false
     var supportZoom = true

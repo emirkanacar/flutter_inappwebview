@@ -109,6 +109,16 @@ void _runSourceContractAssertions() {
     'the WebView2 page zoom setter',
   );
   _expectContains(
+    nativeViewSource,
+    'put_AdditionalBrowserArguments',
+    'the WebView2 proxy environment arguments',
+  );
+  _expectContains(
+    settingsSource,
+    'proxyServer',
+    'the WebView2 proxy settings parser',
+  );
+  _expectContains(
     settingsSource,
     'get_ZoomFactor',
     'the WebView2 page zoom getter',

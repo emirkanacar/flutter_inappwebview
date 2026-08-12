@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "../proxy_manager.h"
+
 namespace flutter_inappwebview_plugin {
 
 class InAppWebView;
@@ -141,6 +143,7 @@ class InAppWebViewSettings {
   // When true, creates an ephemeral network session (no persistent storage)
   bool incognito = false;
   std::optional<std::string> containerId = std::optional<std::string>{};
+  std::optional<ProxySettings> proxySettings = std::optional<ProxySettings>{};
 
   // === CORS allowlist ===
   // List of URI patterns for which CORS checks are disabled

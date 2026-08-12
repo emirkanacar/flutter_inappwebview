@@ -1,3 +1,12 @@
+## 2.1.66 - 2026-08-13
+
+- Complete desktop container parity for scoped cookie operations on macOS and
+  Linux, and add per-WebView proxy settings for macOS, Linux, and Windows.
+  Windows proxy arguments are applied when a new WebView2 environment is
+  created.
+- Update the platform-interface to 1.1.13, macOS to 1.1.8, Linux to 1.0.7,
+  and Windows to 1.0.12.
+
 ## 2.1.65 - 2026-08-12
 
 - Add persistent `ContainerController` support for macOS, Windows, and Linux

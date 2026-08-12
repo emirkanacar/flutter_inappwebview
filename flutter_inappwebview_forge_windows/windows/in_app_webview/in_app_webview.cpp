@@ -243,6 +243,24 @@ namespace flutter_inappwebview_plugin
     else {
       std::wstring userDataFolder;
       LPCWSTR userDataFolderPtr = nullptr;
+      auto environmentOptions = Make<CoreWebView2EnvironmentOptions>();
+      bool hasEnvironmentOptions = false;
+      if (initialSettings && initialSettings->proxyServer.has_value()) {
+        std::string proxyArguments = "--proxy-server=" + initialSettings->proxyServer.value();
+        if (initialSettings->proxyBypassRules.has_value() &&
+            !initialSettings->proxyBypassRules->empty()) {
+          proxyArguments += " --proxy-bypass-list=";
+          for (size_t i = 0; i < initialSettings->proxyBypassRules->value().size(); ++i) {
+            if (i > 0) {
+              proxyArguments += ";";
+            }
+            proxyArguments += initialSettings->proxyBypassRules->value()[i];
+          }
+        }
+        environmentOptions->put_AdditionalBrowserArguments(
+            utf8_to_wide(proxyArguments).c_str());
+        hasEnvironmentOptions = true;
+      }
       if (initialSettings && initialSettings->containerId.has_value()) {
         const auto folder = ContainerManager::userDataFolderFor(initialSettings->containerId.value());
         if (folder.has_value()) {
@@ -253,7 +271,7 @@ namespace flutter_inappwebview_plugin
         }
       }
       hr = CreateCoreWebView2EnvironmentWithOptions(
-        nullptr, userDataFolderPtr, nullptr,
+        nullptr, userDataFolderPtr, hasEnvironmentOptions ? environmentOptions.Get() : nullptr,
         Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(callback).Get());
     }
 

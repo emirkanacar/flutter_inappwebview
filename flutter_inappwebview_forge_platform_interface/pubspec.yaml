@@ -1,6 +1,6 @@
 name: flutter_inappwebview_forge_platform_interface
 description: A common platform interface for the flutter_inappwebview_forge plugin.
-version: 1.1.12
+version: 1.1.13
 repository: https://github.com/emirkanacar/flutter_inappwebview
 issue_tracker: https://github.com/emirkanacar/flutter_inappwebview/issues
 topics:

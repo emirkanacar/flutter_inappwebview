@@ -26,6 +26,35 @@ namespace flutter_inappwebview_plugin
     disableContextMenu = get_fl_map_value(encodableMap, "disableContextMenu", disableContextMenu);
     incognito = get_fl_map_value(encodableMap, "incognito", incognito);
     containerId = get_optional_fl_map_value<std::string>(encodableMap, "containerId");
+    if (auto proxySettings = get_optional_fl_map_value<flutter::EncodableMap>(encodableMap, "proxySettings")) {
+      this->proxySettings = proxySettings;
+      proxyBypassRules = get_optional_fl_map_value<std::vector<std::string>>(*proxySettings, "bypassRules");
+      if (auto proxyRules = get_optional_fl_map_value<flutter::EncodableList>(*proxySettings, "proxyRules")) {
+        for (const auto& value : proxyRules.value()) {
+          auto rule = std::get_if<flutter::EncodableMap>(&value);
+          if (rule == nullptr) {
+            continue;
+          }
+          auto url = get_optional_fl_map_value<std::string>(*rule, "url");
+          if (!url.has_value() || url->empty()) {
+            continue;
+          }
+          auto schemeFilter = get_optional_fl_map_value<std::string>(*rule, "schemeFilter");
+          if (!schemeFilter.has_value()) {
+            if (auto schemeFilterMap =
+                    get_optional_fl_map_value<flutter::EncodableMap>(*rule, "schemeFilter")) {
+              schemeFilter = get_optional_fl_map_value<std::string>(*schemeFilterMap, "rawValue");
+            }
+          }
+          if (!proxyServer.has_value() || !schemeFilter.has_value() || schemeFilter->empty()) {
+            proxyServer = url;
+            if (!schemeFilter.has_value() || schemeFilter->empty()) {
+              break;
+            }
+          }
+        }
+      }
+    }
     if (fl_map_contains_not_null(encodableMap, "javaScriptHandlersOriginAllowList")) {
       javaScriptHandlersOriginAllowList = get_optional_fl_map_value<std::vector<std::string>>(encodableMap, "javaScriptHandlersOriginAllowList");
     }
@@ -71,6 +100,7 @@ namespace flutter_inappwebview_plugin
       {"disableContextMenu", disableContextMenu},
       {"incognito", incognito},
       {"containerId", make_fl_value(containerId)},
+      {"proxySettings", make_fl_value(proxySettings)},
       {"javaScriptHandlersOriginAllowList", make_fl_value(javaScriptHandlersOriginAllowList)},
       {"javaScriptHandlersForMainFrameOnly", javaScriptHandlersForMainFrameOnly},
       {"javaScriptBridgeEnabled", javaScriptBridgeEnabled},

@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-08-13
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -35,8 +35,8 @@ Eight PR-only records also have local implementations but remain outside the
 [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825).
 
 PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
-is source-fixed in Android 1.0.52, iOS 2.1.29, macOS 1.1.7, Windows 1.0.11,
-Linux 1.0.6, platform-interface 1.1.12, and root 2.1.65 for the
+is source-fixed in Android 1.0.52, iOS 2.1.29, macOS 1.1.8, Windows 1.0.12,
+Linux 1.0.7, platform-interface 1.1.13, and root 2.1.66 for the
 Android/iOS/desktop container API slice.
 `ContainerController` manages named containers; AndroidX WebKit profiles are
 bound before WebView state setup and scoped cookie calls resolve the profile
@@ -51,8 +51,12 @@ pass. A physical Android provider with WebView 110+
 must still verify two same-origin WebViews, cookie/local-storage separation,
 profile deletion after disposal, and fallback behavior without `MULTI_PROFILE`;
 physical iOS 17+ must verify the same data-store lifecycle. The desktop
-adapters are source-complete; target-OS builds/runtime validation remain
-pending. Per-container proxy support remains outside this first slice.
+adapters are source-complete. macOS and Linux cookie operations now resolve
+the selected WebView store/session, and macOS 14+, Linux, and Windows accept
+per-WebView proxy settings. Windows maps the first/default proxy rule and
+bypass list to WebView2 environment arguments; an explicitly supplied
+`WebViewEnvironment` cannot be reconfigured after creation. Target-OS
+builds/runtime validation remain pending.
 
 Android PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243)
 is source-fixed in Android 1.0.41: the file chooser now canonicalizes and

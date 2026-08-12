@@ -58,18 +58,22 @@ class CookieManager : public ChannelDelegate {
   void HandleMethodCall(FlMethodCall* method_call) override;
 
   // Cookie operations
-  void setCookie(const std::string& url, const Cookie& cookie, std::function<void(bool)> callback);
+  void setCookie(const std::string& url, const Cookie& cookie, std::function<void(bool)> callback,
+                 WebKitCookieManager* manager = nullptr);
 
-  void getCookies(const std::string& url, std::function<void(std::vector<Cookie>)> callback);
+  void getCookies(const std::string& url, std::function<void(std::vector<Cookie>)> callback,
+                  WebKitCookieManager* manager = nullptr);
 
   void getCookie(const std::string& url, const std::string& name,
-                 std::function<void(std::optional<Cookie>)> callback);
+                 std::function<void(std::optional<Cookie>)> callback,
+                 WebKitCookieManager* manager = nullptr);
 
   void deleteCookie(const std::string& url, const std::string& name, const std::string& domain,
-                    const std::string& path, std::function<void(bool)> callback);
+                    const std::string& path, std::function<void(bool)> callback,
+                    WebKitCookieManager* manager = nullptr);
 
   void deleteCookies(const std::string& url, const std::string& domain, const std::string& path,
-                     std::function<void(bool)> callback);
+                     std::function<void(bool)> callback, WebKitCookieManager* manager = nullptr);
 
   void deleteAllCookies(std::function<void(bool)> callback);
 
@@ -80,6 +84,7 @@ class CookieManager : public ChannelDelegate {
   WebKitCookieManager* cookie_manager_;
 
   WebKitCookieManager* getCookieManager();
+  WebKitCookieManager* getCookieManager(FlValue* args);
 };
 
 }  // namespace flutter_inappwebview_plugin

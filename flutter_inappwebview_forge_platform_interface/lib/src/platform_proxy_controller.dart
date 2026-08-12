@@ -269,6 +269,11 @@ class ProxySettings_ {
         note:
             'Mapped to ignore_hosts; bypass rules are passed as host patterns to WebKitNetworkProxySettings.',
       ),
+      WindowsPlatform(
+        apiName: 'CoreWebView2EnvironmentOptions.AdditionalBrowserArguments',
+        note:
+            'Mapped to the WebView2 proxy-bypass-list argument at environment creation.',
+      ),
     ],
   )
   List<String> bypassRules;
@@ -293,6 +298,7 @@ class ProxySettings_ {
       IOSPlatform(),
       MacOSPlatform(),
       LinuxPlatform(),
+      WindowsPlatform(),
     ],
   )
   List<ProxyRule_> proxyRules;

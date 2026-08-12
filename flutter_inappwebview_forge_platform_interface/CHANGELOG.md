@@ -1,3 +1,8 @@
+## 1.1.13 - 2026-08-13
+
+- Advertise desktop per-WebView proxy settings and scoped cookie behavior in
+  the platform capability metadata.
+
 ## 1.1.12 - 2026-08-12
 
 - Extend persistent container API support to macOS, Windows, and Linux.

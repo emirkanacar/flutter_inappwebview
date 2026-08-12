@@ -45,6 +45,16 @@ class LinuxCookieManager extends PlatformCookieManager {
   /// Creates and returns a new [LinuxCookieManager] for static methods.
   factory LinuxCookieManager.static() => _instance;
 
+  void _addWebViewId(
+    Map<String, dynamic> args,
+    PlatformInAppWebViewController? webViewController,
+  ) {
+    final webViewId = webViewController?.getViewId();
+    if (webViewId != null) {
+      args['webViewId'] = webViewId;
+    }
+  }
+
   @override
   Future<bool> setCookie({
     required WebUri url,
@@ -73,10 +83,9 @@ class LinuxCookieManager extends PlatformCookieManager {
       if (sameSite != null) 'sameSite': sameSite.toString().split('.').last,
     };
 
-    final result = await _channel.invokeMethod<bool>('setCookie', {
-      'url': url.toString(),
-      'cookie': cookie,
-    });
+    final args = <String, dynamic>{'url': url.toString(), 'cookie': cookie};
+    _addWebViewId(args, webViewController);
+    final result = await _channel.invokeMethod<bool>('setCookie', args);
 
     return result ?? false;
   }
@@ -88,9 +97,12 @@ class LinuxCookieManager extends PlatformCookieManager {
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
   }) async {
-    final result = await _channel.invokeMethod<List<dynamic>>('getCookies', {
-      'url': url.toString(),
-    });
+    final args = <String, dynamic>{'url': url.toString()};
+    _addWebViewId(args, webViewController);
+    final result = await _channel.invokeMethod<List<dynamic>>(
+      'getCookies',
+      args,
+    );
 
     if (result == null) {
       return [];
@@ -110,9 +122,11 @@ class LinuxCookieManager extends PlatformCookieManager {
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
   }) async {
+    final args = <String, dynamic>{'url': url.toString(), 'name': name};
+    _addWebViewId(args, webViewController);
     final result = await _channel.invokeMethod<Map<dynamic, dynamic>?>(
       'getCookie',
-      {'url': url.toString(), 'name': name},
+      args,
     );
 
     if (result == null) {
@@ -132,12 +146,14 @@ class LinuxCookieManager extends PlatformCookieManager {
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
   }) async {
-    final result = await _channel.invokeMethod<bool>('deleteCookie', {
+    final args = <String, dynamic>{
       'url': url.toString(),
       'name': name,
       'path': path,
       'domain': domain ?? '',
-    });
+    };
+    _addWebViewId(args, webViewController);
+    final result = await _channel.invokeMethod<bool>('deleteCookie', args);
 
     return result ?? false;
   }
@@ -151,11 +167,13 @@ class LinuxCookieManager extends PlatformCookieManager {
     PlatformInAppWebViewController? iosBelow11WebViewController,
     PlatformInAppWebViewController? webViewController,
   }) async {
-    final result = await _channel.invokeMethod<bool>('deleteCookies', {
+    final args = <String, dynamic>{
       'url': url.toString(),
       'path': path,
       'domain': domain ?? '',
-    });
+    };
+    _addWebViewId(args, webViewController);
+    final result = await _channel.invokeMethod<bool>('deleteCookies', args);
 
     return result ?? false;
   }

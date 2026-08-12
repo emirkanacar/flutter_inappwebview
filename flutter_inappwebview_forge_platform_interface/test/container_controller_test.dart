@@ -54,14 +54,21 @@ void main() {
     );
   });
 
-  test('proxySettings is supported only on Apple WebKit platforms', () {
-    expect(
-      InAppWebViewSettings.isPropertySupported(
-        InAppWebViewSettingsProperty.proxySettings,
-        platform: TargetPlatform.iOS,
-      ),
-      isTrue,
-    );
+  test('proxySettings capability covers supported platforms', () {
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      expect(
+        InAppWebViewSettings.isPropertySupported(
+          InAppWebViewSettingsProperty.proxySettings,
+          platform: platform,
+        ),
+        isTrue,
+      );
+    }
     expect(
       InAppWebViewSettings.isPropertySupported(
         InAppWebViewSettingsProperty.proxySettings,

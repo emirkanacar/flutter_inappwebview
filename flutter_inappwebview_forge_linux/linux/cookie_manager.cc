@@ -5,6 +5,8 @@
 #include <ctime>
 
 #include "plugin_instance.h"
+#include "in_app_webview/custom_platform_view.h"
+#include "in_app_webview/in_app_webview_manager.h"
 #include "utils/flutter.h"
 #include "utils/log.h"
 
@@ -174,11 +176,32 @@ WebKitCookieManager* CookieManager::getCookieManager() {
   return cookie_manager_;
 }
 
+WebKitCookieManager* CookieManager::getCookieManager(FlValue* args) {
+  auto webViewId = get_optional_fl_map_value<int64_t>(args, "webViewId");
+  if (webViewId.has_value() && plugin_ != nullptr && plugin_->inAppWebViewManager != nullptr) {
+    CustomPlatformView* platformView =
+        plugin_->inAppWebViewManager->GetPlatformView(webViewId.value());
+    if (platformView != nullptr && platformView->webview() != nullptr &&
+        platformView->webview()->webview() != nullptr) {
+      WebKitNetworkSession* session =
+          webkit_web_view_get_network_session(platformView->webview()->webview());
+      if (session != nullptr) {
+        WebKitCookieManager* manager = webkit_network_session_get_cookie_manager(session);
+        if (manager != nullptr) {
+          return manager;
+        }
+      }
+    }
+  }
+  return getCookieManager();
+}
+
 void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
 
   if (string_equals(method, "setCookie")) {
+    WebKitCookieManager* manager = getCookieManager(args);
     std::string url = get_fl_map_value<std::string>(args, "url", "");
     FlValue* cookieMap = fl_value_lookup_string(args, "cookie");
 
@@ -193,8 +216,9 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
     setCookie(url, cookie, [method_call](bool success) {
       fl_method_call_respond_success(method_call, fl_value_new_bool(success), nullptr);
       g_object_unref(method_call);
-    });
+    }, manager);
   } else if (string_equals(method, "getCookies")) {
+    WebKitCookieManager* manager = getCookieManager(args);
     std::string url = get_fl_map_value<std::string>(args, "url", "");
 
     if (url.empty()) {
@@ -210,8 +234,9 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
       }
       fl_method_call_respond_success(method_call, result, nullptr);
       g_object_unref(method_call);
-    });
+    }, manager);
   } else if (string_equals(method, "getCookie")) {
+    WebKitCookieManager* manager = getCookieManager(args);
     std::string url = get_fl_map_value<std::string>(args, "url", "");
     std::string name = get_fl_map_value<std::string>(args, "name", "");
 
@@ -228,8 +253,9 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
         fl_method_call_respond_success(method_call, fl_value_new_null(), nullptr);
       }
       g_object_unref(method_call);
-    });
+    }, manager);
   } else if (string_equals(method, "deleteCookie")) {
+    WebKitCookieManager* manager = getCookieManager(args);
     std::string url = get_fl_map_value<std::string>(args, "url", "");
     std::string name = get_fl_map_value<std::string>(args, "name", "");
     std::string domain = get_fl_map_value<std::string>(args, "domain", "");
@@ -239,8 +265,9 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
     deleteCookie(url, name, domain, path, [method_call](bool success) {
       fl_method_call_respond_success(method_call, fl_value_new_bool(success), nullptr);
       g_object_unref(method_call);
-    });
+    }, manager);
   } else if (string_equals(method, "deleteCookies")) {
+    WebKitCookieManager* manager = getCookieManager(args);
     std::string url = get_fl_map_value<std::string>(args, "url", "");
     std::string domain = get_fl_map_value<std::string>(args, "domain", "");
     std::string path = get_fl_map_value<std::string>(args, "path", "/");
@@ -249,7 +276,7 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
     deleteCookies(url, domain, path, [method_call](bool success) {
       fl_method_call_respond_success(method_call, fl_value_new_bool(success), nullptr);
       g_object_unref(method_call);
-    });
+    }, manager);
   } else if (string_equals(method, "deleteAllCookies")) {
     g_object_ref(method_call);
     deleteAllCookies([method_call](bool success) {
@@ -272,8 +299,9 @@ void CookieManager::HandleMethodCall(FlMethodCall* method_call) {
 }
 
 void CookieManager::setCookie(const std::string& url, const Cookie& cookie,
-                              std::function<void(bool)> callback) {
-  WebKitCookieManager* manager = getCookieManager();
+                              std::function<void(bool)> callback,
+                              WebKitCookieManager* manager) {
+  manager = manager != nullptr ? manager : getCookieManager();
   if (manager == nullptr) {
     callback(false);
     return;
@@ -312,8 +340,9 @@ void CookieManager::setCookie(const std::string& url, const Cookie& cookie,
 }
 
 void CookieManager::getCookies(const std::string& url,
-                               std::function<void(std::vector<Cookie>)> callback) {
-  WebKitCookieManager* manager = getCookieManager();
+                               std::function<void(std::vector<Cookie>)> callback,
+                               WebKitCookieManager* manager) {
+  manager = manager != nullptr ? manager : getCookieManager();
   if (manager == nullptr) {
     callback({});
     return;
@@ -351,7 +380,8 @@ void CookieManager::getCookies(const std::string& url,
 }
 
 void CookieManager::getCookie(const std::string& url, const std::string& name,
-                              std::function<void(std::optional<Cookie>)> callback) {
+                              std::function<void(std::optional<Cookie>)> callback,
+                              WebKitCookieManager* manager) {
   getCookies(url, [name, callback = std::move(callback)](std::vector<Cookie> cookies) {
     for (const auto& cookie : cookies) {
       if (cookie.name == name) {
@@ -360,13 +390,14 @@ void CookieManager::getCookie(const std::string& url, const std::string& name,
       }
     }
     callback(std::nullopt);
-  });
+  }, manager);
 }
 
 void CookieManager::deleteCookie(const std::string& url, const std::string& name,
                                  const std::string& domain, const std::string& path,
-                                 std::function<void(bool)> callback) {
-  WebKitCookieManager* manager = getCookieManager();
+                                 std::function<void(bool)> callback,
+                                 WebKitCookieManager* manager) {
+  manager = manager != nullptr ? manager : getCookieManager();
   if (manager == nullptr) {
     callback(false);
     return;
@@ -485,10 +516,12 @@ void CookieManager::deleteCookie(const std::string& url, const std::string& name
 }
 
 void CookieManager::deleteCookies(const std::string& url, const std::string& domain,
-                                  const std::string& path, std::function<void(bool)> callback) {
+                                  const std::string& path, std::function<void(bool)> callback,
+                                  WebKitCookieManager* manager) {
+  manager = manager != nullptr ? manager : getCookieManager();
   // Get all cookies for the URL and delete them
   getCookies(url,
-             [this, domain, path, callback = std::move(callback)](std::vector<Cookie> cookies) {
+             [this, domain, path, callback = std::move(callback), manager](std::vector<Cookie> cookies) {
                if (cookies.empty()) {
                  callback(true);
                  return;
@@ -526,9 +559,9 @@ void CookieManager::deleteCookies(const std::string& url, const std::string& dom
                                   delete anyFailed;
                                   delete sharedCallback;
                                 }
-                              });
+                              }, manager);
                }
-             });
+             }, manager);
 }
 
 void CookieManager::deleteAllCookies(std::function<void(bool)> callback) {

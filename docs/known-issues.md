@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-12
+Last reviewed: 2026-08-13
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 75 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 33 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -20,8 +20,8 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 ### Cross-platform container API (upstream PR #2825)
 
 The Android, iOS, macOS, Windows, and Linux storage slice is available in root
-2.1.65, Android 1.0.52, iOS 2.1.29, macOS 1.1.7, Windows 1.0.11, Linux 1.0.6,
-and platform-interface 1.1.12. On Android,
+2.1.66, Android 1.0.52, iOS 2.1.29, macOS 1.1.8, Windows 1.0.12, Linux 1.0.7,
+and platform-interface 1.1.13. On Android,
 `InAppWebViewSettings.containerId` binds an AndroidX WebKit `ProfileStore`
 profile before WebView state initialization; on iOS 17+, it binds a UUID to a
 `WKWebsiteDataStore`. `ContainerController` lists, checks, and deletes named
@@ -32,9 +32,13 @@ store; Android keeps its existing process-wide proxy API. Android WebView
 110+ with `MULTI_PROFILE` and iOS 17+ are required. Source tests, the Kotlin
 build, and the Xcode iOS example build pass. Android cookie flush now fans out
 to all container profiles. `ContainerController.clearContainerData` now clears
-supported container data without deleting the profile. Desktop native adapters
-are source-complete; Windows/Linux target builds and macOS runtime validation
-remain pending. Per-container proxy configuration remains a follow-up.
+supported container data without deleting the profile. Desktop cookie operations
+now honor `webViewController` on macOS and Linux. macOS 14+ and Linux apply
+proxy settings to the selected data store/network session; Windows maps the
+first default proxy rule and bypass list to arguments for newly created
+WebView2 environments. Explicit Windows `WebViewEnvironment` instances keep
+their existing options. Desktop native adapters are source-complete;
+Windows/Linux target builds and macOS runtime validation remain pending.
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |

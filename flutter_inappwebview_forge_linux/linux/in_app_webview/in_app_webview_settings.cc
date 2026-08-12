@@ -206,6 +206,11 @@ InAppWebViewSettings::InAppWebViewSettings(FlValue* map) : InAppWebViewSettings(
   // === Incognito mode ===
   incognito = get_fl_map_value(map, "incognito", incognito);
   containerId = get_optional_fl_map_value<std::string>(map, "containerId");
+  FlValue* proxy_settings_map = fl_value_lookup_string(map, "proxySettings");
+  if (proxy_settings_map != nullptr &&
+      fl_value_get_type(proxy_settings_map) == FL_VALUE_TYPE_MAP) {
+    proxySettings = ProxySettings(proxy_settings_map);
+  }
 
   // === CORS allowlist ===
   if (fl_map_contains_not_null(map, "corsAllowlist")) {
@@ -584,6 +589,8 @@ FlValue* InAppWebViewSettings::toFlValue() const {
       // === Incognito mode ===
       {"incognito", make_fl_value(incognito)},
       {"containerId", make_fl_value(containerId)},
+      {"proxySettings", proxySettings.has_value() ? proxySettings->toFlValue()
+                                                    : fl_value_new_null()},
 
       // === CORS allowlist (handles std::optional automatically) ===
       {"corsAllowlist", make_fl_value(corsAllowlist)},

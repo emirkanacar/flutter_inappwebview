@@ -1,3 +1,9 @@
+## 1.0.12 - 2026-08-13
+
+- Apply per-WebView proxy server and bypass settings to newly created WebView2
+  environments. Existing explicit `WebViewEnvironment` instances retain their
+  configured proxy options.
+
 ## 1.0.11 - 2026-08-12
 
 - Add persistent WebView2 user-data containers through

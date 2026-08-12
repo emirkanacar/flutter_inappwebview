@@ -121,6 +121,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
         super.init(frame: frame, configuration: configuration)
         self.id = id
         self.plugin = plugin
+        if let id = id {
+            plugin?.inAppWebViewManager?.webViews[String(describing: id)] = self
+        }
         if let id = id, let registrar = plugin?.registrar {
             let channel = FlutterMethodChannel(name: InAppWebView.METHOD_CHANNEL_NAME_PREFIX + String(describing: id),
                                            binaryMessenger: registrar.messenger)
@@ -342,6 +345,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 configuration.websiteDataStore = WKWebsiteDataStore(forIdentifier: identifier)
             } else if settings.cacheEnabled {
                 configuration.websiteDataStore = WKWebsiteDataStore.default()
+            }
+            if #available(macOS 14.0, *), let proxyMap = settings.proxySettings,
+               let proxy = ProxySettings.fromMap(map: proxyMap) {
+                configuration.websiteDataStore.proxyConfigurations =
+                    proxy.toProxyConfigurations()
             }
             if !settings.applicationNameForUserAgent.isEmpty {
                 if let applicationNameForUserAgent = configuration.applicationNameForUserAgent {
@@ -2860,6 +2868,10 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
     
     public func dispose() {
+        if let id = id,
+           plugin?.inAppWebViewManager?.webViews[String(describing: id)] === self {
+            plugin?.inAppWebViewManager?.webViews.removeValue(forKey: String(describing: id))
+        }
         channelDelegate?.dispose()
         channelDelegate = nil
         runWindowBeforeCreatedCallbacks()

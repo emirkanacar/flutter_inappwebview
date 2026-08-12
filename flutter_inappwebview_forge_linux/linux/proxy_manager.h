@@ -26,6 +26,7 @@ struct ProxyRule {
   ProxyRule(const std::string& url, std::optional<std::string> schemeFilter = std::nullopt)
       : url(url), schemeFilter(schemeFilter) {}
   ProxyRule(FlValue* map);
+  FlValue* toFlValue() const;
 };
 
 /**
@@ -37,6 +38,7 @@ struct ProxySettings {
 
   ProxySettings() = default;
   ProxySettings(FlValue* map);
+  FlValue* toFlValue() const;
 };
 
 /**
@@ -62,10 +64,18 @@ class ProxyManager : public ChannelDelegate {
    */
   void setProxyOverride(const ProxySettings& settings);
 
+  /// Applies settings to a specific network session, including a container
+  /// session created for an individual WebView.
+  static void applyProxySettings(WebKitNetworkSession* session,
+                                 const ProxySettings& settings);
+
   /**
    * Clear proxy override and revert to system defaults.
    */
   void clearProxyOverride();
+
+  /// Clears proxy settings from a specific network session.
+  static void clearProxySettings(WebKitNetworkSession* session);
 
  private:
   PluginInstance* plugin_ = nullptr;
