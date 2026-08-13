@@ -11,6 +11,9 @@
   force-casting nullable channel values.
 - Serialize iOS lifecycle state transitions and debug-trace reads so concurrent
   disposal or renderer callbacks remain idempotent.
+- Add a device-free native Swift lifecycle runner covering retained
+  reattachment, renderer-loss recovery, exactly-once async completion,
+  idempotent disposal, and concurrent disposal ownership.
 - Track iOS KVO registrations and remove only observers that were successfully
   registered during WebView teardown.
 - Restore active manager ownership after transferring a headless WebView to a

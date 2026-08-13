@@ -290,17 +290,18 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2654 - iOS/Android WebView disposal crash boundary
 
-Physical iOS disposal validation previously passed on two runs; the latest
-connected-device run completed 100 cycles with only safe `WebView disposed` /
+On 2026-08-13, the final iOS code on the connected physical device completed
+100 disposal/recreate cycles with only safe `WebView disposed` /
 `WebView navigation started` outcomes. The same device also passed 50
-keep-alive and 50 headless-to-normal transfer cycles. The connected iPhone 17
-Pro Simulator now passes the expanded 100-cycle disposal/recreate diagnostic.
+KeepAlive and 50 headless-to-normal transfer cycles without uninstalling the
+app. The connected iPhone 17 Pro Simulator also passes the expanded 100-cycle
+disposal/recreate diagnostic.
 
 The 2026-08-13 run completed all 100 pending JavaScript calls with the safe
 `WebView navigation started` result and exit code 0; this is Simulator evidence,
 not physical-device or provider coverage.
 
-**Local status:** Implemented and source/runtime-diagnostic validated; the final iOS lifecycle gates pass on Simulator, while the final Android headless cleanup path still needs the API 36 device rerun and the broader provider matrix remains pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup and completes both native-content-world and legacy async JavaScript callbacks with a structured `WebView disposed` error; late WebKit callbacks are ignored after the pending table is cleared. Android disposal is idempotent, completes pending async JavaScript callbacks before releasing the channel, and keeps fullscreen teardown before native WebView destruction. The physical iOS device previously passed 100 disposal/recreate cycles and 50 keep-alive plus 50 headless-to-normal transfer cycles; the Android API 36 device passed the same matrix before the final Android headless cleanup path was added. All these runs used `--no-uninstall`. Android's renderer exit code `-1` during explicit WebView destruction is recorded as expected teardown evidence, with no app `AndroidRuntime`, fatal, or ANR failure. External [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491), which is outside the supplied export, reports the same renderer signature after back navigation; its exact affected-OEM path remains pending. **Required evidence:** rerun the final Android code on API 36, then complete Android API 33+/OEM/provider matrices including hybrid composition, forced renderer teardown, fullscreen/IME, and renderer logs; physical iOS 15-26 keyboard/scene/popup/provider coverage.
+**Local status:** Implemented and source/runtime-diagnostic validated; the final iOS and Android lifecycle diagnostics pass on connected physical modern targets, while broader provider and OEM matrices remain pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup and completes both native-content-world and legacy async JavaScript callbacks with a structured `WebView disposed` error; late WebKit callbacks are ignored after the pending table is cleared. Android disposal is idempotent, completes pending async JavaScript callbacks before releasing the channel, and keeps fullscreen teardown before native WebView destruction. The physical iOS and Android API 36 targets both passed the final 100 disposal/recreate plus 50+50 ownership-transfer matrix with `--no-uninstall`. Android's renderer exit code `-1` during explicit WebView destruction is recorded as expected teardown evidence, with no app `AndroidRuntime`, fatal, or ANR failure. External [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491), which is outside the supplied export, reports the same renderer signature after back navigation; its exact affected-OEM path remains pending. **Required evidence:** complete Android API 33+/OEM/provider matrices including hybrid composition, forced renderer teardown, fullscreen/IME, and renderer logs; complete physical iOS 15-26 keyboard/scene/popup/provider coverage.
 
 #### Internal iOS cookie property decoding (no upstream issue mapping)
 
@@ -1060,6 +1061,14 @@ The Forge implementation now caps concurrent synchronous resource-interception c
 
 The opt-in [`android_ime_lifecycle_diagnostic_test.dart`](../flutter_inappwebview/example/integration_test/android_ime_lifecycle_diagnostic_test.dart) passes on the API 35 AVD for both virtual-display and hybrid composition, including a fresh 2026-08-10 run: the HTML input becomes active, the WebView is cleared/disposed, and a separate Flutter input reopens the keyboard with a `24.0` bottom inset. No `AndroidRuntime`, fatal, or `InputMethodManager` NPE appears. This supports the lifecycle guard on a modern provider; Android 10 and OEM validation remains a release gate.
 
+On 2026-08-13, the final Android lifecycle code passed on the connected
+physical API 36 target without uninstalling the app: 100 disposal/recreate
+cycles returned `WebView disposed`, and 50 KeepAlive plus 50 headless-to-normal
+ownership transfers passed. The filtered post-test log contained no app
+`AndroidRuntime`, fatal, signal, or ANR entry. This closes the current physical
+device evidence for the lifecycle diagnostics; Android 10, broader OEM/provider,
+renderer-loss, and IME-specific coverage remain separate release gates.
+
 The existing remote-URL Cookie Manager integration test built and installed on
 the API 35 `emulator-5554`, but timed out after 60 seconds before reaching its
 cookie assertions. A fresh isolated `flutter drive` attempt on 2026-08-10
@@ -1164,8 +1173,12 @@ not reproduce the transition: iOS 26.2 reported zero WebKit viewport metrics,
 while the iOS 27 Simulator reached the initial `778px` viewport but did not
 expose a software-keyboard transition (`keyboardDelta=0`). CoreSimulatorService
 also reported intermittent connection failures during that validation. No
-product crash was captured. Physical iOS 17 runtime evidence, custom page-zoom
-coverage, and the native frame/inset comparison remain required.
+product crash was captured. On 2026-08-13, the final iOS code also passed the
+show/dismiss assertion on the connected physical device: `visualViewport.height`
+changed from `839.0` to `487.8125` while the keyboard was visible, then
+returned to `839.0` with zero viewport offset after dismissal. The app remained
+installed throughout the run. Physical iOS 17 runtime evidence, custom
+page-zoom coverage, and the native frame/inset comparison remain required.
 
 ### #2753 — iOS iframe subresource failures do not reach `onReceivedError`
 

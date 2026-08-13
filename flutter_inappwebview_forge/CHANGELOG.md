@@ -24,6 +24,8 @@
   high-frequency channel dispatch and map allocation.
 - Add opt-in Android and iOS integration diagnostics for repeated keep-alive
   reattachment and headless-to-normal WebView ownership transfer.
+- Add device-free Android JVM and iOS native lifecycle regression coverage;
+  physical WebView/provider behavior remains a separate runtime gate.
 - Split Android and iOS native WebView channel dispatch into internal feature
   handlers for JavaScript, settings, WebMessage, and lifecycle operations;
   public channel contracts remain unchanged.

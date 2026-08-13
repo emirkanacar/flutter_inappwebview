@@ -39,10 +39,15 @@ keep-alive and 50 headless-to-normal transfer cycles. The connected Android API
 headless-to-normal transfer cycles with `--no-uninstall` before the final
 Android headless guaranteed-cleanup path was added. The final Android code
 then passed the same 100 disposal/recreate and 50+50 ownership-transfer matrix
-on the API 35 `Medium_Phone` emulator with `--no-uninstall`; physical API
-36/OEM/provider coverage remains pending. Physical Android
-provider/renderer-loss and broader physical iOS keyboard/scene/provider gates
-remain pending;
+on the API 35 `Medium_Phone` emulator with `--no-uninstall`. On 2026-08-13 it
+also passed the final 100 disposal/recreate and 50+50 ownership-transfer
+matrix on the connected physical API 36 target without uninstalling the app;
+the filtered post-test log had no app `AndroidRuntime`, fatal, signal, or ANR
+entry. The final iOS code also passed on 2026-08-13 on the connected physical
+iOS target: 100 disposal/recreate cycles and 50+50 ownership-transfer cycles
+completed with `--no-uninstall`. Broader Android provider/OEM and renderer-loss
+coverage, plus broader physical iOS keyboard/scene/provider gates, remain
+pending;
 no upstream issue or PR state was changed.
 Android and iOS native user/plugin script registration now skips active
 duplicates while retaining retryable failed registrations. Android and iOS
@@ -100,6 +105,9 @@ during teardown.
 The headless-to-normal factories also restore transferred native WebViews in
 the active manager map after detaching the old headless owner, preserving one
 reachable owner for lookup and plugin teardown.
+The native lifecycle coordinators now also have device-free Android JVM and iOS
+host regression runners for retained reattachment, renderer-loss recovery,
+exactly-once async completion, and concurrent disposal.
 The Web implementation additionally caches settings snapshots to skip unchanged
 JavaScript interop updates; outgoing Web callbacks re-check lifecycle admission
 after asynchronous channel work, and async operation IDs prevent duplicate

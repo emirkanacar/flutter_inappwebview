@@ -17,6 +17,9 @@
   registration, renderer, and JavaScript bridge callbacks are ignored or
   completed once; async operation IDs are consumed exactly once by the
   coordinator.
+- Add device-free Android JVM/JUnit coverage for retained reattachment,
+  renderer-loss recovery, exactly-once async completion, idempotent disposal,
+  and concurrent disposal ownership.
 - Use the lifecycle coordinator as the single disposal source for startup,
   scroll, renderer, geometry, and native registration guards; the duplicate
   `isDisposed` flag is removed.

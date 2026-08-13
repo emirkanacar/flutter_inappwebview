@@ -123,8 +123,9 @@ The iOS WebKit delegate now completes stale permission, navigation,
 authentication, dialog, and popup callbacks with native defaults after
 disposal. The behavior remains source-validated pending the physical iOS
 keyboard/scene/popup/provider matrix.
-Focused package tests, Android example Kotlin compilation, SwiftPM manifest
-validation, and the iOS example device build pass. Example-wide Dart analysis
+Focused package tests, Android example Kotlin compilation, the Android
+device-free JVM lifecycle suite, the iOS device-free native lifecycle runner,
+SwiftPM manifest validation, and the iOS example device build pass. Example-wide Dart analysis
 still reports pre-existing example-only diagnostics and is not used as the
 platform-native lifecycle gate.
 
@@ -132,16 +133,12 @@ The iOS simulator passed a fresh 100-cycle create/dispose/recreate run on
 2026-08-13; all 100 pending JavaScript calls reached the safe terminal result,
 and the test exited successfully without a crash, ANR, or Dart failure. The
 separate 50 keep-alive reattachment plus 50 headless-to-normal transfer
-diagnostic also remains passed. The connected physical iOS device previously
-passed the same 100-cycle disposal/recreate diagnostic with only
-`WebView disposed` or `WebView navigation started` terminal outcomes, plus 50
-keep-alive and 50 headless-to-normal transfer cycles, before the final iOS
-headless deferred cleanup path was added. All physical runs used
-`--no-uninstall`; the final physical-device matrix remains pending.
-On the same host, `xcrun devicectl` reported the paired physical iPhone as
-available, but Flutter's device discovery did not expose that identifier, so
-no physical iOS install or test was attempted and the app/profile was not
-removed.
+diagnostic also remains passed. On 2026-08-13, the final iOS code passed on
+the connected physical iOS target without uninstalling the app: the 100-cycle
+disposal/recreate diagnostic returned only `WebView disposed` or `WebView
+navigation started` terminal outcomes, and the separate 50 KeepAlive plus 50
+headless-to-normal transfer diagnostic passed. Flutter exposed the device
+identifier for this run; no app removal or profile reset was performed.
 After the guaranteed Android `finally` and iOS/macOS `defer` cleanup paths were
 added, the iOS 26.2 Simulator reran the 100-cycle disposal diagnostic and the
 50 keep-alive plus 50 headless-transfer diagnostic successfully, again without
@@ -155,7 +152,12 @@ Android code then reran on the `Medium_Phone` API 35 emulator on 2026-08-13:
 100/100 disposal/recreate outcomes were `WebView disposed`, and the 50
 keep-alive plus 50 headless-to-normal transfer cycles passed. This final run
 also used `--no-uninstall`; no app removal or profile reset was performed.
-Physical API 36/OEM/provider validation remains required. The
+On 2026-08-13, the final Android code also passed on the connected physical
+API 36 target without uninstalling the app: 100 disposal/recreate cycles
+returned `WebView disposed` for every case, and 50 KeepAlive plus 50
+headless-to-normal ownership transfers passed. The filtered post-test log had
+no app `AndroidRuntime`, fatal, signal, or ANR entry. Broader Android
+provider/OEM and renderer-loss validation remains required. The
 transfer diagnostic now polls a page marker instead of requiring optional
 `onLoadStop` delivery and records phase-specific timeouts. The desktop
 and Web ownership slice is source-complete: Web tests and the example web

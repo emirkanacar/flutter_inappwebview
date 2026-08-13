@@ -105,7 +105,11 @@ and 50 keep-alive plus 50 headless transfer cycles without uninstalling the
 app before the final Android headless guaranteed-cleanup path was added. The
 final Android code then passed the same 100 disposal/recreate and 50+50
 ownership-transfer matrix on the API 35 `Medium_Phone` emulator with
-`--no-uninstall`; physical API 36/OEM/provider coverage remains pending.
+`--no-uninstall`. On 2026-08-13 it also passed the final 100 disposal/recreate
+and 50+50 ownership-transfer matrix on the connected physical API 36 target
+without uninstalling the app; the filtered post-test log had no app
+`AndroidRuntime`, fatal, signal, or ANR entry. Broader Android provider/OEM and
+renderer-loss coverage remains pending.
 Android and iOS now also skip duplicate
 active native user/plugin script registration while preserving retryable failed
 registrations. Android provider/renderer-loss, repeated physical iOS
@@ -173,6 +177,10 @@ iOS KVO teardown now uses registration-aware, idempotent observer removal.
 Headless-to-normal factory handoff also restores the transferred WebView in the
 active manager map after detaching the old headless owner, so the native
 instance remains reachable for later lookup and plugin teardown.
+Android now has a device-free JVM lifecycle suite, and iOS has a host Swift
+runner covering coordinator state transitions, renderer-loss reattachment,
+exactly-once async completion, and concurrent idempotent disposal. These tests
+do not replace provider/GPU/IME integration validation.
 
 The Web package test and example web build pass. macOS source tests and the
 SwiftPM manifest pass; the example build is blocked by the host Xcode beta
@@ -390,9 +398,11 @@ pending until the affected physical-device matrices pass. The A16 IME
 diagnostic also passes for virtual-display and hybrid composition WebViews
 after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
 physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
-gate. One signed physical iOS disposal cycle passed on 2026-08-12 after
-provisioning approval, but repeated iOS cycles remain required, so the
-runtime-pending count stays 69.
+gate. On 2026-08-13, the final iOS code passed 100 physical disposal/recreate
+cycles plus 50 KeepAlive and 50 headless-to-normal transfer cycles without
+uninstalling the app. Broader iOS version/provider coverage and the remaining
+Android OEM renderer matrix remain required, so the runtime-pending count
+stays 69.
 
 iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
 now also completes pending popup async JavaScript callbacks when a new
