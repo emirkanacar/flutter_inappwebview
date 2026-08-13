@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-13
+Last reviewed: 2026-08-14
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -36,6 +36,18 @@ dated validation notes below retain their contemporaneous counts.
 | **Total issue records** | **125** | **77** | **1** | **1** | **15** | **31** | **28 active technical records after excluding showcase entries** |
 
 The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
+
+## Local feature addition: WebView prewarm/reuse
+
+`InAppWebViewPreloader` is implemented in the root package as an additive
+convenience API over the existing headless and KeepAlive ownership contract.
+It is not an upstream issue record and does not change the export counts. The
+source acceptance criteria are complete: concurrent starts are coalesced,
+failed starts can be retried, ownership is forwarded without copying the
+native WebView, and disposal is idempotent. Release/profile measurements for
+cold start, first usable frame, memory, and page readiness remain a separate
+runtime-validation task; no device test is required for this source-only
+slice.
 
 ## Status rules
 

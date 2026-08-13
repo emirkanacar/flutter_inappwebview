@@ -1,5 +1,10 @@
-## 2.1.70 - 2026-08-13
+## 2.1.71 - 2026-08-14
 
+- Add the opt-in `InAppWebViewPreloader` helper for starting a headless
+  WebView before a route is displayed and reusing that same native WebView
+  through `InAppWebView(preloader: ...)`. Concurrent prewarm calls are
+  coalesced and disposal selects the correct headless or KeepAlive ownership
+  path.
 - Add the additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK`
   option for keeping iOS/macOS Universal Link login and OAuth POST
   navigations inside the WebView; other platforms retain `ALLOW` behavior

@@ -1,6 +1,6 @@
 # iOS and Android Performance & WebView Upgrade Plan
 
-Last reviewed: 2026-08-10
+Last reviewed: 2026-08-14
 Status: Phase 1 source slice complete; first Android and iOS Phase 2/3 fixes landed, with profiling and device validation pending
 Scope: iOS and Android first
 
@@ -17,6 +17,10 @@ Current state in this workspace:
 - iOS pre-iOS 18 asynchronous JavaScript routing, native iOS 14+ callback tracking, and nil-frame guards are implemented; fallback latency, disposal, and popup stress validation remain open.
 - iOS pending asynchronous JavaScript callbacks now complete with a disposal error during teardown, and Android pending callbacks use the same bounded cleanup contract.
 - iOS UIScene and Swift Package Manager migration is tracked in [`ios-uiscene-spm-migration-plan.md`](ios-uiscene-spm-migration-plan.md); the implementation slice is complete and device validation remains.
+- The opt-in `InAppWebViewPreloader` helper now exposes a single-flight
+  headless prewarm and headless-to-inline KeepAlive handoff. It reuses the
+  existing native lifecycle path; cold-start, first-frame, memory, and page
+  readiness measurements remain runtime validation work.
 
 The source-level slice is complete for this checkpoint. The next release decision must be based on release/profile measurements, not on dependency version numbers alone.
 

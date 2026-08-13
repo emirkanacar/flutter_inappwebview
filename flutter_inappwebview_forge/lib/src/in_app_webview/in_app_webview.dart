@@ -14,6 +14,7 @@ import '../pull_to_refresh/pull_to_refresh_controller.dart';
 import '../webview_environment/webview_environment.dart';
 import 'headless_in_app_webview.dart';
 import 'in_app_webview_controller.dart';
+import 'in_app_webview_preloader.dart';
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidget}
 ///
@@ -44,6 +45,7 @@ class InAppWebView extends StatefulWidget {
     Key? key,
     Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers,
     int? windowId,
+    InAppWebViewPreloader? preloader,
     HeadlessInAppWebView? headlessWebView,
     InAppWebViewKeepAlive? keepAlive,
     bool? preventGestureDelay,
@@ -483,7 +485,9 @@ class InAppWebView extends StatefulWidget {
                (PlatformInAppWebViewController controller) =>
                    InAppWebViewController.fromPlatform(platform: controller),
            windowId: windowId,
-           keepAlive: keepAlive,
+           headlessWebView:
+               (preloader?.headlessWebView ?? headlessWebView)?.platform,
+           keepAlive: preloader?.keepAlive ?? keepAlive,
            initialUrlRequest: initialUrlRequest,
            initialFile: initialFile,
            initialData: initialData,
@@ -888,7 +892,6 @@ class InAppWebView extends StatefulWidget {
                      onLaunchingExternalUriScheme.call(controller, request)
                : null,
            gestureRecognizers: gestureRecognizers,
-           headlessWebView: headlessWebView?.platform,
            preventGestureDelay: preventGestureDelay,
          ),
        );

@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-13
+Last reviewed: 2026-08-14
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,17 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-08-14 WebView prewarm and reuse helper (local feature)
+
+The root package adds `InAppWebViewPreloader` as a small Dart coordinator over
+the existing headless-to-normal WebView transfer. `prewarm()` is single-flight
+for concurrent callers, `InAppWebView(preloader: ...)` forwards the same
+headless owner and KeepAlive token, and `dispose()` selects the headless or
+retained KeepAlive cleanup path exactly once. No MethodChannel names, payload
+keys, native code, or platform-interface contracts changed. The focused
+preloader tests pass; physical cold-start, first-frame, memory, and page-load
+profiling remain runtime validation rather than a claimed benchmark result.
 
 ## 2026-08-13 Android/iOS lifecycle and settings refactor checkpoint
 

@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-13
+Last reviewed: 2026-08-14
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 77 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 31 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -14,6 +14,22 @@ The confidence labels below describe the evidence available during this review:
   remains open for host updates or additional evidence.
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
+
+## 2026-08-14 WebView prewarm and reuse helper
+
+The root package now provides `InAppWebViewPreloader` for an opt-in
+headless-to-inline handoff. It starts one existing `HeadlessInAppWebView`,
+coalesces concurrent `prewarm()` calls, and passes the same native headless
+owner plus `InAppWebViewKeepAlive` token to `InAppWebView(preloader: ...)`.
+This avoids a second native WebView construction when a route is opened.
+
+The feature reuses the existing Android/iOS/desktop/Web ownership path and
+adds no native channel or public platform-interface contract. Source tests
+cover single-flight prewarm, idempotent disposal, and ownership forwarding.
+Release/profile measurements for cold-start time, first usable frame, memory,
+and page-readiness behavior are still required before claiming a runtime
+performance improvement. The application must retain the preloader for the
+whole handoff and must not create it inside `build()`.
 
 ## 2026-08-13 Android/iOS lifecycle and settings refactor checkpoint
 
