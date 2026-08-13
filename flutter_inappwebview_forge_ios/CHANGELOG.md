@@ -1,5 +1,8 @@
 ## 2.1.31 - 2026-08-13
 
+- Support `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` for keeping
+  Universal Link login and OAuth POST navigations inside WKWebView
+  ([#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)).
 - Partition the iOS WebView channel dispatch into internal JavaScript,
   settings, WebMessage, and lifecycle handlers without changing channel names,
   method names, or payloads.

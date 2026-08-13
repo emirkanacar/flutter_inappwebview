@@ -24,7 +24,7 @@ each note was recorded.
 | Open implementation or reproduction | [open work plan](open-work-plan.md) | 31 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
-Eight PR-only records also have local implementations but remain outside the
+Nine PR-only records also have local implementations but remain outside the
 125-issue count: [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243),
 [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771),
 [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871),
@@ -32,7 +32,17 @@ Eight PR-only records also have local implementations but remain outside the
 [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823),
 [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), and
 [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), and
-[#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825).
+[#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825), and
+[#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866).
+
+PR [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)
+is source-fixed in the platform-interface, iOS, macOS, and root packages. The
+additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` value maps to
+WebKit's raw Universal Link opt-out policy on iOS/macOS and falls back to
+`ALLOW` on other platforms. Focused mapping and native source-contract tests
+pass. Physical validation requires a separately installed associated app and a
+Universal Link domain with a POST/OAuth flow; that environment is not currently
+available, so this PR remains runtime-pending.
 
 PR [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825)
 is source-fixed in Android 1.0.52, iOS 2.1.29, macOS 1.1.8, Windows 1.0.12,

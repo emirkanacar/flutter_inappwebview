@@ -21,6 +21,30 @@ class NavigationActionPolicy {
   ///Allow the navigation to continue.
   static const ALLOW = NavigationActionPolicy._internal(1, 1);
 
+  ///Allow the navigation without handing it off to an associated Universal
+  ///Link application.
+  ///
+  ///**NOTE**: available only on iOS and macOS. On other platforms it falls
+  ///back to [ALLOW]. This uses WebKit's long-standing raw policy value and is
+  ///intended for login and OAuth POST navigations that must remain in the
+  ///WebView.
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  static final ALLOW_WITHOUT_TRYING_APP_LINK =
+      NavigationActionPolicy._internalMultiPlatform(3, () {
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.iOS:
+            return 3;
+          case TargetPlatform.macOS:
+            return 3;
+          default:
+            break;
+        }
+        return 1;
+      });
+
   ///Cancel the navigation.
   static const CANCEL = NavigationActionPolicy._internal(0, 0);
 
@@ -32,6 +56,7 @@ class NavigationActionPolicy {
   ///Set of all values of [NavigationActionPolicy].
   static final Set<NavigationActionPolicy> values = [
     NavigationActionPolicy.ALLOW,
+    NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK,
     NavigationActionPolicy.CANCEL,
     NavigationActionPolicy.DOWNLOAD,
   ].toSet();
@@ -106,6 +131,8 @@ class NavigationActionPolicy {
     switch (_value) {
       case 1:
         return 'ALLOW';
+      case 3:
+        return 'ALLOW_WITHOUT_TRYING_APP_LINK';
       case 0:
         return 'CANCEL';
       case 2:

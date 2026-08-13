@@ -1,5 +1,9 @@
 ## 2.1.70 - 2026-08-13
 
+- Add the additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK`
+  option for keeping iOS/macOS Universal Link login and OAuth POST
+  navigations inside the WebView; other platforms retain `ALLOW` behavior
+  ([#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)).
 - Extend `InAppWebViewSettings.disableAutocorrection` to Android, macOS,
   Windows, Linux, and Web in addition to iOS. The setting applies
   `autocorrect="off"` and `spellcheck="false"` to editable HTML elements,

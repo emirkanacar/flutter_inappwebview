@@ -556,7 +556,7 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 The complete pending-runtime register is now maintained in
 [runtime-validation-pending.md](runtime-validation-pending.md). It contains
-76 locally implemented or mitigated issue records and eight PR-only records.
+77 locally implemented or mitigated issue records and nine PR-only records.
 This section remains as a pointer so the detailed findings below can retain
 the root cause and acceptance evidence without creating a second status list.
 
@@ -806,6 +806,26 @@ The iOS console plugin script now serializes object arguments with `JSON.stringi
 **Status:** Fixed in iOS 2.1.1 and macOS 1.1.1. **Impact:** Authentication requests could not attach provider-specific HTTP headers on supported Apple OS versions. **Confidence:** Confirmed API capability.
 
 `WebAuthenticationSessionSettings.additionalHeaderFields` is now available on iOS 17.4+ and macOS 14.4+. The native sessions apply the map only on OS versions exposing `ASWebAuthenticationSession.additionalHeaderFields` and report the effective values through real-settings inspection. Older Apple versions retain the existing behavior without attempting the unavailable API.
+
+### PR #2866 — Keep Universal Link login navigations inside WebView
+
+**Local status:** Implemented and source-validated; associated-app Universal
+Link runtime validation pending. **Affected scope:** iOS/macOS navigation policy
+and the shared platform-interface enum. **Impact:** a login or OAuth POST could
+be handed off by WebKit to an installed Universal Link app; canceling and
+reissuing the request can lose the original POST body. **Confidence:** Confirmed
+API capability and additive upstream proposal.
+
+`NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` maps to WebKit's raw
+`allow + 2` policy on iOS/macOS and falls back to `ALLOW` on Android, Web,
+Windows, and Linux. The raw mapping is defensive and returns ordinary `ALLOW`
+if a WebKit runtime rejects the unknown value. The feature does not change
+existing `ALLOW`, `CANCEL`, or `DOWNLOAD` behavior.
+
+**Remaining validation:** use a physical iOS/macOS host with an installed
+associated app and matching Universal Link domain; verify a form POST and an
+OAuth redirect remain in the WebView, retain the POST body, and still invoke
+`shouldOverrideUrlLoading` with the new policy.
 
 ### #2812 — Windows WebView2 page zoom
 

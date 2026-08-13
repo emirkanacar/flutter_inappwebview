@@ -19,8 +19,9 @@ native runtime gate, #2745 is closed by source review, and
 their failures belong to host app/site configuration, the Apple/WebKit
 Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
 The other 31 issue records
-remain in this active plan. Eight additional PR-only records
-(`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, and `#2825`) are implemented locally and await
+remain in this active plan. Nine additional PR-only records
+(`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, `#2825`, and
+`#2866`) are implemented locally and await
 runtime validation; they do not change the issue counts below.
 
 The scope table and priority queue are authoritative for the current snapshot;
@@ -59,7 +60,7 @@ tracked in the runtime register.
 
 The 77 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
-along with the eight PR-only records. They are resolved implementation work,
+along with the nine PR-only records. They are resolved implementation work,
 not active queue items, and therefore are excluded from the active counts
 above. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)
 is closed by source review and has no package runtime gate. Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
@@ -576,7 +577,7 @@ Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview
 ## Runtime validation register
 
 Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 77 issue records and eight PR-only
+items. The complete register contains 77 issue records and nine PR-only
 records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
 keeps only the 31 issue records that still need implementation, design, or

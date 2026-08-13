@@ -1088,6 +1088,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
             super.init()
             self.decodeResult = { (obj: Any?) in
                 if let action = obj as? Int {
+                    if action == WKNavigationActionPolicy.allow.rawValue + 2 {
+                        return WKNavigationActionPolicy.init(
+                            rawValue: WKNavigationActionPolicy.allow.rawValue + 2
+                        ) ?? WKNavigationActionPolicy.allow
+                    }
                     return WKNavigationActionPolicy.init(rawValue: action) ?? WKNavigationActionPolicy.cancel
                 }
                 return WKNavigationActionPolicy.cancel

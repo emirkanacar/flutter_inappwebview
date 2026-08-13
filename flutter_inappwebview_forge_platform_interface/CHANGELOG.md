@@ -2,6 +2,9 @@
 
 - Advertise `InAppWebViewSettings.disableAutocorrection` for Android, iOS,
   macOS, Windows, Linux, and Web.
+- Add `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK`, mapping to
+  WebKit's Universal Link opt-out policy on iOS/macOS and falling back to
+  `ALLOW` elsewhere ([#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)).
 
 ## 1.1.14 - 2026-08-13
 

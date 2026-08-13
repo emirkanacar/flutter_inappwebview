@@ -522,12 +522,14 @@ tracked separately from that historical export:
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
 | Host/platform-specific boundary | 15 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2680`, `#2688`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`, `#2796`, `#2815`, `#2831`) | Host/provider/engine/application/site/dependency tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
 | Open implementation or reproduction | 34 issues | [open-work-plan.md](open-work-plan.md) |
-| PR-only local implementations awaiting runtime validation | 7 PRs | `#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743` |
+| PR-only local implementations awaiting runtime validation | 9 PRs | `#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, `#2825`, `#2866` |
 
 The issue inventory below remains the historical 125-record export and is not
 reduced when a record moves between the local status registers.
 
 ## Local resolution history
+
+| 2026-08-13 | Universal Link navigation policy | [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866) | The additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` maps to WebKit raw value `3` on iOS/macOS and falls back to `ALLOW` (`1`) on Android, Web, Windows, and Linux. iOS/macOS decode the raw policy defensively; focused Dart and native source-contract tests pass. An associated app and Universal Link domain are still required to validate an OAuth/form POST without app handoff. |
 
 | 2026-08-10 | Android file chooser private-sandbox URI | [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) | Android 1.0.41 rejects canonicalized private `/data/` `file://` results from modern single-select, `ClipData` multi-select, and legacy callbacks while preserving `content://` and FileProvider capture URIs. Focused source regression and native build validation remain the local gates; adversarial picker/provider testing is pending. |
 | 2026-08-12 | Android audio capture file chooser | [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823) | Android 1.0.44 detects `audio/*`, launches a recorder directly for capture-only requests when available, and adds a guarded audio recorder option to the chooser without requiring camera permission. Source regression and native build validation remain local gates; device/provider recorder validation is pending. |

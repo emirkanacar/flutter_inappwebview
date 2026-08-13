@@ -1,5 +1,8 @@
 ## 1.1.9 - 2026-08-13
 
+- Support `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` for keeping
+  Universal Link navigations inside WKWebView
+  ([#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)).
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable
   content in macOS WKWebView.
 - Make headless and keep-alive ownership maps non-null, idempotent, and
