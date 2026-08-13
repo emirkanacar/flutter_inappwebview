@@ -1,3 +1,8 @@
+## 1.0.8 - 2026-08-13
+
+- Add `InAppWebViewSettings.disableAutocorrection` support for editable
+  content in Linux WPE WebKit.
+
 ## 1.0.7 - 2026-08-13
 
 - Scope cookie operations with `webViewController` to the WebView's network

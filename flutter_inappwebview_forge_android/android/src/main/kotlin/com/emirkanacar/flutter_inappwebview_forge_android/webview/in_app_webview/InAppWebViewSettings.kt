@@ -52,6 +52,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var disableVerticalScroll: Boolean? = false
     @JvmField var disableHorizontalScroll: Boolean? = false
     @JvmField var disableContextMenu: Boolean? = false
+    @JvmField var disableAutocorrection: Boolean? = false
     @JvmField var supportZoom: Boolean? = true
     @JvmField var allowFileAccessFromFileURLs: Boolean? = false
     @JvmField var allowUniversalAccessFromFileURLs: Boolean? = false
@@ -171,6 +172,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "disableVerticalScroll" -> disableVerticalScroll = value as Boolean
                 "disableHorizontalScroll" -> disableHorizontalScroll = value as Boolean
                 "disableContextMenu" -> disableContextMenu = value as Boolean
+                "disableAutocorrection" -> disableAutocorrection = value as Boolean
                 "textZoom" -> textZoom = value as Int
                 "clearSessionCache" -> clearSessionCache = value as Boolean
                 "builtInZoomControls" -> builtInZoomControls = value as Boolean
@@ -292,6 +294,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("disableVerticalScroll", disableVerticalScroll)
         put("disableHorizontalScroll", disableHorizontalScroll)
         put("disableContextMenu", disableContextMenu)
+        put("disableAutocorrection", disableAutocorrection)
         put("textZoom", textZoom)
         put("clearSessionCache", clearSessionCache)
         put("builtInZoomControls", builtInZoomControls)

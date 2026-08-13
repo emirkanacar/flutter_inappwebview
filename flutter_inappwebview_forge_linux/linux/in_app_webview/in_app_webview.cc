@@ -46,6 +46,7 @@
 #include "../plugin_scripts_js/console_log_js.h"
 #include "../plugin_scripts_js/cursor_detection_js.h"
 #include "../plugin_scripts_js/date_input_js.h"
+#include "../plugin_scripts_js/disable_autocorrection_js.h"
 #include "../plugin_scripts_js/intercept_ajax_request_js.h"
 #include "../plugin_scripts_js/intercept_fetch_request_js.h"
 #include "../plugin_scripts_js/javascript_bridge_js.h"
@@ -1049,10 +1050,6 @@ void InAppWebView::PrepareAndAddUserScripts() {
     javaScriptBridgeEnabled = settings_->javaScriptBridgeEnabled;
   }
 
-  if (!javaScriptBridgeEnabled) {
-    return;
-  }
-
   // Get plugin scripts settings
   std::optional<std::vector<std::string>> pluginScriptsOriginAllowList = std::nullopt;
   bool pluginScriptsForMainFrameOnly = false;
@@ -1060,6 +1057,16 @@ void InAppWebView::PrepareAndAddUserScripts() {
   if (settings_) {
     pluginScriptsOriginAllowList = settings_->pluginScriptsOriginAllowList;
     pluginScriptsForMainFrameOnly = settings_->pluginScriptsForMainFrameOnly;
+  }
+
+  if (settings_ && settings_->disableAutocorrection) {
+    user_content_controller_->addPluginScript(
+        DisableAutocorrectionJS::DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+            pluginScriptsOriginAllowList, pluginScriptsForMainFrameOnly));
+  }
+
+  if (!javaScriptBridgeEnabled) {
+    return;
   }
 
   // Get JavaScript bridge-specific settings

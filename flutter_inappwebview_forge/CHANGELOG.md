@@ -1,3 +1,12 @@
+## 2.1.70 - 2026-08-13
+
+- Extend `InAppWebViewSettings.disableAutocorrection` to Android, macOS,
+  Windows, Linux, and Web in addition to iOS. The setting applies
+  `autocorrect="off"` and `spellcheck="false"` to editable HTML elements,
+  including elements added later by the page.
+- Update the platform implementations and platform interface for the
+  cross-platform autocorrection setting.
+
 ## 2.1.67 - 2026-08-13
 
 - Add Windows pull-to-refresh support for pages without a vertical scrollbar

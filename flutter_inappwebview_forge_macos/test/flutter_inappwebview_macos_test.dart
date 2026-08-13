@@ -94,6 +94,19 @@ void _runSourceContractAssertions() {
   if (!webViewSource.contains('override func willOpenMenu')) {
     throw StateError('macOS custom context menu hook is missing');
   }
+  final autocorrectionSource = _sourceFile(
+    'macos/flutter_inappwebview_forge_macos/Sources/'
+    'flutter_inappwebview_forge_macos/PluginScriptsJS/DisableAutocorrectionJS.swift',
+  ).readAsStringSync();
+  if (!settingsSource.contains('var disableAutocorrection = false') ||
+      !webViewSource.contains(
+        'DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
+      ) ||
+      !autocorrectionSource.contains('injectionTime: .atDocumentStart') ||
+      !autocorrectionSource.contains('autocorrect') ||
+      !autocorrectionSource.contains('spellcheck')) {
+    throw StateError('macOS autocorrection script wiring is incomplete');
+  }
   if (!webViewSource.contains('NSMenuItem')) {
     throw StateError('macOS custom context menu items are not created');
   }

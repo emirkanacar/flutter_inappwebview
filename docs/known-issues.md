@@ -24,15 +24,14 @@ validation pending. **Affected package:** iOS WebKit input responder and
 platform-interface settings. The existing `disableInputAccessoryView` path
 now reloads the WebView responder hierarchy when the setting changes and when
 the keyboard is about to appear, so refocusing another HTML input does not
-retain a stale accessory view. The new iOS-only
+retain a stale accessory view. The cross-platform
 `InAppWebViewSettings.disableAutocorrection` setting installs a document-start
 script that applies `autocorrect="off"` and `spellcheck="false"` to current and
 dynamically-added editable HTML elements. This is a page-content hint; it does
-not change the system keyboard preference globally, and WebKit may still show
-system UI for particular input types. **Required evidence:** physical iOS
-15+ validation with accessory enabled/disabled across focus changes, and
-editable inputs/textareas/contenteditable elements with and without the new
-setting.
+not change the system keyboard preference globally. **Required evidence:**
+physical iOS 15+ keyboard validation for the accessory path, plus native
+runtime validation on Android, iOS, macOS, Windows, Linux, and Web for editable
+inputs/textareas/contenteditable elements with and without the new setting.
 
 ### #2690 - iOS 18 Writing Tools behavior
 

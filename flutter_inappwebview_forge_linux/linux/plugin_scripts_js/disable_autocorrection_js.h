@@ -1,25 +1,21 @@
-#ifndef FLUTTER_INAPPWEBVIEW_PLUGIN_PLUGIN_SCRIPTS_UTIL_H_
-#define FLUTTER_INAPPWEBVIEW_PLUGIN_PLUGIN_SCRIPTS_UTIL_H_
-
-#include <string>
+#ifndef FLUTTER_INAPPWEBVIEW_PLUGIN_DISABLE_AUTOCORRECTION_JS_H_
+#define FLUTTER_INAPPWEBVIEW_PLUGIN_DISABLE_AUTOCORRECTION_JS_H_
 
 #include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "../types/plugin_script.h"
 
-namespace flutter_inappwebview_plugin
-{
-  const std::string VAR_PLACEHOLDER_VALUE = "$IN_APP_WEBVIEW_PLACEHOLDER_VALUE";
-  const std::string VAR_FUNCTION_ARGUMENT_NAMES = "$IN_APP_WEBVIEW_FUNCTION_ARGUMENT_NAMES";
-  const std::string VAR_FUNCTION_ARGUMENT_VALUES = "$IN_APP_WEBVIEW_FUNCTION_ARGUMENT_VALUES";
-  const std::string VAR_FUNCTION_BODY = "$IN_APP_WEBVIEW_FUNCTION_BODY";
+namespace flutter_inappwebview_plugin {
 
-  inline const std::string DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME =
+class DisableAutocorrectionJS {
+ public:
+  inline static const std::string DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME =
       "IN_APP_WEBVIEW_DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT";
 
-  inline std::string DISABLE_AUTOCORRECTION_JS_SOURCE() {
+  static std::string DISABLE_AUTOCORRECTION_JS_SOURCE() {
     return R"JS(
 (function() {
   var apply = function(root) {
@@ -50,19 +46,18 @@ namespace flutter_inappwebview_plugin
 )JS";
   }
 
-  inline std::shared_ptr<PluginScript> DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+  static std::unique_ptr<PluginScript> DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
       const std::optional<std::vector<std::string>>& allowedOriginRules,
       bool forMainFrameOnly) {
-    return std::make_shared<PluginScript>(
+    return std::make_unique<PluginScript>(
         DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME,
         DISABLE_AUTOCORRECTION_JS_SOURCE(),
         UserScriptInjectionTime::atDocumentStart,
         forMainFrameOnly,
-        allowedOriginRules,
-        nullptr,
-        true,
-        std::vector<std::string>{});
+        allowedOriginRules);
   }
-}
+};
 
-#endif //FLUTTER_INAPPWEBVIEW_PLUGIN_PLUGIN_SCRIPTS_UTIL_H_
+}  // namespace flutter_inappwebview_plugin
+
+#endif  // FLUTTER_INAPPWEBVIEW_PLUGIN_DISABLE_AUTOCORRECTION_JS_H_

@@ -514,11 +514,18 @@ class InAppWebViewSettings {
   ///Set to `true` to disable autocorrection and spelling suggestions for editable HTML elements in the WebView.
   ///This applies the HTML `autocorrect="off"` and `spellcheck="false"` hints at document start,
   ///including editable elements added later by the page.
-  ///This is a WebKit content hint and does not change the system keyboard setting globally.
+  ///This is a content hint and does not change the system keyboard setting globally.
+  ///On platforms with a web content engine, it maps to `autocorrect="off"` and
+  ///`spellcheck="false"` for editable elements.
   ///The default value is `false`.
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
   ///- iOS WKWebView
+  ///- macOS WKWebView
+  ///- Windows WebView2
+  ///- Linux WPE WebKit
+  ///- Web \<iframe\> but requires same origin
   bool? disableAutocorrection;
 
   ///Set to `true` to disable context menu. The default value is `false`.
@@ -3738,7 +3745,12 @@ enum InAppWebViewSettingsProperty {
   ///{@template flutter_inappwebview_forge_platform_interface.InAppWebViewSettings.disableAutocorrection.supported_platforms}
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
   ///- iOS WKWebView
+  ///- macOS WKWebView
+  ///- Windows WebView2
+  ///- Linux WPE WebKit
+  ///- Web \<iframe\> but requires same origin
   ///
   ///Use the [InAppWebViewSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -5886,8 +5898,16 @@ extension _InAppWebViewSettingsPropertySupported on InAppWebViewSettings {
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [TargetPlatform.linux].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.disableAutocorrection:
-        return ((kIsWeb && platform != null) || !kIsWeb) &&
-            [TargetPlatform.iOS].contains(platform ?? defaultTargetPlatform);
+        return kIsWeb && platform == null
+            ? true
+            : ((kIsWeb && platform != null) || !kIsWeb) &&
+                  [
+                    TargetPlatform.android,
+                    TargetPlatform.iOS,
+                    TargetPlatform.macOS,
+                    TargetPlatform.windows,
+                    TargetPlatform.linux,
+                  ].contains(platform ?? defaultTargetPlatform);
       case InAppWebViewSettingsProperty.disableContextMenu:
         return kIsWeb && platform == null
             ? true

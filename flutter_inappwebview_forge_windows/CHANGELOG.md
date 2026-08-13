@@ -1,3 +1,8 @@
+## 1.0.14 - 2026-08-13
+
+- Add `InAppWebViewSettings.disableAutocorrection` support for editable
+  content in Windows WebView2.
+
 ## 1.0.13 - 2026-08-13
 
 - Add opt-in pull-to-refresh for WebView2 pages without a vertical scrollbar

@@ -1,3 +1,8 @@
+## 1.1.17 - 2026-08-13
+
+- Advertise `InAppWebViewSettings.disableAutocorrection` for Android, iOS,
+  macOS, Windows, Linux, and Web.
+
 ## 1.1.14 - 2026-08-13
 
 - Add Windows pull-to-refresh capability metadata and the

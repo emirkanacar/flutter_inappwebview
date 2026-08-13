@@ -1,3 +1,8 @@
+## 1.1.9 - 2026-08-13
+
+- Add `InAppWebViewSettings.disableAutocorrection` support for editable
+  content in macOS WKWebView.
+
 ## 1.1.8 - 2026-08-13
 
 - Scope cookie operations with `webViewController` to the WebView's selected

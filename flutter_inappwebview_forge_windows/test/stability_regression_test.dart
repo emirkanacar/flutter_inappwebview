@@ -33,6 +33,9 @@ void _runSourceContractAssertions() {
   final settingsSource = _sourceFile(
     'windows/in_app_webview/in_app_webview_settings.cpp',
   ).readAsStringSync();
+  final pluginScriptSource = _sourceFile(
+    'windows/plugin_scripts_js/plugin_scripts_util.h',
+  ).readAsStringSync();
   final dartViewSource = _sourceFile(
     'lib/src/in_app_webview/custom_platform_view.dart',
   ).readAsStringSync();
@@ -74,6 +77,21 @@ void _runSourceContractAssertions() {
     dartViewSource,
     '_startPullToRefreshCandidate',
     'the Windows pull-to-refresh gesture candidate',
+  );
+  _expectContains(
+    settingsSource,
+    'disableAutocorrection',
+    'the Windows autocorrection setting',
+  );
+  _expectContains(
+    nativeViewSource,
+    'DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
+    'the Windows autocorrection plugin registration',
+  );
+  _expectContains(
+    pluginScriptSource,
+    'UserScriptInjectionTime::atDocumentStart',
+    'the Windows document-start autocorrection script',
   );
   _expectContains(
     dartWidgetSource,

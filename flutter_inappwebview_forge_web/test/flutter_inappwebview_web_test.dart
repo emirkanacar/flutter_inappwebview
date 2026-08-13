@@ -78,6 +78,13 @@ void _runSourceContractAssertions() {
     'cross-origin URL reads must not reuse the iframe source',
   );
   _assert(
+    elementSource.contains('disableAutocorrection') &&
+        elementSource.contains('autocorrect') &&
+        elementSource.contains('spellcheck') &&
+        elementSource.contains('MutationObserver'),
+    'Web autocorrection script wiring is missing',
+  );
+  _assert(
     supportSource.contains('evaluateJavascript: function(source)') &&
         supportSource.contains('contentWindow?.eval(source)') &&
         RegExp(r'\beval\s*\(').allMatches(supportSource).length == 1,

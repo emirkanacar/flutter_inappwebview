@@ -177,7 +177,7 @@ void main() {
     );
   });
 
-  test('iOS input editing settings are serialized and capability-gated', () {
+  test('input editing settings are serialized and capability-gated', () {
     final settings = InAppWebViewSettings(
       disableInputAccessoryView: true,
       disableAutocorrection: true,
@@ -186,19 +186,21 @@ void main() {
     expect(settings.toMap()['disableInputAccessoryView'], isTrue);
     expect(settings.toMap()['disableAutocorrection'], isTrue);
     expect(settings.copy().disableAutocorrection, isTrue);
-    expect(
-      InAppWebViewSettings.isPropertySupported(
-        InAppWebViewSettingsProperty.disableAutocorrection,
-        platform: TargetPlatform.iOS,
-      ),
-      isTrue,
-    );
-    expect(
-      InAppWebViewSettings.isPropertySupported(
-        InAppWebViewSettingsProperty.disableAutocorrection,
-        platform: TargetPlatform.android,
-      ),
-      isFalse,
-    );
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      expect(
+        InAppWebViewSettings.isPropertySupported(
+          InAppWebViewSettingsProperty.disableAutocorrection,
+          platform: platform,
+        ),
+        isTrue,
+        reason: 'disableAutocorrection should be supported on $platform',
+      );
+    }
   });
 }

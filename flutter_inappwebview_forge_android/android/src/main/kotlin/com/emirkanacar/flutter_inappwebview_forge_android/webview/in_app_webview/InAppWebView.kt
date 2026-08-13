@@ -872,6 +872,15 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   fun prepareAndAddUserScripts() {
+    if (customSettings.disableAutocorrection == true) {
+      userContentController.addPluginScript(
+        PluginScriptsUtil.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+          customSettings.pluginScriptsOriginAllowList,
+          customSettings.pluginScriptsForMainFrameOnly == true
+        )
+      )
+    }
+
     if (javaScriptBridgeEnabled) {
       userContentController.addPluginScript(
         PromisePolyfillJS.PROMISE_POLYFILL_JS_PLUGIN_SCRIPT(

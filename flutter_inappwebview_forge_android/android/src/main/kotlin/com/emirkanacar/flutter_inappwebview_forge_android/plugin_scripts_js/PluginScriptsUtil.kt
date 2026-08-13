@@ -26,6 +26,54 @@ open class PluginScriptsUtil {
         @JvmField
         val VAR_RANDOM_NAME = "\$IN_APP_WEBVIEW_VARIABLE_RANDOM_NAME"
 
+        @JvmField
+        val DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME =
+            "IN_APP_WEBVIEW_DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT"
+
+        @JvmStatic
+        fun DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+            allowedOriginRules: MutableSet<String>?,
+            forMainFrameOnly: Boolean
+        ): PluginScript = PluginScript(
+            DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT_GROUP_NAME,
+            DISABLE_AUTOCORRECTION_JS_SOURCE(),
+            UserScriptInjectionTime.AT_DOCUMENT_START,
+            null,
+            false,
+            allowedOriginRules,
+            forMainFrameOnly
+        )
+
+        @JvmStatic
+        fun DISABLE_AUTOCORRECTION_JS_SOURCE(): String = """
+            (function() {
+              var apply = function(root) {
+                var elements = [];
+                if (root && root.nodeType === 1 &&
+                    (root.matches('input, textarea, [contenteditable]') || root.isContentEditable)) {
+                  elements.push(root);
+                }
+                if (root && root.querySelectorAll) {
+                  elements = elements.concat(Array.prototype.slice.call(
+                    root.querySelectorAll('input, textarea, [contenteditable]')));
+                }
+                elements.forEach(function(element) {
+                  element.setAttribute('autocorrect', 'off');
+                  element.setAttribute('spellcheck', 'false');
+                });
+              };
+              apply(document);
+              if (window.MutationObserver) {
+                var observer = new MutationObserver(function(mutations) {
+                  mutations.forEach(function(mutation) {
+                    Array.prototype.forEach.call(mutation.addedNodes, apply);
+                  });
+                });
+                observer.observe(document, { childList: true, subtree: true });
+              }
+            })();
+        """.trimIndent()
+
         @JvmStatic
         fun CALL_ASYNC_JAVA_SCRIPT_WRAPPER_JS_SOURCE(): String =
             "(function(obj) {" +

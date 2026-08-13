@@ -11,6 +11,7 @@
 
 #include "../custom_platform_view/util/composition.desktop.interop.h"
 #include "../plugin_scripts_js/javascript_bridge_js.h"
+#include "../plugin_scripts_js/plugin_scripts_util.h"
 #include "../plugin_scripts_js/web_message_channel_js.h"
 #include "../plugin_scripts_js/web_message_listener_js.h"
 #include "../types/client_cert_response.h"
@@ -400,6 +401,13 @@ namespace flutter_inappwebview_plugin
     ).Get()));
 
     if (userContentController) {
+      if (settings->disableAutocorrection) {
+        userContentController->addPluginScript(
+            PluginScriptsUtil::DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+                settings->pluginScriptsOriginAllowList,
+                settings->pluginScriptsForMainFrameOnly));
+      }
+
       if (javaScriptBridgeEnabled) {
         auto pluginScriptsOriginAllowList = settings->pluginScriptsOriginAllowList;
         auto pluginScriptsForMainFrameOnly = settings->pluginScriptsForMainFrameOnly;

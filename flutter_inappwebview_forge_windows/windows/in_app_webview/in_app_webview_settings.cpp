@@ -24,6 +24,7 @@ namespace flutter_inappwebview_plugin
     pageZoom = get_fl_map_value(encodableMap, "pageZoom", pageZoom);
     isInspectable = get_fl_map_value(encodableMap, "isInspectable", isInspectable);
     disableContextMenu = get_fl_map_value(encodableMap, "disableContextMenu", disableContextMenu);
+    disableAutocorrection = get_fl_map_value(encodableMap, "disableAutocorrection", disableAutocorrection);
     incognito = get_fl_map_value(encodableMap, "incognito", incognito);
     containerId = get_optional_fl_map_value<std::string>(encodableMap, "containerId");
     if (auto proxySettings = get_optional_fl_map_value<flutter::EncodableMap>(encodableMap, "proxySettings")) {
@@ -98,6 +99,7 @@ namespace flutter_inappwebview_plugin
       {"pageZoom", pageZoom},
       {"isInspectable", isInspectable},
       {"disableContextMenu", disableContextMenu},
+      {"disableAutocorrection", disableAutocorrection},
       {"incognito", incognito},
       {"containerId", make_fl_value(containerId)},
       {"proxySettings", make_fl_value(proxySettings)},

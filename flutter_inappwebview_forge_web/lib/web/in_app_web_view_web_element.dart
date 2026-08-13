@@ -21,6 +21,35 @@ extension on HTMLIFrameElement {
   external String? get csp;
 }
 
+const String _disableAutocorrectionSource = r'''
+(function() {
+  var apply = function(root) {
+    var elements = [];
+    if (root && root.nodeType === 1 &&
+        (root.matches('input, textarea, [contenteditable]') || root.isContentEditable)) {
+      elements.push(root);
+    }
+    if (root && root.querySelectorAll) {
+      elements = elements.concat(Array.prototype.slice.call(
+        root.querySelectorAll('input, textarea, [contenteditable]')));
+    }
+    elements.forEach(function(element) {
+      element.setAttribute('autocorrect', 'off');
+      element.setAttribute('spellcheck', 'false');
+    });
+  };
+  apply(document);
+  if (window.MutationObserver) {
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        Array.prototype.forEach.call(mutation.addedNodes, apply);
+      });
+    });
+    observer.observe(document, { childList: true, subtree: true });
+  }
+})();
+''';
+
 class InAppWebViewWebElement implements Disposable {
   late dynamic _viewId;
   late BinaryMessenger _messenger;
@@ -311,6 +340,17 @@ class InAppWebViewWebElement implements Disposable {
         );
         settings!.iframeSandbox = sandbox;
       }
+    }
+
+    if (settings?.disableAutocorrection == true) {
+      userContentController.addUserOnlyScript(
+        UserScript(
+          groupName: 'IN_APP_WEBVIEW_DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
+          source: _disableAutocorrectionSource,
+          injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+          forMainFrameOnly: false,
+        ),
+      );
     }
 
     if (initialUserScripts != null) {

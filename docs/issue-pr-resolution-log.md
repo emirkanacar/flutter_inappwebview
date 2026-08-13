@@ -38,14 +38,14 @@ No upstream issue or PR reference was supplied for this local reproduction.
 getter; after an HTML input regained focus, WebKit could retain the accessory
 view because the active responder's input views were not reloaded. iOS 2.1.31
 now calls `reloadInputViews()` across the WebView hierarchy after the setting
-changes and during keyboard presentation. Platform-interface 1.1.16 and root
-2.1.69 add the iOS-only `InAppWebViewSettings.disableAutocorrection` option.
-When enabled at WebView creation, the iOS document-start script applies
+changes and during keyboard presentation. Platform-interface 1.1.17 and root
+2.1.70 expose `InAppWebViewSettings.disableAutocorrection` for Android, iOS,
+macOS, Windows, Linux, and Web. Each implementation applies
 `autocorrect="off"` and `spellcheck="false"` to existing and dynamically-added
-editable HTML elements. Platform-interface and iOS source-contract tests cover
-serialization, capability metadata, responder refresh, and script coverage.
-Physical iOS keyboard and WebKit validation remains pending. No upstream issue
-state was changed.
+editable HTML elements when the WebView is created. Platform-interface and
+native source-contract tests cover serialization, capability metadata, and
+script coverage. Physical keyboard/WebView validation remains pending. No
+upstream issue state was changed.
 
 ## 2026-08-13 Cross-platform container API parity
 

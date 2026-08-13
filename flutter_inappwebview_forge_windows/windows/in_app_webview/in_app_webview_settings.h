@@ -25,6 +25,7 @@ namespace flutter_inappwebview_plugin
     double pageZoom = 1.0;
     bool isInspectable = true;
     bool disableContextMenu = false;
+    bool disableAutocorrection = false;
     bool incognito = false;
     std::optional<std::string> containerId = std::optional<std::string>{};
     // WebView2 consumes proxy configuration at environment creation time.

@@ -1,3 +1,8 @@
+## 1.0.3 - 2026-08-13
+
+- Add `InAppWebViewSettings.disableAutocorrection` support for editable
+  content in Web iframe views.
+
 ## 1.0.2 - 2026-08-08
 
 - Reinforce same-origin current-URL reporting and the cross-origin `null` fallback for iframe navigation and `getUrl()` ([#2737](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2737)).

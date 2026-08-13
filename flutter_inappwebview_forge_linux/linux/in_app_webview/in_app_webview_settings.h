@@ -44,6 +44,7 @@ class InAppWebViewSettings {
   bool supportZoom = true;
   bool isInspectable = true;
   bool disableContextMenu = false;
+  bool disableAutocorrection = false;
 
   // === JavaScript bridge settings ===
   std::optional<std::vector<std::string>> javaScriptHandlersOriginAllowList =

@@ -34,8 +34,13 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
   final cmakeSource = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
   final readmeSource = _sourceFile('README.md').readAsStringSync();
-  final cookieManagerSource = _sourceFile('linux/cookie_manager.cc').readAsStringSync();
+  final cookieManagerSource = _sourceFile(
+    'linux/cookie_manager.cc',
+  ).readAsStringSync();
   final proxySource = _sourceFile('linux/proxy_manager.cc').readAsStringSync();
+  final autocorrectionSource = _sourceFile(
+    'linux/plugin_scripts_js/disable_autocorrection_js.h',
+  ).readAsStringSync();
 
   _expectContains(
     source,
@@ -129,5 +134,20 @@ void _runSourceContractAssertions() {
     proxySource,
     'applyProxySettings(WebKitNetworkSession* session',
     'the per-session proxy application path',
+  );
+  _expectContains(
+    source,
+    'DisableAutocorrectionJS::DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
+    'the Linux autocorrection plugin registration',
+  );
+  _expectContains(
+    autocorrectionSource,
+    'UserScriptInjectionTime::atDocumentStart',
+    'the Linux document-start autocorrection script',
+  );
+  _expectContains(
+    autocorrectionSource,
+    'spellcheck',
+    'the Linux spelling-suggestion hint',
   );
 }

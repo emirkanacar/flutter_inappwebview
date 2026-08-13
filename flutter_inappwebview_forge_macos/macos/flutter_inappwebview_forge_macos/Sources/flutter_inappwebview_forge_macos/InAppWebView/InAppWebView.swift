@@ -274,7 +274,16 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             return
         }
         configuration.userContentController.initialize()
-        
+
+        if settings?.disableAutocorrection == true {
+            configuration.userContentController.addPluginScript(
+                DisableAutocorrectionJS.DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+                    allowedOriginRules: settings?.pluginScriptsOriginAllowList,
+                    forMainFrameOnly: settings?.pluginScriptsForMainFrameOnly ?? false
+                )
+            )
+        }
+
         if javaScriptBridgeEnabled {
             let pluginScriptsOriginAllowList = settings?.pluginScriptsOriginAllowList
             let pluginScriptsForMainFrameOnly = settings?.pluginScriptsForMainFrameOnly ?? true

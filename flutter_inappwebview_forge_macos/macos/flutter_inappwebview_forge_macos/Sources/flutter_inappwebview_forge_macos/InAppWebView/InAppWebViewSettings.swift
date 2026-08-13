@@ -53,6 +53,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var allowingReadAccessTo: String? = nil
     var underPageBackgroundColor: String?
     var isTextInteractionEnabled = true
+    var disableAutocorrection = false
     var isSiteSpecificQuirksModeEnabled = true
     var upgradeKnownHostsToHTTPS = true
     var isElementFullscreenEnabled = true

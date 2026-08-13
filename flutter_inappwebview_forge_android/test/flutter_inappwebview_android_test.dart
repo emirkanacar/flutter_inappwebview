@@ -254,4 +254,49 @@ void main() {
       lessThan(rendererCallback.indexOf('val channelDelegate')),
     );
   });
+
+  test('Android autocorrection setting is wired to a document-start script', () {
+    final settingsSource =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebViewSettings.kt',
+          );
+    final scriptSource =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/plugin_scripts_js/PluginScriptsUtil.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/plugin_scripts_js/PluginScriptsUtil.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/plugin_scripts_js/PluginScriptsUtil.kt',
+          );
+    final webViewSource =
+        File(
+          'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+        ).existsSync()
+        ? File(
+            'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+          )
+        : File(
+            'flutter_inappwebview_forge_android/android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/webview/in_app_webview/InAppWebView.kt',
+          );
+    expect(
+      settingsSource.readAsStringSync(),
+      contains('disableAutocorrection'),
+    );
+    final script = scriptSource.readAsStringSync();
+    expect(script, contains('UserScriptInjectionTime.AT_DOCUMENT_START'));
+    expect(script, contains("setAttribute('autocorrect', 'off')"));
+    expect(script, contains("setAttribute('spellcheck', 'false')"));
+    expect(
+      webViewSource.readAsStringSync(),
+      contains('DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT'),
+    );
+  });
 }

@@ -1,3 +1,8 @@
+## 1.0.53 - 2026-08-13
+
+- Add `InAppWebViewSettings.disableAutocorrection` support through an
+  Android WebView document-start plugin script.
+
 ## 1.0.52 - 2026-08-12
 
 - Add `ContainerController.clearContainerData` for clearing AndroidX WebKit
