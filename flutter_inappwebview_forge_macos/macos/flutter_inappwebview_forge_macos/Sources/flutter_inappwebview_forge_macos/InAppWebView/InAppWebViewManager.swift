@@ -15,7 +15,7 @@ public class InAppWebViewManager: ChannelDelegate {
     var webViewForUserAgent: WKWebView?
     var defaultUserAgent: String?
     
-    var keepAliveWebViews: [String:FlutterWebViewController?] = [:]
+    var keepAliveWebViews: [String:FlutterWebViewController] = [:]
     var webViews: [String: InAppWebView] = [:]
     var windowWebViews: [Int64:WebViewTransport] = [:]
     var windowAutoincrementId: Int64 = 0
@@ -92,11 +92,23 @@ public class InAppWebViewManager: ChannelDelegate {
     }
     
     public func disposeKeepAlive(keepAliveId: String) {
-        if let flutterWebView = keepAliveWebViews[keepAliveId] as? FlutterWebViewController {
-            flutterWebView.keepAliveId = nil
-            flutterWebView.dispose(removeFromSuperview: true)
-            keepAliveWebViews[keepAliveId] = nil
+        guard let flutterWebView = keepAliveWebViews.removeValue(forKey: keepAliveId) else {
+            return
         }
+        flutterWebView.keepAliveId = nil
+        flutterWebView.dispose(removeFromSuperview: true)
+    }
+
+    func registerKeepAlive(keepAliveId: String, flutterWebView: FlutterWebViewController) {
+        let previousWebView = keepAliveWebViews.updateValue(flutterWebView, forKey: keepAliveId)
+        if let previousWebView = previousWebView, previousWebView !== flutterWebView {
+            previousWebView.keepAliveId = nil
+            previousWebView.dispose(removeFromSuperview: true)
+        }
+    }
+
+    func takeKeepAlive(keepAliveId: String) -> FlutterWebViewController? {
+        return keepAliveWebViews.removeValue(forKey: keepAliveId)
     }
     
     public func clearAllCache(includeDiskFiles: Bool, completionHandler: @escaping () -> Void) {
@@ -114,14 +126,19 @@ public class InAppWebViewManager: ChannelDelegate {
     
     public override func dispose() {
         super.dispose()
-        let keepAliveWebViewValues = keepAliveWebViews.values
-        keepAliveWebViewValues.forEach {(keepAliveWebView: FlutterWebViewController?) in
-            if let keepAliveId = keepAliveWebView?.keepAliveId {
-                disposeKeepAlive(keepAliveId: keepAliveId)
-            }
-        }
+        let keepAliveWebViewValues = Array(keepAliveWebViews.values)
+        let activeWebViewValues = Array(webViews.values)
         keepAliveWebViews.removeAll()
         webViews.removeAll()
+        keepAliveWebViewValues.forEach { keepAliveWebView in
+            keepAliveWebView.keepAliveId = nil
+            keepAliveWebView.dispose(removeFromSuperview: true)
+        }
+        activeWebViewValues.forEach { webView in
+            if !keepAliveWebViewValues.contains(where: { $0.webView() === webView }) {
+                webView.dispose()
+            }
+        }
         windowWebViews.removeAll()
         webViewForUserAgent = nil
         defaultUserAgent = nil

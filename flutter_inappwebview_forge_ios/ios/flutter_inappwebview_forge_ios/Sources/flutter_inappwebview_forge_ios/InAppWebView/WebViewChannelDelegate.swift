@@ -16,8 +16,38 @@ public class WebViewChannelDelegate: ChannelDelegate {
         super.init(channel: channel)
         self.webView = webView
     }
-    
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let webView = webView else { return false }
+        return webView.acceptsCallbacks()
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any) {
+        guard canDispatchCallbacks(), let channel = channel else { return }
+        channel.invokeMethod(method, arguments: arguments)
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any, callback: MethodChannelResult) {
+        guard canDispatchCallbacks(), let channel = channel else {
+            callback.success(nil)
+            return
+        }
+        channel.invokeMethod(method, arguments: arguments, callback: callback)
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any, result: @escaping FlutterResult) {
+        guard canDispatchCallbacks(), let channel = channel else {
+            result(nil)
+            return
+        }
+        channel.invokeMethod(method, arguments: arguments, result: result)
+    }
+
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard webView?.acceptsCallbacks() == true else {
+            result(nil)
+            return
+        }
         let arguments = call.arguments as? NSDictionary
         
         guard let method = WebViewChannelDelegateMethods.init(rawValue: call.method) else {
@@ -89,41 +119,8 @@ public class WebViewChannelDelegate: ChannelDelegate {
             }
             result(true)
             break
-        case .evaluateJavascript:
-            if let webView = webView {
-                let source = arguments!["source"] as! String
-                let contentWorldMap = arguments!["contentWorld"] as? [String:Any?]
-                if #available(iOS 14.0, *), let contentWorldMap = contentWorldMap {
-                    let contentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId)!
-                    webView.evaluateJavascript(source: source, contentWorld: contentWorld) { (value) in
-                        result(value)
-                    }
-                } else {
-                    webView.evaluateJavascript(source: source) { (value) in
-                        result(value)
-                    }
-                }
-            }
-            else {
-                result(nil)
-            }
-            break
-        case .injectJavascriptFileFromUrl:
-            let urlFile = arguments!["urlFile"] as! String
-            let scriptHtmlTagAttributes = arguments!["scriptHtmlTagAttributes"] as? [String:Any?]
-            webView?.injectJavascriptFileFromUrl(urlFile: urlFile, scriptHtmlTagAttributes: scriptHtmlTagAttributes)
-            result(true)
-            break
-        case .injectCSSCode:
-            let source = arguments!["source"] as! String
-            webView?.injectCSSCode(source: source)
-            result(true)
-            break
-        case .injectCSSFileFromUrl:
-            let urlFile = arguments!["urlFile"] as! String
-            let cssLinkHtmlTagAttributes = arguments!["cssLinkHtmlTagAttributes"] as? [String:Any?]
-            webView?.injectCSSFileFromUrl(urlFile: urlFile, cssLinkHtmlTagAttributes: cssLinkHtmlTagAttributes)
-            result(true)
+        case .evaluateJavascript, .injectJavascriptFileFromUrl, .injectCSSCode, .injectCSSFileFromUrl:
+            handleJavaScriptMethod(method: method, arguments: arguments, result: result)
             break
         case .reload:
             webView?.reload()
@@ -171,25 +168,10 @@ public class WebViewChannelDelegate: ChannelDelegate {
             }
             break
         case .setSettings:
-            if let iabController = webView?.inAppBrowserDelegate as? InAppBrowserWebViewController {
-                let inAppBrowserSettings = InAppBrowserSettings()
-                let inAppBrowserSettingsMap = arguments!["settings"] as! [String: Any]
-                let _ = inAppBrowserSettings.parse(settings: inAppBrowserSettingsMap)
-                iabController.setSettings(newSettings: inAppBrowserSettings, newSettingsMap: inAppBrowserSettingsMap)
-            } else {
-                let inAppWebViewSettings = InAppWebViewSettings()
-                let inAppWebViewSettingsMap = arguments!["settings"] as! [String: Any]
-                let _ = inAppWebViewSettings.parse(settings: inAppWebViewSettingsMap)
-                webView?.setSettings(newSettings: inAppWebViewSettings, newSettingsMap: inAppWebViewSettingsMap)
-            }
-            result(true)
+            handleSettingsMethod(method: method, arguments: arguments, result: result)
             break
         case .getSettings:
-            if let iabController = webView?.inAppBrowserDelegate as? InAppBrowserWebViewController {
-                result(iabController.getSettings())
-            } else {
-                result(webView?.getSettings())
-            }
+            handleSettingsMethod(method: method, arguments: arguments, result: result)
             break
         case .close:
             if let iabController = webView?.inAppBrowserDelegate as? InAppBrowserWebViewController {
@@ -287,13 +269,8 @@ public class WebViewChannelDelegate: ChannelDelegate {
             webView?.scrollBy(x: x, y: y, animated: animated)
             result(true)
             break
-        case .pauseTimers:
-            webView?.pauseTimers()
-            result(true)
-            break
-        case .resumeTimers:
-            webView?.resumeTimers()
-            result(true)
+        case .pauseTimers, .resumeTimers:
+            handleLifecycleMethod(method: method, arguments: arguments, result: result)
             break
         case .printCurrentPage:
             if let webView = webView {
@@ -442,89 +419,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             result(true)
             break
         case .callAsyncJavaScript:
-            guard let webView = webView,
-                  #available(iOS 10.3, *),
-                  let arguments = arguments,
-                  let functionBody = arguments["functionBody"] as? String,
-                  let functionArguments = arguments["arguments"] as? [String:Any] else {
-                result(nil)
-                break
-            }
-
-            let contentWorldMap = arguments["contentWorld"] as? [String:Any?]
-            let contentWorldName = contentWorldMap?["name"] as? String ?? "page"
-
-            if #available(iOS 18.0, *) {
-                var contentWorld = WKContentWorld.page
-                if let contentWorldMap = contentWorldMap {
-                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
-                        result([
-                            "value": NSNull(),
-                            "error": "Invalid content world"
-                        ])
-                        break
-                    }
-                    contentWorld = mappedContentWorld
-                }
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
-                    result(value)
-                }
-            } else if #available(iOS 14.3, *), webView.windowId != nil {
-                // Popup documents do not expose window.webkit, so the legacy result
-                // handler cannot be used. Keep the page-world fallback for shared
-                // popup configurations on iOS 14-17.
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: WKContentWorld.page) { (value) in
-                    result(value)
-                }
-            } else if contentWorldName == "page" {
-                // The native content-world overload can crash on iOS 14-17 for a
-                // regular WebView. The legacy shim uses the page world safely.
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { (value) in
-                    result(value)
-                }
-            } else if #available(iOS 16.1, *) {
-                // Preserve native isolation for custom worlds on supported releases.
-                var contentWorld = WKContentWorld.page
-                if let contentWorldMap = contentWorldMap {
-                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
-                        result([
-                            "value": NSNull(),
-                            "error": "Invalid content world"
-                        ])
-                        break
-                    }
-                    contentWorld = mappedContentWorld
-                }
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
-                    result(value)
-                }
-            } else if #available(iOS 16.0, *) {
-                // iOS 16.0.x cannot safely execute custom content worlds through
-                // the native async API and the legacy shim only supports page.
-                result([
-                    "value": NSNull(),
-                    "error": "Custom content worlds are not supported by callAsyncJavaScript on iOS 16.0.x"
-                ])
-            } else if #available(iOS 14.3, *) {
-                var contentWorld = WKContentWorld.page
-                if let contentWorldMap = contentWorldMap {
-                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
-                        result([
-                            "value": NSNull(),
-                            "error": "Invalid content world"
-                        ])
-                        break
-                    }
-                    contentWorld = mappedContentWorld
-                }
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { (value) in
-                    result(value)
-                }
-            } else {
-                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { (value) in
-                    result(value)
-                }
-            }
+            handleJavaScriptMethod(method: method, arguments: arguments, result: result)
             break
         case .createPdf:
             if let webView = webView, #available(iOS 14.0, *) {
@@ -560,67 +455,10 @@ public class WebViewChannelDelegate: ChannelDelegate {
             }
             break
         case .isSecureContext:
-            if let webView = webView {
-                webView.isSecureContext(completionHandler: { (isSecureContext) in
-                    result(isSecureContext)
-                })
-            }
-            else {
-                result(false)
-            }
+            handleJavaScriptMethod(method: method, arguments: arguments, result: result)
             break
-        case .createWebMessageChannel:
-            if let webView = webView {
-                let _ = webView.createWebMessageChannel { (webMessageChannel) in
-                    guard let webMessageChannel = webMessageChannel else {
-                        result(nil)
-                        return
-                    }
-                    result(webMessageChannel.toMap())
-                }
-            } else {
-                result(nil)
-            }
-            break
-        case .postWebMessage:
-            if let webView = webView {
-                let message = WebMessage.fromMap(map: arguments!["message"] as! [String: Any?])
-                let targetOrigin = arguments!["targetOrigin"] as! String
-                
-                var ports: [WebMessagePort] = []
-                if let notConnectedPorts = message.ports {
-                    for notConnectedPort in notConnectedPorts {
-                        if let webMessageChannel = webView.webMessageChannels[notConnectedPort.webMessageChannelId] {
-                            ports.append(webMessageChannel.ports[Int(notConnectedPort.index)])
-                        }
-                    }
-                }
-                message.ports = ports
-                
-                do {
-                    try webView.postWebMessage(message: message, targetOrigin: targetOrigin) { (_) in
-                        result(true)
-                    }
-                } catch let error as NSError {
-                    result(FlutterError(code: "WebViewChannelDelegate", message: error.domain, details: nil))
-                }
-            } else {
-                result(false)
-            }
-            break
-        case .addWebMessageListener:
-            if let webView = webView, let plugin = webView.plugin {
-                let webMessageListenerMap = arguments!["webMessageListener"] as! [String: Any?]
-                let webMessageListener = WebMessageListener.fromMap(plugin: plugin, map: webMessageListenerMap)!
-                do {
-                    try webView.addWebMessageListener(webMessageListener: webMessageListener)
-                    result(false)
-                } catch let error as NSError {
-                    result(FlutterError(code: "WebViewChannelDelegate", message: error.domain, details: nil))
-                }
-            } else {
-                result(false)
-            }
+        case .createWebMessageChannel, .postWebMessage, .addWebMessageListener:
+            handleWebMessageMethod(method: method, arguments: arguments, result: result)
             break
         case .canScrollVertically:
             if let webView = webView {
@@ -688,12 +526,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             }
             break
         case .isInFullscreen:
-            if let webView = webView {
-                result(webView.isInFullscreenPresentation)
-            }
-            else {
-                result(false)
-            }
+            handleLifecycleMethod(method: method, arguments: arguments, result: result)
             break
         case .getCameraCaptureState:
             if let webView = webView, #available(iOS 15.0, *) {
@@ -754,19 +587,255 @@ public class WebViewChannelDelegate: ChannelDelegate {
             }
             result(true)
             break
-        case .hideInputMethod:
+        case .hideInputMethod, .saveState, .restoreState:
+            handleLifecycleMethod(method: method, arguments: arguments, result: result)
+            break
+        }
+    }
+
+    /// Keep JavaScript and content-world operations behind one internal
+    /// feature boundary. The public method-channel names and result payloads
+    /// remain unchanged.
+    private func handleJavaScriptMethod(method: WebViewChannelDelegateMethods,
+                                        arguments: NSDictionary?,
+                                        result: @escaping FlutterResult) {
+        switch method {
+        case .evaluateJavascript:
             if let webView = webView {
-                webView.hideInputMethod()
+                let source = arguments?["source"] as! String
+                let contentWorldMap = arguments?["contentWorld"] as? [String:Any?]
+                if #available(iOS 14.0, *), let contentWorldMap = contentWorldMap {
+                    let contentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId)!
+                    webView.evaluateJavascript(source: source, contentWorld: contentWorld) { value in
+                        result(value)
+                    }
+                } else {
+                    webView.evaluateJavascript(source: source) { value in
+                        result(value)
+                    }
+                }
+            } else {
+                result(nil)
+            }
+
+        case .injectJavascriptFileFromUrl:
+            let urlFile = arguments?["urlFile"] as! String
+            let scriptHtmlTagAttributes = arguments?["scriptHtmlTagAttributes"] as? [String:Any?]
+            webView?.injectJavascriptFileFromUrl(urlFile: urlFile, scriptHtmlTagAttributes: scriptHtmlTagAttributes)
+            result(true)
+
+        case .injectCSSCode:
+            let source = arguments?["source"] as! String
+            webView?.injectCSSCode(source: source)
+            result(true)
+
+        case .injectCSSFileFromUrl:
+            let urlFile = arguments?["urlFile"] as! String
+            let cssLinkHtmlTagAttributes = arguments?["cssLinkHtmlTagAttributes"] as? [String:Any?]
+            webView?.injectCSSFileFromUrl(urlFile: urlFile, cssLinkHtmlTagAttributes: cssLinkHtmlTagAttributes)
+            result(true)
+
+        case .callAsyncJavaScript:
+            guard let webView = webView,
+                  #available(iOS 10.3, *),
+                  let arguments = arguments,
+                  let functionBody = arguments["functionBody"] as? String,
+                  let functionArguments = arguments["arguments"] as? [String:Any] else {
+                result(nil)
+                return
+            }
+
+            let contentWorldMap = arguments["contentWorld"] as? [String:Any?]
+            let contentWorldName = contentWorldMap?["name"] as? String ?? "page"
+
+            if #available(iOS 18.0, *) {
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result(["value": NSNull(), "error": "Invalid content world"])
+                        return
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { value in
+                    result(value)
+                }
+            } else if #available(iOS 14.3, *), webView.windowId != nil {
+                // Popup documents do not expose window.webkit, so the legacy
+                // result handler cannot be used for shared popup configurations.
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: WKContentWorld.page) { value in
+                    result(value)
+                }
+            } else if contentWorldName == "page" {
+                // The native content-world overload is unsafe on iOS 14-17
+                // for regular WebViews; use the page-world legacy shim.
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { value in
+                    result(value)
+                }
+            } else if #available(iOS 16.1, *) {
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result(["value": NSNull(), "error": "Invalid content world"])
+                        return
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { value in
+                    result(value)
+                }
+            } else if #available(iOS 16.0, *) {
+                result([
+                    "value": NSNull(),
+                    "error": "Custom content worlds are not supported by callAsyncJavaScript on iOS 16.0.x"
+                ])
+            } else if #available(iOS 14.3, *) {
+                var contentWorld = WKContentWorld.page
+                if let contentWorldMap = contentWorldMap {
+                    guard let mappedContentWorld = WKContentWorld.fromMap(map: contentWorldMap, windowId: webView.windowId) else {
+                        result(["value": NSNull(), "error": "Invalid content world"])
+                        return
+                    }
+                    contentWorld = mappedContentWorld
+                }
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments, contentWorld: contentWorld) { value in
+                    result(value)
+                }
+            } else {
+                webView.callAsyncJavaScript(functionBody: functionBody, arguments: functionArguments) { value in
+                    result(value)
+                }
+            }
+
+        case .isSecureContext:
+            if let webView = webView {
+                webView.isSecureContext { isSecureContext in
+                    result(isSecureContext)
+                }
+            } else {
+                result(false)
+            }
+
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    /// Settings keep the full incoming map for compatibility; the native
+    /// WebView applies only changed properties inside setSettings.
+    private func handleSettingsMethod(method: WebViewChannelDelegateMethods,
+                                      arguments: NSDictionary?,
+                                      result: @escaping FlutterResult) {
+        switch method {
+        case .setSettings:
+            if let iabController = webView?.inAppBrowserDelegate as? InAppBrowserWebViewController {
+                let inAppBrowserSettings = InAppBrowserSettings()
+                let inAppBrowserSettingsMap = arguments?["settings"] as! [String: Any]
+                let _ = inAppBrowserSettings.parse(settings: inAppBrowserSettingsMap)
+                iabController.setSettings(newSettings: inAppBrowserSettings, newSettingsMap: inAppBrowserSettingsMap)
+            } else {
+                let inAppWebViewSettings = InAppWebViewSettings()
+                let inAppWebViewSettingsMap = arguments?["settings"] as! [String: Any]
+                let _ = inAppWebViewSettings.parse(settings: inAppWebViewSettingsMap)
+                webView?.setSettings(newSettings: inAppWebViewSettings, newSettingsMap: inAppWebViewSettingsMap)
             }
             result(true)
-            break
+
+        case .getSettings:
+            if let iabController = webView?.inAppBrowserDelegate as? InAppBrowserWebViewController {
+                result(iabController.getSettings())
+            } else {
+                result(webView?.getSettings())
+            }
+
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    /// WebMessage channels and listeners are grouped so their port ownership
+    /// and disposal behavior remain localized to one feature boundary.
+    private func handleWebMessageMethod(method: WebViewChannelDelegateMethods,
+                                        arguments: NSDictionary?,
+                                        result: @escaping FlutterResult) {
+        switch method {
+        case .createWebMessageChannel:
+            if let webView = webView {
+                let _ = webView.createWebMessageChannel { webMessageChannel in
+                    guard let webMessageChannel = webMessageChannel else {
+                        result(nil)
+                        return
+                    }
+                    result(webMessageChannel.toMap())
+                }
+            } else {
+                result(nil)
+            }
+
+        case .postWebMessage:
+            if let webView = webView {
+                let message = WebMessage.fromMap(map: arguments!["message"] as! [String: Any?])
+                let targetOrigin = arguments!["targetOrigin"] as! String
+                var ports: [WebMessagePort] = []
+                if let notConnectedPorts = message.ports {
+                    for notConnectedPort in notConnectedPorts {
+                        if let webMessageChannel = webView.webMessageChannels[notConnectedPort.webMessageChannelId] {
+                            ports.append(webMessageChannel.ports[Int(notConnectedPort.index)])
+                        }
+                    }
+                }
+                message.ports = ports
+                do {
+                    try webView.postWebMessage(message: message, targetOrigin: targetOrigin) { _ in
+                        result(true)
+                    }
+                } catch let error as NSError {
+                    result(FlutterError(code: "WebViewChannelDelegate", message: error.domain, details: nil))
+                }
+            } else {
+                result(false)
+            }
+
+        case .addWebMessageListener:
+            if let webView = webView, let plugin = webView.plugin {
+                let webMessageListenerMap = arguments!["webMessageListener"] as! [String: Any?]
+                let webMessageListener = WebMessageListener.fromMap(plugin: plugin, map: webMessageListenerMap)!
+                do {
+                    try webView.addWebMessageListener(webMessageListener: webMessageListener)
+                    result(false)
+                } catch let error as NSError {
+                    result(FlutterError(code: "WebViewChannelDelegate", message: error.domain, details: nil))
+                }
+            } else {
+                result(false)
+            }
+
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+
+    private func handleLifecycleMethod(method: WebViewChannelDelegateMethods,
+                                       arguments: NSDictionary?,
+                                       result: @escaping FlutterResult) {
+        switch method {
+        case .pauseTimers:
+            webView?.pauseTimers()
+            result(true)
+        case .resumeTimers:
+            webView?.resumeTimers()
+            result(true)
+        case .isInFullscreen:
+            result(webView?.isInFullscreenPresentation ?? false)
+        case .hideInputMethod:
+            webView?.hideInputMethod()
+            result(true)
         case .saveState:
             if let webView = webView, #available(iOS 15.0, *) {
                 result(webView.saveState())
             } else {
                 result(nil)
             }
-            break
         case .restoreState:
             if let webView = webView, #available(iOS 15.0, *) {
                 let state = arguments!["state"] as! FlutterStandardTypedData
@@ -775,7 +844,8 @@ public class WebViewChannelDelegate: ChannelDelegate {
             } else {
                 result(false)
             }
-            break
+        default:
+            result(FlutterMethodNotImplemented)
         }
     }
     
@@ -786,16 +856,16 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "numberOfMatches": numberOfMatches,
             "isDoneCounting": isDoneCounting
         ]
-        channel?.invokeMethod("onFindResultReceived", arguments: arguments)
+        invokeMethod("onFindResultReceived", arguments: arguments)
     }
     
     public func onLongPressHitTestResult(hitTestResult: HitTestResult) {
-        channel?.invokeMethod("onLongPressHitTestResult", arguments: hitTestResult.toMap())
+        invokeMethod("onLongPressHitTestResult", arguments: hitTestResult.toMap())
     }
     
     public func onScrollChanged(x: Int, y: Int) {
         let arguments: [String: Any?] = ["x": x, "y": y]
-        channel?.invokeMethod("onScrollChanged", arguments: arguments)
+        invokeMethod("onScrollChanged", arguments: arguments)
     }
     
     public func onContentSizeChanged(oldContentSize: CGSize, newContentSize: CGSize) {
@@ -803,20 +873,20 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "oldContentSize": oldContentSize.toMap(),
             "newContentSize": newContentSize.toMap()
         ]
-        channel?.invokeMethod("onContentSizeChanged", arguments: arguments)
+        invokeMethod("onContentSizeChanged", arguments: arguments)
     }
     
     public func onDownloadStarting(request: DownloadStartRequest) {
-        channel?.invokeMethod("onDownloadStarting", arguments: request.toMap())
+        invokeMethod("onDownloadStarting", arguments: request.toMap())
     }
     
     public func onCreateContextMenu(hitTestResult: HitTestResult) {
-        channel?.invokeMethod("onCreateContextMenu", arguments: hitTestResult.toMap())
+        invokeMethod("onCreateContextMenu", arguments: hitTestResult.toMap())
     }
     
     public func onOverScrolled(x: Int, y: Int, clampedX: Bool, clampedY: Bool) {
         let arguments: [String: Any?] = ["x": x, "y": y, "clampedX": clampedX, "clampedY": clampedY]
-        channel?.invokeMethod("onOverScrolled", arguments: arguments)
+        invokeMethod("onOverScrolled", arguments: arguments)
     }
     
     public func onContextMenuActionItemClicked(id: Any, title: String) {
@@ -826,22 +896,22 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "androidId": nil,
             "title": title
         ]
-        channel?.invokeMethod("onContextMenuActionItemClicked", arguments: arguments)
+        invokeMethod("onContextMenuActionItemClicked", arguments: arguments)
     }
     
     public func onHideContextMenu() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onHideContextMenu", arguments: arguments)
+        invokeMethod("onHideContextMenu", arguments: arguments)
     }
     
     public func onEnterFullscreen() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onEnterFullscreen", arguments: arguments)
+        invokeMethod("onEnterFullscreen", arguments: arguments)
     }
     
     public func onExitFullscreen() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onExitFullscreen", arguments: arguments)
+        invokeMethod("onExitFullscreen", arguments: arguments)
     }
     
     public class JsAlertCallback: BaseCallbackResult<JsAlertResponse> {
@@ -858,7 +928,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsAlert(url: URL?, message: String, isMainFrame: Bool, callback: JsAlertCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -867,7 +937,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsAlert", arguments: arguments, callback: callback)
+        invokeMethod("onJsAlert", arguments: arguments, callback: callback)
     }
     
     public class JsConfirmCallback: BaseCallbackResult<JsConfirmResponse> {
@@ -884,7 +954,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsConfirm(url: URL?, message: String, isMainFrame: Bool, callback: JsConfirmCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -893,7 +963,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsConfirm", arguments: arguments, callback: callback)
+        invokeMethod("onJsConfirm", arguments: arguments, callback: callback)
     }
     
     public class JsPromptCallback: BaseCallbackResult<JsPromptResponse> {
@@ -910,7 +980,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsPrompt(url: URL?, message: String, defaultValue: String?, isMainFrame: Bool, callback: JsPromptCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -920,7 +990,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "defaultValue": defaultValue,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsPrompt", arguments: arguments, callback: callback)
+        invokeMethod("onJsPrompt", arguments: arguments, callback: callback)
     }
     
     public class CreateWindowCallback: BaseCallbackResult<Bool> {
@@ -933,16 +1003,16 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onCreateWindow(createWindowAction: CreateWindowAction, callback: CreateWindowCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onCreateWindow", arguments: createWindowAction.toMap(), callback: callback)
+        invokeMethod("onCreateWindow", arguments: createWindowAction.toMap(), callback: callback)
     }
     
     public func onCloseWindow() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onCloseWindow", arguments: arguments)
+        invokeMethod("onCloseWindow", arguments: arguments)
     }
     
     public func onConsoleMessage(message: String, messageLevel: Int) {
@@ -950,21 +1020,21 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "messageLevel": messageLevel
         ]
-        channel?.invokeMethod("onConsoleMessage", arguments: arguments)
+        invokeMethod("onConsoleMessage", arguments: arguments)
     }
     
     public func onProgressChanged(progress: Int) {
         let arguments: [String: Any?] = [
             "progress": progress
         ]
-        channel?.invokeMethod("onProgressChanged", arguments: arguments)
+        invokeMethod("onProgressChanged", arguments: arguments)
     }
     
     public func onTitleChanged(title: String?) {
         let arguments: [String: Any?] = [
             "title": title
         ]
-        channel?.invokeMethod("onTitleChanged", arguments: arguments)
+        invokeMethod("onTitleChanged", arguments: arguments)
     }
     
     public class PermissionRequestCallback: BaseCallbackResult<PermissionResponse> {
@@ -981,11 +1051,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onPermissionRequest(request: PermissionRequest, callback: PermissionRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onPermissionRequest", arguments: request.toMap(), callback: callback)
+        invokeMethod("onPermissionRequest", arguments: request.toMap(), callback: callback)
     }
 
     public class GeolocationPermissionsShowPromptCallback: BaseCallbackResult<GeolocationPermissionShowPromptResponse> {
@@ -1002,11 +1072,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
 
     public func onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissionsShowPromptCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod(
+        invokeMethod(
             "onGeolocationPermissionsShowPrompt",
             arguments: ["origin": origin],
             callback: callback
@@ -1030,21 +1100,21 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func shouldOverrideUrlLoading(navigationAction: WKNavigationAction, callback: ShouldOverrideUrlLoadingCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("shouldOverrideUrlLoading", arguments: navigationAction.toMap(), callback: callback)
+        invokeMethod("shouldOverrideUrlLoading", arguments: navigationAction.toMap(), callback: callback)
     }
     
     public func onLoadStart(url: String?) {
         let arguments: [String: Any?] = ["url": url]
-        channel?.invokeMethod("onLoadStart", arguments: arguments)
+        invokeMethod("onLoadStart", arguments: arguments)
     }
     
     public func onLoadStop(url: String?) {
         let arguments: [String: Any?] = ["url": url]
-        channel?.invokeMethod("onLoadStop", arguments: arguments)
+        invokeMethod("onLoadStop", arguments: arguments)
     }
     
     public func onUpdateVisitedHistory(url: String?, isReload: Bool?) {
@@ -1052,7 +1122,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "url": url,
             "isReload": nil
         ]
-        channel?.invokeMethod("onUpdateVisitedHistory", arguments: arguments)
+        invokeMethod("onUpdateVisitedHistory", arguments: arguments)
     }
     
     public func onReceivedError(request: WebResourceRequest, error: WebResourceError) {
@@ -1060,7 +1130,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "request": request.toMap(),
             "error": error.toMap()
         ]
-        channel?.invokeMethod("onReceivedError", arguments: arguments)
+        invokeMethod("onReceivedError", arguments: arguments)
     }
     
     public func onReceivedHttpError(request: WebResourceRequest, errorResponse: WebResourceResponse) {
@@ -1068,7 +1138,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "request": request.toMap(),
             "errorResponse": errorResponse.toMap()
         ]
-        channel?.invokeMethod("onReceivedHttpError", arguments: arguments)
+        invokeMethod("onReceivedHttpError", arguments: arguments)
     }
     
     public class ReceivedHttpAuthRequestCallback: BaseCallbackResult<HttpAuthResponse> {
@@ -1085,7 +1155,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedHttpAuthRequest(challenge: HttpAuthenticationChallenge, callback: ReceivedHttpAuthRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1094,11 +1164,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedHttpAuthRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedHttpAuthRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -1117,7 +1187,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedServerTrustAuthRequest(challenge: ServerTrustChallenge, callback: ReceivedServerTrustAuthRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1126,11 +1196,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedServerTrustAuthRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedServerTrustAuthRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -1149,7 +1219,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedClientCertRequest(challenge: ClientCertChallenge, callback: ReceivedClientCertRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1158,11 +1228,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedClientCertRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedClientCertRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -1172,14 +1242,14 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "newScale": newScale,
             "oldScale": oldScale
         ]
-        channel?.invokeMethod("onZoomScaleChanged", arguments: arguments)
+        invokeMethod("onZoomScaleChanged", arguments: arguments)
     }
     
     public func onPageCommitVisible(url: String?) {
         let arguments: [String: Any?] = [
             "url": url
         ]
-        channel?.invokeMethod("onPageCommitVisible", arguments: arguments)
+        invokeMethod("onPageCommitVisible", arguments: arguments)
     }
     
     public class LoadResourceWithCustomSchemeCallback: BaseCallbackResult<CustomSchemeResponse> {
@@ -1192,12 +1262,12 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onLoadResourceWithCustomScheme(request: WebResourceRequest, callback: LoadResourceWithCustomSchemeCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
         let arguments: [String: Any?] = ["request": request.toMap()]
-        channel?.invokeMethod("onLoadResourceWithCustomScheme", arguments: arguments, callback: callback)
+        invokeMethod("onLoadResourceWithCustomScheme", arguments: arguments, callback: callback)
     }
     
     public class CallJsHandlerCallback: BaseCallbackResult<Any> {
@@ -1210,7 +1280,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onCallJsHandler(handlerName: String, data: JavaScriptHandlerFunctionData, callback: CallJsHandlerCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1218,7 +1288,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "handlerName": handlerName,
             "data": data.toMap()
         ]
-        channel?.invokeMethod("onCallJsHandler", arguments: arguments, callback: callback)
+        invokeMethod("onCallJsHandler", arguments: arguments, callback: callback)
     }
     
     public class NavigationResponseCallback: BaseCallbackResult<WKNavigationResponsePolicy> {
@@ -1238,11 +1308,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onNavigationResponse(navigationResponse: WKNavigationResponse, callback: NavigationResponseCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onNavigationResponse", arguments: navigationResponse.toMap(), callback: callback)
+        invokeMethod("onNavigationResponse", arguments: navigationResponse.toMap(), callback: callback)
     }
     
     public class ShouldAllowDeprecatedTLSCallback: BaseCallbackResult<Bool> {
@@ -1262,7 +1332,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func shouldAllowDeprecatedTLS(challenge: URLAuthenticationChallenge, callback: ShouldAllowDeprecatedTLSCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1271,23 +1341,23 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("shouldAllowDeprecatedTLS", arguments: arguments, callback: callback)
+                self?.invokeMethod("shouldAllowDeprecatedTLS", arguments: arguments, callback: callback)
             }
         }
     }
     
     public func onWebContentProcessDidTerminate() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onWebContentProcessDidTerminate", arguments: arguments)
+        invokeMethod("onWebContentProcessDidTerminate", arguments: arguments)
     }
     
     public func onDidReceiveServerRedirectForProvisionalNavigation() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onDidReceiveServerRedirectForProvisionalNavigation", arguments: arguments)
+        invokeMethod("onDidReceiveServerRedirectForProvisionalNavigation", arguments: arguments)
     }
     
     @available(iOS 15.0, *)
@@ -1296,7 +1366,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "oldState": oldState?.rawValue,
             "newState": newState?.rawValue
         ]
-        channel?.invokeMethod("onCameraCaptureStateChanged", arguments: arguments)
+        invokeMethod("onCameraCaptureStateChanged", arguments: arguments)
     }
     
     @available(iOS 15.0, *)
@@ -1305,7 +1375,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "oldState": oldState?.rawValue,
             "newState": newState?.rawValue
         ]
-        channel?.invokeMethod("onMicrophoneCaptureStateChanged", arguments: arguments)
+        invokeMethod("onMicrophoneCaptureStateChanged", arguments: arguments)
     }
     
     public class PrintRequestCallback: BaseCallbackResult<Bool> {
@@ -1318,7 +1388,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onPrintRequest(url: URL?, printJobId: String?, callback: PrintRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1326,7 +1396,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "url": url?.absoluteString,
             "printJobId": printJobId,
         ]
-        channel?.invokeMethod("onPrintRequest", arguments: arguments, callback: callback)
+        invokeMethod("onPrintRequest", arguments: arguments, callback: callback)
     }
     
     public override func dispose() {

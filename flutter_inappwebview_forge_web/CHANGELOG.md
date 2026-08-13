@@ -2,6 +2,18 @@
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable
   content in Web iframe views.
+- Preserve the underlying iframe and JavaScript bridge during headless to
+  regular WebView transfer, rebind the MethodChannel to the new view ID, and
+  make WebView/headless ownership disposal idempotent.
+- Coalesce iframe scroll callbacks to one native channel dispatch per
+  animation frame and drop the queued dispatch when the WebView is disposed.
+- Route Web create, prepare, retained-transfer, reattach, and disposal paths
+  through one internal lifecycle coordinator so callbacks are rejected after
+  teardown without changing the Web MethodChannel contract.
+- Track Web async callback operation IDs so duplicate completions are ignored
+  and pending work is drained exactly once when disposal begins.
+- Cache the last Web settings snapshot so unchanged `setSettings` calls do not
+  cross the JavaScript interop boundary.
 
 ## 1.0.2 - 2026-08-08
 

@@ -6,6 +6,51 @@
   including elements added later by the page.
 - Update the platform implementations and platform interface for the
   cross-platform autocorrection setting.
+- Avoid duplicate native user/plugin script registration on Android and iOS
+  while preserving retry behavior for failed Android registrations.
+- Start the Android/iOS lifecycle and settings performance refactor without
+  changing public Dart APIs or MethodChannel payload contracts. Native
+  keep-alive/headless ownership is now idempotent, and unchanged settings no
+  longer trigger selected expensive native work.
+- Android, iOS, and macOS managers now snapshot and clear active/retained
+  ownership before disposing every native WebView during plugin teardown.
+- Native disposal now finalizes the lifecycle state in a guaranteed cleanup
+  path, even when an intermediate native cleanup operation returns early.
+- Extend the ownership hardening to macOS, Windows, Linux, and Web: duplicate
+  IDs are replaced deterministically, WPE disposal gates callbacks before
+  cleanup, and Web headless-to-regular transfer preserves the iframe and
+  rebinds its channel/JavaScript view identity.
+- Coalesce Web iframe scroll callbacks at animation-frame cadence to reduce
+  high-frequency channel dispatch and map allocation.
+- Add opt-in Android and iOS integration diagnostics for repeated keep-alive
+  reattachment and headless-to-normal WebView ownership transfer.
+- Split Android and iOS native WebView channel dispatch into internal feature
+  handlers for JavaScript, settings, WebMessage, and lifecycle operations;
+  public channel contracts remain unchanged.
+- Gate iOS and macOS outgoing WebView channel callbacks through lifecycle state
+  and finish pending async JavaScript completions once during native teardown;
+  coordinator operation IDs prevent duplicate completion accounting.
+- Complete stale iOS WebKit decision, authentication, dialog, and popup
+  callbacks with native defaults after disposal.
+- Extend that boundary to iOS and macOS WebMessage and FindInteraction
+  sub-delegates, including exactly-once pending MethodChannel result cleanup.
+- Use one native lifecycle source of truth for Android startup/renderer/scroll/
+  geometry guards, and reject stale outgoing channel events on Windows/Linux
+  after disposal while preserving callback fallbacks.
+- Extend the Android lifecycle boundary to regular and headless channel events
+  and decision callbacks, keeping native default decisions intact during
+  teardown races.
+- Gate Android and iOS pull-to-refresh callbacks through the hosted WebView
+  lifecycle so teardown cannot dispatch stale refresh events.
+- Make the Android lifecycle transfer diagnostic independent of optional
+  `onLoadStop` delivery and validate 50 keep-alive plus 50 headless transfers
+  on a physical device without uninstalling the app.
+- Validate the matching iOS lifecycle transfer and disposal diagnostics on a
+  physical device without uninstalling the app.
+- Remove transferred headless WebViews from the old active ownership map before
+  normal platform-view reattachment, preventing stale native owners.
+- Restore the transferred headless WebView in the active manager map after the
+  handoff, keeping lookup and plugin teardown ownership complete.
 
 ## 2.1.67 - 2026-08-13
 

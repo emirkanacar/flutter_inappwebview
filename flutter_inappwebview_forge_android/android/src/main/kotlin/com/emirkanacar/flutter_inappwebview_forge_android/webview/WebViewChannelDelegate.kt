@@ -91,6 +91,10 @@ open class WebViewChannelDelegate(
 
   @Suppress("UNCHECKED_CAST")
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+    if (webView?.acceptsCallbacks() != true) {
+      result.success(null)
+      return
+    }
     val method = try {
       WebViewChannelDelegateMethods.valueOf(call.method)
     } catch (_: IllegalArgumentException) {
@@ -139,39 +143,11 @@ open class WebViewChannelDelegate(
         }
       }
 
-      WebViewChannelDelegateMethods.evaluateJavascript -> {
-        val view = webView
-        if (view == null) {
-          result.success(null)
-        } else {
-          view.evaluateJavascript(
-            call.argument<String>("source") ?: "",
-            ContentWorld.fromMap(mutableMapArgument(call, "contentWorld")),
-            ValueCallback { value -> result.success(value) }
-          )
-        }
-      }
-
-      WebViewChannelDelegateMethods.injectJavascriptFileFromUrl -> {
-        webView?.injectJavascriptFileFromUrl(
-          call.argument<String>("urlFile") ?: "",
-          mutableMapArgument(call, "scriptHtmlTagAttributes") ?: mutableMapOf()
-        )
-        result.success(true)
-      }
-
-      WebViewChannelDelegateMethods.injectCSSCode -> {
-        webView?.injectCSSCode(call.argument<String>("source") ?: "")
-        result.success(true)
-      }
-
-      WebViewChannelDelegateMethods.injectCSSFileFromUrl -> {
-        webView?.injectCSSFileFromUrl(
-          call.argument<String>("urlFile") ?: "",
-          mutableMapArgument(call, "cssLinkHtmlTagAttributes") ?: mutableMapOf()
-        )
-        result.success(true)
-      }
+      WebViewChannelDelegateMethods.evaluateJavascript,
+      WebViewChannelDelegateMethods.injectJavascriptFileFromUrl,
+      WebViewChannelDelegateMethods.injectCSSCode,
+      WebViewChannelDelegateMethods.injectCSSFileFromUrl ->
+        handleJavaScriptMethod(method, call, result)
 
       WebViewChannelDelegateMethods.reload -> {
         webView?.reload()
@@ -219,22 +195,7 @@ open class WebViewChannelDelegate(
         ) ?: result.success(null)
       }
 
-      WebViewChannelDelegateMethods.setSettings -> {
-        val view = webView
-        if (view != null && view.getInAppBrowserDelegate() is InAppBrowserActivity) {
-          val activity = view.getInAppBrowserDelegate() as InAppBrowserActivity
-          val settingsMap = mutableMapArgument(call, "settings") ?: mutableMapOf()
-          val settings = InAppBrowserSettings()
-          settings.parse(settingsMap)
-          activity.setSettings(settings, HashMap(settingsMap))
-        } else if (view != null) {
-          val settingsMap = mutableMapArgument(call, "settings") ?: mutableMapOf()
-          val settings = InAppWebViewSettings()
-          settings.parse(settingsMap)
-          view.setSettings(settings, HashMap(settingsMap))
-        }
-        result.success(true)
-      }
+      WebViewChannelDelegateMethods.setSettings -> handleSettingsMethod(method, call, result)
 
       WebViewChannelDelegateMethods.setBackgroundColor -> {
         val view = webView
@@ -251,14 +212,7 @@ open class WebViewChannelDelegate(
         }
       }
 
-      WebViewChannelDelegateMethods.getSettings -> {
-        val view = webView
-        if (view != null && view.getInAppBrowserDelegate() is InAppBrowserActivity) {
-          result.success((view.getInAppBrowserDelegate() as InAppBrowserActivity).getCustomSettingsMap())
-        } else {
-          result.success(view?.getCustomSettingsMap())
-        }
-      }
+      WebViewChannelDelegateMethods.getSettings -> handleSettingsMethod(method, call, result)
 
       WebViewChannelDelegateMethods.close -> {
         val view = webView
@@ -356,25 +310,11 @@ open class WebViewChannelDelegate(
         result.success(true)
       }
 
-      WebViewChannelDelegateMethods.pause -> {
-        webView?.onPause()
-        result.success(true)
-      }
-
-      WebViewChannelDelegateMethods.resume -> {
-        webView?.onResume()
-        result.success(true)
-      }
-
-      WebViewChannelDelegateMethods.pauseTimers -> {
-        webView?.pauseTimers()
-        result.success(true)
-      }
-
-      WebViewChannelDelegateMethods.resumeTimers -> {
-        webView?.resumeTimers()
-        result.success(true)
-      }
+      WebViewChannelDelegateMethods.pause,
+      WebViewChannelDelegateMethods.resume,
+      WebViewChannelDelegateMethods.pauseTimers,
+      WebViewChannelDelegateMethods.resumeTimers ->
+        handleLifecycleMethod(method, call, result)
 
       WebViewChannelDelegateMethods.printCurrentPage -> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -436,7 +376,7 @@ open class WebViewChannelDelegate(
         if (view == null) {
           result.success(null)
         } else {
-          view.saveWebArchive(
+          view.saveWebArchiveWithLifecycle(
             call.argument<String>("filePath") ?: "",
             call.argument<Boolean>("autoname") ?: false,
             ValueCallback { value -> result.success(value) }
@@ -526,6 +466,81 @@ open class WebViewChannelDelegate(
         result.success(true)
       }
 
+      WebViewChannelDelegateMethods.callAsyncJavaScript,
+      WebViewChannelDelegateMethods.isSecureContext ->
+        handleJavaScriptMethod(method, call, result)
+
+      WebViewChannelDelegateMethods.createWebMessageChannel,
+      WebViewChannelDelegateMethods.postWebMessage,
+      WebViewChannelDelegateMethods.addWebMessageListener ->
+        handleWebMessageMethod(method, call, result)
+
+      WebViewChannelDelegateMethods.canScrollVertically ->
+        result.success(webView?.canScrollVertically() ?: false)
+
+      WebViewChannelDelegateMethods.canScrollHorizontally ->
+        result.success(webView?.canScrollHorizontally() ?: false)
+
+      WebViewChannelDelegateMethods.isInFullscreen,
+      WebViewChannelDelegateMethods.hideInputMethod,
+      WebViewChannelDelegateMethods.showInputMethod,
+      WebViewChannelDelegateMethods.saveState,
+      WebViewChannelDelegateMethods.restoreState ->
+        handleLifecycleMethod(method, call, result)
+
+      WebViewChannelDelegateMethods.clearFormData -> {
+        webView?.clearFormData()
+        result.success(true)
+      }
+
+    }
+  }
+
+  /**
+   * JavaScript channel operations are kept behind one feature boundary so the
+   * large method-channel dispatch does not duplicate WebView/content-world
+   * lifecycle rules in every branch.
+   */
+  private fun handleJavaScriptMethod(
+    method: WebViewChannelDelegateMethods,
+    call: MethodCall,
+    result: MethodChannel.Result
+  ) {
+    when (method) {
+      WebViewChannelDelegateMethods.evaluateJavascript -> {
+        val view = webView
+        if (view == null) {
+          result.success(null)
+        } else {
+          view.evaluateJavascript(
+            call.argument<String>("source") ?: "",
+            ContentWorld.fromMap(mutableMapArgument(call, "contentWorld")),
+            ValueCallback { value -> result.success(value) }
+          )
+        }
+      }
+
+      WebViewChannelDelegateMethods.injectJavascriptFileFromUrl -> {
+        webView?.injectJavascriptFileFromUrl(
+          call.argument<String>("urlFile") ?: "",
+          mutableMapArgument(call, "scriptHtmlTagAttributes") ?: mutableMapOf()
+        )
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.injectCSSCode -> {
+        webView?.injectCSSCode(call.argument<String>("source") ?: "")
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.injectCSSFileFromUrl -> {
+        webView?.injectCSSFileFromUrl(
+          call.argument<String>("urlFile") ?: "",
+          mutableMapArgument(call, "cssLinkHtmlTagAttributes") ?: mutableMapOf()
+        )
+        result.success(true)
+      }
+
       WebViewChannelDelegateMethods.callAsyncJavaScript -> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
           webView?.callAsyncJavaScript(
@@ -548,6 +563,54 @@ open class WebViewChannelDelegate(
         }
       }
 
+      else -> result.notImplemented()
+    }
+  }
+
+  /** Settings parsing remains a full-map channel contract; native work is diffed by the WebView. */
+  private fun handleSettingsMethod(
+    method: WebViewChannelDelegateMethods,
+    call: MethodCall,
+    result: MethodChannel.Result
+  ) {
+    when (method) {
+      WebViewChannelDelegateMethods.setSettings -> {
+        val view = webView
+        if (view != null && view.getInAppBrowserDelegate() is InAppBrowserActivity) {
+          val activity = view.getInAppBrowserDelegate() as InAppBrowserActivity
+          val settingsMap = mutableMapArgument(call, "settings") ?: mutableMapOf()
+          val settings = InAppBrowserSettings()
+          settings.parse(settingsMap)
+          activity.setSettings(settings, HashMap(settingsMap))
+        } else if (view != null) {
+          val settingsMap = mutableMapArgument(call, "settings") ?: mutableMapOf()
+          val settings = InAppWebViewSettings()
+          settings.parse(settingsMap)
+          view.setSettings(settings, HashMap(settingsMap))
+        }
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.getSettings -> {
+        val view = webView
+        if (view != null && view.getInAppBrowserDelegate() is InAppBrowserActivity) {
+          result.success((view.getInAppBrowserDelegate() as InAppBrowserActivity).getCustomSettingsMap())
+        } else {
+          result.success(view?.getCustomSettingsMap())
+        }
+      }
+
+      else -> result.notImplemented()
+    }
+  }
+
+  /** WebMessage ports/listeners share one ownership boundary with the WebView. */
+  private fun handleWebMessageMethod(
+    method: WebViewChannelDelegateMethods,
+    call: MethodCall,
+    result: MethodChannel.Result
+  ) {
+    when (method) {
       WebViewChannelDelegateMethods.createWebMessageChannel -> {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.CREATE_WEB_MESSAGE_CHANNEL)) {
           result.success(webView?.createCompatWebMessageChannel()?.toMap())
@@ -617,19 +680,39 @@ open class WebViewChannelDelegate(
         }
       }
 
-      WebViewChannelDelegateMethods.canScrollVertically ->
-        result.success(webView?.canScrollVertically() ?: false)
+      else -> result.notImplemented()
+    }
+  }
 
-      WebViewChannelDelegateMethods.canScrollHorizontally ->
-        result.success(webView?.canScrollHorizontally() ?: false)
+  /** Pause/resume, fullscreen and state persistence are lifecycle operations. */
+  private fun handleLifecycleMethod(
+    method: WebViewChannelDelegateMethods,
+    call: MethodCall,
+    result: MethodChannel.Result
+  ) {
+    when (method) {
+      WebViewChannelDelegateMethods.pause -> {
+        webView?.onPause()
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.resume -> {
+        webView?.onResume()
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.pauseTimers -> {
+        webView?.pauseTimers()
+        result.success(true)
+      }
+
+      WebViewChannelDelegateMethods.resumeTimers -> {
+        webView?.resumeTimers()
+        result.success(true)
+      }
 
       WebViewChannelDelegateMethods.isInFullscreen ->
         result.success(webView?.isInFullscreen() ?: false)
-
-      WebViewChannelDelegateMethods.clearFormData -> {
-        webView?.clearFormData()
-        result.success(true)
-      }
 
       WebViewChannelDelegateMethods.hideInputMethod -> {
         webView?.hideInputMethod()
@@ -646,11 +729,31 @@ open class WebViewChannelDelegate(
       WebViewChannelDelegateMethods.restoreState -> {
         result.success(webView?.restoreState(call.argument<ByteArray>("state") ?: ByteArray(0)) ?: false)
       }
+
+      else -> result.notImplemented()
     }
   }
 
+  private fun canDispatchCallbacks(): Boolean {
+    return getChannel() != null && webView?.acceptsCallbacks() == true
+  }
+
   private fun invokeEvent(method: String, arguments: Any? = HashMap<String, Any?>()) {
+    if (!canDispatchCallbacks()) return
     getChannel()?.invokeMethod(method, arguments)
+  }
+
+  private fun invokeCallback(
+    method: String,
+    arguments: Any?,
+    callback: com.emirkanacar.flutter_inappwebview_forge_android.types.ICallbackResult<*>
+  ) {
+    if (!canDispatchCallbacks()) {
+      callback.completeDefaultBehaviour(null)
+      return
+    }
+    getChannel()?.invokeMethod(method, arguments, callback)
+      ?: callback.completeDefaultBehaviour(null)
   }
 
   /**
@@ -732,12 +835,7 @@ open class WebViewChannelDelegate(
     isMainFrame: Boolean?,
     callback: JsAlertCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onJsAlert", HashMap<String, Any?>().apply {
+    invokeCallback("onJsAlert", HashMap<String, Any?>().apply {
       put("url", url)
       put("message", message)
       put("isMainFrame", isMainFrame)
@@ -755,12 +853,7 @@ open class WebViewChannelDelegate(
     isMainFrame: Boolean?,
     callback: JsConfirmCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onJsConfirm", HashMap<String, Any?>().apply {
+    invokeCallback("onJsConfirm", HashMap<String, Any?>().apply {
       put("url", url)
       put("message", message)
       put("isMainFrame", isMainFrame)
@@ -779,12 +872,7 @@ open class WebViewChannelDelegate(
     isMainFrame: Boolean?,
     callback: JsPromptCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onJsPrompt", HashMap<String, Any?>().apply {
+    invokeCallback("onJsPrompt", HashMap<String, Any?>().apply {
       put("url", url)
       put("message", message)
       put("defaultValue", defaultValue)
@@ -798,12 +886,7 @@ open class WebViewChannelDelegate(
   }
 
   open fun onJsBeforeUnload(url: String?, message: String?, callback: JsBeforeUnloadCallback) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onJsBeforeUnload", HashMap<String, Any?>().apply {
+    invokeCallback("onJsBeforeUnload", HashMap<String, Any?>().apply {
       put("url", url)
       put("message", message)
     }, callback)
@@ -814,12 +897,7 @@ open class WebViewChannelDelegate(
   }
 
   open fun onCreateWindow(createWindowAction: CreateWindowAction, callback: CreateWindowCallback) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onCreateWindow", createWindowAction.toMap(), callback)
+    invokeCallback("onCreateWindow", createWindowAction.toMap(), callback)
   }
 
   open fun onCloseWindow() {
@@ -836,12 +914,7 @@ open class WebViewChannelDelegate(
     origin: String?,
     callback: GeolocationPermissionsShowPromptCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onGeolocationPermissionsShowPrompt", HashMap<String, Any?>().apply {
+    invokeCallback("onGeolocationPermissionsShowPrompt", HashMap<String, Any?>().apply {
       put("origin", origin)
     }, callback)
   }
@@ -893,12 +966,7 @@ open class WebViewChannelDelegate(
     frame: Any?,
     callback: PermissionRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onPermissionRequest", HashMap<String, Any?>().apply {
+    invokeCallback("onPermissionRequest", HashMap<String, Any?>().apply {
       put("origin", origin)
       put("resources", resources)
       put("frame", frame)
@@ -924,12 +992,7 @@ open class WebViewChannelDelegate(
     navigationAction: NavigationAction,
     callback: ShouldOverrideUrlLoadingCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("shouldOverrideUrlLoading", navigationAction.toMap(), callback)
+    invokeCallback("shouldOverrideUrlLoading", navigationAction.toMap(), callback)
   }
 
   open fun onLoadStart(url: String?) {
@@ -974,12 +1037,7 @@ open class WebViewChannelDelegate(
     challenge: HttpAuthenticationChallenge,
     callback: ReceivedHttpAuthRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onReceivedHttpAuthRequest", challenge.toMap(), callback)
+    invokeCallback("onReceivedHttpAuthRequest", challenge.toMap(), callback)
   }
 
   open class ReceivedServerTrustAuthRequestCallback :
@@ -992,12 +1050,7 @@ open class WebViewChannelDelegate(
     challenge: ServerTrustChallenge,
     callback: ReceivedServerTrustAuthRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onReceivedServerTrustAuthRequest", challenge.toMap(), callback)
+    invokeCallback("onReceivedServerTrustAuthRequest", challenge.toMap(), callback)
   }
 
   open class ReceivedClientCertRequestCallback :
@@ -1010,12 +1063,7 @@ open class WebViewChannelDelegate(
     challenge: ClientCertChallenge,
     callback: ReceivedClientCertRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onReceivedClientCertRequest", challenge.toMap(), callback)
+    invokeCallback("onReceivedClientCertRequest", challenge.toMap(), callback)
   }
 
   open fun onZoomScaleChanged(oldScale: Float, newScale: Float) {
@@ -1036,12 +1084,7 @@ open class WebViewChannelDelegate(
     threatType: Int,
     callback: SafeBrowsingHitCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onSafeBrowsingHit", HashMap<String, Any?>().apply {
+    invokeCallback("onSafeBrowsingHit", HashMap<String, Any?>().apply {
       put("url", url)
       put("threatType", threatType)
     }, callback)
@@ -1052,12 +1095,7 @@ open class WebViewChannelDelegate(
   }
 
   open fun onFormResubmission(url: String?, callback: FormResubmissionCallback) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onFormResubmission", HashMap<String, Any?>().apply {
+    invokeCallback("onFormResubmission", HashMap<String, Any?>().apply {
       put("url", url)
     }, callback)
   }
@@ -1091,12 +1129,7 @@ open class WebViewChannelDelegate(
     request: WebResourceRequestExt,
     callback: LoadResourceWithCustomSchemeCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onLoadResourceWithCustomScheme", HashMap<String, Any?>().apply {
+    invokeCallback("onLoadResourceWithCustomScheme", HashMap<String, Any?>().apply {
       put("request", request.toMap())
     }, callback)
   }
@@ -1111,6 +1144,7 @@ open class WebViewChannelDelegate(
   open fun onLoadResourceWithCustomScheme(
     request: WebResourceRequestExt
   ): CustomSchemeResponse? {
+    if (!canDispatchCallbacks()) return null
     val channel = getChannel() ?: return null
     val callback = SyncLoadResourceWithCustomSchemeCallback()
     return Util.invokeMethodAndWaitResult(
@@ -1131,12 +1165,7 @@ open class WebViewChannelDelegate(
     request: WebResourceRequestExt,
     callback: ShouldInterceptRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("shouldInterceptRequest", request.toMap(), callback)
+    invokeCallback("shouldInterceptRequest", request.toMap(), callback)
   }
 
   open class SyncShouldInterceptRequestCallback :
@@ -1149,6 +1178,7 @@ open class WebViewChannelDelegate(
   open fun shouldInterceptRequest(
     request: WebResourceRequestExt
   ): WebResourceResponseExt? {
+    if (!canDispatchCallbacks()) return null
     val channel = getChannel() ?: return null
     val callback = SyncShouldInterceptRequestCallback()
     return Util.invokeMethodAndWaitResult(
@@ -1169,12 +1199,7 @@ open class WebViewChannelDelegate(
     url: String?,
     callback: RenderProcessUnresponsiveCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onRenderProcessUnresponsive", HashMap<String, Any?>().apply {
+    invokeCallback("onRenderProcessUnresponsive", HashMap<String, Any?>().apply {
       put("url", url)
     }, callback)
   }
@@ -1184,12 +1209,7 @@ open class WebViewChannelDelegate(
   }
 
   open fun onRenderProcessResponsive(url: String?, callback: RenderProcessResponsiveCallback) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onRenderProcessResponsive", HashMap<String, Any?>().apply {
+    invokeCallback("onRenderProcessResponsive", HashMap<String, Any?>().apply {
       put("url", url)
     }, callback)
   }
@@ -1203,12 +1223,7 @@ open class WebViewChannelDelegate(
     data: JavaScriptHandlerFunctionData,
     callback: CallJsHandlerCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onCallJsHandler", HashMap<String, Any?>().apply {
+    invokeCallback("onCallJsHandler", HashMap<String, Any?>().apply {
       put("handlerName", handlerName)
       put("data", data.toMap())
     }, callback)
@@ -1223,12 +1238,7 @@ open class WebViewChannelDelegate(
     printJobId: String?,
     callback: PrintRequestCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onPrintRequest", HashMap<String, Any?>().apply {
+    invokeCallback("onPrintRequest", HashMap<String, Any?>().apply {
       put("url", url)
       put("printJobId", printJobId)
     }, callback)
@@ -1248,12 +1258,7 @@ open class WebViewChannelDelegate(
     request: ShowFileChooserRequest,
     callback: ShowFileChooserCallback
   ) {
-    val channel = getChannel()
-    if (channel == null) {
-      callback.defaultBehaviour(null)
-      return
-    }
-    channel.invokeMethod("onShowFileChooser", request.toMap(), callback)
+    invokeCallback("onShowFileChooser", request.toMap(), callback)
   }
 
   override fun dispose() {

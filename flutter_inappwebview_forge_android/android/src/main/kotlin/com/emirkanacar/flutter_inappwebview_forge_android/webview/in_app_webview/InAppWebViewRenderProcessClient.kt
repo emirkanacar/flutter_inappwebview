@@ -40,7 +40,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
 
             override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
                 Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-                defaultBehaviour(null)
+                completeDefaultBehaviour(null)
             }
         }
 
@@ -48,7 +48,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
         if (channelDelegate != null) {
             channelDelegate.onRenderProcessUnresponsive(webView.url ?: "", callback)
         } else {
-            callback.defaultBehaviour(null)
+            callback.completeDefaultBehaviour(null)
         }
     }
 
@@ -79,7 +79,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
 
             override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
                 Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-                defaultBehaviour(null)
+                completeDefaultBehaviour(null)
             }
         }
 
@@ -87,7 +87,7 @@ open class InAppWebViewRenderProcessClient : WebViewRenderProcessClient() {
         if (channelDelegate != null) {
             channelDelegate.onRenderProcessResponsive(webView.url ?: "", callback)
         } else {
-            callback.defaultBehaviour(null)
+            callback.completeDefaultBehaviour(null)
         }
     }
 

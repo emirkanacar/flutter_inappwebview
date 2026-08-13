@@ -27,7 +27,7 @@ class InAppWebViewFlutterPlugin {
           viewId: viewId,
           messenger: registrar,
         );
-        InAppWebViewManager.webViews.putIfAbsent(viewId, () => webView);
+        InAppWebViewManager.registerWebView(viewId, webView);
         return webView.iframeContainer;
       },
     );
@@ -77,8 +77,7 @@ Future<String?> _dartNativeAsyncCommunication(
   List? args,
 ]) async {
   if (InAppWebViewManager.webViews.containsKey(viewId)) {
-    var webViewHtmlElement =
-        InAppWebViewManager.webViews[viewId] as InAppWebViewWebElement;
+    var webViewHtmlElement = InAppWebViewManager.webViews[viewId]!;
     var result = null;
     try {
       switch (method) {
@@ -117,8 +116,7 @@ String? _dartNativeSyncCommunication(
   List? args,
 ]) {
   if (InAppWebViewManager.webViews.containsKey(viewId)) {
-    var webViewHtmlElement =
-        InAppWebViewManager.webViews[viewId] as InAppWebViewWebElement;
+    var webViewHtmlElement = InAppWebViewManager.webViews[viewId]!;
     var result = null;
 
     try {

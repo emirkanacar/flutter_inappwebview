@@ -15,6 +15,118 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-08-13 Android/iOS lifecycle and settings refactor checkpoint
+
+The first lifecycle refactor wave is implemented and source-validated in the
+Android and iOS packages. Keep-alive and headless manager ownership is now
+non-null and removed before disposal; duplicate IDs dispose the previous
+native owner; headless disposal is idempotent; and both packages use an
+internal lifecycle coordinator for teardown and tracked async JavaScript
+completion. Android skips unchanged content-blocker and asset-loader work.
+iOS skips unchanged content-blocker compilation and honors partial settings
+maps for `mediaType` and the two scroll-disable axes. Public Dart and
+MethodChannel contracts are unchanged. Android and iOS channel dispatch now
+keep JavaScript, settings, WebMessage, and lifecycle operations behind internal
+feature handlers.
+
+The iOS Simulator now passes the expanded 100-cycle disposal/recreate
+diagnostic and 50 keep-alive plus 50 headless-to-normal transfer cycles. The
+connected Android API 36 device passed the same matrix with `--no-uninstall`
+before the final Android headless guaranteed-cleanup path was added; the final
+code then passed 100 disposal/recreate cycles and 50 keep-alive plus 50
+headless-to-normal transfer cycles on the API 35 `Medium_Phone` emulator with
+`--no-uninstall`; physical API 36/OEM/provider coverage remains pending.
+Android
+source/build validation passes. These
+results do not close physical renderer-loss, fullscreen/IME, scene/popup,
+keyboard, or provider gates. The desktop/Web ownership slice is now also
+source-validated: Web tests and example build pass; macOS source tests and
+SwiftPM manifest pass; Windows/Linux source tests pass. Target runtime gates
+remain pending because this host cannot run Windows WebView2 or Linux WPE, and
+the macOS example still has the existing 10.15 deployment target rejected by
+the installed Xcode beta's 12.0 SDK floor. Web create, retained-transfer,
+reattach, and disposal now share one internal lifecycle coordinator; the Web
+MethodChannel contract remains unchanged. Linux now applies settings through a
+previous-snapshot diff and avoids recompiling unchanged content blockers.
+Linux and Windows retained ownership also uses internal lifecycle coordinators
+for detach/reattach and disposal.
+Their channel delegates now gate both incoming method calls and outgoing native
+events/callbacks through the same lifecycle state; Android likewise no longer
+maintains a second `isDisposed` source of truth for startup, renderer, scroll,
+and geometry callbacks.
+The Android JavaScript bridge rejects queued work after disposal begins, while
+iOS tracks evaluateJavascript completions and drains them exactly once during
+navigation or teardown.
+Native Android/iOS callback results, including default decisions, use the same
+exactly-once completion boundary, so a stale channel response cannot repeat a
+callback or fallback action. The boundary also rejects a later fallback after
+a handled success/error has completed, while preserving the fallback invoked
+by that completion handler itself.
+Android channel events and decision callbacks now use this boundary too, while
+default native decisions still complete when teardown races Dart dispatch. The
+Android headless wrapper is also coordinator-backed rather than flag-backed.
+Android JavaScript UI (`alert`, `confirm`, `prompt`, and `beforeunload`) error
+paths and bridge handler errors also claim the same completion gate before
+calling the native cancel/reject fallback, so a late duplicate error cannot
+repeat that action.
+Delayed Android IME, scroll-stop, and context-menu work, and delayed iOS
+keyboard, gesture, scroll, content-size, and context-menu work, now re-check
+lifecycle admission before touching native UI. Runtime provider/keyboard
+matrices remain pending.
+The follow-up source audit also gates Android floating-menu repositioning and
+runtime plugin-script callbacks, plus iOS delayed focus/image-reference
+lookups. iOS `isPagingEnabled` incremental settings updates now target the
+matching scroll-view property. Physical device/provider validation remains
+pending.
+Native archive/screenshot/PDF completion callbacks are lifecycle-tracked and
+return their existing null-result fallback if disposal wins; target provider
+and WebKit runtime validation remains pending.
+Android screenshot and initial platform-view loading callbacks are additionally
+gated at their posted execution boundary; device validation remains pending.
+Deferred iOS popup initialization and fullscreen-container presentation are
+also gated at their main-queue execution boundary.
+The Web adapter caches its last settings snapshot and skips unchanged
+JavaScript interop updates while preserving the existing JS-side property diff.
+Outgoing load, popup, window, fullscreen, bridge, and injected-script events
+are rejected after disposal, including a second lifecycle check after an
+awaited channel response. Internal operation IDs make async completion
+idempotent. Web package tests and the example build pass; browser runtime
+validation remains pending.
+The iOS and macOS delegates apply the same outgoing callback gate, including
+WebMessage and FindInteraction sub-delegates; their pending MethodChannel
+results are drained exactly once during teardown. macOS completes both native
+`callAsyncJavaScript` and pre-macOS-11 bridge callbacks exactly once during
+disposal.
+Android and iOS pull-to-refresh delegates use the same hosted-WebView gate and
+reset the refresh indicator instead of dispatching stale callbacks during
+teardown.
+Headless-to-normal transfer also removes the native WebView from its previous
+active ownership map before the headless wrapper is disposed, preventing a
+stale duplicate owner. The Android and iOS factories now detach the headless
+map entry before handoff, dispose entries that cannot provide a native view,
+and use identity-checked cleanup so a late old wrapper cannot remove a newer
+owner. Duplicate headless IDs also replace an active owner in the shared
+namespace. Android, iOS, and macOS managers now snapshot and clear
+active/retained ownership before disposing every remaining native WebView when
+the plugin itself is torn down. Accepted disposal now reaches the terminal
+coordinator state through guaranteed cleanup paths on Android, iOS, and macOS.
+Auxiliary Android print-job/Custom Tabs and iOS print-job,
+authentication-session/in-app-browser managers also detach non-null ownership
+entries before disposing their children, so disposal cannot leave a nullable
+placeholder or mutate the live map during iteration.
+Android async JavaScript operations now consume their pending callback when
+script preparation or queue submission fails. iOS screenshot compression
+options use PNG/quality defaults for malformed channel values. Runtime provider
+and keyboard validation remains pending.
+The Android and iOS lifecycle coordinators also serialize state transitions and
+debug-trace reads; this is source/host validated, while provider runtime races
+remain pending.
+iOS KVO observer registration is tracked per object/key path, preventing
+partial-setup teardown from removing an unregistered observer.
+Headless-to-normal transfer now re-registers the transferred native WebView in
+the active manager map after removing the old headless owner; lookup and plugin
+teardown therefore retain one authoritative owner.
+
 ## Resolution summary
 
 ### Local iOS input accessory and autocorrection controls
@@ -178,10 +290,17 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2654 - iOS/Android WebView disposal crash boundary
 
-Physical iOS disposal validation now passes on two runs; the rerun completed
-four cycles with safe `WebView disposed`/`WebView navigation started` outcomes.
+Physical iOS disposal validation previously passed on two runs; the latest
+connected-device run completed 100 cycles with only safe `WebView disposed` /
+`WebView navigation started` outcomes. The same device also passed 50
+keep-alive and 50 headless-to-normal transfer cycles. The connected iPhone 17
+Pro Simulator now passes the expanded 100-cycle disposal/recreate diagnostic.
 
-**Local status:** Implemented and source/runtime-diagnostic validated; one physical iOS lifecycle checkpoint and physical Android validation pass are complete, while the broader provider matrix remains pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup and completes both native-content-world and legacy async JavaScript callbacks with a structured `WebView disposed` error; late WebKit callbacks are ignored after the pending table is cleared. Android disposal is idempotent, completes pending async JavaScript callbacks before releasing the channel, and keeps fullscreen teardown before native WebView destruction. The physical iOS device installed and launched the signed example, and `ios_disposal_lifecycle_diagnostic_test.dart` passed once after provisioning approval. The iPhone 17 Pro iOS 26.2 Simulator previously completed four navigate-away/dispose/recreate cycles; a fresh iOS 27 Simulator run also completed four cycles with safe `WebView navigation started`/`WebView disposed` outcomes. A fresh 2026-08-10 Android `flutter drive` run and the 2026-08-11 Samsung A16 run complete four cycles across the tested composition modes with exit code 0 and `WebView disposed` outcomes. Android's renderer exit code `-1` during explicit WebView destruction is recorded as expected teardown evidence, with no app `AndroidRuntime`, fatal, or ANR failure. External [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491), which is outside the supplied export, reports the same renderer signature after back navigation; its exact affected-OEM path remains pending. **Required evidence:** repeated create/load/navigate-away/dispose cycles on physical iOS 17+ and Android API 33+ OEM/provider matrices, including hybrid composition and renderer teardown logs.
+The 2026-08-13 run completed all 100 pending JavaScript calls with the safe
+`WebView navigation started` result and exit code 0; this is Simulator evidence,
+not physical-device or provider coverage.
+
+**Local status:** Implemented and source/runtime-diagnostic validated; the final iOS lifecycle gates pass on Simulator, while the final Android headless cleanup path still needs the API 36 device rerun and the broader provider matrix remains pending. **Affected packages:** iOS and Android native WebView lifecycle. **Impact:** the upstream report describes an iOS `EXC_BAD_ACCESS` while navigating away and disposing the WebView, plus an Android renderer termination during the same teardown flow. **Fix:** iOS disposal is idempotent before observer/WebKit cleanup and completes both native-content-world and legacy async JavaScript callbacks with a structured `WebView disposed` error; late WebKit callbacks are ignored after the pending table is cleared. Android disposal is idempotent, completes pending async JavaScript callbacks before releasing the channel, and keeps fullscreen teardown before native WebView destruction. The physical iOS device previously passed 100 disposal/recreate cycles and 50 keep-alive plus 50 headless-to-normal transfer cycles; the Android API 36 device passed the same matrix before the final Android headless cleanup path was added. All these runs used `--no-uninstall`. Android's renderer exit code `-1` during explicit WebView destruction is recorded as expected teardown evidence, with no app `AndroidRuntime`, fatal, or ANR failure. External [#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491), which is outside the supplied export, reports the same renderer signature after back navigation; its exact affected-OEM path remains pending. **Required evidence:** rerun the final Android code on API 36, then complete Android API 33+/OEM/provider matrices including hybrid composition, forced renderer teardown, fullscreen/IME, and renderer logs; physical iOS 15-26 keyboard/scene/popup/provider coverage.
 
 #### Internal iOS cookie property decoding (no upstream issue mapping)
 

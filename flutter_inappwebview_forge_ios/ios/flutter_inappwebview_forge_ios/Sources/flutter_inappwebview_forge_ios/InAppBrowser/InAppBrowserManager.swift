@@ -18,7 +18,7 @@ public class InAppBrowserManager: ChannelDelegate {
     static let NAV_STORYBOARD_CONTROLLER_ID = "navController"
     var plugin: InAppWebViewFlutterPlugin?
 
-    var navControllers: [String: InAppBrowserNavigationController?] = [:]
+    var navControllers: [String: InAppBrowserNavigationController] = [:]
     
     init(plugin: InAppWebViewFlutterPlugin) {
         super.init(channel: FlutterMethodChannel(name: InAppBrowserManager.METHOD_CHANNEL_NAME, binaryMessenger: plugin.registrar.messenger()))
@@ -144,11 +144,11 @@ public class InAppBrowserManager: ChannelDelegate {
     
     public override func dispose() {
         super.dispose()
-        let navControllersValues = navControllers.values
-        navControllersValues.forEach { (navController: InAppBrowserNavigationController?) in
-            navController?.dismiss(animated: false)
-        }
+        let navControllersValues = Array(navControllers.values)
         navControllers.removeAll()
+        navControllersValues.forEach { (navController: InAppBrowserNavigationController) in
+            navController.dismiss(animated: false)
+        }
         plugin = nil
     }
     

@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 import 'headless_inappwebview_manager.dart';
 import 'in_app_web_view_web_element.dart';
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
+import 'web_view_lifecycle_coordinator.dart';
 
 class HeadlessInAppWebViewWebElement extends ChannelController {
   String id;
   late BinaryMessenger _messenger;
   InAppWebViewWebElement? webView;
+  final WebViewLifecycleCoordinator lifecycle = WebViewLifecycleCoordinator();
 
   HeadlessInAppWebViewWebElement({
     required this.id,
@@ -28,6 +30,9 @@ class HeadlessInAppWebViewWebElement extends ChannelController {
   }
 
   Future<dynamic> _handleMethod(MethodCall call) async {
+    if (!lifecycle.acceptsCallbacks && call.method != 'dispose') {
+      return null;
+    }
     switch (call.method) {
       case "dispose":
         dispose();
@@ -50,6 +55,9 @@ class HeadlessInAppWebViewWebElement extends ChannelController {
   }
 
   void onWebViewCreated() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await channel?.invokeMethod("onWebViewCreated");
   }
 
@@ -59,16 +67,33 @@ class HeadlessInAppWebViewWebElement extends ChannelController {
   }
 
   InAppWebViewWebElement? disposeAndGetFlutterWebView() {
+    if (!lifecycle.beginDisposal()) {
+      return null;
+    }
     InAppWebViewWebElement? newFlutterWebView = webView;
-    dispose();
+    _completeDispose(disposeWebView: false);
     return newFlutterWebView;
   }
 
   @override
   void dispose() {
+    if (!lifecycle.beginDisposal()) {
+      return;
+    }
+    _completeDispose(disposeWebView: true);
+  }
+
+  void _completeDispose({required bool disposeWebView}) {
     disposeChannel();
-    HeadlessInAppWebViewManager.webViews.putIfAbsent(id, () => null);
-    webView?.dispose();
+    if (identical(HeadlessInAppWebViewManager.webViews[id], this)) {
+      HeadlessInAppWebViewManager.webViews.remove(id);
+    }
+    if (disposeWebView) {
+      webView?.dispose();
+    } else {
+      webView?.lifecycle.markDetachedRetained();
+    }
     webView = null;
+    lifecycle.finishDisposal();
   }
 }

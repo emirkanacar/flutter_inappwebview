@@ -169,14 +169,18 @@ class InAppWebViewSettings {
   /**
    * Apply these settings to a WPE WebKitWebView.
    */
-  void applyToWebView(WebKitWebView* webview) const;
+  void applyToWebView(
+      WebKitWebView* webview,
+      const InAppWebViewSettings* previous = nullptr) const;
 
 #ifdef HAVE_WPE_PLATFORM
   /**
    * Apply WPE Platform settings using the WPE Settings API.
    * @param display The WPE display to get settings from
    */
-  void applyWpePlatformSettings(void* display) const;
+  void applyWpePlatformSettings(
+      void* display,
+      const InAppWebViewSettings* previous = nullptr) const;
 #endif
 
   /**

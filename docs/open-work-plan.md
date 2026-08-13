@@ -72,6 +72,116 @@ and 2026-08-12 Samsung A16 runs restarts the example activity/VM service before
 geometry can be read; the Activity remains up and no app crash/ANR is captured,
 so no runtime count changes.
 
+## 2026-08-13 lifecycle and settings refactor checkpoint
+
+The first Android/iOS implementation wave is source-complete for the scoped
+changes: Android and iOS keep-alive/headless manager maps no longer retain
+nullable placeholders; duplicate IDs replace and dispose the previous owner;
+headless disposal is idempotent; both packages have an internal lifecycle
+coordinator and exactly-once handling for tracked async JavaScript callbacks;
+Android and iOS channel dispatch now route JavaScript, settings, WebMessage, and
+lifecycle operations through internal feature handlers;
+Android bridge queue callbacks and iOS evaluateJavascript completions are also
+lifecycle-tracked, so disposal cannot leave stale native work evaluating
+JavaScript or an outstanding result unaccounted; native default decisions are
+also guarded with the same exactly-once callback boundary during teardown
+races; the boundary also rejects a fallback after a handled result has
+completed, while allowing the owning result handler to perform its native
+default action;
+Android JavaScript UI and bridge error paths claim this boundary before their
+native cancel/reject fallbacks;
+headless-to-normal factories now remove the old headless owner before native
+handoff, stale entries without a native view are disposed, and identity checks
+prevent late cleanup from removing a newer owner;
+Android content-blocker and asset-loader work is skipped when unchanged; and
+iOS partial settings updates no longer recompile unchanged content blockers
+or overwrite omitted media/scroll values. The public Dart API, MethodChannel
+names, method names, and payload keys are unchanged. Focused package tests,
+Android example Kotlin compilation, SwiftPM manifest validation, and targeted
+diagnostic analysis pass. The iOS Simulator now passes the expanded 100-cycle
+disposal/recreate diagnostic plus 50 keep-alive and 50 headless transfer cycles.
+The connected Android API 36 device also passed 100 disposal/recreate cycles
+and 50 keep-alive plus 50 headless transfer cycles without uninstalling the
+app before the final Android headless guaranteed-cleanup path was added. The
+final Android code then passed the same 100 disposal/recreate and 50+50
+ownership-transfer matrix on the API 35 `Medium_Phone` emulator with
+`--no-uninstall`; physical API 36/OEM/provider coverage remains pending.
+Android and iOS now also skip duplicate
+active native user/plugin script registration while preserving retryable failed
+registrations. Android provider/renderer-loss, repeated physical iOS
+keyboard/scene/provider validation, and target-runtime desktop validation
+remain pending. The follow-up ownership slice is now source-complete on
+macOS, Windows, Linux, and Web: macOS maps are non-null and duplicate-safe,
+Windows/Linux duplicate owners are replaced explicitly, Linux opens its WPE
+callback gate before cleanup, Linux applies only changed WebKit/WPE settings
+and skips duplicate content-blocker compilation, Linux and Windows also route
+retained ownership through internal lifecycle coordinators, and Web headless transfer preserves the
+iframe/bridge while rebinding the new MethodChannel ID. Web create, prepare,
+retained-transfer, reattach, and disposal now also use one internal lifecycle
+coordinator, so callbacks are rejected after teardown without changing the Web
+MethodChannel contract. Outgoing Web callbacks re-check lifecycle admission
+after asynchronous channel work, and internal operation IDs reject duplicate
+completion while preserving pending-operation accounting.
+Android's remaining local disposal flag was removed so startup, renderer,
+scroll, and geometry guards use the same coordinator. Windows and Linux now
+gate both method calls and native event/callback dispatch through their
+lifecycle coordinators; callback requests retain their existing default
+fallback behavior after teardown.
+Android WebView channel events and decision callbacks now use the same gate,
+with native default behavior preserved when teardown races a pending decision;
+the Android headless wrapper no longer keeps a separate dispose flag.
+The iOS and macOS delegates apply the same outgoing callback gate, including
+WebMessage and FindInteraction sub-delegates; their pending MethodChannel
+results are drained exactly once during teardown. macOS tracks native and
+legacy async JavaScript operations so each pending callback is completed
+exactly once when disposal begins.
+The iOS WebKit delegate also completes stale permission, navigation,
+authentication, dialog, and popup decisions with native defaults after
+disposal, rather than creating a new native operation.
+Delayed Android IME, scroll-stop, and context-menu callbacks, together with
+iOS delayed keyboard, gesture, scroll, content-size, and context-menu callbacks,
+now re-check lifecycle admission before native UI work.
+Android floating-menu repositioning and runtime plugin-script callbacks, plus
+iOS delayed focus/image-reference lookups, use the same admission check. The
+iOS incremental `isPagingEnabled` settings update now targets the correct
+scroll-view property.
+Android web-archive and iOS screenshot/PDF/web-archive completions are also
+lifecycle-tracked and drained once during teardown, preserving their existing
+null-result channel fallback.
+Android screenshot and initial platform-view loading work also re-check
+lifecycle admission before posted native work runs.
+The iOS deferred popup initialization and fullscreen-container presentation
+callbacks use the same lifecycle gate on the main queue.
+Android and iOS pull-to-refresh delegates also reject callbacks from a
+disposing hosted WebView while restoring the native refreshing indicator.
+Headless-to-normal transfer now removes the transferred native WebView from
+the old active ownership map before disposing the headless wrapper, preventing
+stale dual ownership. Android, iOS, and macOS managers also clear their
+ownership maps before disposing every remaining active or retained WebView
+during plugin teardown. Native disposal also reaches the terminal coordinator
+state through guaranteed cleanup paths if an intermediate operation returns.
+Auxiliary Android print-job/Custom Tabs and iOS print-job,
+authentication-session/in-app-browser managers now use non-null ownership maps,
+clear those maps before child disposal, and remove child entries idempotently.
+Android async JavaScript preparation and queued evaluation failures now drain
+their operation exactly once; iOS screenshot option parsing no longer force-casts
+nullable channel values. Host validation passes and target runtime validation
+remains pending.
+Android and iOS coordinator state transitions now use an internal lock, with
+debug-trace access serialized as well; no public API or channel payload changed.
+iOS KVO teardown now uses registration-aware, idempotent observer removal.
+Headless-to-normal factory handoff also restores the transferred WebView in the
+active manager map after detaching the old headless owner, so the native
+instance remains reachable for later lookup and plugin teardown.
+
+The Web package test and example web build pass. macOS source tests and the
+SwiftPM manifest pass; the example build is blocked by the host Xcode beta
+rejecting the example's existing 10.15 deployment target (the SDK now
+requires 12.0), and the standalone package build cannot resolve the local
+FlutterFramework dependency. Windows and Linux source tests pass; Windows
+native build requires Windows/WebView2, and Linux native build requires the
+WPE packages plus `pkg-config` (not installed on this host).
+
 Android [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)
 is source-validated with a focused Dart serialization test and has no device or
 provider runtime gate. iOS [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)

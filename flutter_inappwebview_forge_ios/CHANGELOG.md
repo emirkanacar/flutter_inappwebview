@@ -1,3 +1,59 @@
+## 2.1.31 - 2026-08-13
+
+- Partition the iOS WebView channel dispatch into internal JavaScript,
+  settings, WebMessage, and lifecycle handlers without changing channel names,
+  method names, or payloads.
+- Dispose all active and retained manager-owned WebViews during plugin teardown
+  after atomically clearing both ownership maps.
+- Remove nullable ownership placeholders from print jobs, authentication
+  sessions, and in-app browsers; managers clear ownership before child teardown.
+- Treat malformed screenshot compression options as safe defaults instead of
+  force-casting nullable channel values.
+- Serialize iOS lifecycle state transitions and debug-trace reads so concurrent
+  disposal or renderer callbacks remain idempotent.
+- Track iOS KVO registrations and remove only observers that were successfully
+  registered during WebView teardown.
+- Restore active manager ownership after transferring a headless WebView to a
+  normal platform view, keeping the native instance reachable for lookup and
+  plugin teardown.
+- Finalize the iOS lifecycle coordinator from a deferred cleanup path after
+  native teardown work.
+- Skip duplicate user/plugin script registration in the native content
+  controller.
+- Add source regression coverage for the feature-group dispatch boundary.
+- Route iOS WebView channel events through the same lifecycle gate as method
+  calls and complete pending native-content-world and legacy async JavaScript
+  callbacks exactly once during disposal; coordinator operation IDs prevent
+  duplicate completion accounting.
+- Complete stale iOS WebKit permission, navigation, authentication, dialog,
+  and popup callbacks with native defaults after disposal.
+- Track iOS evaluateJavascript completion callbacks through the lifecycle
+  coordinator and complete them once when navigation or disposal wins the
+  race with WebKit.
+- Guard all iOS native MethodChannel callback results and default decisions
+  with a thread-safe exactly-once completion gate during teardown races.
+- Allow a default decision only while its owning result handler is completing;
+  a later deinit or stale WebKit fallback cannot run after a handled result.
+- Gate WebMessage and FindInteraction sub-delegate calls after WebView
+  disposal, and drain their pending MethodChannel results exactly once during
+  teardown.
+- Gate delayed keyboard, gesture, scroll, content-size, and context-menu work
+  after disposal so queued UIKit callbacks cannot touch a stale WebView.
+- Gate delayed focus/image-reference lookups and correct the incremental
+  `isPagingEnabled` settings update to target `UIScrollView.isPagingEnabled`.
+- Track iOS screenshot, PDF, and web-archive completion callbacks through the
+  lifecycle coordinator so teardown completes each pending result once.
+- Gate deferred popup window initialization and fullscreen-container
+  presentation after WebKit/UIKit callbacks cross a main-queue boundary.
+- Drop stale iOS pull-to-refresh callbacks after WebView disposal while
+  resetting the control's refreshing state.
+- Remove a transferred headless WebView from the active ownership map before
+  reattaching it as a normal platform view.
+- Make headless-to-normal transfer remove the headless owner before the native
+  handoff, dispose stale entries with no native view, and preserve newer
+  owners when an older wrapper finishes disposing. Duplicate headless IDs now
+  also replace an active WebView owner deterministically.
+
 ## 2.1.29 - 2026-08-12
 
 - Add `ContainerController.clearContainerData` to clear all website data in an
@@ -200,6 +256,13 @@
   enabled, including when an HTML input receives focus again.
 - Add document-start autocorrection and spelling-suggestion hints for editable
   HTML elements through `InAppWebViewSettings.disableAutocorrection`.
+- Make keep-alive and headless ownership maps non-optional and idempotent,
+  including controlled replacement for duplicate IDs.
+- Avoid recompiling unchanged content-blocker rules and applying omitted
+  `mediaType` or scroll-axis settings during partial settings updates.
+- Add an internal lifecycle coordinator for retained/reattached WebViews,
+  async JavaScript operations, and idempotent disposal. Stale callbacks are
+  ignored after teardown and pending JavaScript callbacks complete once.
 
 ## 2.1.30 - 2026-08-13
 

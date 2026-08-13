@@ -128,11 +128,15 @@ open class FlutterWebView : PlatformWebView {
         val currentWebView = webView ?: return
 
         val initialLoad = Runnable {
+            if (!currentWebView.acceptsCallbacks()) return@Runnable
             makeInitialLoadAfterPlatformViewAttach(params)
         }
         currentWebView.whenNativeRegistrationsReady {
             if (deferUntilPlatformViewAttach) {
-                currentWebView.post(initialLoad)
+                currentWebView.post {
+                    if (!currentWebView.acceptsCallbacks()) return@post
+                    initialLoad.run()
+                }
             } else {
                 initialLoad.run()
             }
@@ -141,7 +145,8 @@ open class FlutterWebView : PlatformWebView {
 
     @Suppress("UNCHECKED_CAST")
     private fun makeInitialLoadAfterPlatformViewAttach(params: HashMap<String, Any?>) {
-        val currentWebView = webView ?: return
+    val currentWebView = webView ?: return
+    if (!currentWebView.acceptsCallbacks()) return
 
         val windowId = (params["windowId"] as? Number)?.toInt()
         val initialUrlRequest = params["initialUrlRequest"] as? MutableMap<String, Any?>
@@ -159,6 +164,7 @@ open class FlutterWebView : PlatformWebView {
                     // document-start scripts during initial construction.
                     // See https://github.com/pichillilorenzo/flutter_inappwebview/issues/1455
                     currentWebView.post {
+                        if (!currentWebView.acceptsCallbacks()) return@post
                         currentWebView.prepareAndAddUserScripts()
                     }
                 }
@@ -212,6 +218,8 @@ open class FlutterWebView : PlatformWebView {
                     pullToRefreshLayout = null
                 }
             }
+        } else {
+            webView?.markRetainedWebViewDetached()
         }
     }
 

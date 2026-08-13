@@ -66,6 +66,7 @@
 #include "../types/user_script.h"
 #include "../find_interaction/find_interaction_controller.h"
 #include "in_app_webview_settings.h"
+#include "../types/web_view_lifecycle_coordinator.h"
 
 // Forward declaration of WPE types in global scope to avoid namespace conflicts
 #ifdef HAVE_WPE_BACKEND_LEGACY
@@ -440,6 +441,11 @@ class InAppWebView {
   // Initialize the window ID JavaScript variable in the webview
   // This injects JS to set window._flutter_inappwebview_windowId
   void initializeWindowIdJS();
+  void markAttached() { lifecycle_.markAttached(); }
+  void markReady() { lifecycle_.markReady(); }
+  void markDetachedRetained() { lifecycle_.markDetachedRetained(); }
+  void markReattached() { lifecycle_.markAttached(); lifecycle_.markReady(); }
+  bool acceptsCallbacks() const { return lifecycle_.acceptsCallbacks(); }
 
   // Get the GTK window (for focus restoration after popup dialogs)
   GtkWindow* getGtkWindow() const { return gtk_window_; }
@@ -540,6 +546,9 @@ class InAppWebView {
 
   // Content blocker handler for Safari-style content blocking rules
   std::unique_ptr<ContentBlockerHandler> content_blocker_handler_;
+  // Canonical content-blocker JSON used to skip duplicate asynchronous
+  // compilations during repeated setSettings calls.
+  std::string content_blockers_snapshot_;
 
   // Web message channels (for WebMessageChannel support)
   std::map<std::string, std::unique_ptr<WebMessageChannel>> web_message_channels_;
@@ -600,8 +609,9 @@ class InAppWebView {
   // Used by getHitTestResult() to return the current element under the cursor
   WebKitHitTestResult* last_hit_test_result_ = nullptr;
 
-  // Disposing flag to prevent callbacks during destruction
-  std::atomic<bool> is_disposing_{false};
+  // Internal state gate to prevent callbacks during destruction and retained
+  // ownership transfer.
+  WebViewLifecycleCoordinator lifecycle_;
 
   // Mouse state
   double cursor_x_ = 0;

@@ -121,6 +121,9 @@ extension WKUserContentController {
     }
 
     public func addUserOnlyScript(_ userOnlyScript: UserScript) {
+        guard !userOnlyScripts[userOnlyScript.injectionTime]!.contains(userOnlyScript) else {
+            return
+        }
         if #available(iOS 14.0, *) {
             contentWorlds.insert(userOnlyScript.contentWorld)
         }
@@ -134,6 +137,9 @@ extension WKUserContentController {
     }
 
     public func addPluginScript(_ pluginScript: PluginScript) {
+        guard !pluginScripts[pluginScript.injectionTime]!.contains(pluginScript) else {
+            return
+        }
         if #available(iOS 14.0, *) {
             contentWorlds.insert(pluginScript.contentWorld)
         }

@@ -2,6 +2,14 @@
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable
   content in Windows WebView2.
+- Replace duplicate headless and keep-alive IDs deterministically instead of
+  silently dropping the newly-created WebView.
+- Route WebView2 teardown and keep-alive reattachment through an internal
+  lifecycle coordinator; retained WebViews now return to the active ownership
+  map with a fresh channel/texture wrapper.
+- Gate every WebView2 channel event and callback through the lifecycle
+  coordinator so stale post-dispose events are dropped without changing the
+  existing method or payload contract.
 
 ## 1.0.13 - 2026-08-13
 

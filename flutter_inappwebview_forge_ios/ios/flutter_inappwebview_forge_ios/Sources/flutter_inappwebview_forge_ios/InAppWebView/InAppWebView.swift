@@ -47,17 +47,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     private var lastSeekedFrameInfo: WKFrameInfo?
     private var lastSeekedAt: Date?
     var preventGestureDelay = false
-    private var isDisposed = false
+    private let lifecycle = WebViewLifecycleCoordinator()
     private var windowIdJSInitializationScheduled = false
     private var windowIdJSInitializationInFlight = false
     private var windowIdJSInitializedForCurrentNavigation = false
     private var windowIdJSInitializationGeneration = 0
     private var pendingNavigationActionDecisionCount = 0
+    private var pendingNavigationActionDecisionHandlers: [UUID: () -> Void] = [:]
     private var navigationActionDecisionPending: Bool {
         pendingNavigationActionDecisionCount > 0
     }
     private var pendingNavigationActionLoadRequests: [(URLRequest, URL?)] = []
     private var isLoadingPendingNavigationAction = false
+    private var registeredKVOObservers: [ObjectIdentifier: Set<String>] = [:]
 
     var isInFullscreenPresentation: Bool {
         if fullscreenPresentationState == .nativeContainer || inFullscreen {
@@ -102,6 +104,14 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 
     var callAsyncJavaScriptBelowIOS14Results: [String:((Any?) -> Void)] = [:]
     var pendingCallAsyncJavaScriptResults: [String:((Any?) -> Void)] = [:]
+    private var pendingEvaluateJavaScriptResults: [String:((Any?) -> Void)] = [:]
+    private var evaluateJavaScriptOperationIDs: [String: UInt64] = [:]
+    private var callAsyncJavaScriptOperationIDs: [String: UInt64] = [:]
+    private var callAsyncJavaScriptBelowIOS14OperationIDs: [String: UInt64] = [:]
+    private var nativeCallAsyncJavaScriptResults: [String: (Result<Any, Error>) -> Void] = [:]
+    private var nativeCallAsyncJavaScriptOperationIDs: [String: UInt64] = [:]
+    private var pendingNativeLifecycleCallbacks: [String: (Any?) -> Void] = [:]
+    private var pendingNativeLifecycleOperationIDs: [String: UInt64] = [:]
     
     var oldZoomScale = Float(1.0)
     
@@ -229,7 +239,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         // adjustedContentInset. Restoring from keyboardWillHide can capture the
         // stale keyboard inset and leave the WebView scrolled short of its end.
         DispatchQueue.main.async { [weak self] in
-            guard let self = self, !self._scrollViewContentInsetAdjusted else {
+            guard let self = self,
+                  self.lifecycle.acceptsCallbacks,
+                  !self._scrollViewContentInsetAdjusted else {
                 return
             }
             self.restoreScrollViewViewportAfterKeyboard()
@@ -238,7 +250,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             // queue turn after UIKit posts keyboardDidHide. Refresh once more
             // after that layout pass so WKWebView sees the restored viewport.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                guard let self = self, !self._scrollViewContentInsetAdjusted else {
+                guard let self = self,
+                      self.lifecycle.acceptsCallbacks,
+                      !self._scrollViewContentInsetAdjusted else {
                     return
                 }
                 self.restoreScrollViewViewportAfterKeyboard()
@@ -255,7 +269,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 
         reloadInputViewsForWebViewHierarchy()
         DispatchQueue.main.async { [weak self] in
-            self?.reloadInputViewsForWebViewHierarchy()
+            guard let self = self, self.lifecycle.acceptsCallbacks else { return }
+            self.reloadInputViewsForWebViewHierarchy()
         }
     }
     
@@ -272,7 +287,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     // WKContentView gesture setup is asynchronous, but it has completed by the time
     // the webview is ready to load a URL. After this has happened, we can override the gesture.
     func replaceGestureHandlerIfNeeded() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self, self.lifecycle.acceptsCallbacks else { return }
             if self.gestureRecognizerWithDescriptionFragment("InAppWebView") == nil {
                 self.replaceWebViewLongPress()
             }
@@ -285,7 +301,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
         _scrollChangedUpdatePending = true
         DispatchQueue.main.async { [weak self] in
-            guard let self = self, self._scrollChangedUpdatePending else {
+            guard let self = self,
+                  self.lifecycle.acceptsCallbacks,
+                  self._scrollChangedUpdatePending else {
                 return
             }
             self._scrollChangedUpdatePending = false
@@ -304,7 +322,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         _contentSizeChangedUpdatePending = true
         _pendingOldContentSize = oldContentSize
         DispatchQueue.main.async { [weak self] in
-            guard let self = self, self._contentSizeChangedUpdatePending else {
+            guard let self = self,
+                  self.lifecycle.acceptsCallbacks,
+                  self._contentSizeChangedUpdatePending else {
                 return
             }
             self._contentSizeChangedUpdatePending = false
@@ -369,7 +389,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 
         lastLongPressTouchPoint = touchLocation
 
-        evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._findElementsAtPoint(\(touchLocation.x),\(touchLocation.y))", completionHandler: {(value, error) in
+        evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._findElementsAtPoint(\(touchLocation.x),\(touchLocation.y))", completionHandler: { [weak self] (value, error) in
+            guard let self = self, self.lifecycle.acceptsCallbacks else { return }
             if error != nil {
                 print("Long press gesture recognizer error: \(error?.localizedDescription ?? "")")
             } else if let value = value as? [String: Any?] {
@@ -452,7 +473,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             
             if #unavailable(iOS 16.4), settings?.disableContextMenu == false {
                 contextMenuIsShowing = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+                    guard let self = self, self.lifecycle.acceptsCallbacks else { return }
                     self.onCreateContextMenu()
                 }
             }
@@ -482,7 +504,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     // workaround to trigger onCreateContextMenu event as the same on Android
                     onCreateContextMenu()
                     onCreateContextMenuEventTriggeredWhenMenuDisabled = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                        guard let self = self, self.lifecycle.acceptsCallbacks else { return }
                         self.onCreateContextMenuEventTriggeredWhenMenuDisabled = false
                     }
                 }
@@ -526,7 +549,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
 
     public func prepare() {
-        isDisposed = false
+        guard lifecycle.beginPreparing() else { return }
+        lifecycle.markAttached()
         windowIdJSInitializationGeneration += 1
         windowIdJSInitializationScheduled = false
         windowIdJSInitializationInFlight = false
@@ -552,35 +576,20 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         scrollView.addGestureRecognizer(self.longPressRecognizer)
         scrollView.addGestureRecognizer(self.recognizerForDisablingContextMenuOnLinks)
         scrollView.addGestureRecognizer(self.panGestureRecognizer)
-        scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset), options: [.new, .old], context: nil)
-        scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.zoomScale), options: [.new, .old], context: nil)
-        scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentSize), options: [.new, .old], context: nil)
-        
-        addObserver(self,
-                    forKeyPath: #keyPath(WKWebView.estimatedProgress),
-                    options: .new,
-                    context: nil)
-        
-        addObserver(self,
-                    forKeyPath: #keyPath(WKWebView.url),
-                    options: [.new, .old],
-                    context: nil)
-        
-        addObserver(self,
-            forKeyPath: #keyPath(WKWebView.title),
-            options: [.new, .old],
-            context: nil)
-        
+        registerKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.contentOffset), options: [.new, .old])
+        registerKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.zoomScale), options: [.new, .old])
+        registerKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.contentSize), options: [.new, .old])
+
+        registerKVOObserver(self, keyPath: #keyPath(WKWebView.estimatedProgress), options: .new)
+
+        registerKVOObserver(self, keyPath: #keyPath(WKWebView.url), options: [.new, .old])
+
+        registerKVOObserver(self, keyPath: #keyPath(WKWebView.title), options: [.new, .old])
+
         if #available(iOS 15.0, *) {
-            addObserver(self,
-                forKeyPath: #keyPath(WKWebView.cameraCaptureState),
-                options: [.new, .old],
-                context: nil)
-            
-            addObserver(self,
-                forKeyPath: #keyPath(WKWebView.microphoneCaptureState),
-                options: [.new, .old],
-                context: nil)
+            registerKVOObserver(self, keyPath: #keyPath(WKWebView.cameraCaptureState), options: [.new, .old])
+
+            registerKVOObserver(self, keyPath: #keyPath(WKWebView.microphoneCaptureState), options: [.new, .old])
         }
         
         if #unavailable(iOS 16.0) {
@@ -601,10 +610,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         // NOTE: As of iOS 26, KVO for fullscreenState doesn't reliably fire.
         // The UIWindow notifications below serve as the primary fullscreen detection mechanism.
         if #available(iOS 16.0, *) {
-            addObserver(self,
-                forKeyPath: #keyPath(WKWebView.fullscreenState),
-                options: [.new, .old],
-                context: nil)
+            registerKVOObserver(self, keyPath: #keyPath(WKWebView.fullscreenState), options: [.new, .old])
         }
         
         // Also listen for UIWindow notifications as a fallback for fullscreen detection
@@ -721,6 +727,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             // The new created window webview has the same WKWebViewConfiguration variable reference.
             // So, we cannot set another WKWebViewConfiguration for it unfortunately!
             // This is a limitation of the official WebKit API.
+            lifecycle.markReady()
             return
         }
         
@@ -792,7 +799,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         let callAsyncJavaScriptResultHandlerName = CallAsyncJavaScriptBelowIOS14WrapperJS.RESULT_MESSAGE_HANDLER_NAME
         configuration.userContentController.removeScriptMessageHandler(forName: callAsyncJavaScriptResultHandlerName)
         configuration.userContentController.add(self, name: callAsyncJavaScriptResultHandlerName)
-        
+
         if javaScriptBridgeEnabled {
             let pluginScriptsOriginAllowList = settings?.pluginScriptsOriginAllowList
             let pluginScriptsForMainFrameOnly = settings?.pluginScriptsForMainFrameOnly ?? true
@@ -934,6 +941,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     @objc func onCreateContextMenu() {
+        guard lifecycle.acceptsCallbacks else { return }
         let mapSorted = SharedLastTouchPointTimestamp.sorted { $0.value > $1.value }
         if (mapSorted.first?.key != self) {
             return
@@ -945,7 +953,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         
         if let lastLongPressTouhLocation = lastLongPressTouchPoint {
             if configuration.preferences.javaScriptEnabled {
-                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._findElementsAtPoint(\(lastLongPressTouhLocation.x),\(lastLongPressTouhLocation.y))", completionHandler: {(value, error) in
+                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._findElementsAtPoint(\(lastLongPressTouhLocation.x),\(lastLongPressTouhLocation.y))", completionHandler: { [weak self] (value, error) in
+                    guard let self = self, self.lifecycle.acceptsCallbacks else { return }
                     if error != nil {
                         print("Long press gesture recognizer error: \(error?.localizedDescription ?? "")")
                     } else if let value = value as? [String: Any?] {
@@ -972,7 +981,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        guard !isDisposed else { return }
+        guard lifecycle.acceptsCallbacks else { return }
 
         if keyPath == #keyPath(WKWebView.estimatedProgress) ||
             keyPath == #keyPath(WKWebView.url) ||
@@ -1066,7 +1075,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func initializeWindowIdJS() {
         guard let windowId = windowId,
               windowCreated,
-              !isDisposed,
+              lifecycle.acceptsCallbacks,
               !windowIdJSInitializationScheduled,
               !windowIdJSInitializationInFlight,
               !windowIdJSInitializedForCurrentNavigation else { return }
@@ -1083,20 +1092,62 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             guard let self = self else { return }
             guard self.windowIdJSInitializationGeneration == initializationGeneration else { return }
             self.windowIdJSInitializationScheduled = false
-            guard !self.isDisposed,
+            guard self.lifecycle.acceptsCallbacks,
                   self.windowCreated,
                   self.windowId == windowId else { return }
 
             self.windowIdJSInitializationInFlight = true
             self.evaluateJavascript(source: source) { [weak self] _ in
                 guard let self = self else { return }
-                guard self.windowIdJSInitializationGeneration == initializationGeneration else { return }
+                guard self.windowIdJSInitializationGeneration == initializationGeneration,
+                      self.lifecycle.acceptsCallbacks else { return }
                 self.windowIdJSInitializationInFlight = false
                 self.windowIdJSInitializedForCurrentNavigation = true
             }
         }
+        lifecycle.markReady()
     }
-    
+
+    func markRetainedWebViewDetached() {
+        lifecycle.markDetachedRetained()
+    }
+
+    func markRetainedWebViewReattached() {
+        lifecycle.markAttached()
+        lifecycle.markReady()
+    }
+
+    func acceptsCallbacks() -> Bool {
+        lifecycle.acceptsCallbacks
+    }
+
+    private func registerKVOObserver(
+        _ object: NSObject,
+        keyPath: String,
+        options: NSKeyValueObservingOptions
+    ) {
+        let objectID = ObjectIdentifier(object)
+        if registeredKVOObservers[objectID]?.contains(keyPath) == true {
+            return
+        }
+        object.addObserver(self, forKeyPath: keyPath, options: options, context: nil)
+        registeredKVOObservers[objectID, default: []].insert(keyPath)
+    }
+
+    private func removeKVOObserver(_ object: NSObject, keyPath: String) {
+        let objectID = ObjectIdentifier(object)
+        guard var keyPaths = registeredKVOObservers[objectID],
+              keyPaths.remove(keyPath) != nil else {
+            return
+        }
+        if keyPaths.isEmpty {
+            registeredKVOObservers.removeValue(forKey: objectID)
+        } else {
+            registeredKVOObservers[objectID] = keyPaths
+        }
+        object.removeObserver(self, forKeyPath: keyPath)
+    }
+
     public func goBackOrForward(steps: Int) {
         if canGoBackOrForward(steps: steps) {
             if (steps > 0) {
@@ -1120,6 +1171,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 11.0, *)
     public func takeScreenshot (with: [String: Any?]?, completionHandler: @escaping (_ screenshot: Data?) -> Void) {
+        guard let resultUuid = registerNativeLifecycleCallback({ value in
+            completionHandler(value as? Data)
+        }) else {
+            return
+        }
         var snapshotConfiguration: WKSnapshotConfiguration? = nil
         if let with = with {
             snapshotConfiguration = WKSnapshotConfiguration()
@@ -1133,14 +1189,15 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 snapshotConfiguration!.afterScreenUpdates = afterScreenUpdates
             }
         }
-        takeSnapshot(with: snapshotConfiguration, completionHandler: {(image, error) -> Void in
+        takeSnapshot(with: snapshotConfiguration, completionHandler: { [weak self] (image, error) -> Void in
             var imageData: Data? = nil
             if let screenshot = image {
                 if let with = with {
-                    switch with["compressFormat"] as! String {
+                    switch with["compressFormat"] as? String ?? "PNG" {
                     case "JPEG":
-                        let quality = Float(with["quality"] as! Int) / 100
-                        imageData = screenshot.jpegData(compressionQuality: CGFloat(quality))
+                        let quality = (with["quality"] as? NSNumber)?.doubleValue ?? 100
+                        let compressionQuality = CGFloat(max(0, min(1, quality / 100)))
+                        imageData = screenshot.jpegData(compressionQuality: compressionQuality)
                         break
                     case "PNG":
                         imageData = screenshot.pngData()
@@ -1153,26 +1210,31 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     imageData = screenshot.pngData()
                 }
             }
-            completionHandler(imageData)
+            self?.completeNativeLifecycleCallback(resultUuid, value: imageData)
         })
     }
     
     @available(iOS 14.0, *)
     public func createPdf (configuration: [String: Any?]?, completionHandler: @escaping (_ pdf: Data?) -> Void) {
+        guard let resultUuid = registerNativeLifecycleCallback({ value in
+            completionHandler(value as? Data)
+        }) else {
+            return
+        }
         let pdfConfiguration: WKPDFConfiguration = .init()
         if let configuration = configuration {
             if let rect = configuration["rect"] as? [String: Double] {
                 pdfConfiguration.rect = CGRect.fromMap(map: rect)
             }
         }
-        createPDF(configuration: pdfConfiguration) { (result) in
+        createPDF(configuration: pdfConfiguration) { [weak self] (result) in
             switch (result) {
             case .success(let data):
-                completionHandler(data)
+                self?.completeNativeLifecycleCallback(resultUuid, value: data)
                 return
             case .failure(let error):
                 print(error.localizedDescription)
-                completionHandler(nil)
+                self?.completeNativeLifecycleCallback(resultUuid, value: nil)
                 return
             }
         }
@@ -1180,14 +1242,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.0, *)
     public func createWebArchiveData (dataCompletionHandler: @escaping (_ webArchiveData: Data?) -> Void) {
-        createWebArchiveData(completionHandler: { (result) in
+        guard let resultUuid = registerNativeLifecycleCallback({ value in
+            dataCompletionHandler(value as? Data)
+        }) else {
+            return
+        }
+        super.createWebArchiveData(completionHandler: { [weak self] (result) in
             switch (result) {
             case .success(let data):
-                dataCompletionHandler(data)
+                self?.completeNativeLifecycleCallback(resultUuid, value: data)
                 return
             case .failure(let error):
                 print(error.localizedDescription)
-                dataCompletionHandler(nil)
+                self?.completeNativeLifecycleCallback(resultUuid, value: nil)
                 return
             }
         })
@@ -1195,7 +1262,20 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.0, *)
     public func saveWebArchive (filePath: String, autoname: Bool, completionHandler: @escaping (_ path: String?) -> Void) {
-        createWebArchiveData(dataCompletionHandler: { (webArchiveData) in
+        guard let resultUuid = registerNativeLifecycleCallback({ value in
+            completionHandler(value as? String)
+        }) else {
+            return
+        }
+        super.createWebArchiveData(completionHandler: { [weak self] (result) in
+            guard let self = self else { return }
+            var webArchiveData: Data?
+            switch result {
+            case .success(let data):
+                webArchiveData = data
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
             if let webArchiveData = webArchiveData {
                 var localUrl = URL(fileURLWithPath: filePath)
                 if autoname {
@@ -1213,25 +1293,30 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         let fullPath = filePath + "/" + currentPageUrlFileName + ".webarchive"
                         localUrl = URL(fileURLWithPath: fullPath)
                     } else {
-                        completionHandler(nil)
+                        self.completeNativeLifecycleCallback(resultUuid, value: nil)
                         return
                     }
                 }
                 do {
                     try webArchiveData.write(to: localUrl)
-                    completionHandler(localUrl.path)
+                        self.completeNativeLifecycleCallback(resultUuid, value: localUrl.path)
                 } catch {
                     // Catch any errors
                     print(error.localizedDescription)
-                    completionHandler(nil)
+                    self.completeNativeLifecycleCallback(resultUuid, value: nil)
                 }
             } else {
-                completionHandler(nil)
+                self.completeNativeLifecycleCallback(resultUuid, value: nil)
             }
         })
     }
     
     private func flushPendingNavigationActionLoadRequests() {
+        guard lifecycle.acceptsCallbacks else {
+            pendingNavigationActionLoadRequests.removeAll()
+            isLoadingPendingNavigationAction = false
+            return
+        }
         guard pendingNavigationActionDecisionCount == 0 else {
             return
         }
@@ -1261,7 +1346,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             pendingNavigationActionLoadRequests.append((urlRequest, allowingReadAccessTo))
             return
         }
-        
+
         if #available(iOS 9.0, *), let allowingReadAccessTo = allowingReadAccessTo, url.scheme == "file", allowingReadAccessTo.scheme == "file" {
             loadFileURL(url, allowingReadAccessTo: allowingReadAccessTo)
         } else {
@@ -1565,7 +1650,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             scrollView.scrollsToTop = newSettings.scrollsToTop
         }
         if newSettingsMap["isPagingEnabled"] != nil && settings?.isPagingEnabled != newSettings.isPagingEnabled {
-            scrollView.scrollsToTop = newSettings.isPagingEnabled
+            scrollView.isPagingEnabled = newSettings.isPagingEnabled
         }
         if newSettingsMap["maximumZoomScale"] != nil && settings?.maximumZoomScale != newSettings.maximumZoomScale {
             scrollView.maximumZoomScale = CGFloat(newSettings.maximumZoomScale)
@@ -1609,7 +1694,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
         
         if #available(iOS 14.0, *) {
-            if settings?.mediaType != newSettings.mediaType {
+            if newSettingsMap["mediaType"] != nil && settings?.mediaType != newSettings.mediaType {
                 mediaType = newSettings.mediaType
             }
             
@@ -1626,7 +1711,21 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
         }
         
-        if #available(iOS 11.0, *), newSettingsMap["contentBlockers"] != nil {
+        let contentBlockersChanged: Bool = {
+            guard newSettingsMap["contentBlockers"] != nil else {
+                return false
+            }
+            guard let currentContentBlockers = settings?.contentBlockers else {
+                return true
+            }
+            guard let currentData = try? JSONSerialization.data(withJSONObject: currentContentBlockers, options: [.sortedKeys]),
+                  let newData = try? JSONSerialization.data(withJSONObject: newSettings.contentBlockers, options: [.sortedKeys]) else {
+                return currentContentBlockers.count != newSettings.contentBlockers.count
+            }
+            return currentData != newData
+        }()
+
+        if #available(iOS 11.0, *), contentBlockersChanged {
             configuration.userContentController.removeAllContentRuleLists()
             let contentBlockers = newSettings.contentBlockers
             if contentBlockers.count > 0 {
@@ -1707,7 +1806,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         let autocorrectionSettingChanged = newSettingsMap["disableAutocorrection"] != nil &&
             settings?.disableAutocorrection != newSettings.disableAutocorrection
 
-        scrollView.isScrollEnabled = !(newSettings.disableVerticalScroll && newSettings.disableHorizontalScroll)
+        let verticalScrollSettingChanged = newSettingsMap["disableVerticalScroll"] != nil &&
+            settings?.disableVerticalScroll != newSettings.disableVerticalScroll
+        let horizontalScrollSettingChanged = newSettingsMap["disableHorizontalScroll"] != nil &&
+            settings?.disableHorizontalScroll != newSettings.disableHorizontalScroll
+        if verticalScrollSettingChanged || horizontalScrollSettingChanged {
+            let disableVerticalScroll = newSettingsMap["disableVerticalScroll"] != nil
+                ? newSettings.disableVerticalScroll
+                : (settings?.disableVerticalScroll ?? false)
+            let disableHorizontalScroll = newSettingsMap["disableHorizontalScroll"] != nil
+                ? newSettings.disableHorizontalScroll
+                : (settings?.disableHorizontalScroll ?? false)
+            scrollView.isScrollEnabled = !(disableVerticalScroll && disableHorizontalScroll)
+        }
 
         self.settings = newSettings
 
@@ -1798,26 +1909,34 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             let sourceString: String? = (sourceArrayString! as NSString).substring(with: NSRange(location: 1, length: (sourceArrayString?.count ?? 0) - 2))
             jsToInject = String(format: wrapper, sourceString!)
         }
-        
-        evaluateJavaScript(jsToInject) { (value, error) in
-            guard let completionHandler = completionHandler else {
+        guard let completionHandler = completionHandler else {
+            evaluateJavaScript(jsToInject, completionHandler: nil)
+            return
+        }
+        guard lifecycle.acceptsCallbacks,
+              let operationID = lifecycle.beginAsyncOperation() else {
+            completionHandler(nil)
+            return
+        }
+        let resultUuid = UUID().uuidString
+        pendingEvaluateJavaScriptResults[resultUuid] = completionHandler
+        evaluateJavaScriptOperationIDs[resultUuid] = operationID
+
+        evaluateJavaScript(jsToInject) { [weak self] (value, error) in
+            guard let self = self else {
                 return
             }
-            
+
             if let error = error {
                 let userInfo = (error as NSError).userInfo
                 let errorMessage = userInfo["WKJavaScriptExceptionMessage"] ??
                                    userInfo["NSLocalizedDescription"] as? String ??
                                    error.localizedDescription
-                self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
+                if self.lifecycle.acceptsCallbacks {
+                    self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
+                }
             }
-            
-            if value == nil {
-                completionHandler(nil)
-                return
-            }
-            
-            completionHandler(value)
+            self.consumeEvaluateJavaScriptResult(resultUuid, value: value)
         }
     }
     
@@ -1846,19 +1965,48 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             contentWorld: evaluationContentWorld
         )
 
+        guard let completionHandler = completionHandler else {
+            if windowId != nil {
+                evaluateJavaScript(jsToInject, completionHandler: nil)
+            } else {
+                evaluateJavaScript(jsToInject, frame: nil, contentWorld: contentWorld, completionHandler: nil)
+            }
+            return
+        }
+        guard lifecycle.acceptsCallbacks,
+              let operationID = lifecycle.beginAsyncOperation() else {
+            completionHandler(nil)
+            return
+        }
+        let resultUuid = UUID().uuidString
+        pendingEvaluateJavaScriptResults[resultUuid] = completionHandler
+        evaluateJavaScriptOperationIDs[resultUuid] = operationID
+
         if windowId != nil {
-            evaluateJavascript(source: jsToInject, completionHandler: completionHandler)
+            evaluateJavaScript(jsToInject) { [weak self] (value, error) in
+                guard let self = self else { return }
+                if let error = error {
+                    let userInfo = (error as NSError).userInfo
+                    let errorMessage = userInfo["WKJavaScriptExceptionMessage"] ??
+                                       userInfo["NSLocalizedDescription"] as? String ??
+                                       error.localizedDescription
+                    if self.lifecycle.acceptsCallbacks {
+                        self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
+                    }
+                }
+                self.consumeEvaluateJavaScriptResult(resultUuid, value: value)
+            }
             return
         }
 
         evaluateJavaScript(jsToInject, frame: nil, contentWorld: contentWorld) { (evalResult) in
-            guard let completionHandler = completionHandler else {
+            guard self.lifecycle.acceptsCallbacks else {
+                self.consumeEvaluateJavaScriptResult(resultUuid, value: nil)
                 return
             }
-            
             switch (evalResult) {
             case .success(let value):
-                completionHandler(value)
+                self.consumeEvaluateJavaScriptResult(resultUuid, value: value)
                 return
             case .failure(let error):
                 let userInfo = (error as NSError).userInfo
@@ -1868,8 +2016,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
                 break
             }
-            
-            completionHandler(nil)
+            self.consumeEvaluateJavaScriptResult(resultUuid, value: nil)
         }
     }
     
@@ -1897,6 +2044,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.0, *)
     public func evaluateJavaScript(_ javaScript: String, frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(.failure(webViewDisposedError()))
+            return
+        }
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
@@ -1945,9 +2096,27 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 14.0, *)
     public func callAsyncJavaScript(_ functionBody: String, arguments: [String : Any] = [:], frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(.failure(webViewDisposedError()))
+            return
+        }
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
+        let resultUuid = UUID().uuidString
+        var wrappedCompletionHandler: ((Result<Any, Error>) -> Void)?
+        if let completionHandler = completionHandler {
+            guard let operationID = lifecycle.beginAsyncOperation() else {
+                completionHandler(.failure(webViewDisposedError()))
+                return
+            }
+            nativeCallAsyncJavaScriptResults[resultUuid] = completionHandler
+            nativeCallAsyncJavaScriptOperationIDs[resultUuid] = operationID
+            wrappedCompletionHandler = { [weak self] result in
+                self?.consumeNativeCallAsyncJavaScriptResult(resultUuid, result: result)
+            }
+        }
+
         // Keep popup async evaluation on the initialized page world for the same
         // popup/content-world crash path handled above.
         if windowId != nil {
@@ -1957,28 +2126,42 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     code: -2,
                     userInfo: [NSLocalizedDescriptionKey: "Popup WebView is not attached"]
                 )
-                completionHandler?(.failure(error))
+                if completionHandler != nil {
+                    consumeNativeCallAsyncJavaScriptResult(resultUuid, result: .failure(error))
+                }
                 return
             }
-            super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: completionHandler)
+            super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: wrappedCompletionHandler)
             return
         }
-        super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: completionHandler)
+        super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: wrappedCompletionHandler)
     }
     
     @available(iOS 14.0, *)
     public func callAsyncJavaScript(functionBody: String, arguments: [String:Any], contentWorld: WKContentWorld, completionHandler: ((Any?) -> Void)? = nil) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(disposedJavaScriptResult())
+            return
+        }
         let jsToInject = configuration.userContentController.generateCodeForScriptEvaluation(scriptMessageHandler: self, source: functionBody, contentWorld: contentWorld)
 
         let resultUuid = NSUUID().uuidString
         if let completionHandler = completionHandler {
+            guard let operationID = lifecycle.beginAsyncOperation() else {
+                completionHandler(disposedJavaScriptResult())
+                return
+            }
             pendingCallAsyncJavaScriptResults[resultUuid] = completionHandler
+            callAsyncJavaScriptOperationIDs[resultUuid] = operationID
         }
 
         callAsyncJavaScript(jsToInject, arguments: arguments, frame: nil, contentWorld: contentWorld) { [weak self] (evalResult) in
             guard let self = self,
                   let completionHandler = self.pendingCallAsyncJavaScriptResults.removeValue(forKey: resultUuid) else {
                 return
+            }
+            self.callAsyncJavaScriptOperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                self.lifecycle.completeAsyncOperation(operationID)
             }
 
             var body: [String: Any?] = [
@@ -2005,6 +2188,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     @available(iOS 10.3, *)
     public func callAsyncJavaScript(functionBody: String, arguments: [String:Any], completionHandler: ((Any?) -> Void)? = nil) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(disposedJavaScriptResult())
+            return
+        }
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             completionHandler?(nil)
             return
@@ -2014,7 +2201,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         
         let resultUuid = NSUUID().uuidString
         if let completionHandler = completionHandler {
+            guard let operationID = lifecycle.beginAsyncOperation() else {
+                completionHandler(disposedJavaScriptResult())
+                return
+            }
             callAsyncJavaScriptBelowIOS14Results[resultUuid] = completionHandler
+            callAsyncJavaScriptBelowIOS14OperationIDs[resultUuid] = operationID
         }
         
         var functionArgumentNamesList: [String] = []
@@ -2050,6 +2242,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                                    error.localizedDescription
                 self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
                 if let completionHandler = self.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid) {
+                    self.callAsyncJavaScriptBelowIOS14OperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                        self.lifecycle.completeAsyncOperation(operationID)
+                    }
                     completionHandler([
                         "value": NSNull(),
                         "error": errorMessage
@@ -2181,6 +2376,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         initiatedByFrame frame: WKFrameInfo,
                         type: WKMediaCaptureType,
                         decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(.deny)
+            return
+        }
         let origin = "\(origin.protocol)://\(origin.host)\(origin.port != 0 ? ":" + String(origin.port) : "")"
         let permissionRequest = PermissionRequest(origin: origin, resources: [type.rawValue], frame: frame)
         
@@ -2226,6 +2425,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         requestDeviceOrientationAndMotionPermissionFor origin: WKSecurityOrigin,
                         initiatedByFrame frame: WKFrameInfo,
                         decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(.deny)
+            return
+        }
         let origin = "\(origin.protocol)://\(origin.host)\(origin.port != 0 ? ":" + String(origin.port) : "")"
         let permissionRequest = PermissionRequest(origin: origin, resources: ["deviceOrientationAndMotion"], frame: frame)
         
@@ -2275,6 +2478,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         requestGeolocationPermissionFor origin: WKSecurityOrigin,
                         initiatedByFrame frame: WKFrameInfo,
                         decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(.deny)
+            return
+        }
         let origin = "\(origin.protocol)://\(origin.host)\(origin.port != 0 ? ":" + String(origin.port) : "")"
 
         var decisionHandlerCalled = false
@@ -2351,24 +2558,35 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(.cancel)
+            return
+        }
+        let decisionID = UUID()
         var decisionHandlerCalled = false
-        let callback = WebViewChannelDelegate.ShouldOverrideUrlLoadingCallback()
-        callback.nonNullSuccess = { [weak self] (response: WKNavigationActionPolicy) in
-            if !decisionHandlerCalled {
-                decisionHandlerCalled = true
-                self?.pendingNavigationActionDecisionCount = max(0, (self?.pendingNavigationActionDecisionCount ?? 1) - 1)
-                decisionHandler(response)
+        let completeDecision: (WKNavigationActionPolicy) -> Void = { [weak self] policy in
+            guard !decisionHandlerCalled else { return }
+            decisionHandlerCalled = true
+            self?.pendingNavigationActionDecisionHandlers.removeValue(forKey: decisionID)
+            self?.pendingNavigationActionDecisionCount = max(0, (self?.pendingNavigationActionDecisionCount ?? 1) - 1)
+            decisionHandler(policy)
+            if self?.lifecycle.acceptsCallbacks == true {
                 self?.flushPendingNavigationActionLoadRequests()
+            } else {
+                self?.pendingNavigationActionLoadRequests.removeAll()
+                self?.isLoadingPendingNavigationAction = false
             }
+        }
+        pendingNavigationActionDecisionHandlers[decisionID] = {
+            completeDecision(.cancel)
+        }
+        let callback = WebViewChannelDelegate.ShouldOverrideUrlLoadingCallback()
+        callback.nonNullSuccess = { (response: WKNavigationActionPolicy) in
+            completeDecision(response)
             return false
         }
-        callback.defaultBehaviour = { [weak self] (response: WKNavigationActionPolicy?) in
-            if !decisionHandlerCalled {
-                decisionHandlerCalled = true
-                self?.pendingNavigationActionDecisionCount = max(0, (self?.pendingNavigationActionDecisionCount ?? 1) - 1)
-                decisionHandler(.allow)
-                self?.flushPendingNavigationActionLoadRequests()
-            }
+        callback.defaultBehaviour = { (_: WKNavigationActionPolicy?) in
+            completeDecision(.allow)
         }
         callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
             print(code + ", " + (message ?? ""))
@@ -2376,13 +2594,17 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
 
         let runCallback = {
-            self.pendingNavigationActionDecisionCount += 1
+            guard self.lifecycle.acceptsCallbacks else {
+                completeDecision(.cancel)
+                return
+            }
             if let useShouldOverrideUrlLoading = self.settings?.useShouldOverrideUrlLoading, useShouldOverrideUrlLoading, let channelDelegate = self.channelDelegate {
                 channelDelegate.shouldOverrideUrlLoading(navigationAction: navigationAction, callback: callback)
             } else {
                 callback.defaultBehaviour(nil)
             }
         }
+        pendingNavigationActionDecisionCount += 1
         
         if windowId != nil, !windowCreated {
             windowBeforeCreatedCallbacks.append(runCallback)
@@ -2394,6 +2616,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(.allow)
+            return
+        }
         if let response = navigationResponse.response as? HTTPURLResponse, response.statusCode >= 400 {
             let request = WebResourceRequest.init(fromWKNavigationResponse: navigationResponse)
             let errorResponse = WebResourceResponse.init(fromWKNavigationResponse: navigationResponse)
@@ -2459,6 +2685,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        guard lifecycle.acceptsCallbacks else { return }
         currentOriginalUrl = url
         lastTouchPoint = nil
         finishPendingAsyncJavaScriptCallsOnNavigation()
@@ -2466,7 +2693,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         windowIdJSInitializationScheduled = false
         windowIdJSInitializationInFlight = false
         windowIdJSInitializedForCurrentNavigation = false
-        
+
         disposeWebMessageChannels()
         
         if #available(iOS 14.0, *) {
@@ -2481,6 +2708,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard lifecycle.acceptsCallbacks else { return }
         windowIdJSInitializedForCurrentNavigation = false
         initializeWindowIdJS()
         
@@ -2507,6 +2735,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        guard lifecycle.acceptsCallbacks else { return }
         InAppWebView.credentialsProposed = []
         
         var urlError: URL = url ?? URL(string: "about:blank")!
@@ -2539,6 +2768,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
         var completionHandlerCalled = false
         if challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodHTTPBasic ||
             challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodDefault ||
@@ -2827,7 +3060,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler()
+            return
+        }
+
         if (isPausedTimers) {
             isPausedTimersCompletionHandler = completionHandler
             return
@@ -2899,6 +3136,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (Bool) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler(false)
+            return
+        }
         var completionHandlerCalled = false
         
         let callback = WebViewChannelDelegate.JsConfirmCallback()
@@ -2979,7 +3220,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt message: String, defaultText defaultValue: String?, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (String?) -> Void) {
-        
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler(nil)
+            return
+        }
+
         var completionHandlerCalled = false
         
         let callback = WebViewChannelDelegate.JsPromptCallback()
@@ -3091,7 +3336,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         createWebViewWith configuration: WKWebViewConfiguration,
                   for navigationAction: WKNavigationAction,
                   windowFeatures: WKWindowFeatures) -> WKWebView? {
-        
+        guard lifecycle.acceptsCallbacks else { return nil }
+
         var windowId: Int64 = 0
         let inAppWebViewManager = plugin?.inAppWebViewManager
         if let inAppWebViewManager = inAppWebViewManager {
@@ -3142,6 +3388,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView,
                         authenticationChallenge challenge: URLAuthenticationChallenge,
                         shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
+        guard lifecycle.acceptsCallbacks else {
+            decisionHandler(false)
+            return
+        }
         var decisionHandlerCalled = false
         let callback = WebViewChannelDelegate.ShouldAllowDeprecatedTLSCallback()
         callback.nonNullSuccess = { (action: Bool) in
@@ -3176,20 +3426,24 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     public func webViewDidClose(_ webView: WKWebView) {
+        guard lifecycle.acceptsCallbacks else { return }
         channelDelegate?.onCloseWindow()
     }
     
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        guard lifecycle.markRendererLost() else { return }
         channelDelegate?.onWebContentProcessDidTerminate()
     }
     
     public func webView(_ webView: WKWebView,
                         didCommit navigation: WKNavigation!) {
+        guard lifecycle.acceptsCallbacks else { return }
         channelDelegate?.onPageCommitVisible(url: url?.absoluteString)
     }
     
     public func webView(_ webView: WKWebView,
                         didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        guard lifecycle.acceptsCallbacks else { return }
         channelDelegate?.onDidReceiveServerRedirectForProvisionalNavigation()
     }
     
@@ -3413,8 +3667,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         // presentation. This keeps the same media element visible throughout
         // the transition and avoids the stale iOS 26 fullscreen surface.
         let presentContainer = { [weak self] in
-            DispatchQueue.main.async {
-                self?.presentNativeFullscreenContainer()
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.lifecycle.acceptsCallbacks else { return }
+                self.presentNativeFullscreenContainer()
             }
         }
 
@@ -3613,6 +3868,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard lifecycle.acceptsCallbacks else { return }
         if handleIOSFullscreenVideoMessage(message) {
             return
         }
@@ -3632,6 +3888,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
 
             if let result = targetWebView.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid) {
+                targetWebView.callAsyncJavaScriptBelowIOS14OperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                    targetWebView.lifecycle.completeAsyncOperation(operationID)
+                }
                 result([
                     "value": jsonData["value"],
                     "error": jsonData["error"]
@@ -3706,7 +3965,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         }
                         callback.defaultBehaviour = { (handledByClient: Bool?) in
                             if let printJob = webView.plugin?.printJobManager?.jobs[printJobId] {
-                                printJob?.disposeNoDismiss()
+                                printJob.disposeNoDismiss()
                             }
                         }
                         callback.error = { [weak callback] (code: String, message: String?, details: Any?) in
@@ -3773,6 +4032,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                                 "error": jsonData["error"]
                             ])
                             webView.callAsyncJavaScriptBelowIOS14Results.removeValue(forKey: resultUuid)
+                            webView.callAsyncJavaScriptBelowIOS14OperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                                webView.lifecycle.completeAsyncOperation(operationID)
+                            }
                         }
                     }
                     break
@@ -4042,8 +4304,16 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     public func requestFocusNodeHref(completionHandler: @escaping ([String: Any?]?, Error?) -> Void) {
         if configuration.preferences.javaScriptEnabled {
             // add some delay to make it sure _lastAnchorOrImageTouched is updated
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._lastAnchorOrImageTouched", completionHandler: {(value, error) in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                guard let self = self, self.lifecycle.acceptsCallbacks else {
+                    completionHandler(nil, nil)
+                    return
+                }
+                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._lastAnchorOrImageTouched", completionHandler: { [weak self] (value, error) in
+                    guard let self = self, self.lifecycle.acceptsCallbacks else {
+                        completionHandler(nil, nil)
+                        return
+                    }
                     let lastAnchorOrImageTouched = value as? [String: Any?]
                     completionHandler(lastAnchorOrImageTouched, error)
                 })
@@ -4056,8 +4326,16 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     public func requestImageRef(completionHandler: @escaping ([String: Any?]?, Error?) -> Void) {
         if configuration.preferences.javaScriptEnabled {
             // add some delay to make it sure _lastImageTouched is updated
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._lastImageTouched", completionHandler: {(value, error) in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                guard let self = self, self.lifecycle.acceptsCallbacks else {
+                    completionHandler(nil, nil)
+                    return
+                }
+                self.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._lastImageTouched", completionHandler: { [weak self] (value, error) in
+                    guard let self = self, self.lifecycle.acceptsCallbacks else {
+                        completionHandler(nil, nil)
+                        return
+                    }
                     let lastImageTouched = value as? [String: Any?]
                     completionHandler(lastImageTouched, error)
                 })
@@ -4198,7 +4476,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     private func reloadInputViewsForWebViewHierarchy() {
-        reloadInputViews()
+        super.reloadInputViews()
 
         func reloadInputViews(in view: UIView) {
             view.reloadInputViews()
@@ -4251,13 +4529,41 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
             Array(callAsyncJavaScriptBelowIOS14Results.values)
                 + Array(pendingCallAsyncJavaScriptResults.values)
         )
+        let pendingEvaluateCallbacks = Array(pendingEvaluateJavaScriptResults.values)
+        let pendingOperationIDs = Array(callAsyncJavaScriptOperationIDs.values) +
+            Array(callAsyncJavaScriptBelowIOS14OperationIDs.values) +
+            Array(evaluateJavaScriptOperationIDs.values) +
+            Array(nativeCallAsyncJavaScriptOperationIDs.values) +
+            Array(pendingNativeLifecycleOperationIDs.values)
+        let nativeCallbacks = Array(nativeCallAsyncJavaScriptResults.values)
+        let nativeLifecycleCallbacks = Array(pendingNativeLifecycleCallbacks.values)
         callAsyncJavaScriptBelowIOS14Results.removeAll()
         pendingCallAsyncJavaScriptResults.removeAll()
+        pendingEvaluateJavaScriptResults.removeAll()
+        callAsyncJavaScriptOperationIDs.removeAll()
+        callAsyncJavaScriptBelowIOS14OperationIDs.removeAll()
+        evaluateJavaScriptOperationIDs.removeAll()
+        nativeCallAsyncJavaScriptResults.removeAll()
+        nativeCallAsyncJavaScriptOperationIDs.removeAll()
+        pendingNativeLifecycleCallbacks.removeAll()
+        pendingNativeLifecycleOperationIDs.removeAll()
+        pendingOperationIDs.forEach { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
         pendingCallbacks.forEach { callback in
             callback([
                 "value": NSNull(),
                 "error": error
             ])
+        }
+        pendingEvaluateCallbacks.forEach { callback in
+            callback(nil)
+        }
+        nativeCallbacks.forEach { callback in
+            callback(.failure(webViewAsyncError(error)))
+        }
+        nativeLifecycleCallbacks.forEach { callback in
+            callback(nil)
         }
     }
 
@@ -4266,13 +4572,67 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
     }
 
     private func finishPendingAsyncJavaScriptCallsOnNavigation() {
-        guard !isDisposed else { return }
+        guard lifecycle.acceptsCallbacks else { return }
         finishPendingAsyncJavaScriptCalls(error: "WebView navigation started")
     }
 
+    private func finishPendingNavigationActionDecisionsOnDispose() {
+        let pendingHandlers = Array(pendingNavigationActionDecisionHandlers.values)
+        pendingHandlers.forEach { handler in
+            handler()
+        }
+        pendingNavigationActionDecisionHandlers.removeAll()
+        pendingNavigationActionDecisionCount = 0
+        pendingNavigationActionLoadRequests.removeAll()
+        isLoadingPendingNavigationAction = false
+    }
+
+    private func consumeNativeCallAsyncJavaScriptResult(_ resultUuid: String, result: Result<Any, Error>) {
+        guard let completionHandler = nativeCallAsyncJavaScriptResults.removeValue(forKey: resultUuid) else {
+            return
+        }
+        nativeCallAsyncJavaScriptOperationIDs.removeValue(forKey: resultUuid).map { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
+        completionHandler(result)
+    }
+
+    private func consumeEvaluateJavaScriptResult(_ resultUuid: String, value: Any?) {
+        guard let completionHandler = pendingEvaluateJavaScriptResults.removeValue(forKey: resultUuid) else {
+            return
+        }
+        evaluateJavaScriptOperationIDs.removeValue(forKey: resultUuid).map { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
+        completionHandler(value)
+    }
+
+    @discardableResult
+    private func registerNativeLifecycleCallback(_ callback: @escaping (Any?) -> Void) -> String? {
+        guard lifecycle.acceptsCallbacks,
+              let operationID = lifecycle.beginAsyncOperation() else {
+            callback(nil)
+            return nil
+        }
+        let resultUuid = UUID().uuidString
+        pendingNativeLifecycleCallbacks[resultUuid] = callback
+        pendingNativeLifecycleOperationIDs[resultUuid] = operationID
+        return resultUuid
+    }
+
+    private func completeNativeLifecycleCallback(_ resultUuid: String, value: Any?) {
+        guard let callback = pendingNativeLifecycleCallbacks.removeValue(forKey: resultUuid) else {
+            return
+        }
+        pendingNativeLifecycleOperationIDs.removeValue(forKey: resultUuid).map { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
+        callback(value)
+    }
+
     public func dispose() {
-        guard !isDisposed else { return }
-        isDisposed = true
+        guard lifecycle.beginDisposal() else { return }
+        defer { lifecycle.finishDisposal() }
         if let id = id,
            plugin?.inAppWebViewManager?.webViews[String(describing: id)] === self {
             plugin?.inAppWebViewManager?.webViews.removeValue(forKey: String(describing: id))
@@ -4295,20 +4655,21 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         inFullscreen = false
         channelDelegate?.dispose()
         channelDelegate = nil
+        finishPendingNavigationActionDecisionsOnDispose()
         runWindowBeforeCreatedCallbacks()
-        removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
-        removeObserver(self, forKeyPath: #keyPath(WKWebView.url))
-        removeObserver(self, forKeyPath: #keyPath(WKWebView.title))
+        removeKVOObserver(self, keyPath: #keyPath(WKWebView.estimatedProgress))
+        removeKVOObserver(self, keyPath: #keyPath(WKWebView.url))
+        removeKVOObserver(self, keyPath: #keyPath(WKWebView.title))
         if #available(iOS 15.0, *) {
-            removeObserver(self, forKeyPath: #keyPath(WKWebView.cameraCaptureState))
-            removeObserver(self, forKeyPath: #keyPath(WKWebView.microphoneCaptureState))
+            removeKVOObserver(self, keyPath: #keyPath(WKWebView.cameraCaptureState))
+            removeKVOObserver(self, keyPath: #keyPath(WKWebView.microphoneCaptureState))
         }
         if #available(iOS 16.0, *) {
-            removeObserver(self, forKeyPath: #keyPath(WKWebView.fullscreenState))
+            removeKVOObserver(self, keyPath: #keyPath(WKWebView.fullscreenState))
         }
-        scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset))
-        scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.zoomScale))
-        scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.contentSize))
+        removeKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.contentOffset))
+        removeKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.zoomScale))
+        removeKVOObserver(scrollView, keyPath: #keyPath(UIScrollView.contentSize))
         resumeTimers()
         stopLoading()
         disposeWebMessageChannels()
@@ -4360,10 +4721,23 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         _contentSizeChangedUpdatePending = false
         _pendingOldContentSize = nil
         _lastReportedProgress = nil
-        pendingNavigationActionDecisionCount = 0
-        pendingNavigationActionLoadRequests.removeAll()
-        isLoadingPendingNavigationAction = false
         plugin = nil
+    }
+
+    private func webViewDisposedError() -> NSError {
+        webViewAsyncError("WebView disposed")
+    }
+
+    private func webViewAsyncError(_ message: String) -> NSError {
+        NSError(
+            domain: "flutter_inappwebview_forge",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: message]
+        )
+    }
+
+    private func disposedJavaScriptResult() -> [String: Any?] {
+        ["value": NSNull(), "error": "WebView disposed"]
     }
     
     deinit {

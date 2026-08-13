@@ -447,11 +447,7 @@ open class ChromeCustomTabsActivity : Activity(), Disposable {
     onDestroy()
     channelDelegate?.dispose()
     channelDelegate = null
-    manager?.let { currentManager ->
-      if (currentManager.browsers.containsKey(id)) {
-        currentManager.browsers[id] = null
-      }
-    }
+    manager?.browsers?.remove(id)
     manager = null
   }
 

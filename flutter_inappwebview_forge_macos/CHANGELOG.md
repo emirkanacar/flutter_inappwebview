@@ -2,6 +2,20 @@
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable
   content in macOS WKWebView.
+- Make headless and keep-alive ownership maps non-null, idempotent, and
+  duplicate-safe during native disposal and platform-view reattachment.
+- Dispose all active and retained manager-owned WebViews during plugin teardown
+  after atomically clearing both ownership maps.
+- Finalize the macOS lifecycle coordinator from a deferred cleanup path after
+  native teardown work.
+- Add an internal lifecycle coordinator that gates KVO, renderer-loss, retained
+  WebView, and disposal transitions without changing public channel contracts.
+- Gate macOS WebView channel events and callbacks after disposal, and complete
+  pending native and legacy async JavaScript callbacks with the existing safe
+  terminal result; coordinator operation IDs prevent duplicate completion
+  accounting.
+- Apply the same disposal gate and exactly-once pending-result cleanup to the
+  WebMessage and FindInteraction sub-delegates.
 
 ## 1.1.8 - 2026-08-13
 

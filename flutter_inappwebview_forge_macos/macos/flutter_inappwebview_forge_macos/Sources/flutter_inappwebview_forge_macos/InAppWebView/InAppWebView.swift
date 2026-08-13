@@ -49,6 +49,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     private var printJobCompletionHandler: PrintJobController.CompletionHandler?
     private var contextMenuActionTargets: [ContextMenuActionTarget] = []
     private var contextMenuIsShowing = false
+    private let lifecycle = WebViewLifecycleCoordinator()
     
     static var sslCertificatesMap: [String: SslCertificate] = [:] // [URL host name : SslCertificate]
     static var credentialsProposed: [URLCredential] = []
@@ -65,6 +66,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     var customIMPs: [IMP] = []
     
     var callAsyncJavaScriptBelowMacOS11Results: [String:((Any?) -> Void)] = [:]
+    private var callAsyncJavaScriptBelowMacOS11OperationIDs: [String: UInt64] = [:]
+    private var nativeCallAsyncJavaScriptResults: [String: (Result<Any, Error>) -> Void] = [:]
+    private var nativeCallAsyncJavaScriptOperationIDs: [String: UInt64] = [:]
     
     var currentOpenPanel: NSOpenPanel?
     
@@ -122,7 +126,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
         self.id = id
         self.plugin = plugin
         if let id = id {
-            plugin?.inAppWebViewManager?.webViews[String(describing: id)] = self
+            let key = String(describing: id)
+            if let previousWebView = plugin?.inAppWebViewManager?.webViews.removeValue(forKey: key), previousWebView !== self {
+                previousWebView.dispose()
+            }
+            plugin?.inAppWebViewManager?.webViews[key] = self
         }
         if let id = id, let registrar = plugin?.registrar {
             let channel = FlutterMethodChannel(name: InAppWebView.METHOD_CHANNEL_NAME_PREFIX + String(describing: id),
@@ -139,6 +147,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     }
 
     public func prepare() {
+        guard lifecycle.beginPreparing() else { return }
         addObserver(self,
                     forKeyPath: #keyPath(WKWebView.estimatedProgress),
                     options: .new,
@@ -235,6 +244,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             // The new created window webview has the same WKWebViewConfiguration variable reference.
             // So, we cannot set another WKWebViewConfiguration for it unfortunately!
             // This is a limitation of the official WebKit API.
+            lifecycle.markReady()
             return
         }
         
@@ -264,6 +274,24 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 configuration.preferences.shouldPrintBackgrounds = settings.shouldPrintBackgrounds
             }
         }
+        lifecycle.markReady()
+    }
+
+    func markPlatformViewAttached() {
+        lifecycle.markAttached()
+    }
+
+    func markRetainedWebViewDetached() {
+        lifecycle.markDetachedRetained()
+    }
+
+    func markRetainedWebViewReattached() {
+        lifecycle.markAttached()
+        lifecycle.markReady()
+    }
+
+    func acceptsCallbacks() -> Bool {
+        lifecycle.acceptsCallbacks
     }
     
     public func prepareAndAddUserScripts() -> Void {
@@ -403,6 +431,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        guard lifecycle.acceptsCallbacks else { return }
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
             initializeWindowIdJS()
             let progress = Int(estimatedProgress * 100)
@@ -1004,7 +1033,24 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     
     @available(macOS 11.0, *)
     public func callAsyncJavaScript(_ functionBody: String, arguments: [String : Any] = [:], frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
-        super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: completionHandler)
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(.failure(webViewAsyncError("WebView disposed")))
+            return
+        }
+        let resultUuid = UUID().uuidString
+        var wrappedCompletionHandler: ((Result<Any, Error>) -> Void)?
+        if let completionHandler = completionHandler {
+            guard let operationID = lifecycle.beginAsyncOperation() else {
+                completionHandler(.failure(webViewAsyncError("WebView disposed")))
+                return
+            }
+            nativeCallAsyncJavaScriptResults[resultUuid] = completionHandler
+            nativeCallAsyncJavaScriptOperationIDs[resultUuid] = operationID
+            wrappedCompletionHandler = { [weak self] result in
+                self?.consumeNativeCallAsyncJavaScriptResult(resultUuid, result: result)
+            }
+        }
+        super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: wrappedCompletionHandler)
     }
     
     @available(macOS 11.0, *)
@@ -1039,11 +1085,20 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     }
     
     public func callAsyncJavaScript(functionBody: String, arguments: [String:Any], completionHandler: ((Any?) -> Void)? = nil) {
+        guard lifecycle.acceptsCallbacks else {
+            completionHandler?(disposedJavaScriptResult())
+            return
+        }
         var jsToInject = functionBody
-        
+
         let resultUuid = NSUUID().uuidString
         if let completionHandler = completionHandler {
+            guard let operationID = lifecycle.beginAsyncOperation() else {
+                completionHandler(disposedJavaScriptResult())
+                return
+            }
             callAsyncJavaScriptBelowMacOS11Results[resultUuid] = completionHandler
+            callAsyncJavaScriptBelowMacOS11OperationIDs[resultUuid] = operationID
         }
         
         var functionArgumentNamesList: [String] = []
@@ -1073,6 +1128,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 self.channelDelegate?.onConsoleMessage(message: String(describing: errorMessage), messageLevel: 3)
                 completionHandler?(nil)
                 self.callAsyncJavaScriptBelowMacOS11Results.removeValue(forKey: resultUuid)
+                self.callAsyncJavaScriptBelowMacOS11OperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                    self.lifecycle.completeAsyncOperation(operationID)
+                }
             }
         }
     }
@@ -2018,6 +2076,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     }
     
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        guard lifecycle.markRendererLost() else { return }
         channelDelegate?.onWebContentProcessDidTerminate()
     }
     
@@ -2363,12 +2422,14 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                         let jsonArgs = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [[String: Any]]
                         if let jsonData = jsonArgs?.first,
                            let resultUuid = jsonData["resultUuid"] as? String,
-                           let result = webView.callAsyncJavaScriptBelowMacOS11Results[resultUuid] {
+                           let result = webView.callAsyncJavaScriptBelowMacOS11Results.removeValue(forKey: resultUuid) {
+                            webView.callAsyncJavaScriptBelowMacOS11OperationIDs.removeValue(forKey: resultUuid).map { operationID in
+                                webView.lifecycle.completeAsyncOperation(operationID)
+                            }
                             result([
                                 "value": jsonData["value"],
                                 "error": jsonData["error"]
                             ])
-                            webView.callAsyncJavaScriptBelowMacOS11Results.removeValue(forKey: resultUuid)
                         }
                     }
                     break
@@ -2875,8 +2936,40 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         }
         windowBeforeCreatedCallbacks.removeAll()
     }
-    
+
+    private func consumeNativeCallAsyncJavaScriptResult(_ resultUuid: String, result: Result<Any, Error>) {
+        guard let completionHandler = nativeCallAsyncJavaScriptResults.removeValue(forKey: resultUuid) else {
+            return
+        }
+        nativeCallAsyncJavaScriptOperationIDs.removeValue(forKey: resultUuid).map { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
+        completionHandler(result)
+    }
+
+    private func finishPendingAsyncJavaScriptCallsOnDispose() {
+        let pendingCallbacks = Array(callAsyncJavaScriptBelowMacOS11Results.values)
+        let pendingOperationIDs = Array(callAsyncJavaScriptBelowMacOS11OperationIDs.values) +
+            Array(nativeCallAsyncJavaScriptOperationIDs.values)
+        let nativeCallbacks = Array(nativeCallAsyncJavaScriptResults.values)
+        callAsyncJavaScriptBelowMacOS11Results.removeAll()
+        callAsyncJavaScriptBelowMacOS11OperationIDs.removeAll()
+        nativeCallAsyncJavaScriptResults.removeAll()
+        nativeCallAsyncJavaScriptOperationIDs.removeAll()
+        pendingOperationIDs.forEach { operationID in
+            lifecycle.completeAsyncOperation(operationID)
+        }
+        pendingCallbacks.forEach { callback in
+            callback(disposedJavaScriptResult())
+        }
+        nativeCallbacks.forEach { callback in
+            callback(.failure(webViewAsyncError("WebView disposed")))
+        }
+    }
+
     public func dispose() {
+        guard lifecycle.beginDisposal() else { return }
+        defer { lifecycle.finishDisposal() }
         if let id = id,
            plugin?.inAppWebViewManager?.webViews[String(describing: id)] === self {
             plugin?.inAppWebViewManager?.webViews.removeValue(forKey: String(describing: id))
@@ -2925,8 +3018,20 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         uiDelegate = nil
         navigationDelegate = nil
         isPausedTimersCompletionHandler = nil
-        callAsyncJavaScriptBelowMacOS11Results.removeAll()
+        finishPendingAsyncJavaScriptCallsOnDispose()
         plugin = nil
+    }
+
+    private func webViewAsyncError(_ message: String) -> NSError {
+        NSError(
+            domain: "flutter_inappwebview_forge",
+            code: -1,
+            userInfo: [NSLocalizedDescriptionKey: message]
+        )
+    }
+
+    private func disposedJavaScriptResult() -> [String: Any?] {
+        ["value": NSNull(), "error": "WebView disposed"]
     }
     
     deinit {

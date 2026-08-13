@@ -70,9 +70,11 @@ class JavaScriptBridgeInterface(
     @JavascriptInterface
     fun _hideContextMenu() {
         val webView = inAppWebView ?: return
+        if (!webView.acceptsCallbacks()) return
         val handler = Handler(webView.getWebViewLooper())
         handler.post {
             val currentWebView = inAppWebView ?: return@post
+            if (!currentWebView.acceptsCallbacks()) return@post
             if (currentWebView.floatingContextMenu != null) {
                 currentWebView.hideContextMenu()
             }
@@ -82,6 +84,7 @@ class JavaScriptBridgeInterface(
     @JavascriptInterface
     fun _callHandler(jsonStringifiedData: String) {
         val webView = inAppWebView ?: return
+        if (!webView.acceptsCallbacks()) return
 
         val data = try {
             JSONObject(jsonStringifiedData)
@@ -136,6 +139,7 @@ class JavaScriptBridgeInterface(
         val handler = Handler(webView.getWebViewLooper())
         handler.post {
             val currentWebView = inAppWebView ?: return@post
+            if (!currentWebView.acceptsCallbacks()) return@post
             var isInternalHandler = true
 
             when (handlerName) {
@@ -167,7 +171,7 @@ class JavaScriptBridgeInterface(
                                         errorDetails: Any?
                                     ) {
                                         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-                                        defaultBehaviour(null)
+                                        completeDefaultBehaviour(null)
                                     }
                                 }
                             )
@@ -180,12 +184,10 @@ class JavaScriptBridgeInterface(
                         val arguments = JSONArray(args)
                         val jsonObject = arguments.getJSONObject(0)
                         val resultUuid = jsonObject.getString("resultUuid")
-                        val callback: ValueCallback<String>? =
-                            currentWebView.callAsyncJavaScriptCallbacks[resultUuid]
-                        if (callback != null) {
-                            callback.onReceiveValue(jsonObject.toString())
-                            currentWebView.callAsyncJavaScriptCallbacks.remove(resultUuid)
-                        }
+                        currentWebView.consumeCallAsyncJavaScriptCallback(
+                            resultUuid,
+                            jsonObject.toString()
+                        )
                     } catch (e: JSONException) {
                         Log.e(LOG_TAG, "", e)
                     }
@@ -230,17 +232,12 @@ class JavaScriptBridgeInterface(
                         val arguments = JSONArray(args)
                         val jsonObject = arguments.getJSONObject(0)
                         val resultUuid = jsonObject.getString("resultUuid")
-                        val callback: ValueCallback<String>? =
-                            currentWebView.evaluateJavaScriptContentWorldCallbacks[resultUuid]
-                        if (callback != null) {
-                            val value = if (jsonObject.has("value")) {
-                                jsonObject.get("value").toString()
-                            } else {
-                                "null"
-                            }
-                            callback.onReceiveValue(value)
-                            currentWebView.evaluateJavaScriptContentWorldCallbacks.remove(resultUuid)
+                        val value = if (jsonObject.has("value")) {
+                            jsonObject.get("value").toString()
+                        } else {
+                            "null"
                         }
+                        currentWebView.consumeEvaluateJavaScriptContentWorldCallback(resultUuid, value)
                     } catch (e: JSONException) {
                         Log.e(LOG_TAG, "", e)
                     }
@@ -270,6 +267,7 @@ class JavaScriptBridgeInterface(
                 object : WebViewChannelDelegate.CallJsHandlerCallback() {
                     override fun defaultBehaviour(json: Any?) {
                         val callbackWebView = inAppWebView ?: return
+                        if (!callbackWebView.acceptsCallbacks()) return
                         val sourceCode = "if (window." +
                             JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
                             "[" + callHandlerId + "] != null) { " +
@@ -286,10 +284,12 @@ class JavaScriptBridgeInterface(
                         errorMessage: String?,
                         errorDetails: Any?
                     ) {
+                        if (!beginCallbackCompletion()) return
                         val message = errorCode + (errorMessage?.let { ", $it" } ?: "")
                         Log.e(LOG_TAG, message)
 
                         val callbackWebView = inAppWebView ?: return
+                        if (!callbackWebView.acceptsCallbacks()) return
                         val sourceCode = "if (window." +
                             JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
                             "[" + callHandlerId + "] != null) { " +

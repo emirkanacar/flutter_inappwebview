@@ -48,8 +48,247 @@ void _runSourceContractAssertions() {
   ).readAsStringSync();
 
   _assert(
-    source.contains('guard !isDisposed else { return }'),
-    'iOS WebView disposal is not idempotent',
+    source.contains('guard lifecycle.acceptsCallbacks else { return }'),
+    'iOS WebView disposal callbacks are not lifecycle-gated',
+  );
+  _assert(
+    source.contains('registeredKVOObservers') &&
+        source.contains('registerKVOObserver(') &&
+        source.contains('removeKVOObserver('),
+    'iOS KVO observer cleanup is not registration-aware',
+  );
+  final lifecycleSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/WebViewLifecycleCoordinator.swift',
+  ).readAsStringSync();
+  _assert(
+    lifecycleSource.contains('.disposing') &&
+        lifecycleSource.contains('.disposed') &&
+        lifecycleSource.contains('beginAsyncOperation') &&
+        lifecycleSource.contains('operationID') &&
+        lifecycleSource.contains('activeOperationIDs') &&
+        lifecycleSource.contains(
+          'completeAsyncOperation(_ operationID: UInt64)',
+        ) &&
+        lifecycleSource.contains('callbackCompletionCount') &&
+        lifecycleSource.contains('lifecycleTrace') &&
+        lifecycleSource.contains('NSLock') &&
+        lifecycleSource.contains('acceptsCallbacksLocked') &&
+        lifecycleSource.contains('record("rendererLost")'),
+    'iOS native lifecycle coordinator does not define the disposal boundary',
+  );
+  _assert(
+    source.contains('guard lifecycle.beginPreparing() else { return }') &&
+        source.contains('guard lifecycle.beginDisposal() else { return }') &&
+        source.contains('defer { lifecycle.finishDisposal() }') &&
+        source.contains('lifecycle.finishDisposal()'),
+    'iOS WebView lifecycle transitions are not connected to prepare/dispose',
+  );
+  _assert(
+    source.contains('guard lifecycle.acceptsCallbacks else') &&
+        source.contains('disposedJavaScriptResult()') &&
+        source.contains('webViewDisposedError()') &&
+        source.contains('nativeCallAsyncJavaScriptResults') &&
+        source.contains('consumeNativeCallAsyncJavaScriptResult'),
+    'iOS async JavaScript calls are accepted after disposal',
+  );
+  _assert(
+    source.contains('guard lifecycle.markRendererLost() else { return }'),
+    'iOS WebKit content-process loss is not connected to lifecycle state',
+  );
+  _assert(
+    source.contains('guard lifecycle.acceptsCallbacks else') &&
+        source.contains('decisionHandler(.deny)') &&
+        source.contains('decisionHandler(.cancel)') &&
+        source.contains(
+          'guard lifecycle.acceptsCallbacks else { return nil }',
+        ) &&
+        source.contains('completionHandler(.performDefaultHandling, nil)'),
+    'iOS WebKit decision, authentication, and popup callbacks are not lifecycle-gated',
+  );
+  final channelDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebViewChannelDelegate.swift',
+  ).readAsStringSync();
+  _assert(
+    channelDelegateSource.contains('handleJavaScriptMethod(method: method') &&
+        channelDelegateSource.contains('handleSettingsMethod(method: method') &&
+        channelDelegateSource.contains(
+          'handleWebMessageMethod(method: method',
+        ) &&
+        channelDelegateSource.contains('private func canDispatchCallbacks()') &&
+        channelDelegateSource.contains(
+          'private func invokeMethod(_ method: String',
+        ) &&
+        channelDelegateSource.contains('callback.success(nil)') &&
+        channelDelegateSource.contains('result(nil)') &&
+        !channelDelegateSource.contains('channel?.invokeMethod'),
+    'iOS channel callbacks are not routed through the lifecycle gate',
+  );
+  _assert(
+    channelDelegateSource.contains('handleLifecycleMethod(method: method'),
+    'iOS lifecycle channel operations are not feature-grouped',
+  );
+  _assert(
+    channelDelegateSource.contains('private func handleJavaScriptMethod') &&
+        channelDelegateSource.contains('private func handleWebMessageMethod'),
+    'iOS JavaScript/WebMessage feature handlers are missing',
+  );
+
+  final webMessageChannelDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebMessage/'
+    'WebMessageChannelChannelDelegate.swift',
+  ).readAsStringSync();
+  final webMessageListenerDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/WebMessage/'
+    'WebMessageListenerChannelDelegate.swift',
+  ).readAsStringSync();
+  final findInteractionDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/FindInteraction/'
+    'FindInteractionChannelDelegate.swift',
+  ).readAsStringSync();
+  _assert(
+    webMessageChannelDelegateSource.contains(
+          'private func canDispatchCallbacks()',
+        ) &&
+        webMessageChannelDelegateSource.contains('pendingResults') &&
+        webMessageChannelDelegateSource.contains(
+          r'results.forEach { $0(nil) }',
+        ) &&
+        webMessageListenerDelegateSource.contains(
+          'private func canDispatchCallbacks()',
+        ) &&
+        webMessageListenerDelegateSource.contains('pendingResults') &&
+        findInteractionDelegateSource.contains(
+          'private func canDispatchCallbacks()',
+        ) &&
+        findInteractionDelegateSource.contains(
+          'guard canDispatchCallbacks() else { return }',
+        ),
+    'iOS WebMessage/FindInteraction delegates can dispatch stale callbacks after disposal',
+  );
+  final pullToRefreshDelegateSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PullToRefresh/'
+    'PullToRefreshChannelDelegate.swift',
+  ).readAsStringSync();
+  _assert(
+    pullToRefreshDelegateSource.contains(
+          'private func canDispatchCallbacks()',
+        ) &&
+        pullToRefreshDelegateSource.contains('webView.acceptsCallbacks()'),
+    'iOS pull-to-refresh can dispatch an event after WebView disposal',
+  );
+  _assert(
+    source.contains('pendingNavigationActionDecisionHandlers') &&
+        source.contains('finishPendingNavigationActionDecisionsOnDispose') &&
+        source.contains('completeDecision(.cancel)'),
+    'iOS navigation decisions are not completed during disposal',
+  );
+
+  _assert(
+    source.contains('let contentBlockersChanged: Bool = {') &&
+        source.contains('newSettingsMap["contentBlockers"] != nil') &&
+        source.contains('if #available(iOS 11.0, *), contentBlockersChanged'),
+    'iOS content blockers are rebuilt for unchanged settings',
+  );
+  _assert(
+    source.contains('let verticalScrollSettingChanged =') &&
+        source.contains('let horizontalScrollSettingChanged =') &&
+        source.contains(
+          'let disableVerticalScroll = newSettingsMap["disableVerticalScroll"] != nil',
+        ),
+    'iOS partial scroll settings can overwrite the other axis',
+  );
+  _assert(
+    source.contains('newSettingsMap["mediaType"] != nil &&') &&
+        source.contains('settings?.mediaType != newSettings.mediaType'),
+    'iOS mediaType is applied without checking whether it was supplied',
+  );
+
+  final userContentControllerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/Types/WKUserContentController.swift',
+  ).readAsStringSync();
+  _assert(
+    userContentControllerSource.contains(
+          'guard !userOnlyScripts[userOnlyScript.injectionTime]!.contains(userOnlyScript)',
+        ) &&
+        userContentControllerSource.contains(
+          'guard !pluginScripts[pluginScript.injectionTime]!.contains(pluginScript)',
+        ),
+    'iOS user and plugin script registration does not reject duplicates',
+  );
+
+  final headlessManagerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/HeadlessInAppWebView/'
+    'HeadlessInAppWebViewManager.swift',
+  ).readAsStringSync();
+  final headlessSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/HeadlessInAppWebView/'
+    'HeadlessInAppWebView.swift',
+  ).readAsStringSync();
+  _assert(
+    headlessManagerSource.contains(
+          'var webViews: [String: HeadlessInAppWebView]',
+        ) &&
+        headlessManagerSource.contains(
+          'webViews.removeValue(forKey: id)?.dispose()',
+        ) &&
+        headlessManagerSource.contains(
+          'plugin.inAppWebViewManager?.webViews.removeValue(forKey: id)',
+        ) &&
+        headlessManagerSource.contains('previousWebView.dispose()'),
+    'iOS headless manager does not replace duplicate ids atomically',
+  );
+  final factorySource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppWebView/FlutterWebViewFactory.swift',
+  ).readAsStringSync();
+  _assert(
+    factorySource.contains(
+          'headlessInAppWebViewManager?.webViews.removeValue(forKey: headlessWebViewId)',
+        ) &&
+        factorySource.contains('headlessWebView.dispose()') &&
+        factorySource.contains('transferredFromHeadless') &&
+        factorySource.contains(
+          'inAppWebViewManager?.webViews[String(describing: transferredWebViewID)]',
+        ),
+    'iOS headless ownership is not detached atomically during transfer',
+  );
+  _assert(
+    headlessSource.contains(
+          'guard let currentFlutterWebView = flutterWebView',
+        ) &&
+        headlessSource.contains('let view = currentFlutterWebView.myView') &&
+        headlessSource.contains('dispose()\n            return nil'),
+    'iOS stale headless entries are not disposed when no native view exists',
+  );
+  _assert(
+    headlessSource.contains(
+          'private let lifecycle = WebViewLifecycleCoordinator()',
+        ) &&
+        headlessSource.contains(
+          'guard lifecycle.beginDisposal() else { return }',
+        ) &&
+        headlessSource.contains('defer { lifecycle.finishDisposal() }') &&
+        headlessSource.contains('lifecycle.finishDisposal()') &&
+        headlessSource.contains(
+          'plugin?.headlessInAppWebViewManager?.webViews[id] === self',
+        ) &&
+        headlessSource.contains(
+          'manager.webViews[String(describing: webViewID)] === webView',
+        ) &&
+        headlessSource.contains(
+          'manager.webViews.removeValue(forKey: String(describing: webViewID))',
+        ) &&
+        headlessSource.contains('markRetainedWebViewDetached()'),
+    'iOS headless disposal is not idempotent and map-backed',
   );
 
   final settingsSource = _sourceFile(
@@ -137,9 +376,82 @@ void _runSourceContractAssertions() {
     'iOS WebView manager does not retain WebViews for scoped cookie routing',
   );
   _assert(
+    managerSource.contains(
+          'var keepAliveWebViews: [String:FlutterWebViewController]',
+        ) &&
+        managerSource.contains('func registerKeepAlive(keepAliveId: String') &&
+        managerSource.contains(
+          'let activeWebViewValues = Array(webViews.values)',
+        ) &&
+        managerSource.contains('webView.dispose()'),
+    'iOS keep-alive manager does not enforce a single owner per id',
+  );
+  _assert(
     cookieSource.contains('webViewId') &&
         cookieSource.contains('configuration.websiteDataStore.httpCookieStore'),
     'iOS cookie manager does not route scoped calls to the WebView data store',
+  );
+
+  final printJobManagerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PrintJob/PrintJobManager.swift',
+  ).readAsStringSync();
+  final printJobSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/PrintJob/PrintJobController.swift',
+  ).readAsStringSync();
+  final webAuthenticationManagerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/WebAuthenticationSession/'
+    'WebAuthenticationSessionManager.swift',
+  ).readAsStringSync();
+  final webAuthenticationSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/WebAuthenticationSession/'
+    'WebAuthenticationSession.swift',
+  ).readAsStringSync();
+  final inAppBrowserManagerSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppBrowser/InAppBrowserManager.swift',
+  ).readAsStringSync();
+  final inAppBrowserSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/InAppBrowser/'
+    'InAppBrowserWebViewController.swift',
+  ).readAsStringSync();
+  _assert(
+    printJobManagerSource.contains('var jobs: [String: PrintJobController]') &&
+        printJobManagerSource.contains('let jobValues = Array(jobs.values)') &&
+        printJobManagerSource.contains('jobs.removeAll()') &&
+        !printJobManagerSource.contains('PrintJobController?') &&
+        printJobSource.contains('jobs.removeValue(forKey: id)'),
+    'iOS print-job manager retains nullable ownership placeholders',
+  );
+  _assert(
+    webAuthenticationManagerSource.contains(
+          'var sessions: [String: WebAuthenticationSession]',
+        ) &&
+        webAuthenticationManagerSource.contains(
+          'let sessionValues = Array(sessions.values)',
+        ) &&
+        webAuthenticationManagerSource.contains('sessions.removeAll()') &&
+        !webAuthenticationManagerSource.contains('WebAuthenticationSession?') &&
+        webAuthenticationSource.contains('sessions.removeValue(forKey: id)'),
+    'iOS authentication-session manager retains nullable ownership placeholders',
+  );
+  _assert(
+    inAppBrowserManagerSource.contains(
+          'var navControllers: [String: InAppBrowserNavigationController]',
+        ) &&
+        inAppBrowserManagerSource.contains(
+          'let navControllersValues = Array(navControllers.values)',
+        ) &&
+        inAppBrowserManagerSource.contains('navControllers.removeAll()') &&
+        !inAppBrowserManagerSource.contains(
+          'InAppBrowserNavigationController?',
+        ) &&
+        inAppBrowserSource.contains('navControllers.removeValue(forKey: id)'),
+    'iOS in-app-browser manager retains nullable ownership placeholders',
   );
   _assert(
     source.contains('guard let presentingViewController') &&
@@ -359,7 +671,8 @@ void _runSourceContractAssertions() {
   );
 
   _assert(
-    source.contains('windowCreated') && source.contains('guard !isDisposed'),
+    source.contains('windowCreated') &&
+        source.contains('lifecycle.acceptsCallbacks'),
     'popup JavaScript is evaluated before the Flutter platform view is attached',
   );
   _assert(
@@ -370,19 +683,51 @@ void _runSourceContractAssertions() {
     'popup content-world compatibility guard is missing',
   );
   _assert(
-    source.contains('guard !isDisposed else { return }') &&
+    source.contains('guard lifecycle.acceptsCallbacks else { return }') &&
         source.contains('observedWebView === self') &&
         source.contains('observedScrollView === scrollView'),
     'iOS KVO callbacks are not protected from stale popup/dispose objects',
+  );
+  _assert(
+    source.contains('self.lifecycle.acceptsCallbacks') &&
+        source.contains('guard lifecycle.acceptsCallbacks else { return }') &&
+        source.contains('scheduleScrollChangedUpdate'),
+    'iOS delayed gesture, keyboard, and scroll callbacks are not lifecycle-gated',
+  );
+  _assert(
+    source.contains('requestFocusNodeHref') &&
+        source.contains('requestImageRef') &&
+        source.contains(
+          'DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self]',
+        ) &&
+        source.contains('self.lifecycle.acceptsCallbacks'),
+    'iOS delayed focus/image callbacks are not lifecycle-gated',
+  );
+  _assert(
+    source.contains('scrollView.isPagingEnabled = newSettings.isPagingEnabled'),
+    'iOS settings diff applies isPagingEnabled to the wrong UIScrollView property',
+  );
+  _assert(
+    source.contains('pendingNativeLifecycleCallbacks') &&
+        source.contains('registerNativeLifecycleCallback') &&
+        source.contains('finishPendingAsyncJavaScriptCallsOnDispose()'),
+    'iOS native snapshot/PDF/archive callbacks are not lifecycle-tracked',
+  );
+  _assert(
+    source.contains(
+          'windowIdJSInitializationGeneration == initializationGeneration',
+        ) &&
+        source.contains('self.lifecycle.acceptsCallbacks') &&
+        source.contains('presentNativeFullscreenContainer'),
+    'iOS deferred popup/fullscreen UI callbacks are not lifecycle-gated',
   );
   _assert(
     source.contains('super.evaluateJavaScript(javaScript) { result, error in'),
     'popup JavaScript does not use the page-world fallback',
   );
   _assert(
-    source.contains(
-      'in: WKContentWorld.page, completionHandler: completionHandler',
-    ),
+    source.contains('in: WKContentWorld.page') &&
+        source.contains('completionHandler: wrappedCompletionHandler'),
     'popup async JavaScript does not use the page content world fallback',
   );
   _assert(
@@ -453,12 +798,43 @@ void _runSourceContractAssertions() {
     'late legacy callAsyncJavaScript errors are not ignored after disposal',
   );
   _assert(
+    source.contains('pendingEvaluateJavaScriptResults') &&
+        source.contains('evaluateJavaScriptOperationIDs') &&
+        source.contains('consumeEvaluateJavaScriptResult') &&
+        source.contains('pendingEvaluateCallbacks.forEach') &&
+        source.contains('callback(nil)'),
+    'iOS evaluateJavascript callbacks are not tracked and completed exactly once',
+  );
+  final callbackResultSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/Types/CallbackResult.swift',
+  ).readAsStringSync();
+  _assert(
+    callbackResultSource.contains('resultLock') &&
+        callbackResultSource.contains('callbackCompleted') &&
+        callbackResultSource.contains('defaultBehaviourCompleted') &&
+        callbackResultSource.contains('defaultBehaviourAllowedDuringHandler') &&
+        callbackResultSource.contains(
+          'callbackCompleted && !defaultBehaviourAllowedDuringHandler',
+        ) &&
+        callbackResultSource.contains('completeSuccess') &&
+        callbackResultSource.contains('completeError') &&
+        callbackResultSource.contains('completeDefaultBehaviour') &&
+        callbackResultSource.contains('if defaultBehaviourCompleted'),
+    'iOS native callback defaults are not guarded against duplicate completion',
+  );
+  _assert(
     source.contains('_lastReportedProgress'),
     'iOS progress callbacks are not deduplicated before crossing the channel',
   );
   _assert(
     source.contains('scheduleContentSizeChangedUpdate'),
     'iOS content-size callbacks are not coalesced on the main queue',
+  );
+  _assert(
+    source.contains('with["compressFormat"] as? String ?? "PNG"') &&
+        source.contains('(with["quality"] as? NSNumber)?.doubleValue'),
+    'iOS screenshot options still force-cast nullable channel values',
   );
   _assert(
     source.contains('_contentSizeChangedUpdatePending'),

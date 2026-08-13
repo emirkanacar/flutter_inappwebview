@@ -16,6 +16,7 @@ public class HeadlessInAppWebView: Disposable {
     var channelDelegate: HeadlessWebViewChannelDelegate?
     var flutterWebView: FlutterWebViewController?
     var plugin: InAppWebViewFlutterPlugin?
+    private let lifecycle = WebViewLifecycleCoordinator()
     
     public init(plugin: InAppWebViewFlutterPlugin, id: String, flutterWebView: FlutterWebViewController) {
         self.id = id
@@ -29,8 +30,13 @@ public class HeadlessInAppWebView: Disposable {
     public func onWebViewCreated() {
         channelDelegate?.onWebViewCreated()
     }
+
+    func acceptsCallbacks() -> Bool {
+        lifecycle.acceptsCallbacks
+    }
     
     public func prepare(params: NSDictionary) {
+        guard lifecycle.beginPreparing() else { return }
         if let view = flutterWebView?.view() {
             view.alpha = 0.01
             let initialSize = params["initialSize"] as? [String: Any?]
@@ -49,6 +55,8 @@ public class HeadlessInAppWebView: Disposable {
                 keyWindow.sendSubviewToBack(view)
             }
         }
+        lifecycle.markAttached()
+        lifecycle.markReady()
     }
     
     public func setSize(size: Size2D) {
@@ -68,21 +76,39 @@ public class HeadlessInAppWebView: Disposable {
     
     public func disposeAndGetFlutterWebView(withFrame frame: CGRect) -> FlutterWebViewController? {
         let newFlutterWebView = flutterWebView
-        if let view = flutterWebView?.view() {
-            // restore WebView frame and alpha
-            view.frame = frame
-            view.alpha = 1.0
-            // remove from parent
-            view.removeFromSuperview()
-            dispose(disposeWebView: false)
+        guard let currentFlutterWebView = flutterWebView,
+              let view = currentFlutterWebView.myView else {
+            // A headless entry without a native view cannot be transferred.
+            // Dispose it instead of returning an owner that is no longer
+            // reachable from a manager.
+            dispose()
+            return nil
         }
+        if let webView = currentFlutterWebView.webView(),
+           let manager = plugin?.inAppWebViewManager,
+           let webViewID = webView.id,
+           manager.webViews[String(describing: webViewID)] === webView {
+            manager.webViews.removeValue(forKey: String(describing: webViewID))
+        }
+        // restore WebView frame and alpha
+        view.frame = frame
+        view.alpha = 1.0
+        // remove from parent
+        view.removeFromSuperview()
+        currentFlutterWebView.webView()?.markRetainedWebViewDetached()
+        dispose(disposeWebView: false)
         return newFlutterWebView
     }
     
     public func dispose(disposeWebView: Bool) {
+        guard lifecycle.beginDisposal() else { return }
+        defer { lifecycle.finishDisposal() }
+
         channelDelegate?.dispose()
         channelDelegate = nil
-        plugin?.headlessInAppWebViewManager?.webViews[id] = nil
+        if plugin?.headlessInAppWebViewManager?.webViews[id] === self {
+            plugin?.headlessInAppWebViewManager?.webViews.removeValue(forKey: id)
+        }
         if disposeWebView {
             flutterWebView?.dispose(removeFromSuperview: true)
         }

@@ -21,12 +21,12 @@ public class BaseCallbackResult<T>: CallbackResult<T> {
                 shouldRunDefaultBehaviour = self?.nullSuccess() ?? shouldRunDefaultBehaviour
             }
             if shouldRunDefaultBehaviour {
-                self?.defaultBehaviour(result)
+                _ = self?.completeDefaultBehaviour(result)
             }
         }
         
         self.notImplemented = { [weak self] in
-            self?.defaultBehaviour(nil)
+            _ = self?.completeDefaultBehaviour(nil)
         }
     }
 }

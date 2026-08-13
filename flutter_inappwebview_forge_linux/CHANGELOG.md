@@ -2,6 +2,14 @@
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable
   content in Linux WPE WebKit.
+- Enable the WPE disposal callback gate before native cleanup and replace
+  duplicate headless/keep-alive owners explicitly.
+- Use an internal lifecycle coordinator for WPE disposal and keep-alive
+  reattachment so callbacks are rejected across ownership transfer.
+- Apply WebKit/WPE settings only when their values change and skip duplicate
+  asynchronous content-blocker compilation using a canonical settings snapshot.
+- Gate all channel event and callback dispatch through the WPE lifecycle state,
+  preserving default callback behavior while dropping stale post-dispose events.
 
 ## 1.0.7 - 2026-08-13
 

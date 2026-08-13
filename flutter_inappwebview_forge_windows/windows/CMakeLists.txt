@@ -83,6 +83,7 @@ list(APPEND PLUGIN_SOURCES
   "types/rect.cpp"
   "types/rect.h"
   "types/callbacks_complete.h"
+  "types/web_view_lifecycle_coordinator.h"
   "types/screenshot_configuration.cpp"
   "types/screenshot_configuration.h"
   "types/create_window_action.cpp"

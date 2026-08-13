@@ -95,8 +95,15 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
     }
     
     public func onRefresh() {
+        guard canDispatchCallbacks() else { return }
         let arguments: [String: Any?] = [:]
         channel?.invokeMethod("onRefresh", arguments: arguments)
+    }
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let control = pullToRefreshControl else { return false }
+        guard let webView = control.delegate as? InAppWebView else { return true }
+        return webView.acceptsCallbacks()
     }
     
     public override func dispose() {

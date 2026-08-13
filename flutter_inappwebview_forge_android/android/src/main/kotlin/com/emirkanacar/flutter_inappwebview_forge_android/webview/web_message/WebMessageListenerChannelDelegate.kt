@@ -11,7 +11,16 @@ open class WebMessageListenerChannelDelegate(
     private var webMessageListener: WebMessageListener?,
     channel: MethodChannel
 ) : ChannelDelegateImpl(channel) {
+    private fun canDispatchCallbacks(): Boolean {
+        return getChannel() != null &&
+            (webMessageListener?.webView as? InAppWebView)?.acceptsCallbacks() == true
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (!canDispatchCallbacks()) {
+            result.success(null)
+            return
+        }
         when (call.method) {
             "postMessage" -> {
                 val listener = webMessageListener
@@ -34,6 +43,7 @@ open class WebMessageListenerChannelDelegate(
     }
 
     open fun onPostMessage(message: WebMessageCompatExt?, sourceOrigin: String?, isMainFrame: Boolean) {
+        if (!canDispatchCallbacks()) return
         val channel = getChannel() ?: return
         val obj = HashMap<String, Any?>()
         obj["message"] = message?.toMap()

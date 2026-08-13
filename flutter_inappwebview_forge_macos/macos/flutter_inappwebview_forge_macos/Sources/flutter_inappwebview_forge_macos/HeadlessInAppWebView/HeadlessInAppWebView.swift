@@ -14,6 +14,7 @@ public class HeadlessInAppWebView: Disposable {
     var channelDelegate: HeadlessWebViewChannelDelegate?
     var flutterWebView: FlutterWebViewController?
     var plugin: InAppWebViewFlutterPlugin?
+    private let lifecycle = WebViewLifecycleCoordinator()
     
     public init(plugin: InAppWebViewFlutterPlugin, id: String, flutterWebView: FlutterWebViewController) {
         self.id = id
@@ -27,8 +28,13 @@ public class HeadlessInAppWebView: Disposable {
     public func onWebViewCreated() {
         channelDelegate?.onWebViewCreated();
     }
+
+    func acceptsCallbacks() -> Bool {
+        lifecycle.acceptsCallbacks
+    }
     
     public func prepare(params: NSDictionary) {
+        guard lifecycle.beginPreparing() else { return }
         if let view = flutterWebView?.view() {
             view.alphaValue = 0.01
             let initialSize = params["initialSize"] as? [String: Any?]
@@ -47,6 +53,8 @@ public class HeadlessInAppWebView: Disposable {
             wrapperView.addSubview(view, positioned: .below, relativeTo: nil)
             NSApplication.shared.mainWindow?.contentView?.addSubview(wrapperView, positioned: .below, relativeTo: nil)
         }
+        lifecycle.markAttached()
+        lifecycle.markReady()
     }
     
     public func setSize(size: Size2D) {
@@ -72,6 +80,7 @@ public class HeadlessInAppWebView: Disposable {
             view.alphaValue = 1.0
             // remove from parent
             view.removeFromSuperview()
+            flutterWebView?.webView()?.markRetainedWebViewDetached()
             dispose(disposeWebView: false)
         }
         return newFlutterWebView
@@ -79,9 +88,13 @@ public class HeadlessInAppWebView: Disposable {
     
     
     public func dispose(disposeWebView: Bool) {
+        guard lifecycle.beginDisposal() else { return }
+        defer { lifecycle.finishDisposal() }
         channelDelegate?.dispose()
         channelDelegate = nil
-        plugin?.headlessInAppWebViewManager?.webViews[id] = nil
+        if plugin?.headlessInAppWebViewManager?.webViews[id] === self {
+            plugin?.headlessInAppWebViewManager?.webViews.removeValue(forKey: id)
+        }
         if disposeWebView {
             flutterWebView?.dispose(removeFromSuperview: true)
         }

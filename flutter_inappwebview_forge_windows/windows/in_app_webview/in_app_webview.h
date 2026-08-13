@@ -22,6 +22,7 @@
 #include "../utils/uuid.h"
 #include "../webview_environment/webview_environment.h"
 #include "in_app_webview_settings.h"
+#include "../types/web_view_lifecycle_coordinator.h"
 #include "user_content_controller.h"
 #include "webview_channel_delegate.h"
 #include "../web_message/web_message_channel.h"
@@ -155,6 +156,11 @@ namespace flutter_inappwebview_plugin
       winrt::com_ptr<ABI::Windows::UI::Composition::ICompositor> compositor);
 
     void initChannel(const std::optional<std::variant<std::string, int64_t>> viewId, const std::optional<std::string> channelName);
+    void markAttached() { lifecycle_.markAttached(); }
+    void markReady() { lifecycle_.markReady(); }
+    void markDetachedRetained() { lifecycle_.markDetachedRetained(); }
+    void markReattached() { lifecycle_.markAttached(); lifecycle_.markReady(); }
+    bool acceptsCallbacks() const { return lifecycle_.acceptsCallbacks(); }
     void prepare(const InAppWebViewCreationParams& params);
     std::optional<std::string> getUrl() const;
     std::optional<std::string> getTitle() const;
@@ -270,7 +276,7 @@ namespace flutter_inappwebview_plugin
     std::map<std::string, std::unique_ptr<WebMessageListener>> webMessageListeners_;
     std::map<std::string, std::shared_ptr<WebNotificationController>> webNotificationControllers_;
     std::map<std::string, std::shared_ptr<PrintJobController>> printJobControllers_;
-    std::atomic<bool> disposed_{ false };
+    WebViewLifecycleCoordinator lifecycle_;
     std::mutex controllerMutex_;
 
     void registerEventHandlers();

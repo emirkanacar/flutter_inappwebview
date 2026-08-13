@@ -12,9 +12,13 @@ open class HeadlessWebViewChannelDelegate(
 ) : ChannelDelegateImpl(channel) {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        val webView = headlessWebView
+        if (call.method != "dispose" && (webView == null || !webView.acceptsCallbacks())) {
+            result.success(false)
+            return
+        }
         when (call.method) {
             "dispose" -> {
-                val webView = headlessWebView
                 if (webView != null) {
                     webView.dispose()
                     result.success(true)
@@ -40,6 +44,7 @@ open class HeadlessWebViewChannelDelegate(
     }
 
     fun onWebViewCreated() {
+        if (headlessWebView?.acceptsCallbacks() != true) return
         val channel = getChannel() ?: return
         channel.invokeMethod("onWebViewCreated", HashMap<String, Any?>())
     }

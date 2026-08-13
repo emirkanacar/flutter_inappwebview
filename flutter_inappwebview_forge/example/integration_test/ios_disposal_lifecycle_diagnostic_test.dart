@@ -10,6 +10,8 @@ const _runDiagnostic = bool.fromEnvironment(
   'RUN_IOS_DISPOSAL_LIFECYCLE_DIAGNOSTIC',
 );
 
+const _lifecycleCycles = 100;
+
 const _diagnosticPage = '''
 <!doctype html>
 <html>
@@ -92,7 +94,7 @@ void main() {
     'iOS #2654 WebView disposal lifecycle remains safe',
     (WidgetTester tester) async {
       final outcomes = <String>[];
-      for (var cycle = 0; cycle < 4; cycle++) {
+      for (var cycle = 0; cycle < _lifecycleCycles; cycle++) {
         outcomes.add(await _runCycle(tester, cycle));
       }
 
@@ -105,13 +107,13 @@ void main() {
 
       debugPrint('iOS #2654 diagnostic: outcomes=$outcomes');
       expect(find.text('ios-2654-complete'), findsOneWidget);
-      expect(outcomes, hasLength(4));
+      expect(outcomes, hasLength(_lifecycleCycles));
       expect(
         outcomes,
         everyElement(anyOf('WebView disposed', 'WebView navigation started')),
       );
     },
     skip: !_runDiagnostic || !Platform.isIOS,
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: const Timeout(Duration(minutes: 15)),
   );
 }

@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.HashMap
 import java.util.HashSet
+import java.util.LinkedHashSet
 
 class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
     ChannelDelegateImpl(
@@ -38,7 +39,7 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
     var plugin: InAppWebViewFlutterPlugin? = initialPlugin
 
     @JvmField
-    val keepAliveWebViews: MutableMap<String, FlutterWebView?> = HashMap()
+    val keepAliveWebViews: MutableMap<String, FlutterWebView> = HashMap()
 
     /** Active WebViews indexed by the platform-view/controller id. */
     @JvmField
@@ -174,16 +175,25 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
     }
 
     fun disposeKeepAlive(keepAliveId: String) {
-        val flutterWebView = keepAliveWebViews[keepAliveId]
-        if (flutterWebView != null) {
-            flutterWebView.keepAliveId = null
-            val view: View? = flutterWebView.view
-            val parent = view?.parent as? ViewGroup
-            parent?.removeView(view)
-            flutterWebView.dispose()
-        }
-        if (keepAliveWebViews.containsKey(keepAliveId)) {
-            keepAliveWebViews[keepAliveId] = null
+        val flutterWebView = keepAliveWebViews.remove(keepAliveId) ?: return
+        flutterWebView.keepAliveId = null
+        val view: View? = flutterWebView.view
+        val parent = view?.parent as? ViewGroup
+        parent?.removeView(view)
+        flutterWebView.dispose()
+    }
+
+    /**
+     * Registers a retained WebView without leaving the previous owner behind.
+     * The old instance is detached from the manager before it is disposed so a
+     * duplicate keep-alive id cannot silently leak a native WebView.
+     */
+    fun registerKeepAlive(keepAliveId: String, flutterWebView: FlutterWebView) {
+        val previousWebView = keepAliveWebViews.put(keepAliveId, flutterWebView)
+        if (previousWebView != null && previousWebView !== flutterWebView) {
+            previousWebView.keepAliveId = null
+            (previousWebView.view?.parent as? ViewGroup)?.removeView(previousWebView.view)
+            previousWebView.dispose()
         }
     }
 
@@ -195,14 +205,17 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
 
     override fun dispose() {
         super.dispose()
-        keepAliveWebViews.values.forEach { flutterWebView ->
-            val keepAliveId = flutterWebView?.keepAliveId
-            if (keepAliveId != null) {
-                disposeKeepAlive(keepAliveId)
-            }
+        val ownedWebViews = LinkedHashSet<FlutterWebView>().apply {
+            addAll(keepAliveWebViews.values)
+            addAll(webViews.values)
         }
         keepAliveWebViews.clear()
         webViews.clear()
+        ownedWebViews.forEach { flutterWebView ->
+            flutterWebView.keepAliveId = null
+            (flutterWebView.view?.parent as? ViewGroup)?.removeView(flutterWebView.view)
+            flutterWebView.dispose()
+        }
         windowWebViewMessages.clear()
         plugin = null
     }

@@ -96,7 +96,7 @@ public class WebAuthenticationSession: NSObject, Disposable {
         channelDelegate = nil
         session = nil
         _presentationContextProvider = nil
-        plugin?.webAuthenticationSessionManager?.sessions[id] = nil
+        plugin?.webAuthenticationSessionManager?.sessions.removeValue(forKey: id)
         plugin = nil
     }
     

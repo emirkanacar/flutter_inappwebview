@@ -645,7 +645,7 @@ public class InAppBrowserWebViewController: UIViewController, InAppBrowserDelega
         reloadButton?.target = nil
         shareButton?.target = nil
         menuButton?.target = nil
-        plugin?.inAppBrowserManager?.navControllers[id] = nil
+        plugin?.inAppBrowserManager?.navControllers.removeValue(forKey: id)
         plugin = nil
     }
     

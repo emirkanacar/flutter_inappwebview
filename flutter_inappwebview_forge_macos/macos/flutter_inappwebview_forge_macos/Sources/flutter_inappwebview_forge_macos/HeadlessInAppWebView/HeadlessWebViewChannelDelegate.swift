@@ -18,6 +18,11 @@ public class HeadlessWebViewChannelDelegate: ChannelDelegate {
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? NSDictionary
+
+        guard headlessWebView?.acceptsCallbacks() == true || call.method == "dispose" else {
+            result(nil)
+            return
+        }
         
         switch call.method {
         case "dispose":
@@ -49,6 +54,7 @@ public class HeadlessWebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onWebViewCreated() {
+        guard headlessWebView?.acceptsCallbacks() == true else { return }
         let arguments: [String: Any?] = [:]
         channel?.invokeMethod("onWebViewCreated", arguments: arguments)
     }

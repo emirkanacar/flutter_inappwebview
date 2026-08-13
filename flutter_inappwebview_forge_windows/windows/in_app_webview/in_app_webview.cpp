@@ -286,6 +286,17 @@ namespace flutter_inappwebview_plugin
     if (viewId.has_value()) {
       id = viewId.value();
     }
+    if (channelDelegate) {
+      channelDelegate.reset();
+    }
+    if (findInteractionController) {
+      findInteractionController->dispose();
+      findInteractionController.reset();
+    }
+    if (printJobManager) {
+      printJobManager->dispose();
+      printJobManager.reset();
+    }
     channelDelegate = channelName.has_value() ? std::make_unique<WebViewChannelDelegate>(this, plugin->registrar->messenger(), channelName.value()) :
       std::make_unique<WebViewChannelDelegate>(this, plugin->registrar->messenger());
     findInteractionController = std::make_unique<FindInteractionController>(this, plugin->registrar->messenger());
@@ -297,6 +308,8 @@ namespace flutter_inappwebview_plugin
     if (!webView) {
       return;
     }
+
+    lifecycle_.beginPreparing();
 
     javaScriptBridgeEnabled = settings->javaScriptBridgeEnabled;
 
@@ -423,6 +436,8 @@ namespace flutter_inappwebview_plugin
     }
 
     registerEventHandlers();
+    lifecycle_.markAttached();
+    lifecycle_.markReady();
   }
 
   void InAppWebView::registerEventHandlers()
@@ -3704,12 +3719,12 @@ namespace flutter_inappwebview_plugin
   // flutter_view
   void InAppWebView::setSurfaceSize(size_t width, size_t height, float scale_factor)
   {
-    if (disposed_.load(std::memory_order_acquire)) {
+    if (!lifecycle_.acceptsCallbacks()) {
       return;
     }
 
     std::lock_guard<std::mutex> controllerLock(controllerMutex_);
-    if (disposed_.load(std::memory_order_relaxed) || !webViewController) {
+    if (!lifecycle_.acceptsCallbacks() || !webViewController) {
       return;
     }
 
@@ -3743,12 +3758,12 @@ namespace flutter_inappwebview_plugin
 
   void InAppWebView::setPosition(size_t x, size_t y, float scale_factor)
   {
-    if (disposed_.load(std::memory_order_acquire)) {
+    if (!lifecycle_.acceptsCallbacks()) {
       return;
     }
 
     std::lock_guard<std::mutex> controllerLock(controllerMutex_);
-    if (disposed_.load(std::memory_order_relaxed) ||
+    if (!lifecycle_.acceptsCallbacks() ||
         !webViewController || !plugin || !plugin->registrar) {
       return;
     }
@@ -3779,12 +3794,12 @@ namespace flutter_inappwebview_plugin
 
   void InAppWebView::setVisibility(bool visible)
   {
-    if (disposed_.load(std::memory_order_acquire)) {
+    if (!lifecycle_.acceptsCallbacks()) {
       return;
     }
 
     std::lock_guard<std::mutex> controllerLock(controllerMutex_);
-    if (disposed_.load(std::memory_order_relaxed) || !webViewController) {
+    if (!lifecycle_.acceptsCallbacks() || !webViewController) {
       return;
     }
 
@@ -4270,7 +4285,9 @@ namespace flutter_inappwebview_plugin
   InAppWebView::~InAppWebView()
   {
     debugLog("dealloc InAppWebView");
-    disposed_.store(true, std::memory_order_release);
+    if (!lifecycle_.beginDisposal()) {
+      return;
+    }
     // Detach FindInteraction's WebView2 event handlers before stopping or
     // closing the controller. Removing them after Close() can return a
     // WebView2 invalid-state error and tear down the shared environment when
@@ -4315,5 +4332,6 @@ namespace flutter_inappwebview_plugin
     navigationActions_.clear();
     inAppBrowser = nullptr;
     plugin = nullptr;
+    lifecycle_.finishDisposal();
   }
 }

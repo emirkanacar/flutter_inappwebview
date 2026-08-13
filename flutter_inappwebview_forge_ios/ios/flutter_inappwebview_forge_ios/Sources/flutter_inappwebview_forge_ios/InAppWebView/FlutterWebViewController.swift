@@ -198,6 +198,8 @@ public class FlutterWebViewController: NSObject, FlutterPlatformView, Disposable
                 myView?.removeFromSuperview()
             }
             myView = nil
+        } else {
+            webView()?.markRetainedWebViewDetached()
         }
     }
     

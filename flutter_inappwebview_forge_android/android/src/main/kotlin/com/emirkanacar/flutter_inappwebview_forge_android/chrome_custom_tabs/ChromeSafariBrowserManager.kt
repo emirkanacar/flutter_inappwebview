@@ -37,7 +37,7 @@ open class ChromeSafariBrowserManager(
     var id: String = UUID.randomUUID().toString()
 
     @JvmField
-    val browsers: MutableMap<String, ChromeCustomTabsActivity?> = HashMap()
+    val browsers: MutableMap<String, ChromeCustomTabsActivity> = HashMap()
 
     init {
         shared[id] = this
@@ -157,11 +157,12 @@ open class ChromeSafariBrowserManager(
 
     override fun dispose() {
         super.dispose()
-        browsers.values.forEach { browser ->
-            browser?.close()
-            browser?.dispose()
-        }
+        val ownedBrowsers = ArrayList(browsers.values)
         browsers.clear()
+        ownedBrowsers.forEach { browser ->
+            browser.close()
+            browser.dispose()
+        }
         shared.remove(id)
         plugin = null
     }

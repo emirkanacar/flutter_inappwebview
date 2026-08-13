@@ -16,8 +16,38 @@ public class WebViewChannelDelegate: ChannelDelegate {
         super.init(channel: channel)
         self.webView = webView
     }
-    
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let webView = webView else { return false }
+        return webView.acceptsCallbacks()
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any) {
+        guard canDispatchCallbacks(), let channel = channel else { return }
+        channel.invokeMethod(method, arguments: arguments)
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any, callback: MethodChannelResult) {
+        guard canDispatchCallbacks(), let channel = channel else {
+            callback.success(nil)
+            return
+        }
+        channel.invokeMethod(method, arguments: arguments, callback: callback)
+    }
+
+    private func invokeMethod(_ method: String, arguments: Any, result: @escaping FlutterResult) {
+        guard canDispatchCallbacks(), let channel = channel else {
+            result(nil)
+            return
+        }
+        channel.invokeMethod(method, arguments: arguments, result: result)
+    }
+
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard webView?.acceptsCallbacks() == true else {
+            result(nil)
+            return
+        }
         let arguments = call.arguments as? NSDictionary
         
         guard let method = WebViewChannelDelegateMethods.init(rawValue: call.method) else {
@@ -695,29 +725,29 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "numberOfMatches": numberOfMatches,
             "isDoneCounting": isDoneCounting
         ]
-        channel?.invokeMethod("onFindResultReceived", arguments: arguments)
+        invokeMethod("onFindResultReceived", arguments: arguments)
     }
     
     public func onLongPressHitTestResult(hitTestResult: HitTestResult) {
-        channel?.invokeMethod("onLongPressHitTestResult", arguments: hitTestResult.toMap())
+        invokeMethod("onLongPressHitTestResult", arguments: hitTestResult.toMap())
     }
     
     public func onScrollChanged(x: Int, y: Int) {
         let arguments: [String: Any?] = ["x": x, "y": y]
-        channel?.invokeMethod("onScrollChanged", arguments: arguments)
+        invokeMethod("onScrollChanged", arguments: arguments)
     }
     
     public func onDownloadStarting(request: DownloadStartRequest) {
-        channel?.invokeMethod("onDownloadStarting", arguments: request.toMap())
+        invokeMethod("onDownloadStarting", arguments: request.toMap())
     }
     
     public func onCreateContextMenu(hitTestResult: HitTestResult) {
-        channel?.invokeMethod("onCreateContextMenu", arguments: hitTestResult.toMap())
+        invokeMethod("onCreateContextMenu", arguments: hitTestResult.toMap())
     }
     
     public func onOverScrolled(x: Int, y: Int, clampedX: Bool, clampedY: Bool) {
         let arguments: [String: Any?] = ["x": x, "y": y, "clampedX": clampedX, "clampedY": clampedY]
-        channel?.invokeMethod("onOverScrolled", arguments: arguments)
+        invokeMethod("onOverScrolled", arguments: arguments)
     }
     
     public func onContextMenuActionItemClicked(id: Any, title: String) {
@@ -740,22 +770,22 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "androidId": nil,
             "title": title
         ]
-        channel?.invokeMethod("onContextMenuActionItemClicked", arguments: arguments)
+        invokeMethod("onContextMenuActionItemClicked", arguments: arguments)
     }
     
     public func onHideContextMenu() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onHideContextMenu", arguments: arguments)
+        invokeMethod("onHideContextMenu", arguments: arguments)
     }
     
     public func onEnterFullscreen() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onEnterFullscreen", arguments: arguments)
+        invokeMethod("onEnterFullscreen", arguments: arguments)
     }
     
     public func onExitFullscreen() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onExitFullscreen", arguments: arguments)
+        invokeMethod("onExitFullscreen", arguments: arguments)
     }
     
     public class JsAlertCallback: BaseCallbackResult<JsAlertResponse> {
@@ -768,7 +798,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsAlert(url: URL?, message: String, isMainFrame: Bool, callback: JsAlertCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -777,7 +807,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsAlert", arguments: arguments, callback: callback)
+        invokeMethod("onJsAlert", arguments: arguments, callback: callback)
     }
     
     public class JsConfirmCallback: BaseCallbackResult<JsConfirmResponse> {
@@ -790,7 +820,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsConfirm(url: URL?, message: String, isMainFrame: Bool, callback: JsConfirmCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -799,7 +829,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsConfirm", arguments: arguments, callback: callback)
+        invokeMethod("onJsConfirm", arguments: arguments, callback: callback)
     }
     
     public class JsPromptCallback: BaseCallbackResult<JsPromptResponse> {
@@ -812,7 +842,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onJsPrompt(url: URL?, message: String, defaultValue: String?, isMainFrame: Bool, callback: JsPromptCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -822,7 +852,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "defaultValue": defaultValue,
             "isMainFrame": isMainFrame
         ]
-        channel?.invokeMethod("onJsPrompt", arguments: arguments, callback: callback)
+        invokeMethod("onJsPrompt", arguments: arguments, callback: callback)
     }
     
     public class CreateWindowCallback: BaseCallbackResult<Bool> {
@@ -835,16 +865,16 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onCreateWindow(createWindowAction: CreateWindowAction, callback: CreateWindowCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onCreateWindow", arguments: createWindowAction.toMap(), callback: callback)
+        invokeMethod("onCreateWindow", arguments: createWindowAction.toMap(), callback: callback)
     }
     
     public func onCloseWindow() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onCloseWindow", arguments: arguments)
+        invokeMethod("onCloseWindow", arguments: arguments)
     }
     
     public func onConsoleMessage(message: String, messageLevel: Int) {
@@ -852,21 +882,21 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "message": message,
             "messageLevel": messageLevel
         ]
-        channel?.invokeMethod("onConsoleMessage", arguments: arguments)
+        invokeMethod("onConsoleMessage", arguments: arguments)
     }
     
     public func onProgressChanged(progress: Int) {
         let arguments: [String: Any?] = [
             "progress": progress
         ]
-        channel?.invokeMethod("onProgressChanged", arguments: arguments)
+        invokeMethod("onProgressChanged", arguments: arguments)
     }
     
     public func onTitleChanged(title: String?) {
         let arguments: [String: Any?] = [
             "title": title
         ]
-        channel?.invokeMethod("onTitleChanged", arguments: arguments)
+        invokeMethod("onTitleChanged", arguments: arguments)
     }
     
     public class PermissionRequestCallback: BaseCallbackResult<PermissionResponse> {
@@ -883,11 +913,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onPermissionRequest(request: PermissionRequest, callback: PermissionRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onPermissionRequest", arguments: request.toMap(), callback: callback)
+        invokeMethod("onPermissionRequest", arguments: request.toMap(), callback: callback)
     }
     
     public class ShouldOverrideUrlLoadingCallback: BaseCallbackResult<WKNavigationActionPolicy> {
@@ -907,21 +937,21 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func shouldOverrideUrlLoading(navigationAction: WKNavigationAction, callback: ShouldOverrideUrlLoadingCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("shouldOverrideUrlLoading", arguments: navigationAction.toMap(), callback: callback)
+        invokeMethod("shouldOverrideUrlLoading", arguments: navigationAction.toMap(), callback: callback)
     }
     
     public func onLoadStart(url: String?) {
         let arguments: [String: Any?] = ["url": url]
-        channel?.invokeMethod("onLoadStart", arguments: arguments)
+        invokeMethod("onLoadStart", arguments: arguments)
     }
     
     public func onLoadStop(url: String?) {
         let arguments: [String: Any?] = ["url": url]
-        channel?.invokeMethod("onLoadStop", arguments: arguments)
+        invokeMethod("onLoadStop", arguments: arguments)
     }
     
     public func onUpdateVisitedHistory(url: String?, isReload: Bool?) {
@@ -929,7 +959,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "url": url,
             "isReload": nil
         ]
-        channel?.invokeMethod("onUpdateVisitedHistory", arguments: arguments)
+        invokeMethod("onUpdateVisitedHistory", arguments: arguments)
     }
     
     public func onReceivedError(request: WebResourceRequest, error: WebResourceError) {
@@ -937,7 +967,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "request": request.toMap(),
             "error": error.toMap()
         ]
-        channel?.invokeMethod("onReceivedError", arguments: arguments)
+        invokeMethod("onReceivedError", arguments: arguments)
     }
     
     public func onReceivedHttpError(request: WebResourceRequest, errorResponse: WebResourceResponse) {
@@ -945,7 +975,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "request": request.toMap(),
             "errorResponse": errorResponse.toMap()
         ]
-        channel?.invokeMethod("onReceivedHttpError", arguments: arguments)
+        invokeMethod("onReceivedHttpError", arguments: arguments)
     }
     
     public class ReceivedHttpAuthRequestCallback: BaseCallbackResult<HttpAuthResponse> {
@@ -962,7 +992,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedHttpAuthRequest(challenge: HttpAuthenticationChallenge, callback: ReceivedHttpAuthRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -971,11 +1001,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedHttpAuthRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedHttpAuthRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -994,7 +1024,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedServerTrustAuthRequest(challenge: ServerTrustChallenge, callback: ReceivedServerTrustAuthRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1003,11 +1033,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedServerTrustAuthRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedServerTrustAuthRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -1026,7 +1056,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onReceivedClientCertRequest(challenge: ClientCertChallenge, callback: ReceivedClientCertRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1035,11 +1065,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("onReceivedClientCertRequest", arguments: arguments, callback: callback)
+                self?.invokeMethod("onReceivedClientCertRequest", arguments: arguments, callback: callback)
             }
         }
     }
@@ -1049,14 +1079,14 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "newScale": newScale,
             "oldScale": oldScale
         ]
-        channel?.invokeMethod("onZoomScaleChanged", arguments: arguments)
+        invokeMethod("onZoomScaleChanged", arguments: arguments)
     }
     
     public func onPageCommitVisible(url: String?) {
         let arguments: [String: Any?] = [
             "url": url
         ]
-        channel?.invokeMethod("onPageCommitVisible", arguments: arguments)
+        invokeMethod("onPageCommitVisible", arguments: arguments)
     }
     
     public class LoadResourceWithCustomSchemeCallback: BaseCallbackResult<CustomSchemeResponse> {
@@ -1069,12 +1099,12 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onLoadResourceWithCustomScheme(request: WebResourceRequest, callback: LoadResourceWithCustomSchemeCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
         let arguments: [String: Any?] = ["request": request.toMap()]
-        channel?.invokeMethod("onLoadResourceWithCustomScheme", arguments: arguments, callback: callback)
+        invokeMethod("onLoadResourceWithCustomScheme", arguments: arguments, callback: callback)
     }
     
     public class CallJsHandlerCallback: BaseCallbackResult<Any> {
@@ -1087,7 +1117,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onCallJsHandler(handlerName: String, data: JavaScriptHandlerFunctionData, callback: CallJsHandlerCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1095,7 +1125,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "handlerName": handlerName,
             "data": data.toMap()
         ]
-        channel?.invokeMethod("onCallJsHandler", arguments: arguments, callback: callback)
+        invokeMethod("onCallJsHandler", arguments: arguments, callback: callback)
     }
     
     public class NavigationResponseCallback: BaseCallbackResult<WKNavigationResponsePolicy> {
@@ -1115,11 +1145,11 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onNavigationResponse(navigationResponse: WKNavigationResponse, callback: NavigationResponseCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
-        channel?.invokeMethod("onNavigationResponse", arguments: navigationResponse.toMap(), callback: callback)
+        invokeMethod("onNavigationResponse", arguments: navigationResponse.toMap(), callback: callback)
     }
     
     public class ShouldAllowDeprecatedTLSCallback: BaseCallbackResult<Bool> {
@@ -1139,7 +1169,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func shouldAllowDeprecatedTLS(challenge: URLAuthenticationChallenge, callback: ShouldAllowDeprecatedTLSCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1148,23 +1178,23 @@ public class WebViewChannelDelegate: ChannelDelegate {
         DispatchQueue.global().async {
             let arguments = challenge.toMap()
             DispatchQueue.main.async { [weak self] in
-                if self?.channel == nil {
+                if self?.canDispatchCallbacks() != true {
                     callback.defaultBehaviour(nil)
                     return
                 }
-                self?.channel?.invokeMethod("shouldAllowDeprecatedTLS", arguments: arguments, callback: callback)
+                self?.invokeMethod("shouldAllowDeprecatedTLS", arguments: arguments, callback: callback)
             }
         }
     }
     
     public func onWebContentProcessDidTerminate() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onWebContentProcessDidTerminate", arguments: arguments)
+        invokeMethod("onWebContentProcessDidTerminate", arguments: arguments)
     }
     
     public func onDidReceiveServerRedirectForProvisionalNavigation() {
         let arguments: [String: Any?] = [:]
-        channel?.invokeMethod("onDidReceiveServerRedirectForProvisionalNavigation", arguments: arguments)
+        invokeMethod("onDidReceiveServerRedirectForProvisionalNavigation", arguments: arguments)
     }
     
     @available(macOS 12.0, *)
@@ -1173,7 +1203,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "oldState": oldState?.rawValue,
             "newState": newState?.rawValue
         ]
-        channel?.invokeMethod("onCameraCaptureStateChanged", arguments: arguments)
+        invokeMethod("onCameraCaptureStateChanged", arguments: arguments)
     }
     
     @available(macOS 12.0, *)
@@ -1182,7 +1212,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "oldState": oldState?.rawValue,
             "newState": newState?.rawValue
         ]
-        channel?.invokeMethod("onMicrophoneCaptureStateChanged", arguments: arguments)
+        invokeMethod("onMicrophoneCaptureStateChanged", arguments: arguments)
     }
     
     public class PrintRequestCallback: BaseCallbackResult<Bool> {
@@ -1195,7 +1225,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
     
     public func onPrintRequest(url: URL?, printJobId: String?, callback: PrintRequestCallback) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             callback.defaultBehaviour(nil)
             return
         }
@@ -1203,15 +1233,15 @@ public class WebViewChannelDelegate: ChannelDelegate {
             "url": url?.absoluteString,
             "printJobId": printJobId,
         ]
-        channel?.invokeMethod("onPrintRequest", arguments: arguments, callback: callback)
+        invokeMethod("onPrintRequest", arguments: arguments, callback: callback)
     }
     
     internal func _onMouseDown(callback: @escaping () -> Void) {
-        if channel == nil {
+        if !canDispatchCallbacks() {
             return
         }
         let arguments: [String:Any] = [:];
-        channel?.invokeMethod("_onMouseDown", arguments: arguments) {(result) -> Void in
+        invokeMethod("_onMouseDown", arguments: arguments) {(result) -> Void in
             callback()
         }
     }

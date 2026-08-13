@@ -353,6 +353,8 @@ class WebViewChannelDelegate : public ChannelDelegate {
   void HandleGetScrollY(FlMethodCall* method_call);
   void HandleGetSettings(FlMethodCall* method_call);
   void HandleSetSettings(FlMethodCall* method_call);
+
+  bool canDispatchCallbacks() const;
 };
 
 }  // namespace flutter_inappwebview_plugin

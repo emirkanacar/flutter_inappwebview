@@ -9,5 +9,7 @@ interface ICallbackResult<T> : MethodChannel.Result {
 
     fun defaultBehaviour(result: T?)
 
+    fun completeDefaultBehaviour(result: T?): Boolean
+
     fun decodeResult(obj: Any?): T?
 }

@@ -7,7 +7,7 @@ import 'in_app_web_view_web_element.dart';
 import 'headless_in_app_web_view_web_element.dart';
 
 class HeadlessInAppWebViewManager extends ChannelController {
-  static final Map<String, HeadlessInAppWebViewWebElement?> webViews = {};
+  static final Map<String, HeadlessInAppWebViewWebElement> webViews = {};
 
   late BinaryMessenger _messenger;
 
@@ -37,15 +37,23 @@ class HeadlessInAppWebViewManager extends ChannelController {
   }
 
   void run(String id, Map<String, dynamic> params) {
+    final previousHeadlessWebView = webViews.remove(id);
+    previousHeadlessWebView?.dispose();
+
+    final previousWebView = InAppWebViewManager.webViews.remove(id);
+    previousWebView?.dispose();
+
     var webView = InAppWebViewWebElement(viewId: id, messenger: _messenger);
     var headlessWebView = HeadlessInAppWebViewWebElement(
       id: id,
       messenger: _messenger,
       webView: webView,
     );
-    InAppWebViewManager.webViews.putIfAbsent(id, () => webView);
-    HeadlessInAppWebViewManager.webViews.putIfAbsent(id, () => headlessWebView);
+    InAppWebViewManager.webViews[id] = webView;
+    HeadlessInAppWebViewManager.webViews[id] = headlessWebView;
     prepare(webView, params);
+    headlessWebView.lifecycle.markAttached();
+    headlessWebView.lifecycle.markReady();
     headlessWebView.onWebViewCreated();
     webView.makeInitialLoad();
   }

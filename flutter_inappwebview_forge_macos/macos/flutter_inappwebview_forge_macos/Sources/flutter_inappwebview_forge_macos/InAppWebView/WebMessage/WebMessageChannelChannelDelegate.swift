@@ -10,6 +10,7 @@ import FlutterMacOS
 
 public class WebMessageChannelChannelDelegate: ChannelDelegate {
     private weak var webMessageChannel: WebMessageChannel?
+    private var pendingResults: [UUID: FlutterResult] = [:]
     
     public init(webMessageChannel: WebMessageChannel, channel: FlutterMethodChannel) {
         super.init(channel: channel)
@@ -17,6 +18,10 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard canDispatchCallbacks() else {
+            result(nil)
+            return
+        }
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
@@ -24,12 +29,13 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
                 let index = arguments!["index"] as! Int
                 let port = ports[index]
+                let requestId = track(result)
                 do {
-                    try port.setWebMessageCallback { (_) in
-                        result(true)
+                    try port.setWebMessageCallback { [weak self] (_) in
+                        self?.complete(requestId, value: true)
                     }
                 } catch let error as NSError {
-                    result(FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
+                    complete(requestId, value: FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
                 }
                 
             } else {
@@ -51,13 +57,13 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
                     }
                 }
                 message.ports = ports
-                
+                let requestId = track(result)
                 do {
-                    try port.postMessage(message: message) { (_) in
-                        result(true)
+                    try port.postMessage(message: message) { [weak self] (_) in
+                        self?.complete(requestId, value: true)
                     }
                 } catch let error as NSError {
-                    result(FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
+                    complete(requestId, value: FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
                 }
             } else {
                 result(true)
@@ -67,12 +73,13 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
                 let index = arguments!["index"] as! Int
                 let port = ports[index]
+                let requestId = track(result)
                 do {
-                    try port.close { (_) in
-                        result(true)
+                    try port.close { [weak self] (_) in
+                        self?.complete(requestId, value: true)
                     }
                 } catch let error as NSError {
-                    result(FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
+                    complete(requestId, value: FlutterError(code: "WebMessageChannel", message: error.domain, details: nil))
                 }
             } else {
                 result(true)
@@ -85,6 +92,7 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
     }
     
     public func onMessage(index: Int64, message: WebMessage?) {
+        guard canDispatchCallbacks() else { return }
         let arguments: [String:Any?] = [
             "index": index,
             "message": message?.toMap()
@@ -93,8 +101,28 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
     }
     
     public override func dispose() {
+        let results = pendingResults.values
+        pendingResults.removeAll()
+        results.forEach { $0(nil) }
         super.dispose()
         webMessageChannel = nil
+    }
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let webMessageChannel = webMessageChannel else { return false }
+        guard let webView = webMessageChannel.webView else { return true }
+        return webView.acceptsCallbacks()
+    }
+
+    private func track(_ result: @escaping FlutterResult) -> UUID {
+        let requestId = UUID()
+        pendingResults[requestId] = result
+        return requestId
+    }
+
+    private func complete(_ requestId: UUID, value: Any?) {
+        guard let result = pendingResults.removeValue(forKey: requestId) else { return }
+        result(value)
     }
     
     deinit {

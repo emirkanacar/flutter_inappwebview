@@ -12,15 +12,16 @@ open class PrintJobManager : Disposable {
     var plugin: InAppWebViewFlutterPlugin? = null
 
     @JvmField
-    val jobs: MutableMap<String, PrintJobController?> = HashMap()
+    val jobs: MutableMap<String, PrintJobController> = HashMap()
 
     constructor(plugin: InAppWebViewFlutterPlugin) {
         this.plugin = plugin
     }
 
     override fun dispose() {
-        jobs.values.forEach { it?.dispose() }
+        val ownedJobs = ArrayList(jobs.values)
         jobs.clear()
+        ownedJobs.forEach { it.dispose() }
         plugin = null
     }
 

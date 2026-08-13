@@ -5,7 +5,7 @@
   _Array_slice.call = window.Function.prototype.call;
   window.flutter_inappwebview_plugin = {
     createFlutterInAppWebView: function(viewId, iframe, iframeContainer, bridgeSecret) {
-      const iframeId = iframe.id;
+      let iframeId = iframe.id;
       // The iframe element's `src` attribute is only the requested URL. It does
       // not change when the embedded page navigates itself. Reading the actual
       // location is also subject to the browser's same-origin policy, so return
@@ -23,9 +23,41 @@
         iframeId,
         iframe: null,
         iframeContainer: null,
+        reattach: function(viewId2, iframe2, iframeContainer2) {
+          viewId = viewId2;
+          iframe = iframe2;
+          iframeContainer = iframeContainer2;
+          iframeId = iframe2.id;
+          webView.viewId = viewId2;
+          webView.iframe = iframe2;
+          webView.iframeContainer = iframeContainer2;
+        },
         isFullscreen: false,
         documentTitle: null,
         functionMap: {},
+        scrollEventFramePending: false,
+        lastScrollX: 0,
+        lastScrollY: 0,
+        scheduleScrollChanged: function() {
+          try {
+            webView.lastScrollX = iframe.contentWindow.scrollX;
+            webView.lastScrollY = iframe.contentWindow.scrollY;
+          } catch (e) {
+            webView.lastScrollX = 0;
+            webView.lastScrollY = 0;
+          }
+          if (webView.scrollEventFramePending) {
+            return;
+          }
+          webView.scrollEventFramePending = true;
+          const schedule = window.requestAnimationFrame || function(callback) {
+            return window.setTimeout(callback, 0);
+          };
+          schedule(function() {
+            webView.scrollEventFramePending = false;
+            _nativeCommunication("onScrollChanged", viewId, [webView.lastScrollX, webView.lastScrollY]);
+          });
+        },
         settings: {},
         javaScriptBridgeEnabled: true,
         disableContextMenuHandler: function(event) {
@@ -216,15 +248,7 @@
                   _nativeCommunication("onUpdateVisitedHistory", viewId, [iframeUrl]);
                 });
                 iframe.contentWindow.addEventListener("scroll", function(event2) {
-                  let x = 0;
-                  let y = 0;
-                  try {
-                    x = iframe.contentWindow.scrollX;
-                    y = iframe.contentWindow.scrollY;
-                  } catch (e) {
-                    console.log(e);
-                  }
-                  _nativeCommunication("onScrollChanged", viewId, [x, y]);
+                  webView.scheduleScrollChanged();
                 });
                 iframe.contentWindow.addEventListener("focus", function(event2) {
                   _nativeCommunication("onWindowFocus", viewId);

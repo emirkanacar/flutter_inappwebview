@@ -96,6 +96,10 @@ void HeadlessInAppWebViewManager::Run(FlMethodCall* method_call) {
   }
   std::string id = idOpt.value();
 
+  // Replace duplicate IDs before constructing the new owner so the old
+  // WebView cannot remain reachable through a stale headless channel.
+  RemoveHeadlessWebView(id);
+
   // Get the params map
   FlValue* params = get_fl_map_value_raw(args, "params");
   if (params == nullptr || fl_value_get_type(params) != FL_VALUE_TYPE_MAP) {

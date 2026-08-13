@@ -14,7 +14,7 @@ import AVFoundation
 public class WebAuthenticationSessionManager: ChannelDelegate {
     static let METHOD_CHANNEL_NAME = "com.emirkanacar/flutter_webauthenticationsession"
     var plugin: InAppWebViewFlutterPlugin?
-    var sessions: [String: WebAuthenticationSession?] = [:]
+    var sessions: [String: WebAuthenticationSession] = [:]
     
     init(plugin: InAppWebViewFlutterPlugin) {
         super.init(channel: FlutterMethodChannel(name: WebAuthenticationSessionManager.METHOD_CHANNEL_NAME, binaryMessenger: plugin.registrar.messenger()))
@@ -58,12 +58,12 @@ public class WebAuthenticationSessionManager: ChannelDelegate {
     
     public override func dispose() {
         super.dispose()
-        let sessionValues = sessions.values
-        sessionValues.forEach { (session: WebAuthenticationSession?) in
-            session?.cancel()
-            session?.dispose()
-        }
+        let sessionValues = Array(sessions.values)
         sessions.removeAll()
+        sessionValues.forEach { (session: WebAuthenticationSession) in
+            session.cancel()
+            session.dispose()
+        }
         plugin = nil
     }
     

@@ -5,13 +5,24 @@ import io.flutter.plugin.common.MethodChannel
 import java.util.HashMap
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import com.emirkanacar.flutter_inappwebview_forge_android.types.FindSession
+import com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview.InAppWebView
 
 open class FindInteractionChannelDelegate(
     private var findInteractionController: FindInteractionController?,
     channel: MethodChannel
 ) : ChannelDelegateImpl(channel) {
 
+    private fun canDispatchCallbacks(): Boolean {
+        val webView = findInteractionController?.webView
+        return getChannel() != null && webView != null &&
+            (webView !is InAppWebView || webView.acceptsCallbacks())
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (!canDispatchCallbacks()) {
+            result.success(null)
+            return
+        }
         when (call.method) {
             "findAll" -> {
                 findInteractionController?.findAll(call.argument<String>("find"))
@@ -45,6 +56,7 @@ open class FindInteractionChannelDelegate(
     }
 
     fun onFindResultReceived(activeMatchOrdinal: Int, numberOfMatches: Int, isDoneCounting: Boolean) {
+        if (!canDispatchCallbacks()) return
         val channel = getChannel() ?: return
         val controller = findInteractionController
         if (isDoneCounting && controller?.webView != null) {

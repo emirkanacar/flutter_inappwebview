@@ -283,6 +283,12 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
     }
 
     fun addUserOnlyScript(userOnlyScript: UserScript): Boolean {
+        val scripts = userScriptsAt(userOnlyScript.injectionTime)
+        if (scripts.contains(userOnlyScript) &&
+            !pendingUserOnlyScriptRegistrations.contains(userOnlyScript)
+        ) {
+            return false
+        }
         contentWorlds.add(userOnlyScript.getContentWorld())
         updateContentWorldsCreatorScript()
         val currentWebView = webView
@@ -305,7 +311,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
                 pendingUserOnlyScriptRegistrations.add(userOnlyScript)
             }
         }
-        return userScriptsAt(userOnlyScript.injectionTime).add(userOnlyScript)
+        return scripts.add(userOnlyScript)
     }
 
     fun addUserOnlyScripts(userOnlyScripts: List<UserScript>) {
@@ -349,6 +355,12 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
             .toCollection(LinkedHashSet())
 
     fun addPluginScript(pluginScript: PluginScript): Boolean {
+        val scripts = pluginScriptsAt(pluginScript.injectionTime)
+        if (scripts.contains(pluginScript) &&
+            !pendingPluginScriptRegistrations.contains(pluginScript)
+        ) {
+            return false
+        }
         contentWorlds.add(pluginScript.getContentWorld())
         updateContentWorldsCreatorScript()
         val currentWebView = webView
@@ -371,7 +383,7 @@ open class UserContentController(initialWebView: WebView?) : Disposable {
                 pendingPluginScriptRegistrations.add(pluginScript)
             }
         }
-        return pluginScriptsAt(pluginScript.injectionTime).add(pluginScript)
+        return scripts.add(pluginScript)
     }
 
     fun addPluginScripts(pluginScripts: List<PluginScript>) {

@@ -26,6 +26,9 @@ void _runSourceContractAssertions() {
   final source = _sourceFile(
     'linux/in_app_webview/in_app_webview.cc',
   ).readAsStringSync();
+  final lifecycleSource = _sourceFile(
+    'linux/types/web_view_lifecycle_coordinator.h',
+  ).readAsStringSync();
   final softwareRenderingSource = _sourceFile(
     'linux/utils/software_rendering.cc',
   ).readAsStringSync();
@@ -116,6 +119,24 @@ void _runSourceContractAssertions() {
     'the DMA-BUF skip in the pixel-buffer path',
   );
   _expectContains(
+    lifecycleSource,
+    'WebViewLifecycleState',
+    'the Linux internal lifecycle state model',
+  );
+  _expectContains(
+    lifecycleSource,
+    'markDetachedRetained',
+    'the Linux retained ownership transition',
+  );
+  final channelSource = _sourceFile(
+    'linux/in_app_webview/webview_channel_delegate.cc',
+  ).readAsStringSync();
+  _expectContains(
+    channelSource,
+    'canDispatchCallbacks()',
+    'the Linux stale-channel callback gate',
+  );
+  _expectContains(
     softwareRenderingHeader,
     'software WPE buffers',
     'the software-buffer fallback documentation',
@@ -140,6 +161,35 @@ void _runSourceContractAssertions() {
     'DisableAutocorrectionJS::DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT',
     'the Linux autocorrection plugin registration',
   );
+  final settingsSource = _sourceFile(
+    'linux/in_app_webview/in_app_webview_settings.cc',
+  ).readAsStringSync();
+  final settingsHeader = _sourceFile(
+    'linux/in_app_webview/in_app_webview_settings.h',
+  ).readAsStringSync();
+  final contentBlockerSource = _sourceFile(
+    'linux/content_blocker/content_blocker_handler.cc',
+  ).readAsStringSync();
+  _expectContains(
+    settingsSource,
+    'const auto changed = [this, previous]',
+    'the Linux property-level settings diff helper',
+  );
+  _expectContains(
+    settingsHeader,
+    'const InAppWebViewSettings* previous = nullptr',
+    'the Linux settings snapshot API',
+  );
+  _expectContains(
+    contentBlockerSource,
+    'serializeContentBlockers',
+    'the Linux content-blocker snapshot serializer',
+  );
+  _expectContains(
+    source,
+    'content_blockers_snapshot_',
+    'the Linux duplicate content-blocker compilation guard',
+  );
   _expectContains(
     autocorrectionSource,
     'UserScriptInjectionTime::atDocumentStart',
@@ -150,4 +200,32 @@ void _runSourceContractAssertions() {
     'spellcheck',
     'the Linux spelling-suggestion hint',
   );
+  final headlessManagerSource = _sourceFile(
+    'linux/headless_in_app_webview/headless_in_app_webview_manager.cc',
+  ).readAsStringSync();
+  final managerSource = _sourceFile(
+    'linux/in_app_webview/in_app_webview_manager.cc',
+  ).readAsStringSync();
+  _expectContains(
+    headlessManagerSource,
+    'RemoveHeadlessWebView(id);',
+    'the duplicate headless ID replacement gate',
+  );
+  _expectContains(
+    managerSource,
+    'keepAliveWebViews_.emplace(keepAliveId, std::move(view));',
+    'the explicit keep-alive ownership insertion',
+  );
+  _expectContains(
+    managerSource,
+    'existingView->webview()->markReattached();',
+    'the Linux keep-alive reattachment transition',
+  );
+  final disposeGate = source.indexOf('lifecycle_.beginDisposal()');
+  final firstCleanup = source.indexOf('CleanupMonitorChangeHandlers();');
+  if (disposeGate < 0 || firstCleanup < 0 || disposeGate > firstCleanup) {
+    throw StateError(
+      'Linux WPE disposal must enable the callback gate before cleanup starts',
+    );
+  }
 }

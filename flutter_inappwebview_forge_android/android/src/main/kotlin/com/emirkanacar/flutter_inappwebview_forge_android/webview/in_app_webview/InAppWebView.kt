@@ -147,6 +147,8 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   @JvmField
   var evaluateJavaScriptContentWorldCallbacks: MutableMap<String, ValueCallback<String>?> = HashMap()
 
+  private val evaluateJavaScriptCallbacks: MutableMap<String, ValueCallback<String>?> = HashMap()
+
   @JvmField
   var webMessageChannels: MutableMap<String, WebMessageChannel> = HashMap()
 
@@ -170,8 +172,14 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   private var nativeRegistrationsRegistered = false
   private var nativeRegistrationRequestScheduled = false
   private var nativeRegistrationAttempts = 0
-  private var isDisposed = false
+  private val lifecycle = WebViewLifecycleCoordinator()
   private val nativeRegistrationCallbacks: MutableList<() -> Unit> = ArrayList()
+  private val callAsyncJavaScriptOperationIds: MutableMap<String, Long> = HashMap()
+  private val evaluateJavaScriptOperationIds: MutableMap<String, Long> = HashMap()
+  private val evaluateJavaScriptContentWorldOperationIds: MutableMap<String, Long> = HashMap()
+  private val saveWebArchiveCallbacks: MutableMap<String, ValueCallback<String>> = HashMap()
+  private val saveWebArchiveOperationIds: MutableMap<String, Long> = HashMap()
+  private val pendingScreenshotResults: MutableMap<Long, MethodChannel.Result> = HashMap()
   private var pendingScrollX: Int? = null
   private var pendingScrollY: Int? = null
   private var scrollChangedDispatchScheduled = false
@@ -181,7 +189,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     pendingScrollX = null
     pendingScrollY = null
     scrollChangedDispatchScheduled = false
-    if (!isDisposed && x != null && y != null) {
+    if (lifecycle.acceptsCallbacks() && x != null && y != null) {
       channelDelegate?.onScrollChanged(x, y)
     }
   }
@@ -262,7 +270,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   @SuppressLint("RestrictedApi")
   fun prepare(deferNativeRegistrations: Boolean) {
-    isDisposed = false
+    if (!lifecycle.beginPreparing()) return
 
     // A profile must be attached before JavaScript interfaces, cookies, or
     // other WebView state are initialized. Incognito intentionally keeps its
@@ -682,6 +690,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     )
 
     checkScrollStoppedTask = Runnable {
+      if (!lifecycle.acceptsCallbacks()) return@Runnable
       val newPosition = scrollY
       if (initialPositionScrollStoppedTask == newPosition) {
         onScrollStopped()
@@ -698,11 +707,13 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       customSettings.useHybridComposition != true
     ) {
       checkContextMenuShouldBeClosedTask = Runnable {
+        if (!lifecycle.acceptsCallbacks()) return@Runnable
         if (floatingContextMenu != null) {
           evaluateJavascript(
             PluginScriptsUtil.CHECK_CONTEXT_MENU_SHOULD_BE_HIDDEN_JS_SOURCE,
             null,
             ValueCallback { value ->
+              if (!lifecycle.acceptsCallbacks()) return@ValueCallback
               if (value == null || value == "true") {
                 if (floatingContextMenu != null) {
                   hideContextMenu()
@@ -776,35 +787,38 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
    * callback until they are later surfaced.
    */
   fun onPlatformViewAttached() {
-    if (!isDisposed && nativeRegistrationsDeferred) {
+    lifecycle.markAttached()
+    if (lifecycle.acceptsCallbacks() && nativeRegistrationsDeferred) {
       requestNativeRegistrations()
     }
   }
 
   fun whenNativeRegistrationsReady(callback: () -> Unit) {
-    if (isDisposed) {
+    if (!lifecycle.acceptsCallbacks()) {
       return
     }
     if (nativeRegistrationsRegistered) {
-      post { callback() }
+      post {
+        if (lifecycle.acceptsCallbacks()) callback()
+      }
     } else {
       nativeRegistrationCallbacks.add(callback)
     }
   }
 
   private fun requestNativeRegistrations() {
-    if (isDisposed || nativeRegistrationsRegistered || nativeRegistrationRequestScheduled) {
+    if (!lifecycle.acceptsCallbacks() || nativeRegistrationsRegistered || nativeRegistrationRequestScheduled) {
       return
     }
 
     nativeRegistrationRequestScheduled = true
     WebViewStartupCoordinator.runWhenReady(context) {
-      if (isDisposed) {
+      if (!lifecycle.acceptsCallbacks()) {
         nativeRegistrationRequestScheduled = false
         return@runWhenReady
       }
       post {
-        if (isDisposed) {
+        if (!lifecycle.acceptsCallbacks()) {
           nativeRegistrationRequestScheduled = false
           return@post
         }
@@ -815,7 +829,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   private fun registerNativeWebViewInterfaces() {
-    if (isDisposed || nativeRegistrationsRegistered || plugin == null) {
+    if (!lifecycle.acceptsCallbacks() || nativeRegistrationsRegistered || plugin == null) {
       return
     }
 
@@ -843,6 +857,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
     if (bridgeReady && !userContentController.hasPendingScriptRegistrations()) {
       nativeRegistrationsRegistered = true
+      lifecycle.markReady()
       val callbacks = nativeRegistrationCallbacks.toList()
       nativeRegistrationCallbacks.clear()
       callbacks.forEach { callback -> post { callback() } }
@@ -856,6 +871,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
           "$MAX_NATIVE_REGISTRATION_ATTEMPTS attempts; continuing without blocking the first load."
       )
       nativeRegistrationsRegistered = true
+      lifecycle.markReady()
       val callbacks = nativeRegistrationCallbacks.toList()
       nativeRegistrationCallbacks.clear()
       callbacks.forEach { callback -> post { callback() } }
@@ -1067,8 +1083,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     screenshotConfiguration: MutableMap<String, Any?>,
     result: MethodChannel.Result
   ) {
+    val operationId = lifecycle.beginAsyncOperation()
+    if (operationId == null) {
+      result.success(null)
+      return
+    }
+    pendingScreenshotResults[operationId] = result
     val pixelDensity = Util.getPixelDensity(context)
-    mainLooperHandler.post {
+    val posted = mainLooperHandler.post {
+      if (!lifecycle.acceptsCallbacks()) {
+        completeScreenshotResult(operationId, null)
+        return@post
+      }
       try {
         var bitmapWidth = measuredWidth
         var bitmapHeight = measuredHeight
@@ -1143,11 +1169,17 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
           Log.e(LOG_TAG, "", e)
         }
         screenshotBitmap.recycle()
-        result.success(byteArrayOutputStream.toByteArray())
+        completeScreenshotResult(operationId, byteArrayOutputStream.toByteArray())
       } catch (e: IllegalArgumentException) {
         Log.e(LOG_TAG, "", e)
-        result.success(null)
+        completeScreenshotResult(operationId, null)
+      } catch (e: Throwable) {
+        Log.e(LOG_TAG, "Screenshot failed", e)
+        completeScreenshotResult(operationId, null)
       }
+    }
+    if (!posted) {
+      completeScreenshotResult(operationId, null)
     }
   }
 
@@ -1576,7 +1608,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       )
     }
 
-    if (newCustomSettings.contentBlockers.isNotEmpty()) {
+    if (changed("contentBlockers", customSettings.contentBlockers, newCustomSettings.contentBlockers)) {
       contentBlockerHandler.getRuleList().clear()
       for (contentBlocker in newCustomSettings.contentBlockers) {
         val trigger = contentBlocker["trigger"] as? MutableMap<String, Any?> ?: continue
@@ -1759,10 +1791,12 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       )
     }
 
-    plugin?.let { currentPlugin ->
-      webViewAssetLoaderExt?.dispose()
-      webViewAssetLoaderExt =
-        WebViewAssetLoaderExt.fromMap(newCustomSettings.webViewAssetLoader, currentPlugin, context)
+    if (changed("webViewAssetLoader", customSettings.webViewAssetLoader, newCustomSettings.webViewAssetLoader)) {
+      plugin?.let { currentPlugin ->
+        webViewAssetLoaderExt?.dispose()
+        webViewAssetLoaderExt =
+          WebViewAssetLoaderExt.fromMap(newCustomSettings.webViewAssetLoader, currentPlugin, context)
+      }
     }
 
     customSettings = newCustomSettings
@@ -1782,6 +1816,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       "((window.top == null || window.top === window) ? window : window.top)." + flagVariable,
       null,
       ValueCallback { value ->
+        if (!lifecycle.acceptsCallbacks()) return@ValueCallback
         val alreadyLoaded = value != null && !value.equals("null", ignoreCase = true)
         if (alreadyLoaded) {
           val enableSource =
@@ -1805,12 +1840,28 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     jsWrapper: String?,
     resultCallback: ValueCallback<String>?
   ) {
-    val resultUuid =
-      if (contentWorld != null && contentWorld != ContentWorld.PAGE) {
-        UUID.randomUUID().toString()
-      } else {
-        null
+    if (!lifecycle.acceptsCallbacks()) {
+      resultCallback?.onReceiveValue("null")
+      return
+    }
+
+    val resultUuid = if (resultCallback != null) UUID.randomUUID().toString() else null
+    val isContentWorldCallback =
+      resultUuid != null && contentWorld != null && contentWorld != ContentWorld.PAGE
+    if (resultUuid != null && resultCallback != null) {
+      val operationId = lifecycle.beginAsyncOperation()
+      if (operationId == null) {
+        resultCallback.onReceiveValue("null")
+        return
       }
+      if (isContentWorldCallback) {
+        evaluateJavaScriptContentWorldCallbacks[resultUuid] = resultCallback
+        evaluateJavaScriptContentWorldOperationIds[resultUuid] = operationId
+      } else {
+        evaluateJavaScriptCallbacks[resultUuid] = resultCallback
+        evaluateJavaScriptOperationIds[resultUuid] = operationId
+      }
+    }
 
     var scriptToInject = source
     if (jsWrapper != null) {
@@ -1823,8 +1874,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       )
     }
 
-    if (resultUuid != null && resultCallback != null) {
-      evaluateJavaScriptContentWorldCallbacks[resultUuid] = resultCallback
+    if (isContentWorldCallback) {
       scriptToInject = Util.replaceAll(
         PluginScriptsUtil.EVALUATE_JAVASCRIPT_WITH_CONTENT_WORLD_WRAPPER_JS_SOURCE(),
         PluginScriptsUtil.VAR_RANDOM_NAME,
@@ -1835,21 +1885,44 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
           PluginScriptsUtil.VAR_PLACEHOLDER_VALUE,
           UserContentController.escapeCode(source)
         )
-        .replace(PluginScriptsUtil.VAR_RESULT_UUID, resultUuid)
+        .replace(PluginScriptsUtil.VAR_RESULT_UUID, resultUuid!!)
     }
 
     val finalScriptToInject = scriptToInject
-    mainLooperHandler.post {
-      val generatedScript =
-        userContentController.generateCodeForScriptEvaluation(finalScriptToInject, contentWorld)
-      super.evaluateJavascript(
-        generatedScript,
-        ValueCallback { value ->
-          if (resultUuid == null && resultCallback != null) {
-            resultCallback.onReceiveValue(value)
-          }
+    val posted = mainLooperHandler.post {
+      if (!lifecycle.acceptsCallbacks()) {
+        if (isContentWorldCallback) {
+          consumeEvaluateJavaScriptContentWorldCallback(resultUuid!!, "null")
+        } else if (resultUuid != null) {
+          consumeEvaluateJavaScriptCallback(resultUuid, "null")
         }
-      )
+        return@post
+      }
+      try {
+        val generatedScript =
+          userContentController.generateCodeForScriptEvaluation(finalScriptToInject, contentWorld)
+        super.evaluateJavascript(
+          generatedScript,
+          ValueCallback { value ->
+            if (!isContentWorldCallback && resultUuid != null) {
+              consumeEvaluateJavaScriptCallback(resultUuid, value ?: "null")
+            }
+          }
+        )
+      } catch (_: Throwable) {
+        if (isContentWorldCallback) {
+          consumeEvaluateJavaScriptContentWorldCallback(resultUuid!!, "null")
+        } else if (resultUuid != null) {
+          consumeEvaluateJavaScriptCallback(resultUuid, "null")
+        }
+      }
+    }
+    if (!posted) {
+      if (isContentWorldCallback) {
+        consumeEvaluateJavaScriptContentWorldCallback(resultUuid!!, "null")
+      } else if (resultUuid != null) {
+        consumeEvaluateJavaScriptCallback(resultUuid, "null")
+      }
     }
   }
 
@@ -2194,6 +2267,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       currentContainer != null
     ) {
       currentContainer.handler?.postDelayed({
+        if (!lifecycle.acceptsCallbacks()) return@postDelayed
         val inputMethodManager =
           context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
         var isAcceptingText = false
@@ -2206,6 +2280,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
         val postedContainerView = containerView
         if (
+          lifecycle.acceptsCallbacks() &&
           postedContainerView != null &&
           postedContainerView.isAttachedToWindow &&
           postedContainerView.windowToken != null &&
@@ -2419,6 +2494,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   fun onFloatingActionGlobalLayout(x: Int, y: Int) {
+    if (!lifecycle.acceptsCallbacks()) return
     val menu = floatingContextMenu ?: return
     val maxWidth = width
     val maxHeight = height
@@ -2447,6 +2523,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     )
 
     mainLooperHandler.post {
+      if (!lifecycle.acceptsCallbacks()) return@post
       floatingContextMenu?.let {
         it.visibility = View.VISIBLE
         it.animate().alpha(1f).setDuration(100).setListener(null)
@@ -2461,6 +2538,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   fun onScrollStopped() {
+    if (!lifecycle.acceptsCallbacks()) return
     if (floatingContextMenu != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       adjustFloatingContextMenuPosition()
     }
@@ -2468,6 +2546,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   @RequiresApi(Build.VERSION_CODES.KITKAT)
   fun adjustFloatingContextMenuPosition() {
+    if (!lifecycle.acceptsCallbacks()) return
     evaluateJavascript(
       "(function(){" +
         "  var selection = window.getSelection();" +
@@ -2486,6 +2565,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         "  return rangeY;" +
         "})();",
       ValueCallback { value ->
+        if (!lifecycle.acceptsCallbacks()) return@ValueCallback
         val menu = floatingContextMenu ?: return@ValueCallback
         if (value != null && !value.equals("null", ignoreCase = true)) {
           val x = contextMenuPoint.x
@@ -2545,35 +2625,48 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     contentWorld: ContentWorld?,
     resultCallback: ValueCallback<String>
   ) {
+    val operationId = lifecycle.beginAsyncOperation()
+    if (operationId == null) {
+      resultCallback.onReceiveValue(disposedAsyncJavaScriptResult())
+      return
+    }
     val resultUuid = UUID.randomUUID().toString()
     callAsyncJavaScriptCallbacks[resultUuid] = resultCallback
+    callAsyncJavaScriptOperationIds[resultUuid] = operationId
+    try {
+      val functionArguments = JSONObject(arguments)
+      val keys = functionArguments.keys()
+      val functionArgumentNamesList = ArrayList<String>()
+      val functionArgumentValuesList = ArrayList<String>()
 
-    val functionArguments = JSONObject(arguments)
-    val keys = functionArguments.keys()
-    val functionArgumentNamesList = ArrayList<String>()
-    val functionArgumentValuesList = ArrayList<String>()
+      while (keys.hasNext()) {
+        val key = keys.next()
+        functionArgumentNamesList.add(key)
+        functionArgumentValuesList.add("obj." + key)
+      }
 
-    while (keys.hasNext()) {
-      val key = keys.next()
-      functionArgumentNamesList.add(key)
-      functionArgumentValuesList.add("obj." + key)
+      val functionArgumentNames = TextUtils.join(", ", functionArgumentNamesList)
+      val functionArgumentValues = TextUtils.join(", ", functionArgumentValuesList)
+      val functionArgumentsObject = Util.JSONStringify(arguments)
+
+      val sourceToInject =
+        PluginScriptsUtil.CALL_ASYNC_JAVA_SCRIPT_WRAPPER_JS_SOURCE()
+          .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_NAMES, functionArgumentNames)
+          .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_VALUES, functionArgumentValues)
+          .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENTS_OBJ, functionArgumentsObject)
+          .replace(PluginScriptsUtil.VAR_FUNCTION_BODY, functionBody)
+          .replace(PluginScriptsUtil.VAR_RESULT_UUID, resultUuid)
+
+      val generatedSource =
+        userContentController.generateCodeForScriptEvaluation(sourceToInject, contentWorld)
+      evaluateJavascript(generatedSource, null)
+    } catch (error: Throwable) {
+      Log.e(LOG_TAG, "Unable to prepare asynchronous JavaScript", error)
+      consumeCallAsyncJavaScriptCallback(
+        resultUuid,
+        asyncJavaScriptErrorResult("Unable to prepare JavaScript")
+      )
     }
-
-    val functionArgumentNames = TextUtils.join(", ", functionArgumentNamesList)
-    val functionArgumentValues = TextUtils.join(", ", functionArgumentValuesList)
-    val functionArgumentsObject = Util.JSONStringify(arguments)
-
-    val sourceToInject =
-      PluginScriptsUtil.CALL_ASYNC_JAVA_SCRIPT_WRAPPER_JS_SOURCE()
-        .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_NAMES, functionArgumentNames)
-        .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_VALUES, functionArgumentValues)
-        .replace(PluginScriptsUtil.VAR_FUNCTION_ARGUMENTS_OBJ, functionArgumentsObject)
-        .replace(PluginScriptsUtil.VAR_FUNCTION_BODY, functionBody)
-        .replace(PluginScriptsUtil.VAR_RESULT_UUID, resultUuid)
-
-    val generatedSource =
-      userContentController.generateCodeForScriptEvaluation(sourceToInject, contentWorld)
-    evaluateJavascript(generatedSource, null)
   }
 
   @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -2657,6 +2750,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   internal fun restoreFullscreenStateAfterRendererGone() {
+    if (!lifecycle.acceptsCallbacks()) return
     if (!isInFullscreen()) return
 
     inAppWebViewChromeClient?.onHideCustomView()
@@ -2664,6 +2758,80 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       channelDelegate?.onExitFullscreen()
       setInFullscreen(false)
     }
+  }
+
+  internal fun markRendererProcessLost(): Boolean = lifecycle.markRendererLost()
+
+  internal fun acceptsCallbacks(): Boolean = lifecycle.acceptsCallbacks()
+
+  internal fun markRetainedWebViewDetached() {
+    lifecycle.markDetachedRetained()
+  }
+
+  internal fun markRetainedWebViewReattached() {
+    lifecycle.markAttached()
+    lifecycle.markReady()
+  }
+
+  internal fun consumeCallAsyncJavaScriptCallback(resultUuid: String, value: String): Boolean {
+    val callback = callAsyncJavaScriptCallbacks.remove(resultUuid) ?: return false
+    callAsyncJavaScriptOperationIds.remove(resultUuid)?.let { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    callback?.onReceiveValue(value)
+    return true
+  }
+
+  internal fun consumeEvaluateJavaScriptCallback(resultUuid: String, value: String): Boolean {
+    val callback = evaluateJavaScriptCallbacks.remove(resultUuid) ?: return false
+    evaluateJavaScriptOperationIds.remove(resultUuid)?.let { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    callback?.onReceiveValue(value)
+    return true
+  }
+
+  internal fun consumeEvaluateJavaScriptContentWorldCallback(
+    resultUuid: String,
+    value: String
+  ): Boolean {
+    val callback = evaluateJavaScriptContentWorldCallbacks.remove(resultUuid) ?: return false
+    evaluateJavaScriptContentWorldOperationIds.remove(resultUuid)?.let { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    callback?.onReceiveValue(value)
+    return true
+  }
+
+  internal fun saveWebArchiveWithLifecycle(
+    filePath: String,
+    autoname: Boolean,
+    callback: ValueCallback<String>
+  ) {
+    val operationId = lifecycle.beginAsyncOperation()
+    if (operationId == null) {
+      callback.onReceiveValue(null)
+      return
+    }
+    val resultUuid = UUID.randomUUID().toString()
+    saveWebArchiveCallbacks[resultUuid] = callback
+    saveWebArchiveOperationIds[resultUuid] = operationId
+    try {
+      super.saveWebArchive(filePath, autoname, ValueCallback { value ->
+        consumeSaveWebArchiveCallback(resultUuid, value)
+      })
+    } catch (_: Throwable) {
+      consumeSaveWebArchiveCallback(resultUuid, null)
+    }
+  }
+
+  private fun consumeSaveWebArchiveCallback(resultUuid: String, value: String?): Boolean {
+    val callback = saveWebArchiveCallbacks.remove(resultUuid) ?: return false
+    saveWebArchiveOperationIds.remove(resultUuid)?.let { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    callback.onReceiveValue(value)
+    return true
   }
 
   @Throws(Exception::class)
@@ -2676,7 +2844,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   private fun refreshGeometryAfterLayoutChange() {
-    if (isDisposed) return
+    if (!lifecycle.acceptsCallbacks()) return
     postInvalidateOnAnimation()
     requestLayout()
   }
@@ -2845,8 +3013,8 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   override fun dispose() {
-    if (isDisposed) return
-    isDisposed = true
+    if (!lifecycle.beginDisposal()) return
+    try {
     nativeRegistrationsRegistered = true
     nativeRegistrationRequestScheduled = false
     nativeRegistrationCallbacks.clear()
@@ -2897,7 +3065,9 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     pendingScrollX = null
     pendingScrollY = null
     scrollChangedDispatchScheduled = false
-    evaluateJavaScriptContentWorldCallbacks.clear()
+    finishPendingEvaluateJavaScriptCallbacksOnDispose()
+    finishPendingSaveWebArchiveCallbacksOnDispose()
+    finishPendingScreenshotResultsOnDispose()
     inAppBrowserDelegate = null
 
     inAppWebViewRenderProcessClient?.dispose()
@@ -2912,11 +3082,18 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     javaScriptBridgeInterface = null
     plugin = null
     loadUrl("about:blank")
+    } finally {
+      lifecycle.finishDisposal()
+    }
   }
 
   private fun finishPendingAsyncJavaScriptCallbacksOnDispose() {
     val pendingCallbacks = ArrayList(callAsyncJavaScriptCallbacks.values)
     callAsyncJavaScriptCallbacks.clear()
+    callAsyncJavaScriptOperationIds.values.forEach { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    callAsyncJavaScriptOperationIds.clear()
     val disposedResult = JSONObject().apply {
       put("value", JSONObject.NULL)
       put("error", "WebView disposed")
@@ -2925,6 +3102,61 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       callback?.onReceiveValue(disposedResult)
     }
   }
+
+  private fun finishPendingEvaluateJavaScriptCallbacksOnDispose() {
+    val pendingCallbacks = ArrayList<ValueCallback<String>?>().apply {
+      addAll(evaluateJavaScriptCallbacks.values)
+      addAll(evaluateJavaScriptContentWorldCallbacks.values)
+    }
+    evaluateJavaScriptCallbacks.clear()
+    evaluateJavaScriptContentWorldCallbacks.clear()
+    evaluateJavaScriptOperationIds.values.forEach { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    evaluateJavaScriptContentWorldOperationIds.values.forEach { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    evaluateJavaScriptOperationIds.clear()
+    evaluateJavaScriptContentWorldOperationIds.clear()
+    pendingCallbacks.forEach { callback ->
+      callback?.onReceiveValue("null")
+    }
+  }
+
+  private fun finishPendingSaveWebArchiveCallbacksOnDispose() {
+    val pendingCallbacks = ArrayList(saveWebArchiveCallbacks.values)
+    saveWebArchiveCallbacks.clear()
+    saveWebArchiveOperationIds.values.forEach { operationId ->
+      lifecycle.completeAsyncOperation(operationId)
+    }
+    saveWebArchiveOperationIds.clear()
+    pendingCallbacks.forEach { callback ->
+      callback.onReceiveValue(null)
+    }
+  }
+
+  private fun completeScreenshotResult(operationId: Long, value: ByteArray?) {
+    val result = pendingScreenshotResults.remove(operationId) ?: return
+    if (!lifecycle.completeAsyncOperation(operationId)) return
+    result.success(value)
+  }
+
+  private fun finishPendingScreenshotResultsOnDispose() {
+    val pendingResults = ArrayList(pendingScreenshotResults.entries)
+    pendingScreenshotResults.clear()
+    pendingResults.forEach { entry ->
+      lifecycle.completeAsyncOperation(entry.key)
+      entry.value.success(null)
+    }
+  }
+
+  private fun asyncJavaScriptErrorResult(message: String): String = JSONObject().apply {
+    put("value", JSONObject.NULL)
+    put("error", message)
+  }.toString()
+
+  private fun disposedAsyncJavaScriptResult(): String =
+    asyncJavaScriptErrorResult("WebView disposed")
 
   override fun destroy() {
     super.destroy()

@@ -67,6 +67,7 @@ public class FlutterWebViewController: NSView, Disposable {
         self.addSubview(webView!)
         syncWebViewFrameToBounds()
 
+        webView!.markPlatformViewAttached()
         webView!.settings = settings
         webView!.prepare()
         webView!.windowCreated = true
@@ -221,6 +222,8 @@ public class FlutterWebViewController: NSView, Disposable {
             if removeFromSuperview {
                 self.removeFromSuperview()
             }
+        } else {
+            webView()?.markRetainedWebViewDetached()
         }
     }
     

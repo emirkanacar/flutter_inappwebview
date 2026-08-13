@@ -210,17 +210,17 @@ open class InAppWebViewClientCompat(
                 )
             }
 
-            override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-                Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-                defaultBehaviour(null)
-            }
+          override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+            Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
+            completeDefaultBehaviour(null)
+          }
         }
 
         val channelDelegate = webView.channelDelegate
         if (channelDelegate != null) {
             channelDelegate.onSafeBrowsingHit(request.url.toString(), threatType, resultCallback)
         } else {
-            resultCallback.defaultBehaviour(null)
+            resultCallback.completeDefaultBehaviour(null)
         }
     }
 

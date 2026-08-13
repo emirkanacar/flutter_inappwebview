@@ -10,6 +10,7 @@ import FlutterMacOS
 
 public class WebMessageListenerChannelDelegate: ChannelDelegate {
     private weak var webMessageListener: WebMessageListener?
+    private var pendingResults: [UUID: FlutterResult] = [:]
     
     public init(webMessageListener: WebMessageListener, channel: FlutterMethodChannel) {
         super.init(channel: channel)
@@ -17,6 +18,10 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard canDispatchCallbacks() else {
+            result(nil)
+            return
+        }
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
@@ -39,8 +44,9 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
                     }
                 })();
                 """
-                webView.evaluateJavascript(source: source) { (_) in
-                    result(true)
+                let requestId = track(result)
+                webView.evaluateJavascript(source: source) { [weak self] (_) in
+                    self?.complete(requestId, value: true)
                 }
             } else {
                result(true)
@@ -53,6 +59,7 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
     }
     
     public func onPostMessage(message: WebMessage?, sourceOrigin: URL?, isMainFrame: Bool) {
+        guard canDispatchCallbacks() else { return }
         let arguments: [String:Any?] = [
             "message": message?.toMap(),
             "sourceOrigin": sourceOrigin?.absoluteString,
@@ -62,12 +69,31 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
     }
     
     public override func dispose() {
+        let results = pendingResults.values
+        pendingResults.removeAll()
+        results.forEach { $0(nil) }
         super.dispose()
         webMessageListener = nil
+    }
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let webMessageListener = webMessageListener else { return false }
+        guard let webView = webMessageListener.webView else { return true }
+        return webView.acceptsCallbacks()
+    }
+
+    private func track(_ result: @escaping FlutterResult) -> UUID {
+        let requestId = UUID()
+        pendingResults[requestId] = result
+        return requestId
+    }
+
+    private func complete(_ requestId: UUID, value: Any?) {
+        guard let result = pendingResults.removeValue(forKey: requestId) else { return }
+        result(value)
     }
     
     deinit {
         dispose()
     }
 }
-

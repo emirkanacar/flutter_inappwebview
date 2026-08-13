@@ -3,6 +3,7 @@ package com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh
 import android.graphics.Color
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
+import com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview.InAppWebView
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.HashMap
@@ -107,8 +108,19 @@ open class PullToRefreshChannelDelegate(
     }
 
     fun onRefresh() {
+        if (!canDispatchCallbacks()) {
+            pullToRefreshView?.isRefreshing = false
+            return
+        }
         val channel = getChannel() ?: return
         channel.invokeMethod("onRefresh", HashMap<String, Any?>())
+    }
+
+    private fun canDispatchCallbacks(): Boolean {
+        val view = pullToRefreshView ?: return false
+        val child = if (view.childCount > 0) view.getChildAt(0) else null
+        return getChannel() != null &&
+            (child !is InAppWebView || child.acceptsCallbacks())
     }
 
     override fun dispose() {

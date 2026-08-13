@@ -2,6 +2,61 @@
 
 - Add `InAppWebViewSettings.disableAutocorrection` support through an
   Android WebView document-start plugin script.
+- Make keep-alive and headless ownership maps non-null and remove instances
+  before disposal, including controlled replacement for duplicate IDs.
+- Dispose all active and retained manager-owned WebViews during plugin teardown
+  after atomically clearing both ownership maps.
+- Finalize the Android lifecycle coordinator from a guaranteed cleanup path
+  after native teardown work.
+- Avoid rebuilding Android content-blocker rules and the WebView asset loader
+  when the corresponding settings did not change.
+- Skip duplicate active user/plugin script registration while retaining retry
+  behavior for registrations that previously failed.
+- Add an internal lifecycle coordinator for prepare, attach, retained,
+  renderer-loss, async-operation, and disposal transitions. Post-dispose
+  registration, renderer, and JavaScript bridge callbacks are ignored or
+  completed once; async operation IDs are consumed exactly once by the
+  coordinator.
+- Use the lifecycle coordinator as the single disposal source for startup,
+  scroll, renderer, geometry, and native registration guards; the duplicate
+  `isDisposed` flag is removed.
+- Partition the Android WebView channel dispatch into internal JavaScript,
+  settings, WebMessage, and lifecycle handlers without changing channel names
+  or payloads.
+- Gate Android WebView channel events and decision callbacks through the same
+  lifecycle state, preserving native default behavior after Dart teardown;
+  headless wrappers now use that coordinator instead of a second dispose flag.
+- Gate delayed IME, scroll-stop, and context-menu work through the same
+  lifecycle boundary so queued UI callbacks cannot touch a disposed WebView.
+- Re-check lifecycle admission before delayed floating-menu repositioning and
+  runtime plugin-script callbacks mutate native WebView state.
+- Track Android web-archive completion callbacks as pending lifecycle
+  operations and complete them once with a null result during disposal.
+- Gate Android screenshot work, delayed context-menu visibility, and initial
+  platform-view loading after native registration against disposal.
+- Remove nullable ownership placeholders from print-job and Custom Tabs
+  managers; ownership is cleared before child disposal.
+- Complete asynchronous JavaScript callbacks when script preparation or queued
+  WebView evaluation cannot be posted, preserving the existing result shape.
+- Synchronize lifecycle debug-trace access with the coordinator transition lock.
+- Reject JavaScript bridge work both before it is queued and before queued
+  callbacks evaluate a response after WebView disposal begins.
+- Guard native MethodChannel callback results and default decisions with an
+  atomic exactly-once completion gate so disposal and late channel results
+  cannot run the same WebView fallback twice.
+- Route Android callback error fallbacks through the same gate and reject a
+  default fallback after a handled success has already completed the callback.
+- Drop stale Android pull-to-refresh callbacks after the hosted WebView enters
+  disposal while still resetting the refresh indicator state.
+- Re-register a headless WebView in the active manager map after the native
+  handoff to a normal platform view, so transferred instances remain reachable
+  for lookup and plugin teardown.
+- Remove a transferred headless WebView from the active ownership map before
+  reattaching it as a normal platform view.
+- Make headless-to-normal transfer remove the headless owner before the native
+  handoff, dispose stale entries with no native view, and preserve newer
+  owners when an older wrapper finishes disposing. Duplicate headless IDs now
+  also replace an active WebView owner deterministically.
 
 ## 1.0.52 - 2026-08-12
 

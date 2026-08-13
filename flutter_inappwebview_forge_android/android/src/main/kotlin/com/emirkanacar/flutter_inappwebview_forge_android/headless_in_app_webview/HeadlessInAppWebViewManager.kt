@@ -22,7 +22,7 @@ open class HeadlessInAppWebViewManager(
     }
 
     @JvmField
-    val webViews: MutableMap<String, HeadlessInAppWebView?> = HashMap()
+    val webViews: MutableMap<String, HeadlessInAppWebView> = HashMap()
 
     @JvmField
     var plugin: InAppWebViewFlutterPlugin? = initialPlugin
@@ -47,6 +47,11 @@ open class HeadlessInAppWebViewManager(
     fun run(id: String, params: HashMap<String, Any?>) {
         val currentPlugin = plugin ?: return
         val context: Context = currentPlugin.activity ?: currentPlugin.applicationContext ?: return
+        webViews.remove(id)?.dispose()
+        // A headless id shares the native WebView id namespace. Remove and
+        // dispose an active owner before registering the replacement so a
+        // duplicate id cannot leave a stale channel or native WebView behind.
+        currentPlugin.inAppWebViewManager?.webViews?.remove(id)?.dispose()
         val deferNativeOperationsUntilAttach = currentPlugin.activity != null
         val flutterWebView = FlutterWebView(
             currentPlugin,
@@ -65,8 +70,9 @@ open class HeadlessInAppWebViewManager(
 
     override fun dispose() {
         super.dispose()
-        webViews.values.forEach { it?.dispose() }
+        val headlessWebViews = webViews.values.toList()
         webViews.clear()
+        headlessWebViews.forEach { it.dispose() }
         plugin = null
     }
 }

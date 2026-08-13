@@ -11,6 +11,11 @@ extension type JSWebView._(JSObject _) implements JSObject {
   external JSString get iframeId;
   external HTMLIFrameElement get iframe;
   external HTMLDivElement get iframeContainer;
+  external void reattach(
+    JSAny viewId,
+    HTMLIFrameElement iframe,
+    HTMLDivElement iframeContainer,
+  );
   external void prepare(JSAny? settings);
   external void setSettings(JSAny? newSettings);
   external void reload();

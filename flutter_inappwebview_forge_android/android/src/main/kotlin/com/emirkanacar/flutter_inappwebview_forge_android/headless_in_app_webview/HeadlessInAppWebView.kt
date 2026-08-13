@@ -8,6 +8,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlu
 import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import com.emirkanacar.flutter_inappwebview_forge_android.types.Disposable
 import com.emirkanacar.flutter_inappwebview_forge_android.types.Size2D
+import com.emirkanacar.flutter_inappwebview_forge_android.types.WebViewLifecycleCoordinator
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview.FlutterWebView
 import io.flutter.plugin.common.MethodChannel
 
@@ -30,6 +31,8 @@ open class HeadlessInAppWebView(
     @JvmField
     var plugin: InAppWebViewFlutterPlugin? = initialPlugin
 
+    private val lifecycle = WebViewLifecycleCoordinator()
+
     init {
         val channel = MethodChannel(
             initialPlugin.requireMessenger(),
@@ -39,11 +42,13 @@ open class HeadlessInAppWebView(
     }
 
     fun onWebViewCreated() {
+        if (!lifecycle.acceptsCallbacks()) return
         channelDelegate?.onWebViewCreated()
     }
 
     @Suppress("UNCHECKED_CAST")
     fun prepare(params: Map<String, Any?>) {
+        if (!lifecycle.beginPreparing()) return
         flutterWebView?.let { currentFlutterWebView ->
             currentFlutterWebView.getView()?.let { view ->
                 val initialSize = params["initialSize"] as? MutableMap<String, Any?>
@@ -53,8 +58,17 @@ open class HeadlessInAppWebView(
             }
         }
 
-        val currentPlugin = plugin ?: return
-        val activity = currentPlugin.activity ?: return
+        val currentPlugin = plugin ?: run {
+            lifecycle.markAttached()
+            lifecycle.markReady()
+            return
+        }
+        val activity = currentPlugin.activity
+        if (activity == null) {
+            lifecycle.markAttached()
+            lifecycle.markReady()
+            return
+        }
 
         // Add the headless WebView to the view hierarchy.
         // This way is also possible to take screenshots.
@@ -65,7 +79,11 @@ open class HeadlessInAppWebView(
                 mainView.addView(view, 0)
             }
         }
+        lifecycle.markAttached()
+        lifecycle.markReady()
     }
+
+    internal fun acceptsCallbacks(): Boolean = lifecycle.acceptsCallbacks()
 
     fun setSize(size: Size2D) {
         val currentFlutterWebView = flutterWebView ?: return
@@ -112,33 +130,52 @@ open class HeadlessInAppWebView(
     fun disposeAndGetFlutterWebView(): FlutterWebView? {
         val newFlutterWebView = flutterWebView
         val currentFlutterWebView = flutterWebView
-        if (currentFlutterWebView != null) {
-            currentFlutterWebView.getView()?.let { view ->
-                // Restore WebView layout params and visibility.
-                view.layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                view.visibility = View.VISIBLE
-
-                // Remove from parent.
-                (view.parent as? ViewGroup)?.removeView(view)
-            }
-            // Set to null to avoid being disposed before calling dispose().
-            flutterWebView = null
+        if (currentFlutterWebView == null) {
             dispose()
+            return null
         }
+        val view = currentFlutterWebView.getView()
+        if (view == null) {
+            // A headless entry without a native view cannot be transferred.
+            // Dispose it instead of returning an owner that is no longer
+            // reachable from a manager.
+            dispose()
+            return null
+        }
+        plugin?.inAppWebViewManager?.webViews?.let { activeWebViews ->
+            val webViewId = currentFlutterWebView.webView?.id
+            if (webViewId != null && activeWebViews[webViewId] === currentFlutterWebView) {
+                activeWebViews.remove(webViewId)
+            }
+        }
+        // Restore WebView layout params and visibility.
+        view.layoutParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+        view.visibility = View.VISIBLE
+
+        // Remove from parent.
+        (view.parent as? ViewGroup)?.removeView(view)
+
+        // Set to null to avoid being disposed before calling dispose().
+        currentFlutterWebView.webView?.markRetainedWebViewDetached()
+        flutterWebView = null
+        dispose()
         return newFlutterWebView
     }
 
     override fun dispose() {
+        if (!lifecycle.beginDisposal()) return
+        try {
+
         channelDelegate?.dispose()
         channelDelegate = null
 
         plugin?.let { currentPlugin ->
             currentPlugin.headlessInAppWebViewManager?.let { manager ->
-                if (manager.webViews.containsKey(id)) {
-                    manager.webViews[id] = null
+                if (manager.webViews[id] === this) {
+                    manager.webViews.remove(id)
                 }
             }
 
@@ -154,5 +191,8 @@ open class HeadlessInAppWebView(
         flutterWebView?.dispose()
         flutterWebView = null
         plugin = null
+        } finally {
+            lifecycle.finishDisposal()
+        }
     }
 }

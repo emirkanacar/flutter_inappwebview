@@ -9,7 +9,7 @@ import Foundation
 
 public class PrintJobManager: NSObject, Disposable {
     var plugin: InAppWebViewFlutterPlugin?
-    var jobs: [String: PrintJobController?] = [:]
+    var jobs: [String: PrintJobController] = [:]
     
     public init(plugin: InAppWebViewFlutterPlugin?) {
         super.init()
@@ -17,11 +17,11 @@ public class PrintJobManager: NSObject, Disposable {
     }
     
     public func dispose() {
-        let jobValues = jobs.values
-        jobValues.forEach { (job: PrintJobController?) in
-            job?.dispose()
-        }
+        let jobValues = Array(jobs.values)
         jobs.removeAll()
+        jobValues.forEach { (job: PrintJobController) in
+            job.dispose()
+        }
         plugin = nil
     }
     

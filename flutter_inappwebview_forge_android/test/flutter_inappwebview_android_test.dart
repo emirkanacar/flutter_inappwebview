@@ -194,7 +194,7 @@ void main() {
 
     expect(
       webViewSource.readAsStringSync(),
-      contains('if (isDisposed) return'),
+      contains('if (!lifecycle.beginDisposal()) return'),
     );
     final flutterWebViewContent = flutterWebViewSource.readAsStringSync();
     expect(

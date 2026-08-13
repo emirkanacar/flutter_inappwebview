@@ -10,6 +10,12 @@ const _runDiagnostic = bool.fromEnvironment(
   'RUN_ANDROID_DISPOSAL_LIFECYCLE_DIAGNOSTIC',
 );
 
+const _lifecycleCycles = int.fromEnvironment(
+  'ANDROID_DISPOSAL_LIFECYCLE_CYCLES',
+  defaultValue: 100,
+);
+const _phaseTimeout = Duration(seconds: 20);
+
 const _diagnosticPage = '''
 <!doctype html>
 <html>
@@ -27,6 +33,10 @@ Future<String> _runCycle(
   int cycle, {
   required bool useHybridComposition,
 }) async {
+  debugPrint(
+    'Android disposal diagnostic: create cycle=$cycle '
+    'hybrid=$useHybridComposition',
+  );
   final controllerCompleter = Completer<InAppWebViewController>();
   final webViewKey = ValueKey<String>('android-2654-disposal-webview-$cycle');
 
@@ -48,8 +58,18 @@ Future<String> _runCycle(
     ),
   );
 
-  final controller = await controllerCompleter.future;
-  await tester.pump(const Duration(seconds: 2));
+  final controller = await controllerCompleter.future.timeout(
+    _phaseTimeout,
+    onTimeout: () => throw StateError('controller timeout at cycle $cycle'),
+  );
+  await tester
+      .pump(const Duration(seconds: 2))
+      .timeout(
+        _phaseTimeout,
+        onTimeout: () =>
+            throw StateError('initial pump timeout at cycle $cycle'),
+      );
+  debugPrint('Android disposal diagnostic: pending JS cycle=$cycle');
 
   final pendingAsyncJavaScript = controller.callAsyncJavaScript(
     functionBody: '''
@@ -64,12 +84,19 @@ Future<String> _runCycle(
     controller.loadUrl(urlRequest: URLRequest(url: WebUri('about:blank'))),
   );
 
+  debugPrint('Android disposal diagnostic: remove cycle=$cycle');
   await tester.pumpWidget(
     MaterialApp(
       home: Scaffold(body: Center(child: Text('disposed-$cycle'))),
     ),
   );
-  await tester.pump(const Duration(milliseconds: 300));
+  await tester
+      .pump(const Duration(milliseconds: 300))
+      .timeout(
+        _phaseTimeout,
+        onTimeout: () =>
+            throw StateError('dispose pump timeout at cycle $cycle'),
+      );
 
   try {
     final result = await pendingAsyncJavaScript.timeout(
@@ -93,7 +120,7 @@ void main() {
     'Android #2654 WebView disposal lifecycle remains safe',
     (WidgetTester tester) async {
       final outcomes = <String>[];
-      for (var cycle = 0; cycle < 4; cycle++) {
+      for (var cycle = 0; cycle < _lifecycleCycles; cycle++) {
         outcomes.add(
           await _runCycle(tester, cycle, useHybridComposition: cycle.isOdd),
         );
@@ -108,10 +135,10 @@ void main() {
 
       debugPrint('Android #2654 diagnostic: outcomes=$outcomes');
       expect(find.text('android-2654-complete'), findsOneWidget);
-      expect(outcomes, hasLength(4));
+      expect(outcomes, hasLength(_lifecycleCycles));
       expect(outcomes, everyElement('WebView disposed'));
     },
     skip: !_runDiagnostic || !Platform.isAndroid,
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: const Timeout(Duration(minutes: 15)),
   );
 }

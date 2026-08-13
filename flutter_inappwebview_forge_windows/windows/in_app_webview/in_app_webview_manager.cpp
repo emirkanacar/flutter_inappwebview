@@ -133,15 +133,26 @@ namespace flutter_inappwebview_plugin
       windowClass_.hInstance, nullptr);
 
     if (keepAliveId.has_value() && map_contains(keepAliveWebViews, keepAliveId.value())) {
-      auto webView = std::move(keepAliveWebViews.at(keepAliveId.value())->view);
+      auto retainedPlatformView = std::move(keepAliveWebViews.at(keepAliveId.value()));
       keepAliveWebViews.erase(keepAliveId.value());
-      auto customPlatformView = std::make_unique<CustomPlatformView>(plugin->registrar->messenger(),
+      auto webView = retainedPlatformView ? std::move(retainedPlatformView->view) : nullptr;
+      if (!webView) {
+        DestroyWindow(hwnd);
+        result_->Error("0", "The retained WebView has no native owner");
+        return;
+      }
+      auto customPlatformView = std::make_unique<CustomPlatformView>(
+        plugin->registrar->messenger(),
         plugin->registrar->texture_registrar(),
         graphics_context(),
         hwnd,
         std::move(webView));
       auto textureId = customPlatformView->texture_id();
-      keepAliveWebViews.insert({ keepAliveId.value(), std::move(customPlatformView) });
+      if (customPlatformView->view) {
+        customPlatformView->view->initChannel(textureId, std::nullopt);
+        customPlatformView->view->markReattached();
+      }
+      webViews.insert_or_assign(textureId, std::move(customPlatformView));
       result_->Success(textureId);
       return;
     }
@@ -198,7 +209,8 @@ namespace flutter_inappwebview_plugin
 
           if (keepAliveId.has_value()) {
             customPlatformView->view->initChannel(keepAliveId.value(), std::nullopt);
-            keepAliveWebViews.insert({ keepAliveId.value(), std::move(customPlatformView) });
+            customPlatformView->view->markDetachedRetained();
+            keepAliveWebViews.insert_or_assign(keepAliveId.value(), std::move(customPlatformView));
           }
           else {
             customPlatformView->view->initChannel(textureId, std::nullopt);

@@ -51,6 +51,13 @@ class ContentBlockerHandler {
                           std::function<void(bool success)> callback);
 
   /**
+   * Convert content blockers to the canonical WebKit JSON representation.
+   * This is used by the WebView settings snapshot to avoid recompiling an
+   * unchanged rule set.
+   */
+  std::string serializeContentBlockers(FlValue* contentBlockers);
+
+  /**
    * Remove all content filters from the content manager.
    */
   void removeAllFilters();

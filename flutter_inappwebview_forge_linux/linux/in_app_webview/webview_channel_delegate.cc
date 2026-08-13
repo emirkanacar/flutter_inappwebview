@@ -210,6 +210,10 @@ WebViewChannelDelegate::WebViewChannelDelegate(InAppWebView* webView, FlBinaryMe
                                                const std::string& name)
     : ChannelDelegate(messenger, name), webView(webView) {}
 
+bool WebViewChannelDelegate::canDispatchCallbacks() const {
+  return channel_ != nullptr && webView != nullptr && webView->acceptsCallbacks();
+}
+
 WebViewChannelDelegate::~WebViewChannelDelegate() {
   debugLog("dealloc WebViewChannelDelegate");
   webView = nullptr;
@@ -222,6 +226,10 @@ void WebViewChannelDelegate::HandleMethodCall(FlMethodCall* method_call) {
   }
 
   const gchar* methodName = fl_method_call_get_name(method_call);
+  if (!webView->acceptsCallbacks()) {
+    fl_method_call_respond_success(method_call, nullptr, nullptr);
+    return;
+  }
   FlValue* args = fl_method_call_get_args(method_call);
 
   // === InAppBrowser-specific methods ===
@@ -1112,7 +1120,7 @@ void WebViewChannelDelegate::HandleMethodCall(FlMethodCall* method_call) {
 // === Event methods ===
 
 void WebViewChannelDelegate::onLoadStart(const std::optional<std::string>& url) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1122,7 +1130,7 @@ void WebViewChannelDelegate::onLoadStart(const std::optional<std::string>& url) 
 }
 
 void WebViewChannelDelegate::onLoadStop(const std::optional<std::string>& url) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1132,7 +1140,7 @@ void WebViewChannelDelegate::onLoadStop(const std::optional<std::string>& url) c
 }
 
 void WebViewChannelDelegate::onProgressChanged(int64_t progress) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1142,7 +1150,7 @@ void WebViewChannelDelegate::onProgressChanged(int64_t progress) const {
 }
 
 void WebViewChannelDelegate::onTitleChanged(const std::optional<std::string>& title) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1153,7 +1161,7 @@ void WebViewChannelDelegate::onTitleChanged(const std::optional<std::string>& ti
 
 void WebViewChannelDelegate::onUpdateVisitedHistory(const std::optional<std::string>& url,
                                                     const std::optional<bool>& isReload) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1166,7 +1174,7 @@ void WebViewChannelDelegate::onUpdateVisitedHistory(const std::optional<std::str
 void WebViewChannelDelegate::shouldOverrideUrlLoading(
     std::shared_ptr<NavigationAction> navigationAction,
     std::unique_ptr<ShouldOverrideUrlLoadingCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     if (callback) {
       callback->defaultBehaviour(std::nullopt);
     }
@@ -1209,7 +1217,7 @@ void WebViewChannelDelegate::shouldOverrideUrlLoading(
 
 void WebViewChannelDelegate::onConsoleMessage(const std::string& message,
                                               int64_t messageLevel) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1223,7 +1231,7 @@ void WebViewChannelDelegate::onLoadResource(const std::string& url,
                                             const std::string& initiatorType,
                                             double startTime,
                                             double duration) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1237,7 +1245,7 @@ void WebViewChannelDelegate::onLoadResource(const std::string& url,
 
 void WebViewChannelDelegate::onReceivedError(std::shared_ptr<WebResourceRequest> request,
                                              std::shared_ptr<WebResourceError> error) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1250,7 +1258,7 @@ void WebViewChannelDelegate::onReceivedError(std::shared_ptr<WebResourceRequest>
 void WebViewChannelDelegate::onReceivedHttpError(
     std::shared_ptr<WebResourceRequest> request,
     std::shared_ptr<WebResourceResponse> errorResponse) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1263,7 +1271,7 @@ void WebViewChannelDelegate::onReceivedHttpError(
 void WebViewChannelDelegate::onCallJsHandler(
     const std::string& handlerName, std::unique_ptr<JavaScriptHandlerFunctionData> data,
     std::unique_ptr<CallJsHandlerCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     if (callback) {
       callback->defaultBehaviour(std::nullopt);
     }
@@ -1305,7 +1313,7 @@ void WebViewChannelDelegate::onCallJsHandler(
 }
 
 void WebViewChannelDelegate::onCloseWindow() const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1314,7 +1322,7 @@ void WebViewChannelDelegate::onCloseWindow() const {
 }
 
 void WebViewChannelDelegate::onPageCommitVisible(const std::optional<std::string>& url) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1324,7 +1332,7 @@ void WebViewChannelDelegate::onPageCommitVisible(const std::optional<std::string
 }
 
 void WebViewChannelDelegate::onZoomScaleChanged(double newScale, double oldScale) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1335,7 +1343,7 @@ void WebViewChannelDelegate::onZoomScaleChanged(double newScale, double oldScale
 }
 
 void WebViewChannelDelegate::onScrollChanged(int64_t x, int64_t y) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1347,7 +1355,7 @@ void WebViewChannelDelegate::onScrollChanged(int64_t x, int64_t y) const {
 void WebViewChannelDelegate::shouldInterceptRequest(
     std::shared_ptr<WebResourceRequest> request,
     std::unique_ptr<ShouldInterceptRequestCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     if (callback) {
       callback->defaultBehaviour(std::nullopt);
     }
@@ -1388,7 +1396,7 @@ void WebViewChannelDelegate::shouldInterceptRequest(
 }
 
 void WebViewChannelDelegate::onWebViewCreated() const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1397,7 +1405,7 @@ void WebViewChannelDelegate::onWebViewCreated() const {
 }
 
 void WebViewChannelDelegate::onContentSizeChanged(int64_t width, int64_t height) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1409,7 +1417,7 @@ void WebViewChannelDelegate::onContentSizeChanged(int64_t width, int64_t height)
 
 void WebViewChannelDelegate::onCreateWindow(std::unique_ptr<CreateWindowAction> createWindowAction,
                                             std::unique_ptr<CreateWindowCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1448,7 +1456,7 @@ void WebViewChannelDelegate::onCreateWindow(std::unique_ptr<CreateWindowAction> 
 
 void WebViewChannelDelegate::onJsAlert(std::unique_ptr<JsAlertRequest> request,
                                        std::unique_ptr<JsAlertCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1487,7 +1495,7 @@ void WebViewChannelDelegate::onJsAlert(std::unique_ptr<JsAlertRequest> request,
 
 void WebViewChannelDelegate::onJsConfirm(std::unique_ptr<JsConfirmRequest> request,
                                          std::unique_ptr<JsConfirmCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1526,7 +1534,7 @@ void WebViewChannelDelegate::onJsConfirm(std::unique_ptr<JsConfirmRequest> reque
 
 void WebViewChannelDelegate::onJsPrompt(std::unique_ptr<JsPromptRequest> request,
                                         std::unique_ptr<JsPromptCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1566,7 +1574,7 @@ void WebViewChannelDelegate::onJsPrompt(std::unique_ptr<JsPromptRequest> request
 void WebViewChannelDelegate::onJsBeforeUnload(
     const std::optional<std::string>& url, const std::optional<std::string>& message,
     std::unique_ptr<JsBeforeUnloadCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1608,7 +1616,7 @@ void WebViewChannelDelegate::onJsBeforeUnload(
 void WebViewChannelDelegate::onPermissionRequest(
     std::unique_ptr<PermissionRequest> request,
     std::unique_ptr<PermissionRequestCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1648,7 +1656,7 @@ void WebViewChannelDelegate::onPermissionRequest(
 void WebViewChannelDelegate::onReceivedHttpAuthRequest(
     std::unique_ptr<HttpAuthenticationChallenge> challenge,
     std::unique_ptr<HttpAuthRequestCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1688,7 +1696,7 @@ void WebViewChannelDelegate::onReceivedHttpAuthRequest(
 void WebViewChannelDelegate::onReceivedServerTrustAuthRequest(
     std::unique_ptr<ServerTrustChallenge> challenge,
     std::unique_ptr<ServerTrustAuthRequestCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1728,7 +1736,7 @@ void WebViewChannelDelegate::onReceivedServerTrustAuthRequest(
 void WebViewChannelDelegate::onReceivedClientCertRequest(
     std::unique_ptr<ClientCertChallenge> challenge,
     std::unique_ptr<ClientCertRequestCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1768,7 +1776,7 @@ void WebViewChannelDelegate::onReceivedClientCertRequest(
 void WebViewChannelDelegate::onDownloadStarting(
     std::unique_ptr<DownloadStartRequest> request,
     std::unique_ptr<DownloadStartCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback->defaultBehaviour(std::nullopt);
     return;
   }
@@ -1806,7 +1814,7 @@ void WebViewChannelDelegate::onDownloadStarting(
 }
 
 void WebViewChannelDelegate::onEnterFullscreen() const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1815,7 +1823,7 @@ void WebViewChannelDelegate::onEnterFullscreen() const {
 }
 
 void WebViewChannelDelegate::onExitFullscreen() const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1824,7 +1832,7 @@ void WebViewChannelDelegate::onExitFullscreen() const {
 }
 
 void WebViewChannelDelegate::onFaviconChanged(const std::optional<std::string>& faviconUrl) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1834,7 +1842,7 @@ void WebViewChannelDelegate::onFaviconChanged(const std::optional<std::string>& 
 }
 
 void WebViewChannelDelegate::onRenderProcessGone(bool didCrash) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1858,7 +1866,7 @@ void WebViewChannelDelegate::onShowFileChooser(
     const std::optional<std::string>& title,
     const std::optional<std::string>& filenameHint,
     std::function<void(ShowFileChooserResponse)> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     callback(ShowFileChooserResponse());
     return;
   }
@@ -1901,7 +1909,7 @@ void WebViewChannelDelegate::onShowFileChooser(
 }
 
 void WebViewChannelDelegate::onCreateContextMenu(const HitTestResult& hitTestResult) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1910,7 +1918,7 @@ void WebViewChannelDelegate::onCreateContextMenu(const HitTestResult& hitTestRes
 }
 
 void WebViewChannelDelegate::onHideContextMenu() const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1920,7 +1928,7 @@ void WebViewChannelDelegate::onHideContextMenu() const {
 
 void WebViewChannelDelegate::onContextMenuActionItemClicked(const std::string& id,
                                                             const std::string& title) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1933,7 +1941,7 @@ void WebViewChannelDelegate::onContextMenuActionItemClicked(const std::string& i
 void WebViewChannelDelegate::onLoadResourceWithCustomScheme(
     std::shared_ptr<WebResourceRequest> request,
     std::unique_ptr<LoadResourceWithCustomSchemeCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     if (callback) {
       callback->defaultBehaviour(std::nullopt);
     }
@@ -1974,7 +1982,7 @@ void WebViewChannelDelegate::onLoadResourceWithCustomScheme(
 }
 
 void WebViewChannelDelegate::onCameraCaptureStateChanged(int oldState, int newState) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -1987,7 +1995,7 @@ void WebViewChannelDelegate::onCameraCaptureStateChanged(int oldState, int newSt
 }
 
 void WebViewChannelDelegate::onMicrophoneCaptureStateChanged(int oldState, int newState) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 
@@ -2007,7 +2015,7 @@ void WebViewChannelDelegate::onNavigationResponse(
     bool isForMainFrame,
     bool canShowMimeType,
     std::unique_ptr<NavigationResponseCallback> callback) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     if (callback) {
       callback->defaultBehaviour(1);  // Allow by default
     }
@@ -2066,7 +2074,7 @@ void WebViewChannelDelegate::onNavigationResponse(
 }
 
 void WebViewChannelDelegate::onPrintRequest(const std::optional<std::string>& url) const {
-  if (!channel_) {
+  if (!canDispatchCallbacks()) {
     return;
   }
 

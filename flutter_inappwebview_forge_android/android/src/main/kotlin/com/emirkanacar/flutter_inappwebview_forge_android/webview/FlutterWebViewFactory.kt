@@ -25,16 +25,28 @@ open class FlutterWebViewFactory(
         val params = args as? HashMap<String, Any?> ?: hashMapOf()
         var flutterWebView: FlutterWebView? = null
         var viewId: Any = id
+        var transferredFromHeadless = false
 
         val keepAliveId = params["keepAliveId"] as? String
         val headlessWebViewId = params["headlessWebViewId"] as? String
 
         val headlessManager: HeadlessInAppWebViewManager? = plugin.headlessInAppWebViewManager
         if (headlessWebViewId != null && headlessManager != null) {
-            val headlessWebView: HeadlessInAppWebView? = headlessManager.webViews[headlessWebViewId]
+            // Remove the headless owner before transferring the native view. This
+            // makes the transfer atomic from the manager's point of view and
+            // prevents a later teardown from disposing the transferred instance.
+            val headlessWebView: HeadlessInAppWebView? =
+                headlessManager.webViews.remove(headlessWebViewId)
             if (headlessWebView != null) {
                 flutterWebView = headlessWebView.disposeAndGetFlutterWebView()
-                flutterWebView?.keepAliveId = keepAliveId
+                if (flutterWebView != null) {
+                    transferredFromHeadless = true
+                    flutterWebView.keepAliveId = keepAliveId
+                } else {
+                    // Do not silently lose an owner when a malformed/stale
+                    // headless entry cannot yield a platform view.
+                    headlessWebView.dispose()
+                }
             }
         }
 
@@ -58,13 +70,22 @@ open class FlutterWebViewFactory(
 
         val resultWebView = flutterWebView
             ?: error("Flutter WebView could not be created.")
+        if (transferredFromHeadless) {
+            resultWebView.webView?.let { transferredWebView ->
+                transferredWebView.id?.let { transferredWebViewID ->
+                    inAppWebViewManager?.webViews?.set(transferredWebViewID, resultWebView)
+                }
+            }
+        }
         if (keepAliveId != null && inAppWebViewManager != null) {
-            inAppWebViewManager.keepAliveWebViews[keepAliveId] = resultWebView
+            inAppWebViewManager.registerKeepAlive(keepAliveId, resultWebView)
         }
 
         if (shouldMakeInitialLoad) {
             resultWebView.makeInitialLoad(params)
         }
+
+        resultWebView.webView?.markRetainedWebViewReattached()
         return resultWebView
     }
 }

@@ -210,6 +210,7 @@ open class InAppWebViewChromeClient(
       }
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
         result.cancel()
       }
@@ -275,6 +276,7 @@ open class InAppWebViewChromeClient(
       }
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
         result.cancel()
       }
@@ -365,6 +367,7 @@ open class InAppWebViewChromeClient(
         }
 
         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+          if (!beginCallbackCompletion()) return
           Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
           result.cancel()
         }
@@ -463,6 +466,7 @@ open class InAppWebViewChromeClient(
       }
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
         result.cancel()
       }
@@ -560,7 +564,7 @@ open class InAppWebViewChromeClient(
 
         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
           Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-          defaultBehaviour(null)
+          completeDefaultBehaviour(null)
         }
       })
       return true
@@ -590,7 +594,7 @@ open class InAppWebViewChromeClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -598,7 +602,7 @@ open class InAppWebViewChromeClient(
     if (channelDelegate != null) {
       channelDelegate.onGeolocationPermissionsShowPrompt(origin, resultCallback)
     } else {
-      resultCallback.defaultBehaviour(null)
+      resultCallback.completeDefaultBehaviour(null)
     }
   }
 
@@ -689,7 +693,7 @@ open class InAppWebViewChromeClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -698,7 +702,7 @@ open class InAppWebViewChromeClient(
     if (channelDelegate != null && webView.customSettings.useOnShowFileChooser == true) {
       channelDelegate.onShowFileChooser(request, callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
 
     return true
@@ -1168,7 +1172,7 @@ open class InAppWebViewChromeClient(
 
         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
           Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-          defaultBehaviour(null)
+          completeDefaultBehaviour(null)
         }
       }
 
@@ -1181,7 +1185,7 @@ open class InAppWebViewChromeClient(
           callback
         )
       } else {
-        callback.defaultBehaviour(null)
+        callback.completeDefaultBehaviour(null)
       }
     }
   }

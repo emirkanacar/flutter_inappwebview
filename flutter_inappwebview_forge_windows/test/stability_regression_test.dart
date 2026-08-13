@@ -29,6 +29,9 @@ void _runSourceContractAssertions() {
   final nativeViewSource = _sourceFile(
     'windows/in_app_webview/in_app_webview.cpp',
   ).readAsStringSync();
+  final lifecycleSource = _sourceFile(
+    'windows/types/web_view_lifecycle_coordinator.h',
+  ).readAsStringSync();
   final cmakeSource = _sourceFile('windows/CMakeLists.txt').readAsStringSync();
   final settingsSource = _sourceFile(
     'windows/in_app_webview/in_app_webview_settings.cpp',
@@ -144,8 +147,35 @@ void _runSourceContractAssertions() {
   );
   _expectContains(
     nativeViewSource,
-    'disposed_.store(true, std::memory_order_release)',
-    'the WebView disposal gate',
+    'lifecycle_.beginDisposal()',
+    'the WebView lifecycle disposal gate',
+  );
+  _expectContains(
+    lifecycleSource,
+    'WebViewLifecycleState',
+    'the Windows internal lifecycle state model',
+  );
+  _expectContains(
+    lifecycleSource,
+    'markDetachedRetained',
+    'the Windows retained ownership transition',
+  );
+  _expectContains(
+    _sourceFile(
+      'windows/in_app_webview/webview_channel_delegate.cpp',
+    ).readAsStringSync(),
+    'canDispatchCallbacks()',
+    'the Windows stale-channel callback gate',
+  );
+  _expectContains(
+    nativeViewSource,
+    'findInteractionController->dispose();',
+    'the Windows channel rebind cleanup',
+  );
+  _expectContains(
+    cmakeSource,
+    'types/web_view_lifecycle_coordinator.h',
+    'the Windows lifecycle coordinator build entry',
   );
   _expectContains(
     nativeViewSource,
@@ -185,10 +215,41 @@ void _runSourceContractAssertions() {
   final headlessSource = _sourceFile(
     'windows/headless_in_app_webview/headless_in_app_webview.cpp',
   ).readAsStringSync();
+  final headlessManagerSource = _sourceFile(
+    'windows/headless_in_app_webview/headless_in_app_webview_manager.cpp',
+  ).readAsStringSync();
+  final inAppWebViewManagerSource = _sourceFile(
+    'windows/in_app_webview/in_app_webview_manager.cpp',
+  ).readAsStringSync();
   _expectContains(
     headlessSource,
     '!webView || !webView->webViewController',
     'the headless WebView controller lifetime guard',
+  );
+  _expectContains(
+    headlessManagerSource,
+    'webViews.erase(id);',
+    'the duplicate headless ID replacement gate',
+  );
+  _expectContains(
+    headlessManagerSource,
+    'webViews.insert_or_assign(id, std::move(headlessInAppWebView));',
+    'the deterministic headless ownership replacement',
+  );
+  _expectContains(
+    inAppWebViewManagerSource,
+    'keepAliveWebViews.insert_or_assign',
+    'the deterministic keep-alive ownership replacement',
+  );
+  _expectContains(
+    inAppWebViewManagerSource,
+    'webViews.insert_or_assign(textureId, std::move(customPlatformView));',
+    'the atomic keep-alive to active-view ownership transfer',
+  );
+  _expectContains(
+    inAppWebViewManagerSource,
+    'markDetachedRetained()',
+    'the retained lifecycle transition',
   );
 
   final findDispose = nativeViewSource.indexOf(

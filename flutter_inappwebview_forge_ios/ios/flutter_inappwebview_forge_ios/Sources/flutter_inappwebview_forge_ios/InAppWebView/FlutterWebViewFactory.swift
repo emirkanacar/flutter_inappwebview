@@ -26,16 +26,26 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
         let arguments = args as? NSDictionary
         var flutterWebView: FlutterWebViewController?
         var id: Any = viewId
+        var transferredFromHeadless = false
         
         let keepAliveId = arguments?["keepAliveId"] as? String
         let headlessWebViewId = arguments?["headlessWebViewId"] as? String
         let preventGestureDelay = arguments?["preventGestureDelay"] as? Bool ?? false
         
         if let headlessWebViewId = headlessWebViewId,
-           let headlessWebView = plugin.headlessInAppWebViewManager?.webViews[headlessWebViewId],
-           let platformView = headlessWebView?.disposeAndGetFlutterWebView(withFrame: frame) {
-            flutterWebView = platformView
-            flutterWebView?.keepAliveId = keepAliveId
+           let headlessWebView = plugin.headlessInAppWebViewManager?.webViews.removeValue(forKey: headlessWebViewId) {
+            // Detach ownership before moving the native view into the platform
+            // view. A later manager teardown must not dispose the transferred
+            // instance through the old headless owner.
+            if let platformView = headlessWebView.disposeAndGetFlutterWebView(withFrame: frame) {
+                flutterWebView = platformView
+                transferredFromHeadless = true
+                flutterWebView?.keepAliveId = keepAliveId
+            } else {
+                // A stale headless entry must be cleaned up rather than being
+                // silently dropped from the manager.
+                headlessWebView.dispose()
+            }
         }
         
         if let keepAliveId = keepAliveId,
@@ -60,7 +70,14 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         
         if let keepAliveId = keepAliveId {
-            plugin.inAppWebViewManager?.keepAliveWebViews[keepAliveId] = flutterWebView!
+            plugin.inAppWebViewManager?.registerKeepAlive(keepAliveId: keepAliveId,
+                                                          flutterWebView: flutterWebView!)
+        }
+
+        if transferredFromHeadless,
+           let transferredWebView = flutterWebView?.webView(),
+           let transferredWebViewID = transferredWebView.id {
+            plugin.inAppWebViewManager?.webViews[String(describing: transferredWebViewID)] = transferredWebView
         }
         
         flutterWebView?.webView()?.preventGestureDelay = preventGestureDelay
@@ -68,6 +85,8 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
         if shouldMakeInitialLoad {
             flutterWebView?.makeInitialLoad(params: arguments!)
         }
+
+        flutterWebView?.webView()?.markRetainedWebViewReattached()
         
         return flutterWebView!
     }

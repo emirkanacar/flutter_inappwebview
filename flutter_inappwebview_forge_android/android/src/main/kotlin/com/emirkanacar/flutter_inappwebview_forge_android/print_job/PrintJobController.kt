@@ -55,11 +55,7 @@ open class PrintJobController(
     fun disposeNoCancel() {
         channelDelegate?.dispose()
         channelDelegate = null
-        plugin?.printJobManager?.jobs?.let { jobs ->
-            if (jobs.containsKey(id)) {
-                jobs[id] = null
-            }
-        }
+        plugin?.printJobManager?.jobs?.remove(id)
         job = null
         plugin = null
     }
@@ -67,11 +63,7 @@ open class PrintJobController(
     override fun dispose() {
         channelDelegate?.dispose()
         channelDelegate = null
-        plugin?.printJobManager?.jobs?.let { jobs ->
-            if (jobs.containsKey(id)) {
-                jobs[id] = null
-            }
-        }
+        plugin?.printJobManager?.jobs?.remove(id)
         job?.cancel()
         job = null
         plugin = null

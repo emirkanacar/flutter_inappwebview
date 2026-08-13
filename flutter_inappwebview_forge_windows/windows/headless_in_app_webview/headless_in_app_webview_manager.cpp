@@ -54,6 +54,11 @@ namespace flutter_inappwebview_plugin
     auto id = get_fl_map_value<std::string>(*arguments, "id");
     auto params = get_fl_map_value<flutter::EncodableMap>(*arguments, "params");
 
+    // A duplicate ID must replace the previous owner deterministically.  Using
+    // insert() here silently discarded a newly-created WebView when the ID was
+    // already present.
+    webViews.erase(id);
+
     auto initialSize = std::make_shared<Size2D>(get_fl_map_value<flutter::EncodableMap>(params, "initialSize"));
 
     auto settingsMap = get_fl_map_value<flutter::EncodableMap>(params, "initialSettings");
@@ -127,7 +132,7 @@ namespace flutter_inappwebview_plugin
             headlessInAppWebView->webView->loadData(get_fl_map_value<std::string>(initialDataMap.value(), "data"));
           }
 
-          webViews.insert({ id, std::move(headlessInAppWebView) });
+          webViews.insert_or_assign(id, std::move(headlessInAppWebView));
 
           result_->Success(true);
         }

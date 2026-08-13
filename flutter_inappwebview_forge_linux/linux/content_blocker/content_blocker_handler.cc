@@ -90,6 +90,10 @@ void ContentBlockerHandler::setContentBlockers(FlValue* contentBlockers,
   compileContentBlockers(jsonSource, callback);
 }
 
+std::string ContentBlockerHandler::serializeContentBlockers(FlValue* contentBlockers) {
+  return convertToJsonString(contentBlockers);
+}
+
 void ContentBlockerHandler::removeAllFilters() {
   // Check if content_manager is still valid before calling WebKit API
   // The content_manager becomes invalid when the webview is destroyed

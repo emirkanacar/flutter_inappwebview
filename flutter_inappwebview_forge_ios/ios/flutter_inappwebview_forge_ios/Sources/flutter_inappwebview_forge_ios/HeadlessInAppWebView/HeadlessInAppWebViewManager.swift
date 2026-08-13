@@ -16,7 +16,7 @@ import AVFoundation
 public class HeadlessInAppWebViewManager: ChannelDelegate {
     static let METHOD_CHANNEL_NAME = "com.emirkanacar/flutter_headless_inappwebview"
     var plugin: InAppWebViewFlutterPlugin?
-    var webViews: [String: HeadlessInAppWebView?] = [:]
+    var webViews: [String: HeadlessInAppWebView] = [:]
     
     init(plugin: InAppWebViewFlutterPlugin) {
         super.init(channel: FlutterMethodChannel(name: HeadlessInAppWebViewManager.METHOD_CHANNEL_NAME, binaryMessenger: plugin.registrar.messenger()))
@@ -43,6 +43,13 @@ public class HeadlessInAppWebViewManager: ChannelDelegate {
         guard let plugin = plugin else {
             return
         }
+        webViews.removeValue(forKey: id)?.dispose()
+        // Headless and regular WebViews share the native id namespace. Remove
+        // and dispose the active owner before registering the replacement so a
+        // duplicate id cannot leave a stale channel or WebView reachable.
+        if let previousWebView = plugin.inAppWebViewManager?.webViews.removeValue(forKey: id) {
+            previousWebView.dispose()
+        }
         let flutterWebView = FlutterWebViewController(plugin: plugin,
             withFrame: CGRect.zero,
             viewIdentifier: id,
@@ -57,11 +64,9 @@ public class HeadlessInAppWebViewManager: ChannelDelegate {
     
     public override func dispose() {
         super.dispose()
-        let headlessWebViews = webViews.values
-        headlessWebViews.forEach { (headlessWebView: HeadlessInAppWebView?) in
-            headlessWebView?.dispose()
-        }
+        let headlessWebViews = Array(webViews.values)
         webViews.removeAll()
+        headlessWebViews.forEach { $0.dispose() }
         plugin = nil
     }
     

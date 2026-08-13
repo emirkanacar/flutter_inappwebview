@@ -32,15 +32,15 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
         let headlessWebViewId = arguments?["headlessWebViewId"] as? String
         
         if let headlessWebViewId = headlessWebViewId,
-           let headlessWebView = plugin.headlessInAppWebViewManager?.webViews[headlessWebViewId],
-           let platformView = headlessWebView?.disposeAndGetFlutterWebView(withFrame: .zero) {
+           let headlessWebView = plugin.headlessInAppWebViewManager?.webViews.removeValue(forKey: headlessWebViewId),
+           let platformView = headlessWebView.disposeAndGetFlutterWebView(withFrame: .zero) {
             flutterWebView = platformView
             flutterWebView?.keepAliveId = keepAliveId
         }
         
         if let keepAliveId = keepAliveId,
            flutterWebView == nil,
-           let keepAliveWebView = plugin.inAppWebViewManager?.keepAliveWebViews[keepAliveId] {
+           let keepAliveWebView = plugin.inAppWebViewManager?.takeKeepAlive(keepAliveId: keepAliveId) {
             flutterWebView = keepAliveWebView
             if let view = flutterWebView?.view() {
                 // remove from parent
@@ -60,12 +60,15 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
         }
         
         if let keepAliveId = keepAliveId {
-            plugin.inAppWebViewManager?.keepAliveWebViews[keepAliveId] = flutterWebView!
+            plugin.inAppWebViewManager?.registerKeepAlive(keepAliveId: keepAliveId,
+                                                          flutterWebView: flutterWebView!)
         }
         
         if shouldMakeInitialLoad {
             flutterWebView?.makeInitialLoad(params: arguments!)
         }
+
+        flutterWebView?.webView()?.markRetainedWebViewReattached()
         
         return flutterWebView!
     }

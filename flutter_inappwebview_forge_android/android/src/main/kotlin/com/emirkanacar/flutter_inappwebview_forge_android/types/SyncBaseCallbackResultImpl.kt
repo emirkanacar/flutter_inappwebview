@@ -27,7 +27,7 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
     }
 
     override fun success(obj: Any?) {
-        if (cancelled) {
+        if (cancelled || !beginCallbackCompletion()) {
             return
         }
         val decodedResult = decodeResult(obj)
@@ -38,7 +38,7 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
             nonNullSuccess(decodedResult)
         }
         if (shouldRunDefaultBehaviour) {
-            defaultBehaviour(decodedResult)
+            completeDefaultBehaviourAfterCallback(decodedResult)
         } else {
             latch.countDown()
         }
@@ -46,7 +46,7 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
 
     @CallSuper
     override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-        if (cancelled) {
+        if (cancelled || !beginCallbackCompletion()) {
             return
         }
         latch.countDown()
@@ -54,6 +54,6 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
 
     @CallSuper
     override fun notImplemented() {
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
     }
 }

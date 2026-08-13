@@ -168,6 +168,9 @@ void InAppWebViewManager::CreateInAppWebView(FlMethodCall* method_call) {
     auto existingView = TakeKeepAliveWebView(keepAliveId);
     if (existingView != nullptr) {
       int64_t texture_id = existingView->texture_id();
+      if (existingView->webview()) {
+        existingView->webview()->markReattached();
+      }
       platform_views_[texture_id] = std::move(existingView);
       
       g_autoptr(FlValue) result = make_fl_value(texture_id);
@@ -343,7 +346,14 @@ void InAppWebViewManager::ClearAllCache(FlMethodCall* method_call, bool includeD
 void InAppWebViewManager::StoreKeepAliveWebView(const std::string& keepAliveId, 
                                                   std::unique_ptr<CustomPlatformView> view) {
   if (!keepAliveId.empty() && view != nullptr) {
-    keepAliveWebViews_[keepAliveId] = std::move(view);
+    auto previous = keepAliveWebViews_.find(keepAliveId);
+    if (previous != keepAliveWebViews_.end()) {
+      keepAliveWebViews_.erase(previous);
+    }
+    if (view->webview()) {
+      view->webview()->markDetachedRetained();
+    }
+    keepAliveWebViews_.emplace(keepAliveId, std::move(view));
   }
 }
 

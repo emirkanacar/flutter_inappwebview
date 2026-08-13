@@ -84,7 +84,7 @@ public class PrintJobController: NSObject, Disposable, UIPrintInteractionControl
         printPageRenderer = nil
         job?.delegate = nil
         job = nil
-        plugin?.printJobManager?.jobs[id] = nil
+        plugin?.printJobManager?.jobs.removeValue(forKey: id)
         plugin = nil
     }
     
@@ -96,7 +96,7 @@ public class PrintJobController: NSObject, Disposable, UIPrintInteractionControl
         job?.delegate = nil
         job?.dismiss(animated: false)
         job = nil
-        plugin?.printJobManager?.jobs[id] = nil
+        plugin?.printJobManager?.jobs.removeValue(forKey: id)
         plugin = nil
     }
     

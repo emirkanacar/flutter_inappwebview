@@ -11,7 +11,16 @@ open class WebMessageChannelChannelDelegate(
     private var webMessageChannel: WebMessageChannel?,
     channel: MethodChannel
 ) : ChannelDelegateImpl(channel) {
+    private fun canDispatchCallbacks(): Boolean {
+        return getChannel() != null &&
+            (webMessageChannel?.webView as? InAppWebView)?.acceptsCallbacks() == true
+    }
+
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (!canDispatchCallbacks()) {
+            result.success(null)
+            return
+        }
         when (call.method) {
             "setWebMessageCallback" -> {
                 val channel = webMessageChannel
@@ -63,6 +72,7 @@ open class WebMessageChannelChannelDelegate(
     }
 
     open fun onMessage(index: Int, message: WebMessageCompatExt?) {
+        if (!canDispatchCallbacks()) return
         val channel = getChannel() ?: return
         val obj = HashMap<String, Any?>()
         obj["index"] = index

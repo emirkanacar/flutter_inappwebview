@@ -241,6 +241,7 @@ InAppWebView::InAppWebView(FlPluginRegistrar* registrar, FlBinaryMessenger* mess
                            const InAppWebViewCreationParams& params)
     : plugin_(params.plugin), registrar_(registrar), messenger_(messenger), gtk_window_(params.gtkWindow), fl_view_(params.flView), manager_(params.manager), id_(id), settings_(params.initialSettings),
       initial_user_scripts_(params.initialUserScripts) {
+  lifecycle_.beginPreparing();
   js_bridge_secret_ = GenerateRandomSecret();
   
   if (params.windowId.has_value()) {
@@ -274,6 +275,8 @@ InAppWebView::InAppWebView(FlPluginRegistrar* registrar, FlBinaryMessenger* mess
   // Apply content blockers if specified, then load initial content
   // Content blockers must be compiled asynchronously
   if (settings_ && settings_->contentBlockers != nullptr && content_blocker_handler_) {
+    content_blockers_snapshot_ =
+        content_blocker_handler_->serializeContentBlockers(settings_->contentBlockers);
     // Store initial load params for callback
     auto initialUrlRequest = params.initialUrlRequest;
     auto initialData = params.initialData;
@@ -286,6 +289,9 @@ InAppWebView::InAppWebView(FlPluginRegistrar* registrar, FlBinaryMessenger* mess
         settings_->contentBlockers,
         [this, initialUrlRequest, initialData, initialDataMimeType, initialDataEncoding,
          initialDataBaseUrl, initialFile](bool success) {
+          if (!lifecycle_.acceptsCallbacks()) {
+            return;
+          }
           if (!success) {
             debugLog("InAppWebView: Content blockers failed to apply, loading content anyway");
           }
@@ -316,6 +322,9 @@ InAppWebView::InAppWebView(FlPluginRegistrar* registrar, FlBinaryMessenger* mess
       loadFile(params.initialFile.value());
     }
   }
+
+  lifecycle_.markAttached();
+  lifecycle_.markReady();
 }
 
 void InAppWebView::AttachChannel(FlBinaryMessenger* messenger, int64_t channel_id) {
@@ -360,6 +369,13 @@ void InAppWebView::AttachChannel(FlBinaryMessenger* messenger, const std::string
 
 InAppWebView::~InAppWebView() {
   debugLog("dealloc InAppWebView");
+
+  // Activate the callback gate before any cleanup can trigger WebKit/WPE
+  // callbacks.  The old placement below allowed buffer callbacks to enter
+  // while user-content and policy state was already being torn down.
+  if (!lifecycle_.beginDisposal()) {
+    return;
+  }
 
   CleanupMonitorChangeHandlers();
 
@@ -424,9 +440,6 @@ InAppWebView::~InAppWebView() {
 
 #ifdef HAVE_WPE_PLATFORM
   // === WPEPlatform proper shutdown sequence ===
-  // Mark as disposing to prevent buffer callbacks from processing
-  is_disposing_.store(true);
-  
   // 1. First disconnect signals to stop receiving callbacks
   if (wpe_view_ != nullptr && buffer_rendered_handler_ != 0) {
     g_signal_handler_disconnect(wpe_view_, buffer_rendered_handler_);
@@ -505,6 +518,7 @@ InAppWebView::~InAppWebView() {
     webview_ = nullptr;
   }
 #endif
+  lifecycle_.finishDisposal();
 }
 
 void InAppWebView::InitWpeBackend() {
@@ -1305,7 +1319,7 @@ void InAppWebView::OnWpePlatformBufferRendered(WPEBuffer* buffer) {
   }
   
   // Don't process buffers during destruction
-  if (is_disposing_.load()) {
+  if (!lifecycle_.acceptsCallbacks()) {
     // Still need to release the buffer back to WPE
     if (wpe_view_ != nullptr) {
       wpe_view_buffer_released(wpe_view_, buffer);
@@ -2777,22 +2791,27 @@ FlValue* InAppWebView::getSettings() const {
 void InAppWebView::setSettings(const std::shared_ptr<InAppWebViewSettings> newSettings,
                                FlValue* newSettingsMap) {
   if (newSettings && webview_) {
-    // Check if contentBlockers changed
-    FlValue* newContentBlockers = newSettings->contentBlockers;
+    const auto previousSettings = settings_;
+    const std::string newContentBlockers =
+        content_blocker_handler_
+            ? content_blocker_handler_->serializeContentBlockers(
+                  newSettings->contentBlockers)
+            : std::string();
+    const bool contentBlockersChanged =
+        newContentBlockers != content_blockers_snapshot_;
 
     // Apply content blockers if they have been updated
-    if (content_blocker_handler_ != nullptr) {
-      // If new settings have contentBlockers, apply them
-      // This will replace any existing content blockers
-      content_blocker_handler_->setContentBlockers(newContentBlockers, nullptr);
+    if (content_blockersChanged && content_blocker_handler_ != nullptr) {
+      content_blocker_handler_->setContentBlockers(newSettings->contentBlockers, nullptr);
+      content_blockers_snapshot_ = newContentBlockers;
     }
 
     settings_ = newSettings;
-    settings_->applyToWebView(webview_);
+    settings_->applyToWebView(webview_, previousSettings.get());
 #ifdef HAVE_WPE_PLATFORM
     // Apply WPE Platform settings (dark mode, font settings, etc.)
     if (wpe_display_ != nullptr) {
-      settings_->applyWpePlatformSettings(wpe_display_);
+      settings_->applyWpePlatformSettings(wpe_display_, previousSettings.get());
     }
 #endif
   }

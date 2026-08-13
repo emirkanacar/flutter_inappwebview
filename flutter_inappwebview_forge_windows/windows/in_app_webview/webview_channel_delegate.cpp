@@ -20,6 +20,11 @@ namespace flutter_inappwebview_plugin
     : webView(webView), ChannelDelegate(messenger, name)
   {}
 
+  bool WebViewChannelDelegate::canDispatchCallbacks() const
+  {
+    return channel && webView && webView->acceptsCallbacks();
+  }
+
   WebViewChannelDelegate::ShouldOverrideUrlLoadingCallback::ShouldOverrideUrlLoadingCallback()
   {
     decodeResult = [](const flutter::EncodableValue* value)
@@ -158,6 +163,11 @@ namespace flutter_inappwebview_plugin
 
     auto& arguments = std::get<flutter::EncodableMap>(*method_call.arguments());
     auto& methodName = method_call.method_name();
+
+    if (!webView->acceptsCallbacks()) {
+      result->Success();
+      return;
+    }
 
     if (string_equals(methodName, "getUrl")) {
       result->Success(make_fl_value(webView->getUrl()));
@@ -556,7 +566,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onLoadStart(const std::optional<std::string>& url) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -568,7 +578,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onLoadStop(const std::optional<std::string>& url) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -580,7 +590,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onContentLoading(const std::optional<std::string>& url) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -592,7 +602,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onDOMContentLoaded(const std::optional<std::string>& url) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -604,7 +614,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::shouldOverrideUrlLoading(std::shared_ptr<NavigationAction> navigationAction, std::unique_ptr<ShouldOverrideUrlLoadingCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -615,7 +625,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onReceivedError(std::shared_ptr<WebResourceRequest> request, std::shared_ptr<WebResourceError> error) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -628,7 +638,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onReceivedHttpError(std::shared_ptr<WebResourceRequest> request, std::shared_ptr<WebResourceResponse> errorResponse) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -641,7 +651,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onTitleChanged(const std::optional<std::string>& title) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -657,7 +667,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onUpdateVisitedHistory(const std::optional<std::string>& url, const std::optional<bool>& isReload) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -670,7 +680,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onCallJsHandler(const std::string& handlerName, const std::unique_ptr<JavaScriptHandlerFunctionData> data, std::unique_ptr<CallJsHandlerCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -684,7 +694,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onConsoleMessage(const std::string& message, const int64_t& messageLevel) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -697,7 +707,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onDevToolsProtocolEventReceived(const std::string& eventName, const std::string& data) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -710,7 +720,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onProgressChanged(const int64_t& progress) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -722,7 +732,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onCreateWindow(std::shared_ptr<CreateWindowAction> createWindowAction, std::unique_ptr<CreateWindowCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -733,7 +743,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onCloseWindow() const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -743,7 +753,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onPermissionRequest(const std::string& origin, const std::vector<int64_t>& resources, std::unique_ptr<PermissionRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -757,7 +767,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::shouldInterceptRequest(std::shared_ptr<WebResourceRequest> request, std::unique_ptr<ShouldInterceptRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -768,7 +778,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onLoadResourceWithCustomScheme(std::shared_ptr<WebResourceRequest> request, std::unique_ptr<LoadResourceWithCustomSchemeCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -781,7 +791,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onReceivedHttpAuthRequest(std::shared_ptr<HttpAuthenticationChallenge> challenge, std::unique_ptr<ReceivedHttpAuthRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -792,7 +802,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onReceivedClientCertRequest(std::shared_ptr<ClientCertChallenge> challenge, std::unique_ptr<ReceivedClientCertRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -803,7 +813,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onReceivedServerTrustAuthRequest(std::shared_ptr<ServerTrustChallenge> challenge, std::unique_ptr<ReceivedServerTrustAuthRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -814,7 +824,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onRenderProcessGone(const std::shared_ptr<RenderProcessGoneDetail> detail) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -824,7 +834,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onRenderProcessUnresponsive(const std::optional<std::string>& url) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -835,7 +845,7 @@ namespace flutter_inappwebview_plugin
   }
   void WebViewChannelDelegate::onWebContentProcessDidTerminate() const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -845,7 +855,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onProcessFailed(const std::shared_ptr<ProcessFailedDetail> detail) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -855,7 +865,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onDownloadStarting(std::shared_ptr<DownloadStartRequest> request, std::unique_ptr<DownloadStartRequestCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -866,7 +876,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onAcceleratorKeyPressed(std::shared_ptr<AcceleratorKeyPressedDetail> detail) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -876,7 +886,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onZoomScaleChanged(const double& oldScale, const double& newScale) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -889,7 +899,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onEnterFullscreen() const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -899,7 +909,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onExitFullscreen() const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -909,7 +919,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onFaviconChanged(std::shared_ptr<FaviconChangedRequest> request) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       return;
     }
 
@@ -919,7 +929,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onLaunchingExternalUriScheme(std::shared_ptr<LaunchingExternalUriSchemeRequest> request, std::unique_ptr<LaunchingExternalUriSchemeCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -930,7 +940,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onNotificationReceived(std::shared_ptr<NotificationReceivedRequest> request, std::unique_ptr<NotificationReceivedCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -941,7 +951,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onSaveAsUIShowing(std::shared_ptr<SaveAsUIShowingRequest> request, std::unique_ptr<SaveAsUIShowingCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -952,7 +962,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onSaveFileSecurityCheckStarting(std::shared_ptr<SaveFileSecurityCheckStartingRequest> request, std::unique_ptr<SaveFileSecurityCheckStartingCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }
@@ -963,7 +973,7 @@ namespace flutter_inappwebview_plugin
 
   void WebViewChannelDelegate::onScreenCaptureStarting(std::shared_ptr<ScreenCaptureStartingRequest> request, std::unique_ptr<ScreenCaptureStartingCallback> callback) const
   {
-    if (!channel) {
+    if (!canDispatchCallbacks()) {
       callback->defaultBehaviour(std::nullopt);
       return;
     }

@@ -232,7 +232,9 @@ InAppWebViewSettings::InAppWebViewSettings(FlValue* map) : InAppWebViewSettings(
   }
 }
 
-void InAppWebViewSettings::applyToWebView(WebKitWebView* webview) const {
+void InAppWebViewSettings::applyToWebView(
+    WebKitWebView* webview,
+    const InAppWebViewSettings* previous) const {
   if (webview == nullptr) {
     return;
   }
@@ -242,104 +244,156 @@ void InAppWebViewSettings::applyToWebView(WebKitWebView* webview) const {
     return;
   }
 
+  const auto changed = [this, previous](auto member) {
+    return previous == nullptr || (previous->*member) != (this->*member);
+  };
+
   // Apply user agent
-  if (!userAgent.empty()) {
+  if (changed(&InAppWebViewSettings::userAgent) && !userAgent.empty()) {
     webkit_settings_set_user_agent(settings, userAgent.c_str());
   }
 
   // JavaScript settings
-  webkit_settings_set_enable_javascript(settings, javaScriptEnabled);
-  webkit_settings_set_javascript_can_open_windows_automatically(
-      settings, javaScriptCanOpenWindowsAutomatically);
-  webkit_settings_set_media_playback_requires_user_gesture(settings,
-                                                           mediaPlaybackRequiresUserGesture);
+  if (changed(&InAppWebViewSettings::javaScriptEnabled)) {
+    webkit_settings_set_enable_javascript(settings, javaScriptEnabled);
+  }
+  if (changed(&InAppWebViewSettings::javaScriptCanOpenWindowsAutomatically)) {
+    webkit_settings_set_javascript_can_open_windows_automatically(
+        settings, javaScriptCanOpenWindowsAutomatically);
+  }
+  if (changed(&InAppWebViewSettings::mediaPlaybackRequiresUserGesture)) {
+    webkit_settings_set_media_playback_requires_user_gesture(
+        settings, mediaPlaybackRequiresUserGesture);
+  }
 
   // Font settings
-  if (minimumFontSize > 0) {
+  if (changed(&InAppWebViewSettings::minimumFontSize) && minimumFontSize > 0) {
     webkit_settings_set_minimum_font_size(settings, minimumFontSize);
   }
-  if (defaultFontSize > 0) {
+  if (changed(&InAppWebViewSettings::defaultFontSize) && defaultFontSize > 0) {
     webkit_settings_set_default_font_size(settings, defaultFontSize);
   }
-  if (defaultFixedFontSize > 0) {
+  if (changed(&InAppWebViewSettings::defaultFixedFontSize) &&
+      defaultFixedFontSize > 0) {
     webkit_settings_set_default_monospace_font_size(settings, defaultFixedFontSize);
   }
   // Note: webkit_settings_set_minimum_logical_font_size is not available in WPE 2.0 API
 
   // Font families
-  if (!standardFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::standardFontFamily) && !standardFontFamily.empty()) {
     webkit_settings_set_default_font_family(settings, standardFontFamily.c_str());
   }
-  if (!fixedFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::fixedFontFamily) && !fixedFontFamily.empty()) {
     webkit_settings_set_monospace_font_family(settings, fixedFontFamily.c_str());
   }
-  if (!serifFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::serifFontFamily) && !serifFontFamily.empty()) {
     webkit_settings_set_serif_font_family(settings, serifFontFamily.c_str());
   }
-  if (!sansSerifFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::sansSerifFontFamily) && !sansSerifFontFamily.empty()) {
     webkit_settings_set_sans_serif_font_family(settings, sansSerifFontFamily.c_str());
   }
-  if (!cursiveFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::cursiveFontFamily) && !cursiveFontFamily.empty()) {
     webkit_settings_set_cursive_font_family(settings, cursiveFontFamily.c_str());
   }
-  if (!fantasyFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::fantasyFontFamily) && !fantasyFontFamily.empty()) {
     webkit_settings_set_fantasy_font_family(settings, fantasyFontFamily.c_str());
   }
-  if (!pictographFontFamily.empty()) {
+  if (changed(&InAppWebViewSettings::pictographFontFamily) && !pictographFontFamily.empty()) {
     webkit_settings_set_pictograph_font_family(settings, pictographFontFamily.c_str());
   }
 
   // Charset
-  if (!defaultTextEncodingName.empty()) {
+  if (changed(&InAppWebViewSettings::defaultTextEncodingName) &&
+      !defaultTextEncodingName.empty()) {
     webkit_settings_set_default_charset(settings, defaultTextEncodingName.c_str());
   }
 
   // Media settings
-  webkit_settings_set_enable_media_stream(settings, enableMediaStream);
-  webkit_settings_set_enable_mediasource(settings, enableMediaSource);
-  webkit_settings_set_enable_webaudio(settings, enableWebAudio);
-  webkit_settings_set_enable_webgl(settings, enableWebGL);
+  if (changed(&InAppWebViewSettings::enableMediaStream)) {
+    webkit_settings_set_enable_media_stream(settings, enableMediaStream);
+  }
+  if (changed(&InAppWebViewSettings::enableMediaSource)) {
+    webkit_settings_set_enable_mediasource(settings, enableMediaSource);
+  }
+  if (changed(&InAppWebViewSettings::enableWebAudio)) {
+    webkit_settings_set_enable_webaudio(settings, enableWebAudio);
+  }
+  if (changed(&InAppWebViewSettings::enableWebGL)) {
+    webkit_settings_set_enable_webgl(settings, enableWebGL);
+  }
 
   // Developer tools
-  webkit_settings_set_enable_developer_extras(settings, enableDeveloperExtras);
-  webkit_settings_set_enable_write_console_messages_to_stdout(settings,
-                                                              enableWriteConsoleMessagesToStdout);
+  if (changed(&InAppWebViewSettings::enableDeveloperExtras)) {
+    webkit_settings_set_enable_developer_extras(settings, enableDeveloperExtras);
+  }
+  if (changed(&InAppWebViewSettings::enableWriteConsoleMessagesToStdout)) {
+    webkit_settings_set_enable_write_console_messages_to_stdout(
+        settings, enableWriteConsoleMessagesToStdout);
+  }
 
   // Navigation
-  webkit_settings_set_enable_smooth_scrolling(settings, enableSmoothScrolling);
+  if (changed(&InAppWebViewSettings::enableSmoothScrolling)) {
+    webkit_settings_set_enable_smooth_scrolling(settings, enableSmoothScrolling);
+  }
   // Note: Back-forward gestures not available in WPE (requires touch/gesture backend)
-  webkit_settings_set_enable_caret_browsing(settings, enableCaretBrowsing);
-  webkit_settings_set_enable_spatial_navigation(settings, enableSpatialNavigation);
+  if (changed(&InAppWebViewSettings::enableCaretBrowsing)) {
+    webkit_settings_set_enable_caret_browsing(settings, enableCaretBrowsing);
+  }
+  if (changed(&InAppWebViewSettings::enableSpatialNavigation)) {
+    webkit_settings_set_enable_spatial_navigation(settings, enableSpatialNavigation);
+  }
   // Note: DNS prefetching and hyperlink auditing are deprecated in WPE 2.50+
 
   // Content settings
-  webkit_settings_set_enable_fullscreen(settings, isElementFullscreenEnabled);
-  webkit_settings_set_auto_load_images(settings, loadsImagesAutomatically);
-  webkit_settings_set_enable_resizable_text_areas(settings, enableResizableTextAreas);
-  webkit_settings_set_enable_tabs_to_links(settings, enableTabsToLinks);
-  webkit_settings_set_enable_site_specific_quirks(settings, isSiteSpecificQuirksModeEnabled);
-  webkit_settings_set_print_backgrounds(settings, printBackgrounds);
-  webkit_settings_set_enable_page_cache(settings, enablePageCache);
+  if (changed(&InAppWebViewSettings::isElementFullscreenEnabled)) {
+    webkit_settings_set_enable_fullscreen(settings, isElementFullscreenEnabled);
+  }
+  if (changed(&InAppWebViewSettings::loadsImagesAutomatically)) {
+    webkit_settings_set_auto_load_images(settings, loadsImagesAutomatically);
+  }
+  if (changed(&InAppWebViewSettings::enableResizableTextAreas)) {
+    webkit_settings_set_enable_resizable_text_areas(settings, enableResizableTextAreas);
+  }
+  if (changed(&InAppWebViewSettings::enableTabsToLinks)) {
+    webkit_settings_set_enable_tabs_to_links(settings, enableTabsToLinks);
+  }
+  if (changed(&InAppWebViewSettings::isSiteSpecificQuirksModeEnabled)) {
+    webkit_settings_set_enable_site_specific_quirks(settings, isSiteSpecificQuirksModeEnabled);
+  }
+  if (changed(&InAppWebViewSettings::printBackgrounds)) {
+    webkit_settings_set_print_backgrounds(settings, printBackgrounds);
+  }
+  if (changed(&InAppWebViewSettings::enablePageCache)) {
+    webkit_settings_set_enable_page_cache(settings, enablePageCache);
+  }
 
   // HTML5 features
   // Note: offline web application cache is deprecated in WPE 2.50+
-  webkit_settings_set_enable_html5_local_storage(settings, enableHtml5LocalStorage);
-  webkit_settings_set_enable_html5_database(settings, enableHtml5Database);
+  if (changed(&InAppWebViewSettings::enableHtml5LocalStorage)) {
+    webkit_settings_set_enable_html5_local_storage(settings, enableHtml5LocalStorage);
+  }
+  if (changed(&InAppWebViewSettings::enableHtml5Database)) {
+    webkit_settings_set_enable_html5_database(settings, enableHtml5Database);
+  }
 
   // Zoom settings
-  webkit_settings_set_zoom_text_only(settings, !supportZoom);
+  if (changed(&InAppWebViewSettings::supportZoom)) {
+    webkit_settings_set_zoom_text_only(settings, !supportZoom);
+  }
 
   // Debugging
-  webkit_settings_set_draw_compositing_indicators(settings, drawCompositingIndicators);
+  if (changed(&InAppWebViewSettings::drawCompositingIndicators)) {
+    webkit_settings_set_draw_compositing_indicators(settings, drawCompositingIndicators);
+  }
 
   // Set background color
-  if (transparentBackground) {
+  if (changed(&InAppWebViewSettings::transparentBackground) && transparentBackground) {
     WebKitColor bg = {0.0, 0.0, 0.0, 0.0};
     webkit_web_view_set_background_color(webview, &bg);
   }
 
   // Apply CORS allowlist
-  if (corsAllowlist.has_value()) {
+  if (changed(&InAppWebViewSettings::corsAllowlist) && corsAllowlist.has_value()) {
     if (corsAllowlist->empty()) {
       // Empty list clears the allowlist
       webkit_web_view_set_cors_allowlist(webview, nullptr);
@@ -356,38 +410,72 @@ void InAppWebViewSettings::applyToWebView(WebKitWebView* webview) const {
   }
 
   // Security settings
-  webkit_settings_set_allow_file_access_from_file_urls(settings, allowFileAccessFromFileURLs);
-  webkit_settings_set_allow_universal_access_from_file_urls(settings, allowUniversalAccessFromFileURLs);
-  webkit_settings_set_disable_web_security(settings, disableWebSecurity);
-  webkit_settings_set_allow_top_navigation_to_data_urls(settings, allowTopNavigationToDataUrls);
+  if (changed(&InAppWebViewSettings::allowFileAccessFromFileURLs)) {
+    webkit_settings_set_allow_file_access_from_file_urls(settings, allowFileAccessFromFileURLs);
+  }
+  if (changed(&InAppWebViewSettings::allowUniversalAccessFromFileURLs)) {
+    webkit_settings_set_allow_universal_access_from_file_urls(
+        settings, allowUniversalAccessFromFileURLs);
+  }
+  if (changed(&InAppWebViewSettings::disableWebSecurity)) {
+    webkit_settings_set_disable_web_security(settings, disableWebSecurity);
+  }
+  if (changed(&InAppWebViewSettings::allowTopNavigationToDataUrls)) {
+    webkit_settings_set_allow_top_navigation_to_data_urls(
+        settings, allowTopNavigationToDataUrls);
+  }
 
   // Clipboard
-  webkit_settings_set_javascript_can_access_clipboard(settings, javaScriptCanAccessClipboard);
+  if (changed(&InAppWebViewSettings::javaScriptCanAccessClipboard)) {
+    webkit_settings_set_javascript_can_access_clipboard(settings, javaScriptCanAccessClipboard);
+  }
 
   // WebRTC
-  webkit_settings_set_enable_webrtc(settings, enableWebRTC);
-  if (!webRTCUdpPortsRange.empty()) {
+  if (changed(&InAppWebViewSettings::enableWebRTC)) {
+    webkit_settings_set_enable_webrtc(settings, enableWebRTC);
+  }
+  if (changed(&InAppWebViewSettings::webRTCUdpPortsRange) &&
+      !webRTCUdpPortsRange.empty()) {
     webkit_settings_set_webrtc_udp_ports_range(settings, webRTCUdpPortsRange.c_str());
   }
 
   // Media settings
-  webkit_settings_set_media_playback_allows_inline(settings, allowsInlineMediaPlayback);
-  webkit_settings_set_enable_media(settings, enableMedia);
-  webkit_settings_set_enable_encrypted_media(settings, enableEncryptedMedia);
-  webkit_settings_set_enable_media_capabilities(settings, enableMediaCapabilities);
-  webkit_settings_set_enable_mock_capture_devices(settings, enableMockCaptureDevices);
-  if (!mediaContentTypesRequiringHardwareSupport.empty()) {
+  if (changed(&InAppWebViewSettings::allowsInlineMediaPlayback)) {
+    webkit_settings_set_media_playback_allows_inline(settings, allowsInlineMediaPlayback);
+  }
+  if (changed(&InAppWebViewSettings::enableMedia)) {
+    webkit_settings_set_enable_media(settings, enableMedia);
+  }
+  if (changed(&InAppWebViewSettings::enableEncryptedMedia)) {
+    webkit_settings_set_enable_encrypted_media(settings, enableEncryptedMedia);
+  }
+  if (changed(&InAppWebViewSettings::enableMediaCapabilities)) {
+    webkit_settings_set_enable_media_capabilities(settings, enableMediaCapabilities);
+  }
+  if (changed(&InAppWebViewSettings::enableMockCaptureDevices)) {
+    webkit_settings_set_enable_mock_capture_devices(settings, enableMockCaptureDevices);
+  }
+  if (changed(&InAppWebViewSettings::mediaContentTypesRequiringHardwareSupport) &&
+      !mediaContentTypesRequiringHardwareSupport.empty()) {
     webkit_settings_set_media_content_types_requiring_hardware_support(settings, mediaContentTypesRequiringHardwareSupport.c_str());
   }
 
   // Other settings
-  webkit_settings_set_enable_javascript_markup(settings, enableJavaScriptMarkup);
-  webkit_settings_set_enable_2d_canvas_acceleration(settings, enable2DCanvasAcceleration);
-  webkit_settings_set_allow_modal_dialogs(settings, allowModalDialogs);
+  if (changed(&InAppWebViewSettings::enableJavaScriptMarkup)) {
+    webkit_settings_set_enable_javascript_markup(settings, enableJavaScriptMarkup);
+  }
+  if (changed(&InAppWebViewSettings::enable2DCanvasAcceleration)) {
+    webkit_settings_set_enable_2d_canvas_acceleration(settings, enable2DCanvasAcceleration);
+  }
+  if (changed(&InAppWebViewSettings::allowModalDialogs)) {
+    webkit_settings_set_allow_modal_dialogs(settings, allowModalDialogs);
+  }
 }
 
 #ifdef HAVE_WPE_PLATFORM
-void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
+void InAppWebViewSettings::applyWpePlatformSettings(
+    void* display_ptr,
+    const InAppWebViewSettings* previous) const {
   if (display_ptr == nullptr) {
     return;
   }
@@ -398,31 +486,35 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
     return;
   }
 
+  const auto changed = [this, previous](auto member) {
+    return previous == nullptr || (previous->*member) != (this->*member);
+  };
+
   GError* error = nullptr;
 
   // Apply dark mode setting
-  if (darkMode.has_value()) {
+  if (changed(&InAppWebViewSettings::darkMode) && darkMode.has_value()) {
     wpe_settings_set_boolean(wpe_settings, WPE_SETTING_DARK_MODE,
                              darkMode.value(), WPE_SETTINGS_SOURCE_APPLICATION, &error);
     g_clear_error(&error);
   }
 
   // Apply disable animations setting
-  if (disableAnimations.has_value()) {
+  if (changed(&InAppWebViewSettings::disableAnimations) && disableAnimations.has_value()) {
     wpe_settings_set_boolean(wpe_settings, WPE_SETTING_DISABLE_ANIMATIONS,
                              disableAnimations.value(), WPE_SETTINGS_SOURCE_APPLICATION, &error);
     g_clear_error(&error);
   }
 
   // Apply font antialias setting
-  if (fontAntialias.has_value()) {
+  if (changed(&InAppWebViewSettings::fontAntialias) && fontAntialias.has_value()) {
     wpe_settings_set_boolean(wpe_settings, WPE_SETTING_FONT_ANTIALIAS,
                              fontAntialias.value(), WPE_SETTINGS_SOURCE_APPLICATION, &error);
     g_clear_error(&error);
   }
 
   // Apply font hinting style
-  if (fontHintingStyle.has_value()) {
+  if (changed(&InAppWebViewSettings::fontHintingStyle) && fontHintingStyle.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_FONT_HINTING_STYLE,
                             static_cast<uint32_t>(fontHintingStyle.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -430,7 +522,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply font subpixel layout
-  if (fontSubpixelLayout.has_value()) {
+  if (changed(&InAppWebViewSettings::fontSubpixelLayout) && fontSubpixelLayout.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_FONT_SUBPIXEL_LAYOUT,
                             static_cast<uint32_t>(fontSubpixelLayout.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -438,14 +530,14 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply font DPI
-  if (fontDPI.has_value()) {
+  if (changed(&InAppWebViewSettings::fontDPI) && fontDPI.has_value()) {
     wpe_settings_set_double(wpe_settings, WPE_SETTING_FONT_DPI,
                             fontDPI.value(), WPE_SETTINGS_SOURCE_APPLICATION, &error);
     g_clear_error(&error);
   }
 
   // Apply cursor blink time
-  if (cursorBlinkTime.has_value()) {
+  if (changed(&InAppWebViewSettings::cursorBlinkTime) && cursorBlinkTime.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_CURSOR_BLINK_TIME,
                             static_cast<uint32_t>(cursorBlinkTime.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -453,7 +545,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply double-click distance
-  if (doubleClickDistance.has_value()) {
+  if (changed(&InAppWebViewSettings::doubleClickDistance) && doubleClickDistance.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_DOUBLE_CLICK_DISTANCE,
                             static_cast<uint32_t>(doubleClickDistance.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -461,7 +553,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply double-click time
-  if (doubleClickTime.has_value()) {
+  if (changed(&InAppWebViewSettings::doubleClickTime) && doubleClickTime.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_DOUBLE_CLICK_TIME,
                             static_cast<uint32_t>(doubleClickTime.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -469,7 +561,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply drag threshold
-  if (dragThreshold.has_value()) {
+  if (changed(&InAppWebViewSettings::dragThreshold) && dragThreshold.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_DRAG_THRESHOLD,
                             static_cast<uint32_t>(dragThreshold.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -477,7 +569,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply key repeat delay
-  if (keyRepeatDelay.has_value()) {
+  if (changed(&InAppWebViewSettings::keyRepeatDelay) && keyRepeatDelay.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_KEY_REPEAT_DELAY,
                             static_cast<uint32_t>(keyRepeatDelay.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);
@@ -485,7 +577,7 @@ void InAppWebViewSettings::applyWpePlatformSettings(void* display_ptr) const {
   }
 
   // Apply key repeat interval
-  if (keyRepeatInterval.has_value()) {
+  if (changed(&InAppWebViewSettings::keyRepeatInterval) && keyRepeatInterval.has_value()) {
     wpe_settings_set_uint32(wpe_settings, WPE_SETTING_KEY_REPEAT_INTERVAL,
                             static_cast<uint32_t>(keyRepeatInterval.value()),
                             WPE_SETTINGS_SOURCE_APPLICATION, &error);

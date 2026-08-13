@@ -224,7 +224,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -232,7 +232,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.shouldOverrideUrlLoading(navigationAction, callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -464,7 +464,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -472,7 +472,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.onReceivedHttpAuthRequest(challenge, callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -521,7 +521,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -529,7 +529,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.onReceivedServerTrustAuthRequest(challenge, callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -595,7 +595,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -603,7 +603,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.onReceivedClientCertRequest(challenge, callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -642,7 +642,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -650,7 +650,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.onSafeBrowsingHit(request.url.toString(), threatType, resultCallback)
     } else {
-      resultCallback.defaultBehaviour(null)
+      resultCallback.completeDefaultBehaviour(null)
     }
   }
 
@@ -804,7 +804,7 @@ open class InAppWebViewClient(
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        defaultBehaviour(null)
+        completeDefaultBehaviour(null)
       }
     }
 
@@ -812,7 +812,7 @@ open class InAppWebViewClient(
     if (channelDelegate != null) {
       channelDelegate.onFormResubmission(webView.url ?: "", callback)
     } else {
-      callback.defaultBehaviour(null)
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -826,6 +826,10 @@ open class InAppWebViewClient(
   @RequiresApi(api = Build.VERSION_CODES.O)
   override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
     val webView = view as InAppWebView
+
+    if (!webView.markRendererProcessLost()) {
+      return true
+    }
 
     // Renderer loss can bypass WebChromeClient.onHideCustomView(). Restore
     // the host fullscreen state before forwarding the renderer event so the

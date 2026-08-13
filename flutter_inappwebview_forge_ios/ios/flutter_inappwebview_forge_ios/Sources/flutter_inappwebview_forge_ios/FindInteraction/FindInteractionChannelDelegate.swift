@@ -17,6 +17,10 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard canDispatchCallbacks() else {
+            result(nil)
+            return
+        }
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
@@ -134,6 +138,7 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
     }
     
     public func onFindResultReceived(activeMatchOrdinal: Int, numberOfMatches: Int, isDoneCounting: Bool) {
+        guard canDispatchCallbacks() else { return }
         if isDoneCounting, let findInteractionController = findInteractionController {
             findInteractionController.activeFindSession = FindSession(resultCount: numberOfMatches,
                                                                       highlightedResultIndex: activeMatchOrdinal,
@@ -145,7 +150,14 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
             "numberOfMatches": numberOfMatches,
             "isDoneCounting": isDoneCounting
         ]
-        channel?.invokeMethod("onFindResultReceived", arguments: arguments)
+        guard let channel = channel else { return }
+        channel.invokeMethod("onFindResultReceived", arguments: arguments)
+    }
+
+    private func canDispatchCallbacks() -> Bool {
+        guard channel != nil, let findInteractionController = findInteractionController else { return false }
+        guard let webView = findInteractionController.webView else { return true }
+        return webView.acceptsCallbacks()
     }
     
     public override func dispose() {

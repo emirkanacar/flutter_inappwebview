@@ -13,6 +13,7 @@ import 'package:web/web.dart';
 import 'headless_inappwebview_manager.dart';
 import 'in_app_webview_manager.dart';
 import 'js_bridge.dart';
+import 'web_view_lifecycle_coordinator.dart';
 
 extension on HTMLIFrameElement {
   // https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/csp
@@ -66,9 +67,11 @@ class InAppWebViewWebElement implements Disposable {
   late final int? windowId;
 
   InAppWebViewSettings? settings;
+  Map<String, dynamic>? _settingsSnapshot;
   JSWebView? jsWebView;
   bool isLoading = false;
   bool _hasLoadedDocument = false;
+  final WebViewLifecycleCoordinator lifecycle = WebViewLifecycleCoordinator();
 
   late final String _expectedBridgeSecret;
 
@@ -90,24 +93,7 @@ class InAppWebViewWebElement implements Disposable {
       ..style.border = 'none';
     iframeContainer.append(iframe);
 
-    _channel = MethodChannel(
-      'com.emirkanacar/flutter_inappwebview_$_viewId',
-      const StandardMethodCodec(),
-      _messenger,
-    );
-
-    this._channel?.setMethodCallHandler((call) async {
-      try {
-        return await handleMethodCall(call);
-      } on Error catch (e) {
-        log(
-          e.toString(),
-          name: runtimeType.toString(),
-          error: e,
-          stackTrace: e.stackTrace,
-        );
-      }
-    });
+    _configureChannel();
 
     try {
       _expectedBridgeSecret = window.crypto.randomUUID();
@@ -127,8 +113,32 @@ class InAppWebViewWebElement implements Disposable {
     );
   }
 
+  void _configureChannel() {
+    _channel?.setMethodCallHandler(null);
+    _channel = MethodChannel(
+      'com.emirkanacar/flutter_inappwebview_$_viewId',
+      const StandardMethodCodec(),
+      _messenger,
+    );
+    _channel?.setMethodCallHandler((call) async {
+      try {
+        return await handleMethodCall(call);
+      } on Error catch (e) {
+        log(
+          e.toString(),
+          name: runtimeType.toString(),
+          error: e,
+          stackTrace: e.stackTrace,
+        );
+      }
+    });
+  }
+
   /// Handles method calls over the MethodChannel of this plugin.
   Future<dynamic> handleMethodCall(MethodCall call) async {
+    if (!lifecycle.acceptsCallbacks && call.method != 'dispose') {
+      return null;
+    }
     switch (call.method) {
       case "getIFrameId":
         return getIFrameId();
@@ -276,6 +286,9 @@ class InAppWebViewWebElement implements Disposable {
   }
 
   void prepare() {
+    if (!lifecycle.beginPreparing()) {
+      return;
+    }
     if (headlessWebViewId != null) {
       final headlessWebView =
           HeadlessInAppWebViewManager.webViews[headlessWebViewId!];
@@ -287,6 +300,17 @@ class InAppWebViewWebElement implements Disposable {
           iframeContainer.append(webView.iframe);
           iframe = webView.iframe;
 
+          webView.jsWebView?.reattach(
+            _viewId is int ? (_viewId as int).toJS : _viewId.toString().toJS,
+            iframe,
+            iframeContainer,
+          );
+          webView._reattachToView(
+            viewId: _viewId,
+            iframe: iframe,
+            iframeContainer: iframeContainer,
+          );
+
           initialSettings = webView.initialSettings;
           settings = webView.settings;
           initialUrlRequest = webView.initialUrlRequest;
@@ -294,12 +318,15 @@ class InAppWebViewWebElement implements Disposable {
           initialFile = webView.initialFile;
           initialUserScripts = webView.initialUserScripts;
 
-          jsWebView = flutterInAppWebView?.createFlutterInAppWebView(
-            _viewId is int ? (_viewId as int).toJS : _viewId.toString().toJS,
-            iframe,
-            iframeContainer,
-            _expectedBridgeSecret,
-          );
+          // The transferred element was already prepared while headless.  The
+          // normal platform element is only the new Flutter host container;
+          // continue using the transferred element's controller, scripts, and
+          // bridge state instead of preparing the placeholder a second time.
+          jsWebView = webView.jsWebView;
+          _settingsSnapshot = settings?.toMap();
+          lifecycle.markReattached();
+          lifecycle.markReady();
+          return;
         }
       }
     }
@@ -357,10 +384,17 @@ class InAppWebViewWebElement implements Disposable {
       userContentController.addUserOnlyScripts(initialUserScripts!.toList());
     }
 
-    jsWebView?.prepare(settings?.toMap().jsify());
+    lifecycle.markAttached();
+    final initialSettingsMap = settings?.toMap();
+    _settingsSnapshot = initialSettingsMap;
+    jsWebView?.prepare(initialSettingsMap?.jsify());
+    lifecycle.markReady();
   }
 
   void makeInitialLoad() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     if (windowId != null) {
       if (InAppWebViewManager.windowActions.containsKey(windowId!)) {
         final createWindowAction = InAppWebViewManager.windowActions[windowId!];
@@ -640,9 +674,57 @@ class InAppWebViewWebElement implements Disposable {
     }
     newSettings.iframeSandbox = sandbox;
 
-    jsWebView?.setSettings(newSettings.toMap().jsify());
+    final newSettingsMap = newSettings.toMap();
+    final settingsChanged =
+        _settingsSnapshot == null ||
+        !_deepEquals(_settingsSnapshot!, newSettingsMap);
+    if (settingsChanged) {
+      jsWebView?.setSettings(newSettingsMap.jsify());
+    }
 
     settings = newSettings;
+    _settingsSnapshot = newSettingsMap;
+  }
+
+  bool _deepEquals(Object? first, Object? second) {
+    if (identical(first, second)) {
+      return true;
+    }
+    if (first is Map && second is Map) {
+      if (first.length != second.length) {
+        return false;
+      }
+      for (final key in first.keys) {
+        if (!second.containsKey(key) || !_deepEquals(first[key], second[key])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (first is Set && second is Set) {
+      return first.length == second.length &&
+          first.every(
+            (value) => second.any((candidate) => _deepEquals(value, candidate)),
+          );
+    }
+    if (first is Iterable && second is Iterable) {
+      final firstIterator = first.iterator;
+      final secondIterator = second.iterator;
+      while (true) {
+        final firstHasValue = firstIterator.moveNext();
+        final secondHasValue = secondIterator.moveNext();
+        if (firstHasValue != secondHasValue) {
+          return false;
+        }
+        if (!firstHasValue) {
+          return true;
+        }
+        if (!_deepEquals(firstIterator.current, secondIterator.current)) {
+          return false;
+        }
+      }
+    }
+    return first == second;
   }
 
   Future<Map<String, dynamic>> getSettings() async {
@@ -650,6 +732,9 @@ class InAppWebViewWebElement implements Disposable {
   }
 
   void onLoadStart(String? url) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     isLoading = true;
 
     var obj = {"url": url};
@@ -657,6 +742,9 @@ class InAppWebViewWebElement implements Disposable {
   }
 
   void onLoadStop(String? url) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     isLoading = false;
     _hasLoadedDocument = true;
 
@@ -665,16 +753,25 @@ class InAppWebViewWebElement implements Disposable {
   }
 
   void onUpdateVisitedHistory(String? url) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     var obj = {"url": url};
     await _channel?.invokeMethod("onUpdateVisitedHistory", obj);
   }
 
   void onScrollChanged(int x, int y) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     var obj = {"x": x, "y": y};
     await _channel?.invokeMethod("onScrollChanged", obj);
   }
 
   void onConsoleMessage(String type, String? message) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     int messageLevel = 1;
     switch (type) {
       case 'debug':
@@ -700,6 +797,9 @@ class InAppWebViewWebElement implements Disposable {
     String? target,
     String? windowFeatures,
   ) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return false;
+    }
     Map<String, dynamic> windowFeaturesMap = {};
     List<String> features = windowFeatures?.split(",") ?? [];
     for (var feature in features) {
@@ -732,6 +832,10 @@ class InAppWebViewWebElement implements Disposable {
           createWindowAction.toMap(),
         ) ??
         false;
+    if (!lifecycle.acceptsCallbacks) {
+      InAppWebViewManager.windowActions.remove(windowId);
+      return false;
+    }
     if (!handledByClient &&
         InAppWebViewManager.windowActions.containsKey(windowId)) {
       InAppWebViewManager.windowActions.remove(windowId);
@@ -740,48 +844,78 @@ class InAppWebViewWebElement implements Disposable {
   }
 
   void onCloseWindow() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onCloseWindow");
   }
 
   void onWindowFocus() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onWindowFocus");
   }
 
   void onWindowBlur() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onWindowBlur");
   }
 
   void onPrintRequest(String? url) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     var obj = {"url": url, "printJobId": null};
 
     await _channel?.invokeMethod("onPrintRequest", obj);
   }
 
   void onEnterFullscreen() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onEnterFullscreen");
   }
 
   void onExitFullscreen() async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onExitFullscreen");
   }
 
   void onTitleChanged(String? title) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     var obj = {"title": title};
 
     await _channel?.invokeMethod("onTitleChanged", obj);
   }
 
   void onZoomScaleChanged(double oldScale, double newScale) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     var obj = {"oldScale": oldScale, "newScale": newScale};
 
     await _channel?.invokeMethod("onZoomScaleChanged", obj);
   }
 
   void onInjectedScriptLoaded(String id) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onInjectedScriptLoaded", [id]);
   }
 
   void onInjectedScriptError(String id) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
     await _channel?.invokeMethod("onInjectedScriptError", [id]);
   }
 
@@ -789,6 +923,9 @@ class InAppWebViewWebElement implements Disposable {
     String handlerName,
     Map<String, dynamic> data,
   ) async {
+    if (!lifecycle.acceptsCallbacks) {
+      return null;
+    }
     final String bridgeSecret = data["_bridgeSecret"];
     final String origin = data["origin"];
 
@@ -825,11 +962,17 @@ class InAppWebViewWebElement implements Disposable {
 
     var obj = {"handlerName": handlerName, "data": data};
     final result = await _channel?.invokeMethod<String>("onCallJsHandler", obj);
+    if (!lifecycle.acceptsCallbacks) {
+      return null;
+    }
     return result != null ? jsonDecode(result) : null;
   }
 
   @override
   void dispose() {
+    if (!lifecycle.beginDisposal()) {
+      return;
+    }
     _channel?.setMethodCallHandler(null);
     _channel = null;
     if (windowId != null &&
@@ -837,9 +980,29 @@ class InAppWebViewWebElement implements Disposable {
       InAppWebViewManager.windowActions.remove(windowId);
     }
     iframeContainer.remove();
-    if (InAppWebViewManager.webViews.containsKey(_viewId)) {
+    if (identical(InAppWebViewManager.webViews[_viewId], this)) {
       InAppWebViewManager.webViews.remove(_viewId);
     }
+    lifecycle.finishDisposal();
+  }
+
+  void _reattachToView({
+    required dynamic viewId,
+    required HTMLIFrameElement iframe,
+    required HTMLDivElement iframeContainer,
+  }) {
+    if (!lifecycle.acceptsCallbacks) {
+      return;
+    }
+    if (identical(InAppWebViewManager.webViews[_viewId], this)) {
+      InAppWebViewManager.webViews.remove(_viewId);
+    }
+    _viewId = viewId;
+    this.iframe = iframe;
+    this.iframeContainer = iframeContainer;
+    _configureChannel();
+    InAppWebViewManager.webViews[_viewId] = this;
+    lifecycle.markReattached();
   }
 }
 

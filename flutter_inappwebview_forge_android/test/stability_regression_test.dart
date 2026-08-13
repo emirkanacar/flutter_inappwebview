@@ -24,7 +24,6 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'webview/WebViewChannelDelegate.kt',
     ).readAsStringSync();
-
     expect(clientSource, contains('MAX_CONCURRENT_SYNC_INTERCEPT_REQUESTS'));
     expect(clientSource, contains('synchronousInterceptRequestsInFlight'));
     expect(
@@ -32,6 +31,146 @@ void main() {
       contains('Too many synchronous shouldInterceptRequest callbacks'),
     );
     expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
+  });
+
+  test(
+    'Android channel dispatch keeps feature groups behind internal handlers',
+    () {
+      final source = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        'webview/WebViewChannelDelegate.kt',
+      ).readAsStringSync();
+
+      expect(source, contains('handleJavaScriptMethod(method, call, result)'));
+      expect(source, contains('handleSettingsMethod(method, call, result)'));
+      expect(source, contains('handleWebMessageMethod(method, call, result)'));
+      expect(source, contains('handleLifecycleMethod(method, call, result)'));
+      expect(source, contains('private fun handleJavaScriptMethod('));
+      expect(source, contains('private fun handleWebMessageMethod('));
+    },
+  );
+
+  test('Android JavaScript bridge drops queued work after disposal begins', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/JavaScriptBridgeInterface.kt',
+    ).readAsStringSync();
+
+    expect(source, contains('if (!webView.acceptsCallbacks()) return'));
+    expect(
+      source,
+      contains('if (!currentWebView.acceptsCallbacks()) return@post'),
+    );
+    expect(source, contains('if (!callbackWebView.acceptsCallbacks()) return'));
+  });
+
+  test('Android headless ownership transfers atomically and replaces collisions', () {
+    final factorySource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/FlutterWebViewFactory.kt',
+    ).readAsStringSync();
+    final managerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'headless_in_app_webview/HeadlessInAppWebViewManager.kt',
+    ).readAsStringSync();
+
+    expect(
+      factorySource,
+      contains('headlessManager.webViews.remove(headlessWebViewId)'),
+    );
+    expect(
+      factorySource,
+      contains('transferredFromHeadless'),
+    );
+    expect(
+      factorySource,
+      contains('transferredWebView.id?.let { transferredWebViewID ->'),
+    );
+    expect(
+      factorySource,
+      contains('inAppWebViewManager?.webViews?.set(transferredWebViewID, resultWebView)'),
+    );
+    expect(
+      factorySource,
+      contains('headlessWebView.dispose()'),
+      reason: 'a stale headless entry must not be silently abandoned',
+    );
+    final headlessSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'headless_in_app_webview/HeadlessInAppWebView.kt',
+    ).readAsStringSync();
+    expect(headlessSource, contains('if (view == null)'));
+    expect(headlessSource, contains('dispose()\n            return null'));
+    expect(headlessSource, contains('manager.webViews[id] === this'));
+    expect(
+      managerSource,
+      contains(
+        'currentPlugin.inAppWebViewManager?.webViews?.remove(id)?.dispose()',
+      ),
+    );
+  });
+
+  test('Android callback defaults are completed at most once', () {
+    final callbackSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/BaseCallbackResultImpl.kt',
+    ).readAsStringSync();
+    final interfaceSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/ICallbackResult.kt',
+    ).readAsStringSync();
+
+    expect(callbackSource, contains('AtomicBoolean'));
+    expect(callbackSource, contains('callbackCompleted'));
+    expect(callbackSource, contains('beginCallbackCompletion()'));
+    expect(callbackSource, contains('compareAndSet(false, true)'));
+    expect(callbackSource, contains('completeDefaultBehaviourAfterCallback'));
+    expect(
+      callbackSource,
+      contains('completeDefaultBehaviourAfterCallback(result)'),
+    );
+    expect(
+      interfaceSource,
+      contains('completeDefaultBehaviour(result: T?): Boolean'),
+    );
+
+    const callbackFiles = <String>[
+      'webview/in_app_webview/InAppWebViewClient.kt',
+      'webview/in_app_webview/InAppWebViewClientCompat.kt',
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+      'webview/in_app_webview/InAppWebViewRenderProcessClient.kt',
+      'webview/JavaScriptBridgeInterface.kt',
+    ];
+    for (final relativePath in callbackFiles) {
+      final source = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        '$relativePath',
+      ).readAsStringSync();
+      expect(
+        source,
+        isNot(contains('defaultBehaviour(null)')),
+        reason: '$relativePath bypasses the exactly-once default gate',
+      );
+    }
+    final chromeSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    expect(
+      chromeSource,
+      contains('if (!beginCallbackCompletion()) return'),
+      reason: 'Android JavaScript UI errors bypass callback completion gating',
+    );
+    final bridgeSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/JavaScriptBridgeInterface.kt',
+    ).readAsStringSync();
+    expect(
+      bridgeSource,
+      contains('if (!beginCallbackCompletion()) return'),
+      reason:
+          'Android JavaScript bridge errors bypass callback completion gating',
+    );
   });
 
   test('Android JavaScript injection calls the platform WebView overload', () {
@@ -722,6 +861,10 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'webview/in_app_webview/InAppWebViewClient.kt',
     ).readAsStringSync();
+    final delegateSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/WebViewChannelDelegate.kt',
+    ).readAsStringSync();
 
     expect(cookieSource, contains('@Suppress("DEPRECATION")'));
     expect(
@@ -863,8 +1006,16 @@ void main() {
       'webview/in_app_webview/InAppWebView.kt',
     ).readAsStringSync();
 
-    expect(source, contains('private var isDisposed = false'));
-    expect(source, contains('if (isDisposed || nativeRegistrationsRegistered'));
+    expect(
+      source,
+      contains('private val lifecycle = WebViewLifecycleCoordinator()'),
+    );
+    expect(
+      source,
+      contains(
+        'if (!lifecycle.acceptsCallbacks() || nativeRegistrationsRegistered',
+      ),
+    );
     expect(source, contains('nativeRegistrationRequestScheduled = false'));
     expect(source, contains('nativeRegistrationCallbacks.clear()'));
   });
@@ -892,6 +1043,36 @@ void main() {
     },
   );
 
+  test('Android script registration skips active duplicates', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/UserContentController.kt',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains('val scripts = userScriptsAt(userOnlyScript.injectionTime)'),
+    );
+    expect(
+      source,
+      contains(
+        'if (scripts.contains(userOnlyScript) &&\n'
+        '            !pendingUserOnlyScriptRegistrations.contains(userOnlyScript)',
+      ),
+    );
+    expect(
+      source,
+      contains('val scripts = pluginScriptsAt(pluginScript.injectionTime)'),
+    );
+    expect(
+      source,
+      contains(
+        'if (scripts.contains(pluginScript) &&\n'
+        '            !pendingPluginScriptRegistrations.contains(pluginScript)',
+      ),
+    );
+  });
+
   test('Android scroll callbacks skip unchanged positions', () {
     final source = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
@@ -915,6 +1096,243 @@ void main() {
     );
     expect(source, contains('removeCallbacks(dispatchPendingScrollChanged)'));
   });
+
+  test('Android retained and headless WebViews have single owners', () {
+    final managerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/InAppWebViewManager.kt',
+    ).readAsStringSync();
+    final headlessManagerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'headless_in_app_webview/HeadlessInAppWebViewManager.kt',
+    ).readAsStringSync();
+    final headlessSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'headless_in_app_webview/HeadlessInAppWebView.kt',
+    ).readAsStringSync();
+    final headlessDelegateSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'headless_in_app_webview/HeadlessWebViewChannelDelegate.kt',
+    ).readAsStringSync();
+
+    expect(managerSource, contains('MutableMap<String, FlutterWebView>'));
+    expect(managerSource, contains('keepAliveWebViews.remove(keepAliveId)'));
+    expect(managerSource, contains('registerKeepAlive'));
+    expect(managerSource, contains('LinkedHashSet<FlutterWebView>()'));
+    expect(managerSource, contains('addAll(webViews.values)'));
+    expect(managerSource, contains('webViews.clear()'));
+    expect(
+      managerSource,
+      isNot(contains('keepAliveWebViews[keepAliveId] = null')),
+    );
+    expect(
+      headlessManagerSource,
+      contains('MutableMap<String, HeadlessInAppWebView>'),
+    );
+    expect(headlessManagerSource, contains('webViews.remove(id)?.dispose()'));
+    expect(headlessSource, contains('WebViewLifecycleCoordinator'));
+    expect(headlessSource, contains('lifecycle.beginDisposal()'));
+    expect(headlessSource, contains('try {'));
+    expect(headlessSource, contains('} finally {'));
+    expect(headlessSource, contains('lifecycle.finishDisposal()'));
+    expect(headlessSource, isNot(contains('isDisposed')));
+    expect(headlessDelegateSource, contains('acceptsCallbacks()'));
+    expect(headlessSource, contains('manager.webViews.remove(id)'));
+    expect(
+      headlessSource,
+      contains('currentFlutterWebView.webView?.markRetainedWebViewDetached()'),
+    );
+    expect(
+      headlessSource,
+      contains('activeWebViews[webViewId] === currentFlutterWebView'),
+    );
+    expect(headlessSource, contains('activeWebViews.remove(webViewId)'));
+  });
+
+  test('Android auxiliary managers remove ownership before disposal', () {
+    final printJobManagerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'print_job/PrintJobManager.kt',
+    ).readAsStringSync();
+    final printJobSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'print_job/PrintJobController.kt',
+    ).readAsStringSync();
+    final chromeManagerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'chrome_custom_tabs/ChromeSafariBrowserManager.kt',
+    ).readAsStringSync();
+    final chromeActivitySource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'chrome_custom_tabs/ChromeCustomTabsActivity.kt',
+    ).readAsStringSync();
+
+    expect(
+      printJobManagerSource,
+      contains('MutableMap<String, PrintJobController>'),
+    );
+    expect(printJobManagerSource, isNot(contains('PrintJobController?>')));
+    expect(printJobManagerSource, contains('ArrayList(jobs.values)'));
+    expect(printJobManagerSource, contains('jobs.clear()'));
+    expect(printJobSource, contains('jobs?.remove(id)'));
+    expect(
+      chromeManagerSource,
+      contains('MutableMap<String, ChromeCustomTabsActivity>'),
+    );
+    expect(chromeManagerSource, isNot(contains('ChromeCustomTabsActivity?>')));
+    expect(chromeManagerSource, contains('ArrayList(browsers.values)'));
+    expect(chromeManagerSource, contains('browsers.clear()'));
+    expect(chromeActivitySource, contains('browsers?.remove(id)'));
+  });
+
+  test('Android settings only rebuild expensive resources when changed', () {
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains(
+        'changed("contentBlockers", customSettings.contentBlockers, newCustomSettings.contentBlockers)',
+      ),
+    );
+    expect(
+      source,
+      contains(
+        'changed("webViewAssetLoader", customSettings.webViewAssetLoader, newCustomSettings.webViewAssetLoader)',
+      ),
+    );
+  });
+
+  test('Android native lifecycle has one disposal boundary for callbacks', () {
+    final coordinatorSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'types/WebViewLifecycleCoordinator.kt',
+    ).readAsStringSync();
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final bridgeSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/JavaScriptBridgeInterface.kt',
+    ).readAsStringSync();
+    final clientSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewClient.kt',
+    ).readAsStringSync();
+    final delegateSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/WebViewChannelDelegate.kt',
+    ).readAsStringSync();
+    final webMessageDelegateSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/web_message/WebMessageChannelChannelDelegate.kt',
+    ).readAsStringSync();
+
+    expect(coordinatorSource, contains('DISPOSING'));
+    expect(coordinatorSource, contains('DISPOSED'));
+    expect(coordinatorSource, contains('beginAsyncOperation'));
+    expect(coordinatorSource, contains('activeOperationIds'));
+    expect(
+      coordinatorSource,
+      contains('completeAsyncOperation(operationId: Long)'),
+    );
+    expect(coordinatorSource, contains('operationId'));
+    expect(coordinatorSource, contains('callbackCompletionCount'));
+    expect(coordinatorSource, contains('lifecycleTrace'));
+    expect(coordinatorSource, contains('record("rendererLost")'));
+    expect(webViewSource, contains('if (!lifecycle.beginPreparing()) return'));
+    expect(webViewSource, contains('if (!lifecycle.beginDisposal()) return'));
+    expect(webViewSource, contains('try {'));
+    expect(webViewSource, contains('} finally {'));
+    expect(webViewSource, contains('lifecycle.finishDisposal()'));
+    expect(webViewSource, contains('internal fun acceptsCallbacks()'));
+    expect(delegateSource, contains('private fun canDispatchCallbacks()'));
+    expect(delegateSource, contains('private fun invokeCallback('));
+    expect(delegateSource, contains('if (!canDispatchCallbacks()) return'));
+    expect(webMessageDelegateSource, contains('canDispatchCallbacks()'));
+    final pullToRefreshSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'pull_to_refresh/PullToRefreshChannelDelegate.kt',
+    ).readAsStringSync();
+    expect(pullToRefreshSource, contains('private fun canDispatchCallbacks()'));
+    expect(pullToRefreshSource, contains('child.acceptsCallbacks()'));
+    expect(webViewSource, contains('disposedAsyncJavaScriptResult()'));
+    expect(
+      webViewSource,
+      contains('asyncJavaScriptErrorResult("Unable to prepare JavaScript")'),
+    );
+    expect(webViewSource, contains('consumeCallAsyncJavaScriptCallback'));
+    expect(webViewSource, contains('consumeEvaluateJavaScriptCallback'));
+    expect(
+      webViewSource,
+      contains('finishPendingEvaluateJavaScriptCallbacksOnDispose()'),
+    );
+    expect(bridgeSource, contains('consumeCallAsyncJavaScriptCallback('));
+    expect(
+      bridgeSource,
+      contains('consumeEvaluateJavaScriptContentWorldCallback('),
+    );
+    expect(clientSource, contains('markRendererProcessLost()'));
+    expect(webViewSource, contains('markRetainedWebViewDetached()'));
+    expect(webViewSource, contains('markRetainedWebViewReattached()'));
+    expect(
+      webViewSource,
+      contains('if (!lifecycle.acceptsCallbacks()) return@Runnable'),
+    );
+    expect(
+      webViewSource,
+      contains('if (!lifecycle.acceptsCallbacks()) return@ValueCallback'),
+    );
+    expect(webViewSource, contains('lifecycle.acceptsCallbacks() &&'));
+    expect(webViewSource, contains('fun onScrollStopped()'));
+    expect(webViewSource, contains('fun adjustFloatingContextMenuPosition()'));
+    expect(webViewSource, contains('saveWebArchiveWithLifecycle('));
+    expect(
+      webViewSource,
+      contains('finishPendingSaveWebArchiveCallbacksOnDispose()'),
+    );
+    expect(webViewSource, contains('pendingScreenshotResults'));
+    expect(
+      webViewSource,
+      contains('finishPendingScreenshotResultsOnDispose()'),
+    );
+    expect(webViewSource, contains('completeScreenshotResult(operationId'));
+    expect(
+      webViewSource,
+      contains('if (!lifecycle.acceptsCallbacks()) return@ValueCallback'),
+    );
+    expect(webViewSource, contains('fun enablePluginScriptAtRuntime('));
+  });
+
+  test(
+    'Android initial load and screenshot work stop at the lifecycle boundary',
+    () {
+      final flutterWebViewSource = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        'webview/in_app_webview/FlutterWebView.kt',
+      ).readAsStringSync();
+      final webViewSource = _sourceFile(
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+        'webview/in_app_webview/InAppWebView.kt',
+      ).readAsStringSync();
+
+      expect(
+        flutterWebViewSource,
+        contains('if (!currentWebView.acceptsCallbacks()) return@Runnable'),
+      );
+      expect(
+        flutterWebViewSource,
+        contains('if (!currentWebView.acceptsCallbacks()) return@post'),
+      );
+      expect(
+        webViewSource,
+        contains('if (!lifecycle.acceptsCallbacks()) return@post'),
+      );
+    },
+  );
 
   test('Android WebMessageListener falls back when WebKit lacks the native API', () {
     final listenerSource = _sourceFile(
