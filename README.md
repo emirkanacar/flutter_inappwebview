@@ -4,64 +4,181 @@
 
 ![InAppWebView-logo](https://user-images.githubusercontent.com/5956938/195422744-bdcfed16-73f0-4bc9-94ab-ecf10771a1c4.png)
 
+[![pub package](https://img.shields.io/pub/v/flutter_inappwebview_forge.svg)](https://pub.dev/packages/flutter_inappwebview_forge)
+[![pub points](https://img.shields.io/pub/points/flutter_inappwebview_forge)](https://pub.dev/packages/flutter_inappwebview_forge/score)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-[![flutter_inappwebview_forge version](https://img.shields.io/pub/v/flutter_inappwebview_forge?include_prereleases)](https://pub.dev/packages/flutter_inappwebview_forge)
-[![Pub Points](https://img.shields.io/pub/points/flutter_inappwebview_forge)](https://pub.dev/packages/flutter_inappwebview_forge/score)
-[![Pub Popularity](https://img.shields.io/pub/popularity/flutter_inappwebview_forge)](https://pub.dev/packages/flutter_inappwebview_forge/score)
-[![Pub Likes](https://img.shields.io/pub/likes/flutter_inappwebview_forge)](https://pub.dev/packages/flutter_inappwebview_forge/score)
-[![Awesome Flutter](https://img.shields.io/badge/Awesome-Flutter-blue.svg?longCache=true&style=flat-square)](https://stackoverflow.com/questions/tagged/flutter-inappwebview)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](/LICENSE)
-
-[![GitHub forks](https://img.shields.io/github/forks/emirkanacar/flutter_inappwebview?style=social)](https://github.com/emirkanacar/flutter_inappwebview)
-[![GitHub stars](https://img.shields.io/github/stars/emirkanacar/flutter_inappwebview?style=social)](https://github.com/emirkanacar/flutter_inappwebview)
-
-###### Supported Platforms
-
-[![flutter_inappwebview_forge_platform_interface version](https://img.shields.io/pub/v/flutter_inappwebview_forge_platform_interface?include_prereleases&label=Platform%20Interface)](https://pub.dev/packages/flutter_inappwebview_forge_platform_interface)
-[![flutter_inappwebview_forge_android version](https://img.shields.io/pub/v/flutter_inappwebview_forge_android?include_prereleases&label=Android)](https://pub.dev/packages/flutter_inappwebview_forge_android)
-[![flutter_inappwebview_forge_ios version](https://img.shields.io/pub/v/flutter_inappwebview_forge_ios?include_prereleases&label=iOS)](https://pub.dev/packages/flutter_inappwebview_forge_ios)
-[![flutter_inappwebview_forge_macos version](https://img.shields.io/pub/v/flutter_inappwebview_forge_macos?include_prereleases&label=macOS)](https://pub.dev/packages/flutter_inappwebview_forge_macos)
-[![flutter_inappwebview_forge_windows version](https://img.shields.io/pub/v/flutter_inappwebview_forge_windows?include_prereleases&label=Windows)](https://pub.dev/packages/flutter_inappwebview_forge_windows)
-[![flutter_inappwebview_forge_linux version](https://img.shields.io/pub/v/flutter_inappwebview_forge_linux?include_prereleases&label=Linux)](https://pub.dev/packages/flutter_inappwebview_forge_linux)
-[![flutter_inappwebview_forge_web version](https://img.shields.io/pub/v/flutter_inappwebview_forge_web?include_prereleases&label=Web)](https://pub.dev/packages/flutter_inappwebview_forge_web)
-
-A maintained Flutter plugin that allows you to add an inline WebView, use a headless WebView, and open an in-app browser window.
+A maintained Flutter plugin for inline WebViews, headless WebViews, and in-app
+browser windows on Android, iOS, macOS, Windows, Linux, and Web.
 
 </div>
 
-## Attribution
+`flutter_inappwebview_forge` is a maintained fork of
+[Flutter InAppWebView](https://github.com/pichillilorenzo/flutter_inappwebview).
+The public Dart API stays familiar (`InAppWebView`, `InAppWebViewController`,
+settings, and callbacks) while this repository owns the Forge package names,
+native implementations, and release process.
 
-`flutter_inappwebview_forge` is a maintained fork of Flutter InAppWebView, originally created and maintained by Lorenzo Pichilli with contributions from the open-source community. See [ATTRIBUTION.md](ATTRIBUTION.md) for the upstream project reference and licensing details.
+## Features
 
-Project repository: [github.com/emirkanacar/flutter_inappwebview](https://github.com/emirkanacar/flutter_inappwebview)
-
-## Documentation
-
-- [Project documentation index](docs/README.md)
-- [Project overview](docs/project-overview.md)
-- [Development guide](docs/development.md)
-- [Issue and PR resolution log](docs/issue-pr-resolution-log.md)
-- [Open work plan](docs/open-work-plan.md)
-- [Known issues and upstream findings](docs/known-issues.md)
-- [Performance and WebView upgrade plan](docs/performance-and-webview-upgrade-plan.md)
-- The package API reference will be published with the `flutter_inappwebview_forge` release.
+- One Dart API across Android WebView, iOS/macOS `WKWebView`, Windows WebView2,
+  Linux WPE WebKit, and Web iframes
+- Inline `InAppWebView`, `HeadlessInAppWebView`, and `InAppBrowser`
+- Opt-in `InAppWebViewPreloader` to start a page before a route is shown and
+  reuse the same native WebView
+- JavaScript handlers, user scripts, cookies, storage, and localhost serving
+- Keep-alive, headless transfer, and disposal paths that stay idempotent
+- Runtime support checks so unavailable platform features fail safely
 
 ## Requirements
 
-- Dart sdk: "^3.8.0"
-- Flutter: ">=3.38.6"
-- Android: `minSdkVersion >= 19`, [AGP](https://developer.android.com/build/releases/gradle-plugin) version `>= 7.3.0` (use [Android Studio - Android Gradle plugin Upgrade Assistant](https://developer.android.com/build/agp-upgrade-assistant) for help)
-- iOS 15.0+, Xcode version `>= 15.0`
-- MacOS 10.14+: Xcode version `>= 15.0`
-- Windows: [NuGet CLI](https://learn.microsoft.com/en-us/nuget/install-nuget-client-tools?tabs=windows#nugetexe-cli) available on your PATH environment variable
-- Linux: WPE 2.0 WebKit built
+| Target | Minimum |
+| --- | --- |
+| Dart | `^3.8.0` |
+| Flutter | `>=3.38.6` |
+| Android | `minSdkVersion >= 19`, AGP `>= 7.3.0` |
+| iOS | 15.0+, Xcode 15+ |
+| macOS | 10.14+, Xcode 15+ |
+| Windows | WebView2 runtime and NuGet CLI on `PATH` |
+| Linux | WPE WebKit 2.0 development packages |
+| Web | iframe plus the plugin support script when required |
+
+iOS still needs Flutter 3.38.6 or newer. Earlier Flutter versions can dispatch
+WebView gestures incorrectly on iOS.
 
 ## Installation
 
-Add `flutter_inappwebview_forge` as a dependency in your `pubspec.yaml` file.
+```yaml
+dependencies:
+  flutter_inappwebview_forge: ^2.1.71
+```
 
-Platform-specific implementation packages are included automatically by Flutter's federated plugin mechanism.
+```sh
+flutter pub get
+```
+
+```dart
+import 'package:flutter_inappwebview_forge/flutter_inappwebview_forge.dart';
+```
+
+Endorsed platform packages are selected automatically. Do not add
+`flutter_inappwebview` and `flutter_inappwebview_forge` to the same app.
+
+## Quick start
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview_forge/flutter_inappwebview_forge.dart';
+
+class BrowserPage extends StatefulWidget {
+  const BrowserPage({super.key});
+
+  @override
+  State<BrowserPage> createState() => _BrowserPageState();
+}
+
+class _BrowserPageState extends State<BrowserPage> {
+  InAppWebViewController? _controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: WebUri('https://example.com'),
+          ),
+          onWebViewCreated: (controller) {
+            _controller = controller;
+          },
+          onLoadStop: (controller, url) {
+            debugPrint('Loaded: $url');
+          },
+        ),
+      ),
+    );
+  }
+}
+```
+
+Keep the controller in `State`, not in `build()`. Do not issue navigation or
+JavaScript commands before `onWebViewCreated`.
+
+## Preload a known page
+
+If the destination URL is known before the route opens, start the native
+WebView early and reuse it:
+
+```dart
+final preloader = InAppWebViewPreloader(
+  headlessWebView: HeadlessInAppWebView(
+    initialUrlRequest: URLRequest(
+      url: WebUri('https://example.com'),
+    ),
+  ),
+);
+
+await preloader.prewarm();
+
+InAppWebView(
+  preloader: preloader,
+  onWebViewCreated: (controller) {
+    // This controller owns the transferred native WebView.
+  },
+);
+```
+
+Keep the preloader alive until the inline WebView takes ownership. Dispose it
+only when the application no longer needs that WebView.
+
+## Documentation
+
+User guides live in [`documentation/`](documentation/README.md):
+
+- [Getting started](documentation/getting-started.md)
+- [Inline WebView](documentation/in-app-webview.md)
+- [Preload and reuse](documentation/preload-and-reuse.md)
+- [Examples and recipes](documentation/examples.md)
+- [Feature guide](documentation/features.md)
+- [Platform guide](documentation/platforms.md)
+- [Lifecycle and performance](documentation/lifecycle-and-performance.md)
+- [Troubleshooting](documentation/troubleshooting.md)
+- [Migration from upstream](documentation/migration-from-upstream.md)
+- [Changelog](documentation/changelog.md)
+- [API reference](documentation/api-reference.md)
+
+Contributor and engineering records are in [`docs/`](docs/README.md):
+
+- [Project overview](docs/project-overview.md)
+- [Development guide](docs/development.md)
+- [Known issues](docs/known-issues.md)
+- [Open work plan](docs/open-work-plan.md)
+
+## Migration from `flutter_inappwebview`
+
+Replace the package name and import. Widget and controller names stay the same.
+
+```yaml
+dependencies:
+  flutter_inappwebview_forge: ^2.1.71
+```
+
+```dart
+import 'package:flutter_inappwebview_forge/flutter_inappwebview_forge.dart';
+```
+
+See [Migration and upstream relationship](documentation/migration-from-upstream.md)
+for the full package map and compatibility notes.
 
 ## Support
 
-Report bugs and compatibility problems in the [project issue tracker](https://github.com/emirkanacar/flutter_inappwebview/issues).
+Report bugs and compatibility problems in the
+[issue tracker](https://github.com/emirkanacar/flutter_inappwebview/issues).
+
+## Attribution and license
+
+Originally created and maintained by Lorenzo Pichilli with contributions from
+the open-source community. This fork is maintained by Emirkan Acar.
+
+See [ATTRIBUTION.md](ATTRIBUTION.md). Distributed under the
+[Apache License 2.0](LICENSE).

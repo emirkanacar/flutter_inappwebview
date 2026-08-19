@@ -15,6 +15,11 @@
 
     "docs:gen": "cd flutter_inappwebview_forge && ../.fvm/flutter_sdk/bin/dart doc --output=../doc/api .",
     "docs:gen:windows": "cd flutter_inappwebview_forge && ..\\.fvm\\flutter_sdk\\bin\\dart.bat doc --output=../doc/api .",
+    "docs:api:site": "node tool/generate_documentation_api.mjs",
+    "docs:api:site:windows": "node tool/generate_documentation_api.mjs",
+    "docs:site:dev": "npm --prefix documentation run dev",
+    "docs:site:build": "npm --prefix documentation run build",
+    "docs:site:preview": "npm --prefix documentation run preview",
     "docs:serve": ".fvm/flutter_sdk/bin/flutter pub global activate dhttpd && .fvm/flutter_sdk/bin/flutter pub global run dhttpd:dhttpd --path doc/api",
     "docs:serve:windows": ".fvm\\flutter_sdk\\bin\\flutter.bat pub global activate dhttpd && .fvm\\flutter_sdk\\bin\\flutter.bat pub global run dhttpd:dhttpd --path doc/api",
 

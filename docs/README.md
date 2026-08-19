@@ -2,6 +2,10 @@
 
 This directory describes the architecture, development workflow, native-platform constraints, and issue/PR resolution history of `flutter_inappwebview_forge`.
 
+For application-facing guides, start with the separate
+[user documentation](../documentation/README.md). This directory is reserved
+for engineering records and repository maintenance notes.
+
 ## Start here
 
 - [Project overview](project-overview.md) explains the federated package graph and platform boundaries.

@@ -1,0 +1,13 @@
+{
+  "name": "flutter-inappwebview-forge-documentation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev .",
+    "build": "node ../tool/generate_documentation_api.mjs && vitepress build . && node ../tool/verify_documentation_site.mjs",
+    "preview": "vitepress preview ."
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  }
+}

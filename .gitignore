@@ -24,6 +24,11 @@
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
 /pubspec.lock
 doc/api/
+documentation/public/api/
+documentation/node_modules/
+documentation/.vitepress/cache/
+documentation/.vitepress/dist/
+.wrangler/
 .dart_tool/
 .packages
 build/
