@@ -17,7 +17,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_inappwebview_forge_platform_interface: ^1.1.16
+  flutter_inappwebview_forge_platform_interface: ^1.1.17
     # path: ../flutter_inappwebview_forge_platform_interface
 
 dev_dependencies:
