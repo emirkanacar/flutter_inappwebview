@@ -5,6 +5,17 @@ import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebvi
 
 File _sourceFile() {
   final candidates = [
+    File('lib/src/in_app_localhost_server_io.dart'),
+    File(
+      'flutter_inappwebview_forge_platform_interface/lib/src/'
+      'in_app_localhost_server_io.dart',
+    ),
+  ];
+  return candidates.firstWhere((file) => file.existsSync());
+}
+
+File _barrelFile() {
+  final candidates = [
     File('lib/src/in_app_localhost_server.dart'),
     File(
       'flutter_inappwebview_forge_platform_interface/lib/src/'
@@ -14,7 +25,43 @@ File _sourceFile() {
   return candidates.firstWhere((file) => file.existsSync());
 }
 
+File _platformFile() {
+  final candidates = [
+    File('lib/src/platform_in_app_localhost_server.dart'),
+    File(
+      'flutter_inappwebview_forge_platform_interface/lib/src/'
+      'platform_in_app_localhost_server.dart',
+    ),
+  ];
+  return candidates.firstWhere((file) => file.existsSync());
+}
+
+File _httpRequestBarrelFile() {
+  final candidates = [
+    File('lib/src/in_app_localhost_http_request.dart'),
+    File(
+      'flutter_inappwebview_forge_platform_interface/lib/src/'
+      'in_app_localhost_http_request.dart',
+    ),
+  ];
+  return candidates.firstWhere((file) => file.existsSync());
+}
+
 void main() {
+  test('localhost dart:io imports stay behind dart.library.io', () {
+    final barrel = _barrelFile().readAsStringSync();
+    final platform = _platformFile().readAsStringSync();
+    final httpRequestBarrel = _httpRequestBarrelFile().readAsStringSync();
+
+    expect(barrel, contains("if (dart.library.io)"));
+    expect(barrel, isNot(contains("dart.library.html")));
+    expect(barrel, isNot(contains("import 'dart:io'")));
+    expect(httpRequestBarrel, contains("if (dart.library.io)"));
+    expect(httpRequestBarrel, isNot(contains("dart.library.html")));
+    expect(platform, isNot(contains("import 'dart:io'")));
+    expect(platform, contains('InAppLocalhostHttpRequest'));
+  });
+
   test('localhost server clears stale references when HttpServer ends', () {
     final source = _sourceFile().readAsStringSync();
 

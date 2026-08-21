@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview_forge_internal_annotations/flutter_inappwebview_forge_internal_annotations.dart';
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+import 'in_app_localhost_http_request.dart';
 
 part 'platform_in_app_localhost_server.g.dart';
 
@@ -49,7 +50,7 @@ class PlatformInAppLocalhostServerCreationParams {
   final bool shared;
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.onData}
-  final Future<bool> Function(HttpRequest request)? onData;
+  final Future<bool> Function(InAppLocalhostHttpRequest request)? onData;
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServerCreationParams.isClassSupported}
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
@@ -157,7 +158,8 @@ abstract class PlatformInAppLocalhostServer extends PlatformInterface {
   ///If this callback returns `true`, it means that the request has been handled by this callback.
   ///Otherwise, if this callback returns `false`, the server will continue to process the request using the default implementation.
   ///{@endtemplate}
-  Future<bool> Function(HttpRequest request)? get onData => params.onData;
+  Future<bool> Function(InAppLocalhostHttpRequest request)? get onData =>
+      params.onData;
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.start}
   ///Starts the server on `http://localhost:[port]/`.

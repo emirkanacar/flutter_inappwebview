@@ -12,6 +12,8 @@ import 'headless_inappwebview_manager.dart';
 import 'in_app_web_view_web_element.dart';
 import 'in_app_webview_manager.dart';
 import 'js_bridge.dart';
+import 'js_interop_value.dart';
+import 'js_value.dart';
 import 'platform_util.dart';
 
 /// Builds an iframe based WebView.
@@ -49,16 +51,16 @@ class InAppWebViewFlutterPlugin {
             ((JSString method, JSAny viewId, [JSArray? args]) {
               return _dartNativeAsyncCommunication(
                 method.toDart,
-                viewId,
-                args?.toDart,
+                jsAnyToDartViewId(viewId),
+                jsArrayToDartArgs(args),
               ).then((value) => value?.toJS).toJS;
             }).toJS;
         flutterInAppWebView!.nativeSyncCommunication =
             ((JSString method, JSAny viewId, [JSArray? args]) =>
                     _dartNativeSyncCommunication(
                       method.toDart,
-                      viewId,
-                      args?.toDart,
+                      jsAnyToDartViewId(viewId),
+                      jsArrayToDartArgs(args),
                     )?.toJS)
                 .toJS;
         Object_freeze(flutterInAppWebView!);
@@ -82,9 +84,9 @@ Future<String?> _dartNativeAsyncCommunication(
     try {
       switch (method) {
         case 'onCreateWindow':
-          String url = args![0] ?? 'about:blank';
-          String? target = args[1];
-          String? windowFeatures = args[2];
+          String url = jsArgAsString(args![0]) ?? 'about:blank';
+          String? target = jsArgAsString(args[1]);
+          String? windowFeatures = jsArgAsString(args[2]);
           result = await webViewHtmlElement.onCreateWindow(
             url,
             target,
@@ -92,8 +94,8 @@ Future<String?> _dartNativeAsyncCommunication(
           );
           break;
         case 'onCallJsHandler':
-          String handlerName = args![0];
-          Map<String, dynamic> data = jsonDecode(args[1]);
+          String handlerName = jsArgAsString(args![0])!;
+          Map<String, dynamic> data = jsonDecode(jsArgAsString(args[1])!);
           result = await webViewHtmlElement.onCallJsHandler(handlerName, data);
           break;
         default:
@@ -122,25 +124,25 @@ String? _dartNativeSyncCommunication(
     try {
       switch (method) {
         case 'onLoadStart':
-          String? url = args?[0] as String?;
+          String? url = jsArgAsString(args?[0]);
           webViewHtmlElement.onLoadStart(url);
           break;
         case 'onLoadStop':
-          String? url = args?[0] as String?;
+          String? url = jsArgAsString(args?[0]);
           webViewHtmlElement.onLoadStop(url);
           break;
         case 'onUpdateVisitedHistory':
-          String? url = args?[0] as String?;
+          String? url = jsArgAsString(args?[0]);
           webViewHtmlElement.onUpdateVisitedHistory(url);
           break;
         case 'onScrollChanged':
-          int x = (args![0] as double).toInt();
-          int y = (args[1] as double).toInt();
+          int x = jsArgAsInt(args![0]);
+          int y = jsArgAsInt(args[1]);
           webViewHtmlElement.onScrollChanged(x, y);
           break;
         case 'onConsoleMessage':
-          String type = args![0];
-          String? message = args[1];
+          String type = jsArgAsString(args![0])!;
+          String? message = jsArgAsString(args[1]);
           webViewHtmlElement.onConsoleMessage(type, message);
           break;
         case 'onWindowFocus':
@@ -150,7 +152,7 @@ String? _dartNativeSyncCommunication(
           webViewHtmlElement.onWindowBlur();
           break;
         case 'onPrintRequest':
-          String? url = args![0];
+          String? url = jsArgAsString(args![0]);
           webViewHtmlElement.onPrintRequest(url);
           break;
         case 'onEnterFullscreen':
@@ -160,20 +162,20 @@ String? _dartNativeSyncCommunication(
           webViewHtmlElement.onExitFullscreen();
           break;
         case 'onTitleChanged':
-          String? title = args![0];
+          String? title = jsArgAsString(args![0]);
           webViewHtmlElement.onTitleChanged(title);
           break;
         case 'onZoomScaleChanged':
-          double oldScale = args![0];
-          double newScale = args[1];
+          double oldScale = jsArgAsDouble(args![0]);
+          double newScale = jsArgAsDouble(args[1]);
           webViewHtmlElement.onZoomScaleChanged(oldScale, newScale);
           break;
         case 'onInjectedScriptLoaded':
-          String id = args![0];
+          String id = jsArgAsString(args![0])!;
           webViewHtmlElement.onInjectedScriptLoaded(id);
           break;
         case 'onInjectedScriptError':
-          String id = args![0];
+          String id = jsArgAsString(args![0])!;
           webViewHtmlElement.onInjectedScriptError(id);
           break;
         case 'onCloseWindow':
@@ -181,7 +183,7 @@ String? _dartNativeSyncCommunication(
           break;
         case 'getUserOnlyScriptsAt':
           final injectionTime = UserScriptInjectionTime.fromNativeValue(
-            args![0],
+            jsArgAsInt(args![0]),
           );
           result = webViewHtmlElement.userContentController
               .getUserOnlyScriptsAt(injectionTime!);

@@ -1,3 +1,13 @@
+## 2.1.72 - 2026-08-21
+
+- Compile Flutter web applications with `--wasm` by keeping `dart:io`
+  localhost types behind `dart.library.io` and converting Web JavaScript
+  bridge values to Dart primitives
+  ([#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811)).
+- `InAppLocalhostServer` remains unsupported on web/WASM; the public
+  `onData` callback now uses `InAppLocalhostHttpRequest`, which is a
+  `HttpRequest` typedef on VM platforms.
+
 ## 2.1.71 - 2026-08-14
 
 - Add the opt-in `InAppWebViewPreloader` helper for starting a headless

@@ -119,8 +119,10 @@ void _runSourceContractAssertions() {
     'getUrl still falls back to a stale source after a document loads',
   );
   _assert(
-    platformSource.contains('String? url = args?[0] as String?;'),
-    'native URL event decoding is not nullable',
+    platformSource.contains('jsArgAsString(args?[0])') &&
+        platformSource.contains('jsAnyToDartViewId(viewId)') &&
+        platformSource.contains('jsArrayToDartArgs(args)'),
+    'native URL event decoding is not WASM-safe',
   );
   _assert(
     supportSource.contains('return null;') &&
@@ -206,5 +208,13 @@ void _runSourceContractAssertions() {
         webSupportSource.contains('requestAnimationFrame') &&
         webSupportSource.contains('scrollEventFramePending'),
     'Web scroll callbacks must be coalesced to animation frames',
+  );
+  _assert(
+    !platformSource.contains("import 'dart:html'") &&
+        !platformSource.contains("import 'dart:js'") &&
+        !platformSource.contains("import 'package:js/") &&
+        !elementSource.contains("import 'dart:html'") &&
+        !bridgeSource.contains("import 'dart:html'"),
+    'Web implementation must not import dart:html, dart:js, or package:js',
   );
 }

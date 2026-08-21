@@ -101,6 +101,15 @@ Build and run the Windows example with the supported Visual Studio and WebView2 
 
 Run the Web package tests and browser integration tests with both same-origin and cross-origin pages. Browser privacy behavior must be documented rather than worked around by returning stale iframe URLs.
 
+Validate Flutter web WASM compilation of the Web example and the root example:
+
+```sh
+cd flutter_inappwebview_forge_web/example && fvm flutter build web --wasm
+cd flutter_inappwebview_forge/example && fvm flutter build web --wasm
+```
+
+Do not import `dart:html`, `dart:js`, `package:js`, or unconditional `dart:io` on the web compilation path. Gate VM-only APIs with `if (dart.library.io)`, not `dart.library.html`. Chrome WasmGC iframe and JavaScript-bridge behavior remains a browser runtime gate.
+
 ## Change workflow
 
 For issue-specific work, follow the detailed [issue resolution workflow](issue-resolution-workflow.md). Review both the Flutter/Dart and native implementation paths before closing an issue; its post-resolution documentation step is mandatory, so do not stop after only one side's code and tests pass.

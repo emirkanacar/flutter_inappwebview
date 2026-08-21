@@ -28,5 +28,6 @@ export 'platform_webview_asset_loader.dart';
 export 'platform_tracing_controller.dart' hide TracingSettings_;
 export 'platform_process_global_config.dart'
     hide ProcessGlobalConfigSettings_, ProcessGlobalConfigDirectoryBasePaths_;
+export 'in_app_localhost_http_request.dart';
 export 'platform_in_app_localhost_server.dart';
 export 'in_app_localhost_server.dart';

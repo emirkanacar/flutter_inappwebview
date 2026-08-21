@@ -12,3 +12,7 @@ so you do not need to add it to your `pubspec.yaml`.
 
 However, if you `import` this package to use any of its APIs directly, you
 should add it to your `pubspec.yaml` as usual.
+
+The implementation uses `package:web` and `dart:js_interop`, so consuming apps
+can compile with `flutter build web --wasm`. `InAppLocalhostServer` is still
+unsupported on web.

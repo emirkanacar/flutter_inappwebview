@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 
@@ -13,7 +12,7 @@ class InAppLocalhostServer {
     String directoryIndex = 'index.html',
     String documentRoot = './',
     bool shared = false,
-    Future<bool> Function(HttpRequest request)? onData,
+    Future<bool> Function(InAppLocalhostHttpRequest request)? onData,
   }) : this.fromPlatformCreationParams(
          PlatformInAppLocalhostServerCreationParams(
            port: port,
@@ -60,7 +59,8 @@ class InAppLocalhostServer {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.onData}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.onData.supported_platforms}
-  Future<bool> Function(HttpRequest request)? get onData => platform.onData;
+  Future<bool> Function(InAppLocalhostHttpRequest request)? get onData =>
+      platform.onData;
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.start}
   ///

@@ -1,3 +1,11 @@
+## 1.0.4 - 2026-08-21
+
+- Convert JavaScript `nativeCommunication` view IDs and argument lists to
+  Dart primitives so iframe callbacks work under Flutter web WASM
+  (`dart2wasm`) ([#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811)).
+- Load `web_support.js` from the Web example `index.html` so the JavaScript
+  bridge is present for both JS and WASM bootstraps.
+
 ## 1.0.3 - 2026-08-13
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable

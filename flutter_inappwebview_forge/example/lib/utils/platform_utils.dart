@@ -1,6 +1,5 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_forge_example/utils/support_checker.dart';
@@ -12,22 +11,20 @@ class PlatformUtils {
     if (kIsWeb) {
       return 'Web';
     }
-    if (Platform.isAndroid) {
-      return 'Android';
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'Android';
+      case TargetPlatform.iOS:
+        return 'iOS';
+      case TargetPlatform.macOS:
+        return 'macOS';
+      case TargetPlatform.windows:
+        return 'Windows';
+      case TargetPlatform.linux:
+        return 'Linux';
+      default:
+        return 'Unknown';
     }
-    if (Platform.isIOS) {
-      return 'iOS';
-    }
-    if (Platform.isMacOS) {
-      return 'macOS';
-    }
-    if (Platform.isWindows) {
-      return 'Windows';
-    }
-    if (Platform.isLinux) {
-      return 'Linux';
-    }
-    return 'Unknown';
   }
 
   /// Gets the current platform as a [SupportedPlatform] enum value.
@@ -36,22 +33,20 @@ class PlatformUtils {
     if (kIsWeb) {
       return SupportedPlatform.web;
     }
-    if (Platform.isAndroid) {
-      return SupportedPlatform.android;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return SupportedPlatform.android;
+      case TargetPlatform.iOS:
+        return SupportedPlatform.ios;
+      case TargetPlatform.macOS:
+        return SupportedPlatform.macos;
+      case TargetPlatform.windows:
+        return SupportedPlatform.windows;
+      case TargetPlatform.linux:
+        return SupportedPlatform.linux;
+      default:
+        return null;
     }
-    if (Platform.isIOS) {
-      return SupportedPlatform.ios;
-    }
-    if (Platform.isMacOS) {
-      return SupportedPlatform.macos;
-    }
-    if (Platform.isWindows) {
-      return SupportedPlatform.windows;
-    }
-    if (Platform.isLinux) {
-      return SupportedPlatform.linux;
-    }
-    return null;
   }
 
   /// Gets the Flutter SDK version.
@@ -65,8 +60,7 @@ class PlatformUtils {
 
   /// Gets the Dart SDK version.
   static String getDartVersion() {
-    return FlutterVersion.dartVersion ??
-        (!kIsWeb ? Platform.version : 'Dart SDK');
+    return FlutterVersion.dartVersion ?? 'Dart SDK';
   }
 
   /// Returns true if running on web platform.
@@ -77,13 +71,16 @@ class PlatformUtils {
   /// Returns true if running on mobile platform (Android or iOS).
   static bool isMobilePlatform() {
     if (kIsWeb) return false;
-    return Platform.isAndroid || Platform.isIOS;
+    return defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
   }
 
   /// Returns true if running on desktop platform (Windows, macOS, or Linux).
   static bool isDesktopPlatform() {
     if (kIsWeb) return false;
-    return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    return defaultTargetPlatform == TargetPlatform.windows ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.linux;
   }
 
   /// Gets an appropriate icon for the current platform.
@@ -91,24 +88,20 @@ class PlatformUtils {
     if (kIsWeb) {
       return Icons.language;
     }
-    if (!kIsWeb) {
-      if (Platform.isAndroid) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
         return Icons.android;
-      }
-      if (Platform.isIOS) {
+      case TargetPlatform.iOS:
         return Icons.phone_iphone;
-      }
-      if (Platform.isMacOS) {
+      case TargetPlatform.macOS:
         return Icons.laptop_mac;
-      }
-      if (Platform.isWindows) {
+      case TargetPlatform.windows:
         return Icons.desktop_windows;
-      }
-      if (Platform.isLinux) {
+      case TargetPlatform.linux:
         return Icons.computer;
-      }
+      default:
+        return Icons.devices;
     }
-    return Icons.devices;
   }
 
   /// Gets a short platform identifier (lowercase).

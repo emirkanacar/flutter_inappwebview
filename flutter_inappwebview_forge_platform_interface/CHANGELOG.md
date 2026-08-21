@@ -1,3 +1,12 @@
+## 1.1.18 - 2026-08-21
+
+- Keep `dart:io` localhost types behind `dart.library.io` conditional
+  exports so Flutter web WASM (`dart2wasm`) compilation can import the
+  platform interface ([#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811)).
+- Introduce `InAppLocalhostHttpRequest` as a `HttpRequest` typedef on VM
+  platforms and a web/WASM stub. `InAppLocalhostServer` remains unsupported
+  on web.
+
 ## 1.1.17 - 2026-08-13
 
 - Advertise `InAppWebViewSettings.disableAutocorrection` for Android, iOS,

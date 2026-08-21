@@ -180,7 +180,7 @@ For Dart-only changes:
 1. Implement platform interface from `flutter_inappwebview_forge_platform_interface`
 2. Register in `WebPlatformInAppWebViewPlatform.registerWith()`
 3. Use `dart:js_interop` for JavaScript interop
-4. Use `dart:html` for DOM manipulation
+4. Use `package:web` for DOM manipulation. Do not import `dart:html`, `dart:js`, or `package:js`; those libraries fail Flutter web WASM (`dart2wasm`) compilation.
 
 ### Adding New Features
 

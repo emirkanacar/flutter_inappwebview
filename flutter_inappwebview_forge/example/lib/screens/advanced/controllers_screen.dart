@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview_forge/flutter_inappwebview_forge.dart';
@@ -56,12 +54,20 @@ class _ControllersScreenState extends State<ControllersScreen> {
 
   SupportedPlatform? get _currentPlatform {
     if (kIsWeb) return SupportedPlatform.web;
-    if (Platform.isAndroid) return SupportedPlatform.android;
-    if (Platform.isIOS) return SupportedPlatform.ios;
-    if (Platform.isMacOS) return SupportedPlatform.macos;
-    if (Platform.isWindows) return SupportedPlatform.windows;
-    if (Platform.isLinux) return SupportedPlatform.linux;
-    return null;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return SupportedPlatform.android;
+      case TargetPlatform.iOS:
+        return SupportedPlatform.ios;
+      case TargetPlatform.macOS:
+        return SupportedPlatform.macos;
+      case TargetPlatform.windows:
+        return SupportedPlatform.windows;
+      case TargetPlatform.linux:
+        return SupportedPlatform.linux;
+      default:
+        return null;
+    }
   }
 
   Set<SupportedPlatform> _getFindSupportedPlatforms(

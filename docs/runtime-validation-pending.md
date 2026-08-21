@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-13
+Last reviewed: 2026-08-21
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -17,11 +17,11 @@ each note was recorded.
 
 | Local status | Issue records | Count | Meaning |
 | --- | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | Issue register below | 77 | Source, regression, and host/build checks pass; real validation remains. |
+| Locally implemented or mitigated; runtime validation pending | Issue register below | 78 | Source, regression, and host/build checks pass; real validation remains. |
 | Resolved locally; no runtime gate | [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | 1 | Pure Dart serialization is covered by a focused regression test; no device/provider behavior is involved. |
 | Closed by source review | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 | No plugin-owned security sink was found; no package runtime test is required. |
 | Host/platform-specific boundary | [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831) | 15 | Strong evidence points to Apple/WebKit Simulator or callback limitations, Android framework/provider/dependency, host app/site/Firebase configuration, and Flutter engine/platform-view behavior; no Forge-owned control point is available. |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 31 | No complete local implementation boundary has been established. |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 30 | No complete local implementation boundary has been established. |
 | **Issue export total** | 125 | **125** | Historical export count; upstream `OPEN` state is unchanged. |
 
 Nine PR-only records also have local implementations but remain outside the
@@ -67,6 +67,19 @@ per-WebView proxy settings. Windows maps the first/default proxy rule and
 bypass list to WebView2 environment arguments; an explicitly supplied
 `WebViewEnvironment` cannot be reconfigured after creation. Target-OS
 builds/runtime validation remain pending.
+
+### Web dart2wasm compilation (#2811)
+
+Issue [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811)
+is source-fixed in platform-interface 1.1.18, Web 1.0.4, and root 2.1.72.
+Unconditional `dart:io` localhost types are now behind `dart.library.io`
+conditional exports, and Web `nativeCommunication` callbacks convert JS view
+IDs and argument lists to Dart primitives. Platform-interface and Web package
+tests pass. `flutter build web --wasm` succeeds for both the Web example and
+the root example. Chrome WasmGC iframe creation, `web_support.js` bridge
+events, and same-origin versus cross-origin behavior remain a browser runtime
+gate. `InAppLocalhostServer` stays unsupported on web. This issue remains
+outside the active queue and increases the runtime-pending issue count to 78.
 
 ### Android/iOS lifecycle ownership and settings diff validation
 
@@ -702,7 +715,7 @@ not guarantee that Apple Intelligence is available.
 
 ## Issue register
 
-The following 77 issue records have moved out of the active implementation
+The following 78 issue records have moved out of the active implementation
 queue. They remain release gates until the required real validation is
 recorded:
 
@@ -710,7 +723,7 @@ recorded:
 `#2654`, `#2673`, `#2685`, `#2687`, `#2697`, `#2700`, `#2703`, `#2707`, `#2710`, `#2711`,
 `#2717`, `#2718`, `#2720`, `#2721`, `#2725`, `#2728`, `#2733`, `#2736`, `#2737`,
 `#2741`, `#2757`, `#2760`, `#2762`, `#2763`, `#2778`, `#2780`, `#2782`, `#2783`, `#2787`, `#2789`,
-`#2791`, `#2797`, `#2805`, `#2812`, `#2813`, `#2819`, `#2826`, `#2830`,
+`#2791`, `#2797`, `#2805`, `#2811`, `#2812`, `#2813`, `#2819`, `#2826`, `#2830`,
 `#2793`, `#2834`, `#2835`, `#2837`, `#2840`, `#2841`, `#2842`, `#2843`, `#2846`, `#2848`, `#2849`,
 `#2850`, `#2852`, `#2855`, `#2856`, `#2859`, `#2861`, `#2862`, `#2863`,
 `#2660`, `#2690`, `#2752`, `#2814`, `#2839`, `#2867`, `#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880`.
@@ -723,7 +736,7 @@ recorded:
 | iOS/macOS | Physical-device WebKit/AppKit coverage across supported OS versions, UIScene activation, popup/presentation, keyboard, authentication, geolocation grant/deny, and SPM/CocoaPods consuming-app validation. |
 | Windows | Native WebView2 create/resize/dispose/recreate flows, affected runtime versions, minimized/focus behavior, and debug/release builds on Windows. |
 | Linux | WPE/WebKit build matrix plus Fedora/X11/Intel runtime frames, GL-disabled fallback, backend diagnostics, and required `pkg-config` configurations. |
-| Web | Browser integration coverage for same-origin navigation/history and cross-origin privacy behavior. |
+| Web | Browser integration coverage for same-origin navigation/history and cross-origin privacy behavior, plus Chrome WasmGC `flutter build web --wasm` iframe and JavaScript-bridge runtime. |
 
 The per-issue required evidence is maintained in the detailed findings in
 [known-issues.md](known-issues.md). A source test, static assertion, host

@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-14
+Last reviewed: 2026-08-21
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,17 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-08-21 Flutter web WASM compilation (upstream #2811)
+
+Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 compile with
+`flutter build web --wasm`. Localhost `dart:io` types are gated behind
+`dart.library.io`, `InAppLocalhostHttpRequest` aliases `HttpRequest` on VM
+platforms, and Web `nativeCommunication` callbacks convert JS view IDs and
+argument lists to Dart primitives. Platform-interface and Web tests pass; both
+example apps WASM-compile. Chrome WasmGC iframe and JavaScript-bridge behavior
+remain a runtime gate. `InAppLocalhostServer` is still unsupported on web. No
+upstream issue or PR state was changed.
 
 ## 2026-08-14 WebView prewarm and reuse helper (local feature)
 
@@ -528,17 +539,19 @@ tracked separately from that historical export:
 
 | Status | Count | Register |
 | --- | ---: | --- |
-| Locally implemented or mitigated; runtime validation pending | 74 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
+| Locally implemented or mitigated; runtime validation pending | 78 issues | [runtime-validation-pending.md](runtime-validation-pending.md) |
 | Resolved locally; no runtime gate | 1 issue (`#2709`) | Focused Dart serialization regression test; no device/provider behavior is involved |
 | Closed by source review | 1 issue (`#2745`) | No package runtime gate |
 | Host/platform-specific boundary | 15 issues (`#2570`, `#2584`, `#2598`, `#2636`, `#2659`, `#2680`, `#2688`, `#2698`, `#2713`, `#2723`, `#2727`, `#2753`, `#2796`, `#2815`, `#2831`) | Host/provider/engine/application/site/dependency tracking in [known-issues.md](known-issues.md); no Forge-owned fix |
-| Open implementation or reproduction | 34 issues | [open-work-plan.md](open-work-plan.md) |
+| Open implementation or reproduction | 30 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 9 PRs | `#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, `#2825`, `#2866` |
 
 The issue inventory below remains the historical 125-record export and is not
 reduced when a record moves between the local status registers.
 
 ## Local resolution history
+
+| 2026-08-21 | Flutter web WASM compilation | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 gate `dart:io` localhost types and convert JS bridge values so `flutter build web --wasm` succeeds. Chrome WasmGC iframe/bridge runtime remains pending. |
 
 | 2026-08-13 | Universal Link navigation policy | [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866) | The additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` maps to WebKit raw value `3` on iOS/macOS and falls back to `ALLOW` (`1`) on Android, Web, Windows, and Linux. iOS/macOS decode the raw policy defensively; focused Dart and native source-contract tests pass. An associated app and Universal Link domain are still required to validate an OAuth/form POST without app handoff. |
 
