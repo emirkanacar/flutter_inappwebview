@@ -17,6 +17,9 @@ common workflows are collected here.
 | Serve bundled files over localhost | `InAppLocalhostServer` | Native platforms |
 | Configure Android service workers | `ServiceWorkerController` | Android |
 | Start an external authentication flow | `WebAuthenticationSession` | Supported Apple platforms |
+| Start an opt-in native file download | `onDownloadStarting` + `DownloadJobController` | Android, iOS, macOS |
+| Observe cookie store changes | `CookieManager.addCookieChangedListener` | iOS, macOS |
+| Find text without the system UI | `FindInteractionController.findString` | iOS, macOS |
 
 Every capability has a runtime support check. Check support before exposing a
 platform-specific action in your UI.
@@ -74,6 +77,22 @@ Cookie visibility can depend on the platform data store, third-party cookie
 policy, and whether the WebView uses a persistent or private profile. Do not
 put access tokens in a cookie unless the server-side session design expects it.
 
+On iOS and macOS, observe `WKHTTPCookieStore` changes. Android has no
+equivalent observer; keep polling or your own mutation path there:
+
+```dart
+if (CookieManager.isMethodSupported(
+  PlatformCookieManagerMethod.addCookieChangedListener,
+)) {
+  await cookies.addCookieChangedListener((changed) {
+    debugPrint('Cookie store changed: ${changed.length}');
+  });
+}
+```
+
+Call `removeCookieChangedListener` when the feature that owns the observer
+is disposed.
+
 ## Isolate persistent container data
 
 Use a stable `containerId` when the application needs separate persistent
@@ -109,6 +128,64 @@ if (exists) {
 Container support depends on the platform and WebView/WebKit version. Check
 the runtime capability before showing profile-management UI, and do not
 change `containerId` on a live WebView.
+
+On Android, a container can add Profile request headers and prefetch a URL
+when the WebView provider advertises the feature:
+
+```dart
+if (await WebViewFeature.isFeatureSupported(
+  WebViewFeature.CUSTOM_REQUEST_HEADERS,
+)) {
+  await containers.addCustomHeader(
+    containerId: profileId,
+    headerName: 'X-App-Profile',
+    headerValue: 'work',
+  );
+}
+
+if (await WebViewFeature.isFeatureSupported(
+  WebViewFeature.PROFILE_URL_PREFETCH,
+)) {
+  await containers.prefetchUrl(
+    containerId: profileId,
+    url: 'https://example.com/account',
+  );
+}
+```
+
+## Opt-in native downloads
+
+`onDownloadStarting` is notify-only when the callback returns `null`. To start
+a native Android `DownloadManager` or Apple `WKDownload` job, return a
+handled response with an absolute destination path:
+
+```dart
+InAppWebView(
+  onDownloadStarting: (controller, request) async {
+    return DownloadStartResponse(
+      handled: true,
+      action: DownloadStartResponseAction.DOWNLOAD,
+      resultFilePath: '/tmp/${request.suggestedFilename ?? 'download.bin'}',
+    );
+  },
+)
+```
+
+Returning `handled: true` without a path, or returning `CANCEL`, does not
+start a plugin download. Progress and completion stay on
+`DownloadJobController` when a job ID is available.
+
+## Find text in the page
+
+Use `FindInteractionController.findString` on iOS 14+ and macOS 11+ to select
+and scroll to a match without presenting the system find UI:
+
+```dart
+final find = FindInteractionController();
+final found = await find.findString(find: 'invoice');
+```
+
+Keep the same controller instance for the WebView that owns it.
 
 ## Inspect Web Storage
 
@@ -210,4 +287,4 @@ When a feature works on one platform but not another, record:
 6. Whether the feature is supported by the runtime capability check.
 
 Then compare the platform-specific notes in [Platform guide](platforms.md) and
-the generated [API reference](/api/).
+the generated [API reference](/api/index.html).

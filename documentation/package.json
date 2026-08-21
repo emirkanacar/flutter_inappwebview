@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev .",
+    "dev": "node ../tool/ensure_documentation_api.mjs && vitepress dev .",
     "build": "node ../tool/generate_documentation_api.mjs && vitepress build . && node ../tool/verify_documentation_site.mjs",
     "preview": "vitepress preview ."
   },

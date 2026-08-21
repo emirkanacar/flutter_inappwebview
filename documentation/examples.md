@@ -481,6 +481,51 @@ network activity early. Measure first usable frame, page readiness, and
 memory on the target Android or Apple runtime. See
 [Preload and reuse](preload-and-reuse.md) for ownership details.
 
+## Mute WebView audio
+
+On Android, check `WebViewFeature.MUTE_AUDIO`. On iOS/macOS, check
+`InAppWebViewController.isMethodSupported` for `setAudioMuted`:
+
+```dart
+if (await WebViewFeature.isFeatureSupported(WebViewFeature.MUTE_AUDIO) ||
+    InAppWebViewController.isMethodSupported(
+      PlatformInAppWebViewControllerMethod.setAudioMuted,
+    )) {
+  await controller.setAudioMuted(muted: true);
+  final muted = await controller.isAudioMuted();
+  debugPrint('muted: $muted');
+}
+```
+
+## Start a native download
+
+A `null` `onDownloadStarting` result stays notify-only. This starts an
+opt-in native job:
+
+```dart
+InAppWebView(
+  onDownloadStarting: (controller, request) async {
+    final name = request.suggestedFilename ?? 'download.bin';
+    return DownloadStartResponse(
+      handled: true,
+      action: DownloadStartResponseAction.DOWNLOAD,
+      resultFilePath: '/tmp/$name',
+    );
+  },
+)
+```
+
+## Observe cookie changes on Apple platforms
+
+```dart
+final cookies = CookieManager.instance();
+await cookies.addCookieChangedListener((changed) {
+  debugPrint('cookies changed: ${changed.length}');
+});
+```
+
+Call `removeCookieChangedListener` when the observer is no longer needed.
+
 ## Debug lifecycle and performance
 
 Use a small event log while investigating route transitions:

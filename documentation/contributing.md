@@ -49,7 +49,8 @@ Install the site dependency once:
 npm install --prefix documentation
 ```
 
-Start the local VitePress site:
+Start the local VitePress site. The first run generates the Dart API
+reference when `documentation/public/api/` is missing:
 
 ```sh
 npm run docs:site:dev

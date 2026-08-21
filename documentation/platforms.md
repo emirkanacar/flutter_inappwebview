@@ -7,7 +7,9 @@ features with runtime capability checks.
 ## Android
 
 - Uses the system Android WebView provider.
-- Minimum SDK is 19.
+- Minimum SDK is 19. AndroidX WebKit is `1.15.0`; `1.15`/`1.16` APIs such as
+  mute, NavigationListener, prerender, BFCache, and Profile headers are
+  feature-checked at runtime and do not raise `minSdk`.
 - Hybrid composition is available and can be selected through settings.
 - WebView provider version, renderer behavior, permissions, IME, fullscreen,
   and file chooser behavior depend partly on the device provider.
@@ -25,7 +27,8 @@ missing manifest permissions.
 - Scene/window lifecycle affects popup, focus, fullscreen, and authentication
   presentation.
 - WebKit availability varies by iOS release. Unsupported settings retain a
-  safe fallback.
+  safe fallback. iOS 26 APIs such as `obscuredContentInsets`, session-storage
+  fetch/restore, and `isBlockedByScreenTime` are availability-checked.
 - Physical-device validation is recommended for keyboard, scene transitions,
   popup windows, media, and WebKit process termination.
 

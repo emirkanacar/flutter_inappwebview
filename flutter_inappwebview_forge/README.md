@@ -127,6 +127,7 @@ Keep the preloader alive until the inline WebView takes ownership.
 - [Platform guide](https://github.com/emirkanacar/flutter_inappwebview/blob/master/documentation/platforms.md)
 - [Migration from upstream](https://github.com/emirkanacar/flutter_inappwebview/blob/master/documentation/migration-from-upstream.md)
 - [Changelog](CHANGELOG.md)
+- [API reference](https://emirkanacar.github.io/flutter_inappwebview/api/)
 - [Repository](https://github.com/emirkanacar/flutter_inappwebview)
 
 ## Migration from `flutter_inappwebview`

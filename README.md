@@ -146,7 +146,8 @@ User guides live in [`documentation/`](documentation/README.md):
 - [Troubleshooting](documentation/troubleshooting.md)
 - [Migration from upstream](documentation/migration-from-upstream.md)
 - [Changelog](documentation/changelog.md)
-- [API reference](documentation/api-reference.md)
+- [API reference](documentation/api-reference.md) (generated dart doc at
+  `/api/` after `npm run docs:site:dev` or GitHub Pages)
 
 Contributor and engineering records are in [`docs/`](docs/README.md):
 

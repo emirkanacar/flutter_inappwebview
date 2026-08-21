@@ -18,7 +18,7 @@ the WebView model and platform details that match your application.
 - [Lifecycle and performance](lifecycle-and-performance.md) - keep WebViews alive safely and avoid cold starts.
 - [Troubleshooting](troubleshooting.md) - common build, runtime, keyboard, permission, and signing problems.
 - [Contributing](contributing.md) - repository workflow for code and documentation changes.
-- [API reference](api-reference.md) - generated from the public Dart package.
+- [API reference](api-reference.md) - generated `dart doc` output at `/api/`.
 
 ## Run the documentation site
 
@@ -26,6 +26,10 @@ the WebView model and platform details that match your application.
 npm install --prefix documentation
 npm run docs:site:dev
 ```
+
+The local site is at `http://localhost:5173/`. Open
+`http://localhost:5173/api/index.html` for the generated Dart API. The first
+dev start generates that tree when it is missing.
 
 For a production build, including the generated Dart API reference:
 

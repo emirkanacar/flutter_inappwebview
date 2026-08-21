@@ -49,6 +49,8 @@ npm install --prefix documentation
 npm run docs:site:build
 ```
 
+`npm run docs:site:dev` generates `documentation/public/api/` the first time
+it is missing so `/api/index.html` resolves in the local preview.
 `documentation/public/api/` and `documentation/.vitepress/dist/` are generated
 and must not be committed. Deprecated public names belong in the affected
 package changelog and in `documentation/deprecated-api.md`; the engineering

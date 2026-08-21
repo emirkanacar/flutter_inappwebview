@@ -1,2 +1,2 @@
-/api /api/ 301
-/api/index.html /api/ 301
+/api /api/index.html 200
+/api/ /api/index.html 200

@@ -62,7 +62,12 @@ Useful settings include:
 - `proxySettings` for per-WebView proxy configuration where supported;
 - `javaScriptBridgeEnabled` and origin allowlists for bridge control;
 - `useHybridComposition` on Android when choosing a platform-view mode;
-- `writingToolsBehavior` on Apple platforms where Writing Tools are available.
+- `writingToolsBehavior` on Apple platforms where Writing Tools are available;
+- `allowsInlinePredictions` on Apple platforms;
+- `backForwardCacheEnabled` on Android when `WebViewFeature.BACK_FORWARD_CACHE`
+  is supported;
+- `obscuredContentInsets` on iOS/macOS 26+ when the WebView is under system
+  chrome.
 
 ## JavaScript
 
@@ -105,3 +110,23 @@ Do not create a new `InAppWebView` controller or `InAppWebViewKeepAlive`
 inside `build()`. Rebuilding the widget is normal; recreating the native
 WebView is expensive and can reset page state, JavaScript state, and scroll
 position. See [Preload and reuse](preload-and-reuse.md) for route transitions.
+
+## Mute, downloads, and first paint
+
+Mute audio when the provider supports it. On Android this is
+`WebViewFeature.MUTE_AUDIO`; on iOS/macOS it maps to media playback
+suspension:
+
+```dart
+if (InAppWebViewController.isMethodSupported(
+      PlatformInAppWebViewControllerMethod.setAudioMuted,
+    ) ||
+    await WebViewFeature.isFeatureSupported(WebViewFeature.MUTE_AUDIO)) {
+  await controller.setAudioMuted(muted: true);
+}
+```
+
+Return `null` from `onDownloadStarting` to keep notify-only behavior. Return
+`DownloadStartResponse(handled: true, resultFilePath: absolutePath)` only when
+the application wants a native download job. Android `onVisualStateReady`
+fires after `postVisualStateCallback` or after a finished load.

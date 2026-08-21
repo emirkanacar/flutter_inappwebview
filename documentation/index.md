@@ -14,7 +14,7 @@ hero:
       link: /getting-started
     - theme: alt
       text: API reference
-      link: /api/
+      link: /api/index.html
 
 features:
   - title: One Dart API
@@ -36,5 +36,5 @@ features:
 - Checking platform differences? Read [Platform guide](/platforms).
 - Debugging a device or signing issue? Read [Troubleshooting](/troubleshooting).
 
-The generated [API reference](/api/) is created from the public Dart
+The generated [API reference](/api/index.html) is created from the public Dart
 package and is refreshed by the documentation build command.

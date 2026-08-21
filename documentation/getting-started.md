@@ -116,6 +116,35 @@ Do not issue commands before the controller has been created. Navigation
 callbacks may be delivered more than once during redirects, so use the URL
 and your own state to identify the terminal page you need.
 
+## Mute, visual state, and native extras
+
+Gate platform-specific controller APIs with a runtime check. A missing
+feature should leave the WebView usable:
+
+```dart
+if (InAppWebViewController.isMethodSupported(
+  PlatformInAppWebViewControllerMethod.setAudioMuted,
+)) {
+  await controller.setAudioMuted(muted: true);
+}
+
+if (InAppWebViewController.isMethodSupported(
+  PlatformInAppWebViewControllerMethod.postVisualStateCallback,
+)) {
+  await controller.postVisualStateCallback();
+}
+```
+
+`onVisualStateReady` reports when Android has a first paintable frame.
+`navigate` and `prerenderUrl` use AndroidX WebKit 1.15 when
+`WebViewFeature.NAVIGATION_LISTENER` or `WebViewFeature.PRERENDER_URL` is
+present; otherwise `navigate` falls back to `loadUrl`.
+
+On iOS/macOS 26+, `fetchWebViewData` / `restoreWebViewData` can snapshot
+session storage, and `isBlockedByScreenTime` reports Screen Time blocking.
+Check `InAppWebViewController.isMethodSupported` before calling them. See
+[Feature guide](features.md) for downloads, cookie observers, and find.
+
 ## Android setup
 
 The host application must allow network access:
