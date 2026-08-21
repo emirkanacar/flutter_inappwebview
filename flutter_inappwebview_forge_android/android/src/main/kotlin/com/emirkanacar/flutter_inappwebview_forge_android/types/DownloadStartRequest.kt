@@ -9,7 +9,8 @@ open class DownloadStartRequest(
     open var mimeType: String,
     open var contentLength: Long,
     open var suggestedFilename: String?,
-    open var textEncodingName: String?
+    open var textEncodingName: String?,
+    open var downloadId: String? = null
 ) {
     open fun toMap(): MutableMap<String, Any?> = HashMap<String, Any?>().apply {
         put("url", url)
@@ -19,6 +20,7 @@ open class DownloadStartRequest(
         put("contentLength", contentLength)
         put("suggestedFilename", suggestedFilename)
         put("textEncodingName", textEncodingName)
+        put("downloadId", downloadId)
     }
 
     open override fun equals(other: Any?): Boolean {

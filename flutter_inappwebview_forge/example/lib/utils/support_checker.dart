@@ -1718,13 +1718,13 @@ class SupportChecker {
         ),
         ApiEventDefinition(
           name: PlatformWebViewCreationParamsProperty.onLoadError.name,
-          description: 'Called when a page fails to load.',
+          description: 'Deprecated. Use onReceivedError instead.',
           className: className,
           category: 'Core',
         ),
         ApiEventDefinition(
           name: PlatformWebViewCreationParamsProperty.onLoadHttpError.name,
-          description: 'Called when an HTTP error is received.',
+          description: 'Deprecated. Use onReceivedHttpError instead.',
           className: className,
           category: 'Core',
         ),

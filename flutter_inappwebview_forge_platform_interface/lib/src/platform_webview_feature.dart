@@ -395,6 +395,44 @@ class WebViewFeature_ {
     "PAYMENT_REQUEST",
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.setAudioMuted] and [InAppWebViewController.isAudioMuted].
+  static const MUTE_AUDIO = const WebViewFeature_._internal("MUTE_AUDIO");
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformWebViewCreationParams.onWebViewNavigation].
+  static const NAVIGATION_LISTENER = const WebViewFeature_._internal(
+    "NAVIGATION_LISTENER",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.prerenderUrl].
+  static const PRERENDER_URL = const WebViewFeature_._internal("PRERENDER_URL");
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.prefetchUrl].
+  static const PROFILE_URL_PREFETCH = const WebViewFeature_._internal(
+    "PROFILE_URL_PREFETCH",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.addCustomHeader].
+  static const CUSTOM_REQUEST_HEADERS = const WebViewFeature_._internal(
+    "CUSTOM_REQUEST_HEADERS",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewSettings.backForwardCacheEnabled].
+  static const BACK_FORWARD_CACHE = const WebViewFeature_._internal(
+    "BACK_FORWARD_CACHE",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.addJavaScriptOnEvent].
+  static const DOCUMENT_START_JAVASCRIPT = const WebViewFeature_._internal(
+    "DOCUMENT_START_JAVASCRIPT",
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].
   static const USER_AGENT_METADATA = const WebViewFeature_._internal(
     "USER_AGENT_METADATA",
@@ -690,6 +728,42 @@ class AndroidWebViewFeature_ {
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.paymentRequestEnabled].
   static const PAYMENT_REQUEST = const AndroidWebViewFeature_._internal(
     "PAYMENT_REQUEST",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.setAudioMuted] and [InAppWebViewController.isAudioMuted].
+  static const MUTE_AUDIO = const AndroidWebViewFeature_._internal(
+    "MUTE_AUDIO",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformWebViewCreationParams.onWebViewNavigation].
+  static const NAVIGATION_LISTENER = const AndroidWebViewFeature_._internal(
+    "NAVIGATION_LISTENER",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.prerenderUrl].
+  static const PRERENDER_URL = const AndroidWebViewFeature_._internal(
+    "PRERENDER_URL",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.prefetchUrl].
+  static const PROFILE_URL_PREFETCH = const AndroidWebViewFeature_._internal(
+    "PROFILE_URL_PREFETCH",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.addCustomHeader].
+  static const CUSTOM_REQUEST_HEADERS = const AndroidWebViewFeature_._internal(
+    "CUSTOM_REQUEST_HEADERS",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewSettings.backForwardCacheEnabled].
+  static const BACK_FORWARD_CACHE = const AndroidWebViewFeature_._internal(
+    "BACK_FORWARD_CACHE",
   );
 
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].

@@ -20,12 +20,21 @@ class DownloadStartResponseAction {
   ///Cancel the download.
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   ///- Linux WPE WebKit
   static final CANCEL = DownloadStartResponseAction._internalMultiPlatform(
     0,
     () {
       switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          return 0;
+        case TargetPlatform.iOS:
+          return 0;
+        case TargetPlatform.macOS:
+          return 0;
         case TargetPlatform.windows:
           return 0;
         case TargetPlatform.linux:
@@ -37,9 +46,33 @@ class DownloadStartResponseAction {
     },
   );
 
+  ///Start a native plugin download to [DownloadStartResponse.resultFilePath].
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  static final DOWNLOAD = DownloadStartResponseAction._internalMultiPlatform(
+    1,
+    () {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          return 1;
+        case TargetPlatform.iOS:
+          return 1;
+        case TargetPlatform.macOS:
+          return 1;
+        default:
+          break;
+      }
+      return null;
+    },
+  );
+
   ///Set of all values of [DownloadStartResponseAction].
   static final Set<DownloadStartResponseAction> values = [
     DownloadStartResponseAction.CANCEL,
+    DownloadStartResponseAction.DOWNLOAD,
   ].toSet();
 
   ///Gets a possible [DownloadStartResponseAction] instance from [int] value.
@@ -113,6 +146,8 @@ class DownloadStartResponseAction {
     switch (_value) {
       case 0:
         return 'CANCEL';
+      case 1:
+        return 'DOWNLOAD';
     }
     return _value.toString();
   }

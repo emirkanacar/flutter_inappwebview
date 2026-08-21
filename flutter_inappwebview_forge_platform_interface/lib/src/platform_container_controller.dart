@@ -291,6 +291,69 @@ abstract class PlatformContainerController extends PlatformInterface {
     );
   }
 
+  /// Adds a static request header for matching origins on the Android profile.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.addCustomHeader',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/Profile#addCustomHeader(java.lang.String,java.lang.String,java.util.Set)',
+        available: '110',
+        note: 'Requires [WebViewFeature.CUSTOM_REQUEST_HEADERS].',
+      ),
+    ],
+  )
+  Future<bool> addCustomHeader({
+    required String containerId,
+    required String headerName,
+    required String headerValue,
+    Set<String>? originRules,
+  }) {
+    throw UnimplementedError(
+      'addCustomHeader is not implemented on the current platform',
+    );
+  }
+
+  /// Removes a previously added custom header from the Android profile.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.removeCustomHeader',
+        available: '110',
+        note: 'Requires [WebViewFeature.CUSTOM_REQUEST_HEADERS].',
+      ),
+    ],
+  )
+  Future<bool> removeCustomHeader({
+    required String containerId,
+    required String headerName,
+  }) {
+    throw UnimplementedError(
+      'removeCustomHeader is not implemented on the current platform',
+    );
+  }
+
+  /// Prefetches [url] into the Android profile HTTP cache.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.prefetchUrlAsync',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/Profile#prefetchUrlAsync(java.lang.String,androidx.webkit.PrefetchParameters,java.util.concurrent.Executor,androidx.webkit.OutcomeReceiver)',
+        available: '110',
+        note: 'Requires [WebViewFeature.PROFILE_URL_PREFETCH].',
+      ),
+    ],
+  )
+  Future<bool> prefetchUrl({
+    required String containerId,
+    required String url,
+  }) {
+    throw UnimplementedError(
+      'prefetchUrl is not implemented on the current platform',
+    );
+  }
+
   /// Checks whether this controller is available on [platform].
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

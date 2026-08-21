@@ -23,16 +23,37 @@ class WebViewFeature {
     'ALGORITHMIC_DARKENING',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewSettings.backForwardCacheEnabled].
+  static const BACK_FORWARD_CACHE = WebViewFeature._internal(
+    'BACK_FORWARD_CACHE',
+    'BACK_FORWARD_CACHE',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.createWebMessageChannel].
   static const CREATE_WEB_MESSAGE_CHANNEL = WebViewFeature._internal(
     'CREATE_WEB_MESSAGE_CHANNEL',
     'CREATE_WEB_MESSAGE_CHANNEL',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.addCustomHeader].
+  static const CUSTOM_REQUEST_HEADERS = WebViewFeature._internal(
+    'CUSTOM_REQUEST_HEADERS',
+    'CUSTOM_REQUEST_HEADERS',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.disabledActionModeMenuItems].
   static const DISABLED_ACTION_MODE_MENU_ITEMS = WebViewFeature._internal(
     'DISABLED_ACTION_MODE_MENU_ITEMS',
     'DISABLED_ACTION_MODE_MENU_ITEMS',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.addJavaScriptOnEvent].
+  static const DOCUMENT_START_JAVASCRIPT = WebViewFeature._internal(
+    'DOCUMENT_START_JAVASCRIPT',
+    'DOCUMENT_START_JAVASCRIPT',
   );
 
   ///Feature for [isFeatureSupported]. This feature covers [UserScriptInjectionTime.AT_DOCUMENT_START].
@@ -96,6 +117,20 @@ class WebViewFeature {
     'MULTI_PROCESS',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.setAudioMuted] and [InAppWebViewController.isAudioMuted].
+  static const MUTE_AUDIO = WebViewFeature._internal(
+    'MUTE_AUDIO',
+    'MUTE_AUDIO',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformWebViewCreationParams.onWebViewNavigation].
+  static const NAVIGATION_LISTENER = WebViewFeature._internal(
+    'NAVIGATION_LISTENER',
+    'NAVIGATION_LISTENER',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.offscreenPreRaster].
   static const OFF_SCREEN_PRERASTER = WebViewFeature._internal(
     'OFF_SCREEN_PRERASTER',
@@ -112,6 +147,20 @@ class WebViewFeature {
   static const POST_WEB_MESSAGE = WebViewFeature._internal(
     'POST_WEB_MESSAGE',
     'POST_WEB_MESSAGE',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.prerenderUrl].
+  static const PRERENDER_URL = WebViewFeature._internal(
+    'PRERENDER_URL',
+    'PRERENDER_URL',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.prefetchUrl].
+  static const PROFILE_URL_PREFETCH = WebViewFeature._internal(
+    'PROFILE_URL_PREFETCH',
+    'PROFILE_URL_PREFETCH',
   );
 
   ///Feature for [isFeatureSupported]. This feature covers [ProxyController.setProxyOverride] and [ProxyController.clearProxyOverride].
@@ -350,8 +399,11 @@ class WebViewFeature {
   ///Set of all values of [WebViewFeature].
   static final Set<WebViewFeature> values = [
     WebViewFeature.ALGORITHMIC_DARKENING,
+    WebViewFeature.BACK_FORWARD_CACHE,
     WebViewFeature.CREATE_WEB_MESSAGE_CHANNEL,
+    WebViewFeature.CUSTOM_REQUEST_HEADERS,
     WebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS,
+    WebViewFeature.DOCUMENT_START_JAVASCRIPT,
     WebViewFeature.DOCUMENT_START_SCRIPT,
     WebViewFeature.ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY,
     WebViewFeature.FORCE_DARK,
@@ -362,9 +414,13 @@ class WebViewFeature {
     WebViewFeature.GET_WEB_VIEW_CLIENT,
     WebViewFeature.GET_WEB_VIEW_RENDERER,
     WebViewFeature.MULTI_PROCESS,
+    WebViewFeature.MUTE_AUDIO,
+    WebViewFeature.NAVIGATION_LISTENER,
     WebViewFeature.OFF_SCREEN_PRERASTER,
     WebViewFeature.PAYMENT_REQUEST,
     WebViewFeature.POST_WEB_MESSAGE,
+    WebViewFeature.PRERENDER_URL,
+    WebViewFeature.PROFILE_URL_PREFETCH,
     WebViewFeature.PROXY_OVERRIDE,
     WebViewFeature.PROXY_OVERRIDE_REVERSE_BYPASS,
     WebViewFeature.RECEIVE_HTTP_ERROR,
@@ -484,10 +540,16 @@ class WebViewFeature {
     switch (_value) {
       case 'ALGORITHMIC_DARKENING':
         return 'ALGORITHMIC_DARKENING';
+      case 'BACK_FORWARD_CACHE':
+        return 'BACK_FORWARD_CACHE';
       case 'CREATE_WEB_MESSAGE_CHANNEL':
         return 'CREATE_WEB_MESSAGE_CHANNEL';
+      case 'CUSTOM_REQUEST_HEADERS':
+        return 'CUSTOM_REQUEST_HEADERS';
       case 'DISABLED_ACTION_MODE_MENU_ITEMS':
         return 'DISABLED_ACTION_MODE_MENU_ITEMS';
+      case 'DOCUMENT_START_JAVASCRIPT':
+        return 'DOCUMENT_START_JAVASCRIPT';
       case 'DOCUMENT_START_SCRIPT':
         return 'DOCUMENT_START_SCRIPT';
       case 'ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY':
@@ -508,12 +570,20 @@ class WebViewFeature {
         return 'GET_WEB_VIEW_RENDERER';
       case 'MULTI_PROCESS':
         return 'MULTI_PROCESS';
+      case 'MUTE_AUDIO':
+        return 'MUTE_AUDIO';
+      case 'NAVIGATION_LISTENER':
+        return 'NAVIGATION_LISTENER';
       case 'OFF_SCREEN_PRERASTER':
         return 'OFF_SCREEN_PRERASTER';
       case 'PAYMENT_REQUEST':
         return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
+      case 'PRERENDER_URL':
+        return 'PRERENDER_URL';
+      case 'PROFILE_URL_PREFETCH':
+        return 'PROFILE_URL_PREFETCH';
       case 'PROXY_OVERRIDE':
         return 'PROXY_OVERRIDE';
       case 'PROXY_OVERRIDE_REVERSE_BYPASS':
@@ -630,10 +700,24 @@ class AndroidWebViewFeature {
     'ALGORITHMIC_DARKENING',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewSettings.backForwardCacheEnabled].
+  static const BACK_FORWARD_CACHE = AndroidWebViewFeature._internal(
+    'BACK_FORWARD_CACHE',
+    'BACK_FORWARD_CACHE',
+  );
+
   ///
   static const CREATE_WEB_MESSAGE_CHANNEL = AndroidWebViewFeature._internal(
     'CREATE_WEB_MESSAGE_CHANNEL',
     'CREATE_WEB_MESSAGE_CHANNEL',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.addCustomHeader].
+  static const CUSTOM_REQUEST_HEADERS = AndroidWebViewFeature._internal(
+    'CUSTOM_REQUEST_HEADERS',
+    'CUSTOM_REQUEST_HEADERS',
   );
 
   ///
@@ -692,6 +776,20 @@ class AndroidWebViewFeature {
     'MULTI_PROCESS',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.setAudioMuted] and [InAppWebViewController.isAudioMuted].
+  static const MUTE_AUDIO = AndroidWebViewFeature._internal(
+    'MUTE_AUDIO',
+    'MUTE_AUDIO',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformWebViewCreationParams.onWebViewNavigation].
+  static const NAVIGATION_LISTENER = AndroidWebViewFeature._internal(
+    'NAVIGATION_LISTENER',
+    'NAVIGATION_LISTENER',
+  );
+
   ///
   static const OFF_SCREEN_PRERASTER = AndroidWebViewFeature._internal(
     'OFF_SCREEN_PRERASTER',
@@ -708,6 +806,20 @@ class AndroidWebViewFeature {
   static const POST_WEB_MESSAGE = AndroidWebViewFeature._internal(
     'POST_WEB_MESSAGE',
     'POST_WEB_MESSAGE',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[InAppWebViewController.prerenderUrl].
+  static const PRERENDER_URL = AndroidWebViewFeature._internal(
+    'PRERENDER_URL',
+    'PRERENDER_URL',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.prefetchUrl].
+  static const PROFILE_URL_PREFETCH = AndroidWebViewFeature._internal(
+    'PROFILE_URL_PREFETCH',
+    'PROFILE_URL_PREFETCH',
   );
 
   ///
@@ -933,7 +1045,9 @@ class AndroidWebViewFeature {
   ///Set of all values of [AndroidWebViewFeature].
   static final Set<AndroidWebViewFeature> values = [
     AndroidWebViewFeature.ALGORITHMIC_DARKENING,
+    AndroidWebViewFeature.BACK_FORWARD_CACHE,
     AndroidWebViewFeature.CREATE_WEB_MESSAGE_CHANNEL,
+    AndroidWebViewFeature.CUSTOM_REQUEST_HEADERS,
     AndroidWebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS,
     AndroidWebViewFeature.DOCUMENT_START_SCRIPT,
     AndroidWebViewFeature.ENTERPRISE_AUTHENTICATION_APP_LINK_POLICY,
@@ -943,9 +1057,13 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.GET_WEB_VIEW_CLIENT,
     AndroidWebViewFeature.GET_WEB_VIEW_RENDERER,
     AndroidWebViewFeature.MULTI_PROCESS,
+    AndroidWebViewFeature.MUTE_AUDIO,
+    AndroidWebViewFeature.NAVIGATION_LISTENER,
     AndroidWebViewFeature.OFF_SCREEN_PRERASTER,
     AndroidWebViewFeature.PAYMENT_REQUEST,
     AndroidWebViewFeature.POST_WEB_MESSAGE,
+    AndroidWebViewFeature.PRERENDER_URL,
+    AndroidWebViewFeature.PROFILE_URL_PREFETCH,
     AndroidWebViewFeature.PROXY_OVERRIDE,
     AndroidWebViewFeature.RECEIVE_HTTP_ERROR,
     AndroidWebViewFeature.RECEIVE_WEB_RESOURCE_ERROR,
@@ -1063,8 +1181,12 @@ class AndroidWebViewFeature {
     switch (_value) {
       case 'ALGORITHMIC_DARKENING':
         return 'ALGORITHMIC_DARKENING';
+      case 'BACK_FORWARD_CACHE':
+        return 'BACK_FORWARD_CACHE';
       case 'CREATE_WEB_MESSAGE_CHANNEL':
         return 'CREATE_WEB_MESSAGE_CHANNEL';
+      case 'CUSTOM_REQUEST_HEADERS':
+        return 'CUSTOM_REQUEST_HEADERS';
       case 'DISABLED_ACTION_MODE_MENU_ITEMS':
         return 'DISABLED_ACTION_MODE_MENU_ITEMS';
       case 'DOCUMENT_START_SCRIPT':
@@ -1083,12 +1205,20 @@ class AndroidWebViewFeature {
         return 'GET_WEB_VIEW_RENDERER';
       case 'MULTI_PROCESS':
         return 'MULTI_PROCESS';
+      case 'MUTE_AUDIO':
+        return 'MUTE_AUDIO';
+      case 'NAVIGATION_LISTENER':
+        return 'NAVIGATION_LISTENER';
       case 'OFF_SCREEN_PRERASTER':
         return 'OFF_SCREEN_PRERASTER';
       case 'PAYMENT_REQUEST':
         return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
+      case 'PRERENDER_URL':
+        return 'PRERENDER_URL';
+      case 'PROFILE_URL_PREFETCH':
+        return 'PROFILE_URL_PREFETCH';
       case 'PROXY_OVERRIDE':
         return 'PROXY_OVERRIDE';
       case 'RECEIVE_HTTP_ERROR':

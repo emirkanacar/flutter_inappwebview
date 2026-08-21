@@ -15,6 +15,31 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-21 Native WebView API gaps
+
+Root 2.1.76, platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, and
+macOS 1.1.10 add cross-platform mute, opt-in native
+`DownloadJobController` downloads, Android `onVisualStateReady`,
+iOS/macOS cookie observers, `findString`, Android Profile headers and
+prefetch, feature-gated AndroidX WebKit 1.15 navigation APIs, and iOS 26
+obscured-content / session-storage / Screen Time helpers. A `null`
+`onDownloadStarting` response remains notify-only. Declared Android
+`minSdk 19` is unchanged. This is not a CSV issue record. Physical-device
+mute, download, visual-state, cookie observer, Profile prefetch,
+NavigationListener, and iOS 26 validation remain pending. No upstream
+issue or PR state was changed.
+
+## 2026-08-21 Deprecated compatibility inventory
+
+Root 2.1.75, platform-interface 1.1.20, and Android 1.0.54 document the 5.x
+Options, prefixed-callback, and type-alias shims without removing them.
+`saveFormData` now has a non-empty deprecation message (Android Autofill; no
+Dart replacement). Native Android SDK-deprecated paths stay for `minSdk 19`.
+The mapping is [Deprecated APIs](../documentation/deprecated-api.md). The
+engineering sequence is
+[Deprecated API migration plan](deprecated-api-migration-plan.md). This is
+not a CSV issue record. No upstream issue or PR state was changed.
+
 ## 2026-08-21 iOS 27 `canOpenURL` deprecation (upstream #2882)
 
 iOS 2.1.33 and root 2.1.74 replace the only `UIApplication.canOpenURL`
@@ -578,6 +603,8 @@ reduced when a record moves between the local status registers.
 
 ## Local resolution history
 
+| 2026-08-21 | Native WebView API gaps | No upstream issue | Root 2.1.76, platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, and macOS 1.1.10 add mute, opt-in native downloads, Android visual-state, iOS/macOS cookie observers, `findString`, Profile headers/prefetch, feature-gated WebKit 1.15 navigation APIs, and iOS 26 session-storage helpers. A `null` `onDownloadStarting` response remains notify-only. `minSdk 19` is unchanged. Device validation remains pending. |
+| 2026-08-21 | Deprecated compatibility inventory | No upstream issue | Root 2.1.75, platform-interface 1.1.20, and Android 1.0.54 name the deprecated Options/prefixed-callback/`saveFormData` surfaces in changelogs, keep them present, and point host apps at [Deprecated APIs](../documentation/deprecated-api.md) plus [deprecated-api-migration-plan.md](deprecated-api-migration-plan.md). Native minSdk 19 SDK-deprecated paths stay. The example storage screen uses `onReceivedError`. |
 | 2026-08-21 | iOS 27 `canOpenURL` deprecation [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) | No upstream PR | iOS 2.1.33 / root 2.1.74 open system-browser URLs through `UIApplication.open(_:options:completionHandler:)` and complete the existing FlutterError contract from that result. iOS package tests, SwiftPM dump-package, and the Xcode 27 example debug build pass. iOS 27 Simulator/device open-URL validation remains pending. This issue is not in the CSV snapshot. |
 | 2026-08-21 | Pub.dev lints_core static analysis | [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757) | Root 2.1.73 and platform-interface 1.1.19 rename `prewarmConnections` `URLs` to `urls` and declare `Future<void>` on `setServiceWorkerClient`. The iOS channel key remains `URLs`. Republish/Pana 50/50 remains pending. |
 | 2026-08-21 | Flutter web WASM compilation | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 gate `dart:io` localhost types and convert JS bridge values so `flutter build web --wasm` succeeds. Chrome WasmGC iframe/bridge runtime remains pending. |
@@ -663,6 +690,8 @@ reduced when a record moves between the local status registers.
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.76 / Android 1.0.55 / iOS 2.1.34 / macOS 1.1.10 / platform-interface 1.1.21 | Native WebView API gaps | No upstream issue | Mute, opt-in native `DownloadJobController` downloads, Android `onVisualStateReady`, iOS/macOS cookie observers, `findString`, Profile headers/prefetch, feature-gated WebKit 1.15 navigation APIs, and iOS 26 session-storage helpers. A `null` `onDownloadStarting` response remains notify-only. `minSdk 19` is unchanged. Device validation remains required. |
+| 2.1.75 / Android 1.0.54 / platform-interface 1.1.20 | Deprecated compatibility inventory | No upstream issue | Changelogs name the deprecated Options, `onLoadError`, `androidOn*` / `iosOn*`, `clearCache()`, `findAllAsync`, `saveFormData`, and `IOS*` / `Android*` surfaces. They stay present. Host-app and major-version sequence is [deprecated-api-migration-plan.md](deprecated-api-migration-plan.md). The example storage screen uses `onReceivedError`. |
 | 2.1.74 / iOS 2.1.33 | iOS 27 `canOpenURL` deprecation [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) | No upstream PR | Root 2.1.74 depends on iOS 2.1.33. System-browser URLs open through `UIApplication.open(_:options:completionHandler:)` and complete the existing FlutterError contract from that result. iOS package tests, SwiftPM dump-package, and the Xcode 27 example debug build pass; iOS 27 Simulator/device open-URL validation remains required. |
 | 2.1.48 / Android 1.0.43 | Android cookie mutation ANR [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) | No upstream relationship inferred | API 21+ cookie mutations no longer force synchronous `CookieManager.flush()` on the WebView UI thread after asynchronous updates, and the explicit `flush` MethodChannel result now completes. The Android package suite passes 48/48 and the native debug build path compiles the fix. The A16 diagnostic passes 10/10 cycles with an empty final cookie list and no app crash/ANR; Android 10/provider and Play Console validation remain required. |
 | 2.1.40 / Android 1.0.37 | Android nullable and malformed permission callback payloads [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) | [#2857](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2857) | Android permission request/cancellation payloads now validate the map, origin, and resources container before decoding, filter unknown resource entries, and preserve native default behavior for malformed payloads. The focused regression and Android package tests pass; API/provider validation remains required. |

@@ -1,3 +1,41 @@
+## 2.1.76 - 2026-08-21
+
+- Add cross-platform `setAudioMuted` / `isAudioMuted`, opt-in native
+  `DownloadJobController` downloads, Android `onVisualStateReady`,
+  iOS/macOS cookie observers, `findString`, Android Profile headers
+  and prefetch, feature-gated AndroidX WebKit 1.15 navigation APIs,
+  and iOS 26 obscured-content and session-storage helpers.
+- A `null` `onDownloadStarting` response remains notify-only.
+- Depend on platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, and
+  macOS 1.1.10.
+
+## 2.1.75 - 2026-08-21
+
+- Document, but do not remove, these deprecated public APIs. They still
+  compile. Use the current names in new code
+  ([Deprecated APIs](https://github.com/emirkanacar/flutter_inappwebview/blob/master/documentation/deprecated-api.md)):
+  - `InAppWebViewGroupOptions` / `InAppWebViewOptions` /
+    `AndroidInAppWebViewOptions` / `IOSInAppWebViewOptions` and
+    `initialOptions` / `setOptions` / `getOptions` (use
+    `InAppWebViewSettings`, `initialSettings`, `setSettings`, `getSettings`)
+  - `InAppBrowserClassOptions`, `ChromeCustomTabsOptions`, `SafariOptions`,
+    `PullToRefreshOptions`, `ContextMenuOptions` (use the matching `*Settings`
+    types)
+  - `onLoadError` / `onLoadHttpError` (use `onReceivedError` /
+    `onReceivedHttpError`)
+  - `onDownloadStart` / `onDownloadStartRequest` (use `onDownloadStarting`)
+  - `androidOn*` and `iosOn*` callbacks (use the unprefixed names)
+  - `clearCache()`, `findAllAsync` / `findNext` / `clearMatches` (use
+    `clearAllCache` and `FindInteractionController`)
+  - `IOS*` / `Android*` type aliases (use the unprefixed types)
+  - `JavaScriptHandlerCallback` (use `JavaScriptHandlerFunction`)
+- Deprecated `InAppWebViewSettings.saveFormData` now states that Android
+  Autofill replaced WebView form-data saving. The setting is a no-op on API
+  26+ and has no Dart replacement; it is not removed.
+- Deprecated `forceDark` / `forceDarkStrategy` remain; use
+  `algorithmicDarkeningAllowed`.
+- Depend on platform-interface 1.1.20 and Android 1.0.54.
+
 ## 2.1.74 - 2026-08-21
 
 - Depend on iOS 2.1.33, which opens system-browser URLs through

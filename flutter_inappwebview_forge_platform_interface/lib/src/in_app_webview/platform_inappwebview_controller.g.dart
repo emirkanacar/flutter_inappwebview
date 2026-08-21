@@ -163,6 +163,22 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   addJavaScriptHandler,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.addJavaScriptOnEvent] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addJavaScriptOnEvent.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView (Official API - WebViewCompat.addJavaScriptOnEvent):
+  ///    - Requires a WebView provider that advertises the document-event script feature.
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [source]: all platforms
+  ///- [event]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  addJavaScriptOnEvent,
+
   ///Can be used to check if the [PlatformInAppWebViewController.addUserScript] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addUserScript.supported_platforms}
@@ -595,6 +611,21 @@ enum PlatformInAppWebViewControllerMethod {
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   evaluateJavascript,
+
+  ///Can be used to check if the [PlatformInAppWebViewController.fetchWebViewData] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.fetchWebViewData.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 26.0+ ([Official API - WKWebView.fetchData(of:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebview/fetchdata(of:completionhandler:)))
+  ///- macOS WKWebView 26.0+ ([Official API - WKWebView.fetchData(of:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebview/fetchdata(of:completionhandler:)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [dataTypes]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  fetchWebViewData,
 
   ///Can be used to check if the [PlatformInAppWebViewController.findAllAsync] method is supported at runtime.
   ///
@@ -1441,6 +1472,32 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   injectJavascriptFileFromUrl,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.isAudioMuted] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isAudioMuted.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.isAudioMuted](https://developer.android.com/reference/androidx/webkit/WebViewCompat#isAudioMuted(android.webkit.WebView))):
+  ///    - Available only if [WebViewFeature.MUTE_AUDIO] is supported.
+  ///- iOS WKWebView 15.0+
+  ///- macOS WKWebView 12.0+
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  isAudioMuted,
+
+  ///Can be used to check if the [PlatformInAppWebViewController.isBlockedByScreenTime] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isBlockedByScreenTime.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 26.0+ ([Official API - WKWebView.isBlockedByScreenTime](https://developer.apple.com/documentation/webkit/wkwebview/isblockedbyscreentime))
+  ///- macOS WKWebView 26.0+ ([Official API - WKWebView.isBlockedByScreenTime](https://developer.apple.com/documentation/webkit/wkwebview/isblockedbyscreentime))
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  isBlockedByScreenTime,
+
   ///Can be used to check if the [PlatformInAppWebViewController.isInFullscreen] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isInFullscreen.supported_platforms}
@@ -1654,6 +1711,23 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   loadUrl,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.navigate] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.navigate.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.navigate](https://developer.android.com/reference/androidx/webkit/WebViewCompat#navigate(android.webkit.WebView,java.lang.String,androidx.webkit.NavigationParameters))):
+  ///    - Requires [WebViewFeature.NAVIGATION_LISTENER]. Falls back to loadUrl otherwise.
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [url]: all platforms
+  ///- [replaceHistory]: all platforms
+  ///- [headers]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  navigate,
+
   ///Can be used to check if the [PlatformInAppWebViewController.openDevTools] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.openDevTools.supported_platforms}
@@ -1756,6 +1830,20 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   postUrl,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.postVisualStateCallback] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postVisualStateCallback.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 23+ ([Official API - WebView.postVisualStateCallback](https://developer.android.com/reference/android/webkit/WebView#postVisualStateCallback(long,%20android.webkit.WebView.VisualStateCallback)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [requestId]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  postVisualStateCallback,
+
   ///Can be used to check if the [PlatformInAppWebViewController.postWebMessage] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postWebMessage.supported_platforms}
@@ -1779,6 +1867,21 @@ enum PlatformInAppWebViewControllerMethod {
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   postWebMessage,
+
+  ///Can be used to check if the [PlatformInAppWebViewController.prerenderUrl] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.prerenderUrl.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.prerenderUrlAsync](https://developer.android.com/reference/androidx/webkit/WebViewCompat#prerenderUrlAsync(android.webkit.WebView,java.lang.String,java.util.concurrent.Executor,androidx.webkit.PrerenderOperationCallback))):
+  ///    - Requires [WebViewFeature.PRERENDER_URL].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [url]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  prerenderUrl,
 
   ///Can be used to check if the [PlatformInAppWebViewController.printCurrentPage] method is supported at runtime.
   ///
@@ -2066,6 +2169,21 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   restoreState,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.restoreWebViewData] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreWebViewData.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 26.0+ ([Official API - WKWebView.restoreData(_:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebview/restoredata(_:completionhandler:)))
+  ///- macOS WKWebView 26.0+ ([Official API - WKWebView.restoreData(_:completionHandler:)](https://developer.apple.com/documentation/webkit/wkwebview/restoredata(_:completionhandler:)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [data]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  restoreWebViewData,
+
   ///Can be used to check if the [PlatformInAppWebViewController.resume] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.resume.supported_platforms}
@@ -2192,6 +2310,23 @@ enum PlatformInAppWebViewControllerMethod {
   ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   setAllMediaPlaybackSuspended,
+
+  ///Can be used to check if the [PlatformInAppWebViewController.setAudioMuted] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setAudioMuted.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.setAudioMuted](https://developer.android.com/reference/androidx/webkit/WebViewCompat#setAudioMuted(android.webkit.WebView,boolean))):
+  ///    - Available only if [WebViewFeature.MUTE_AUDIO] is supported.
+  ///- iOS WKWebView 15.0+ ([Official API - WKWebView.setAllMediaPlaybackSuspended](https://developer.apple.com/documentation/webkit/wkwebview/3752242-setallmediaplaybacksuspended))
+  ///- macOS WKWebView 12.0+ ([Official API - WKWebView.setAllMediaPlaybackSuspended](https://developer.apple.com/documentation/webkit/wkwebview/3752242-setallmediaplaybacksuspended))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [muted]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  setAudioMuted,
 
   ///Can be used to check if the [PlatformInAppWebViewController.setBackgroundColor] method is supported at runtime.
   ///
@@ -2586,6 +2721,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
                     TargetPlatform.macOS,
                     TargetPlatform.windows,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.addJavaScriptOnEvent:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.addUserScript:
         return kIsWeb && platform == null
             ? true
@@ -2798,6 +2938,12 @@ extension _PlatformInAppWebViewControllerMethodSupported
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.fetchWebViewData:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.findAllAsync:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -3259,6 +3405,19 @@ extension _PlatformInAppWebViewControllerMethodSupported
                     TargetPlatform.linux,
                     TargetPlatform.macOS,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.isAudioMuted:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.isBlockedByScreenTime:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.isInFullscreen:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -3347,6 +3506,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.navigate:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.openDevTools:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -3393,6 +3557,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.postVisualStateCallback:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.postWebMessage:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -3401,6 +3570,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.linux,
               TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.prerenderUrl:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.printCurrentPage:
         return kIsWeb && platform == null
@@ -3537,6 +3711,12 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.restoreWebViewData:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.resume:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -3594,6 +3774,13 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.setAudioMuted:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.setBackgroundColor:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

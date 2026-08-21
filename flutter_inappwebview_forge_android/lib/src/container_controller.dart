@@ -85,4 +85,41 @@ class AndroidContainerController extends PlatformContainerController {
         'containerId': containerId,
       }) ??
       false;
+
+  @override
+  Future<bool> addCustomHeader({
+    required String containerId,
+    required String headerName,
+    required String headerValue,
+    Set<String>? originRules,
+  }) async =>
+      await _channel.invokeMethod<bool>('addCustomHeader', <String, dynamic>{
+        'containerId': containerId,
+        'headerName': headerName,
+        'headerValue': headerValue,
+        'originRules': originRules?.toList(),
+      }) ??
+      false;
+
+  @override
+  Future<bool> removeCustomHeader({
+    required String containerId,
+    required String headerName,
+  }) async =>
+      await _channel.invokeMethod<bool>('removeCustomHeader', <String, dynamic>{
+        'containerId': containerId,
+        'headerName': headerName,
+      }) ??
+      false;
+
+  @override
+  Future<bool> prefetchUrl({
+    required String containerId,
+    required String url,
+  }) async =>
+      await _channel.invokeMethod<bool>('prefetchUrl', <String, dynamic>{
+        'containerId': containerId,
+        'url': url,
+      }) ??
+      false;
 }

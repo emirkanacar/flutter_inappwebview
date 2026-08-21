@@ -2347,6 +2347,23 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
   @SupportedPlatforms(platforms: [IOSPlatform()])
   void onContentSizeChanged(Size oldContentSize, Size newContentSize) {}
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onVisualStateReady}
+  @SupportedPlatforms(platforms: [AndroidPlatform(available: '23')])
+  void onVisualStateReady(int requestId) {}
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWritingToolsActiveChanged}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(available: '18.0'),
+      MacOSPlatform(available: '15.0'),
+    ],
+  )
+  void onWritingToolsActiveChanged(bool isActive) {}
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWebViewNavigation}
+  @SupportedPlatforms(platforms: [AndroidPlatform()])
+  void onWebViewNavigation(WebViewNavigationEvent event) {}
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onProcessFailed}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppBrowserEvents.onProcessFailed.supported_platforms}

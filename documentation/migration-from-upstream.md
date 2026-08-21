@@ -47,7 +47,7 @@ new setting while preserving the public contract.
 
    ```yaml
    dependencies:
-     flutter_inappwebview_forge: ^2.1.74
+     flutter_inappwebview_forge: ^2.1.76
    ```
 
    ```dart
@@ -63,6 +63,12 @@ new setting while preserving the public contract.
    on the target runtime before shipping.
 5. Read the [Changelog](changelog.md) for additive features and compatibility
    notes introduced after the upstream baseline.
+6. If the app still uses `*Options`, `androidOn*` / `iosOn*` callbacks, or
+   `IOS*` / `Android*` type names, migrate to the current names in
+   [Deprecated APIs](deprecated-api.md). Those symbols are deprecated and
+   still present. The
+   [migration plan](https://github.com/emirkanacar/flutter_inappwebview/blob/master/docs/deprecated-api-migration-plan.md)
+   records when they can be removed.
 
 Do not add both the upstream and Forge implementations to the same app unless
 you have a deliberate platform-registration plan. Duplicate platform

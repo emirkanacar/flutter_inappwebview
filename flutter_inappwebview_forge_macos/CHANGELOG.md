@@ -1,3 +1,15 @@
+## 1.1.10 - 2026-08-21
+
+- Map `setAudioMuted` / `isAudioMuted` to
+  `setAllMediaPlaybackSuspended`.
+- Start an opt-in `WKDownload` job when `onDownloadStarting` returns
+  `handled` and `resultFilePath`; the previous notify-only default is
+  unchanged.
+- Observe `WKHTTPCookieStore` changes and add `findString`,
+  `allowsInlinePredictions`, and macOS 26
+  `obscuredContentInsets` / session-storage / Screen Time APIs.
+- Depend on platform-interface 1.1.21.
+
 ## 1.1.9 - 2026-08-13
 
 - Support `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` for keeping

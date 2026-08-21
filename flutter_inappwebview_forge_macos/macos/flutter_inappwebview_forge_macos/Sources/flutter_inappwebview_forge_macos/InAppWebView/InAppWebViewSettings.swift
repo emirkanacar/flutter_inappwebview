@@ -59,6 +59,8 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var isElementFullscreenEnabled = true
     var isInspectable = false
     var shouldPrintBackgrounds = false
+    var allowsInlinePredictions = false
+    var obscuredContentInsets: NSEdgeInsets? = nil
     var javaScriptHandlersOriginAllowList: [String]? = nil
     var javaScriptBridgeEnabled = true
     var javaScriptBridgeOriginAllowList: [String]? = nil
@@ -75,6 +77,10 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
         var settings = settings // re-assing to be able to use removeValue
         // nullable values with primitive type (Int, Double, etc.)
         // must be handled here as super.parse will not work
+        if let obscuredContentInsetsMap = settings["obscuredContentInsets"] as? [String : Double] {
+            obscuredContentInsets = NSEdgeInsets.fromMap(map: obscuredContentInsetsMap)
+            settings.removeValue(forKey: "obscuredContentInsets")
+        }
         if let alphaValue = settings["alpha"] as? Double {
             alpha = alphaValue
             settings.removeValue(forKey: "alpha")
@@ -125,6 +131,17 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
             if #available(macOS 13.3, *) {
                 realSettings["isInspectable"] = webView.isInspectable
                 realSettings["shouldPrintBackgrounds"] = configuration.preferences.shouldPrintBackgrounds
+            }
+            if #available(macOS 14.0, *) {
+                realSettings["allowsInlinePredictions"] = configuration.allowsInlinePredictions
+            }
+            if #available(macOS 26.0, *) {
+                realSettings["obscuredContentInsets"] = NSEdgeInsets(
+                    top: webView.obscuredContentInsets.top,
+                    left: webView.obscuredContentInsets.leading,
+                    bottom: webView.obscuredContentInsets.bottom,
+                    right: webView.obscuredContentInsets.trailing
+                ).toMap()
             }
         }
         return realSettings

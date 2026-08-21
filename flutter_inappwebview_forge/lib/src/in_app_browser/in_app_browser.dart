@@ -430,6 +430,15 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
   void onContentSizeChanged(Size oldContentSize, Size newContentSize) {}
 
   @override
+  void onVisualStateReady(int requestId) {}
+
+  @override
+  void onWritingToolsActiveChanged(bool isActive) {}
+
+  @override
+  void onWebViewNavigation(WebViewNavigationEvent event) {}
+
+  @override
   FutureOr<bool?>? onCreateWindow(CreateWindowAction createWindowAction) {
     return null;
   }

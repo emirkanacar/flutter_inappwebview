@@ -1125,7 +1125,11 @@ because there isn't any way to make the website data store non-persistent for th
   ///Sets whether the WebView should save form data. In Android O, the platform has implemented a fully functional Autofill feature to store form data.
   ///Therefore, the Webview form data save feature is disabled. Note that the feature will continue to be supported on older versions of Android as before.
   ///The default value is `true`.
-  @Deprecated('')
+  ///
+  ///There is no Dart replacement: Autofill is a platform feature, not a plugin API.
+  @Deprecated(
+    'Android Autofill replaced WebView form-data saving; this setting is a no-op on API 26+ and has no Dart replacement',
+  )
   @ExchangeableObjectProperty(
     leaveDeprecatedInToMapMethod: true,
     leaveDeprecatedInFromMapMethod: true,
@@ -3472,6 +3476,61 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   bool? allowTopNavigationToDataUrls;
 
+  ///Enables iOS inline text predictions in the WebView.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: "17.0",
+        apiName: "WKWebViewConfiguration.allowsInlinePredictions",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/4172816-allowsinlinepredictions",
+      ),
+      MacOSPlatform(
+        available: "14.0",
+        apiName: "WKWebViewConfiguration.allowsInlinePredictions",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebviewconfiguration/4172816-allowsinlinepredictions",
+      ),
+    ],
+  )
+  bool? allowsInlinePredictions;
+
+  ///Edge insets that shrink the layout viewport around overlay UI.
+  ///
+  ///Use this when Flutter widgets such as an AppBar overlap the WebView so
+  ///that sticky and fixed CSS tracks the visible area.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: "26.0",
+        apiName: "WKWebView.obscuredContentInsets",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebview/obscuredcontentinsets",
+      ),
+      MacOSPlatform(
+        available: "26.0",
+        apiName: "WKWebView.obscuredContentInsets",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebview/obscuredcontentinsets",
+      ),
+    ],
+  )
+  EdgeInsets? obscuredContentInsets;
+
+  ///Enables the Android Back/Forward Cache when the WebView provider supports it.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "WebSettingsCompat.getBackForwardCacheSettings",
+        apiUrl:
+            "https://developer.android.com/reference/androidx/webkit/WebSettingsCompat#getBackForwardCacheSettings(android.webkit.WebSettings)",
+        note:
+            "Available only if [WebViewFeature.BACK_FORWARD_CACHE] is supported.",
+      ),
+    ],
+  )
+  bool? backForwardCacheEnabled;
+
   @ExchangeableObjectConstructor()
   InAppWebViewSettings_({
     this.useShouldOverrideUrlLoading,
@@ -3540,7 +3599,10 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.sansSerifFontFamily = "sans-serif",
     this.serifFontFamily = "sans-serif",
     this.standardFontFamily = "sans-serif",
-    @Deprecated('') this.saveFormData = true,
+    @Deprecated(
+      'Android Autofill replaced WebView form-data saving; this setting is a no-op on API 26+ and has no Dart replacement',
+    )
+    this.saveFormData = true,
     this.thirdPartyCookiesEnabled = true,
     this.hardwareAcceleration = true,
     this.initialScale = 0,
@@ -3684,6 +3746,9 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.enableJavaScriptMarkup = true,
     this.enable2DCanvasAcceleration = false,
     this.allowTopNavigationToDataUrls = false,
+    this.allowsInlinePredictions,
+    this.obscuredContentInsets,
+    this.backForwardCacheEnabled,
   }) {
     if (this.minimumFontSize == null)
       this.minimumFontSize = Util.isAndroid ? 8 : 0;

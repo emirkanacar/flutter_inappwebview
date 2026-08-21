@@ -35,6 +35,7 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin, FlutterSceneLif
     var chromeSafariBrowserManager: ChromeSafariBrowserManager?
     var webAuthenticationSessionManager: WebAuthenticationSessionManager?
     var printJobManager: PrintJobManager?
+    var downloadJobManager: DownloadJobManager?
     var proxyManager: Any?
     var containerManager: Any?
     
@@ -62,6 +63,7 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin, FlutterSceneLif
         }
         webAuthenticationSessionManager = WebAuthenticationSessionManager(plugin: self)
         printJobManager = PrintJobManager(plugin: self)
+        downloadJobManager = DownloadJobManager(plugin: self)
         if #available(iOS 17.0, *) {
             proxyManager = ProxyManager(plugin: self)
             containerManager = ContainerManager(plugin: self)
@@ -99,6 +101,8 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin, FlutterSceneLif
         webAuthenticationSessionManager = nil
         printJobManager?.dispose()
         printJobManager = nil
+        downloadJobManager?.dispose()
+        downloadJobManager = nil
         if #available(iOS 17.0, *) {
             (proxyManager as? ProxyManager)?.dispose()
             proxyManager = nil

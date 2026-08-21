@@ -640,10 +640,10 @@ class _WebStorageScreenState extends State<WebStorageScreen>
                   onLoadStop: (controller, url) {
                     setState(() => _webViewReady = true);
                   },
-                  onLoadError: (controller, url, code, message) {
+                  onReceivedError: (controller, request, error) {
                     _recordMethodResult(
                       PlatformInAppWebViewControllerMethod.loadUrl.name,
-                      'Load error: $message',
+                      'Load error: ${error.description}',
                       isError: true,
                     );
                   },

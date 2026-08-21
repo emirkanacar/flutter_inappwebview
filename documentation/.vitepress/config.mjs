@@ -24,6 +24,7 @@ export default defineConfig({
           { text: 'Documentation home', link: '/' },
           { text: 'Getting started', link: '/getting-started' },
           { text: 'Inline WebView', link: '/in-app-webview' },
+          { text: 'Deprecated APIs', link: '/deprecated-api' },
         ],
       },
       {
@@ -48,6 +49,7 @@ export default defineConfig({
             text: 'Migration and upstream',
             link: '/migration-from-upstream',
           },
+          { text: 'Deprecated APIs', link: '/deprecated-api' },
           { text: 'Troubleshooting', link: '/troubleshooting' },
         ],
       },

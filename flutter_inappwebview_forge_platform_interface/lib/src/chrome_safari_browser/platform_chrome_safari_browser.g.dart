@@ -247,7 +247,7 @@ enum PlatformChromeSafariBrowserMethod {
   ///- iOS SFSafariViewController 15.0+ ([Official API - SFSafariViewController.prewarmConnections](https://developer.apple.com/documentation/safariservices/sfsafariviewcontroller/3752133-prewarmconnections))
   ///
   ///**Parameters - Officially Supported Platforms/Implementations**:
-  ///- [URLs]: all platforms
+  ///- [urls]: all platforms
   ///
   ///Use the [PlatformChromeSafariBrowser.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}

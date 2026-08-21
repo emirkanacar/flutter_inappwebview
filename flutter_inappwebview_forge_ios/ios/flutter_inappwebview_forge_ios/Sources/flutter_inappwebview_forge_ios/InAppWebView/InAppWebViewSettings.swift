@@ -89,6 +89,8 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var maximumViewportInset: UIEdgeInsets? = nil
     var isInspectable = false
     var shouldPrintBackgrounds = false
+    var allowsInlinePredictions = false
+    var obscuredContentInsets: UIEdgeInsets? = nil
     var javaScriptHandlersOriginAllowList: [String]? = nil
     var javaScriptBridgeEnabled = true
     var javaScriptBridgeOriginAllowList: [String]? = nil
@@ -111,6 +113,10 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
         if let maximumViewportInsetMap = settings["maximumViewportInset"] as? [String : Double] {
             maximumViewportInset = UIEdgeInsets.fromMap(map: maximumViewportInsetMap)
             settings.removeValue(forKey: "maximumViewportInset")
+        }
+        if let obscuredContentInsetsMap = settings["obscuredContentInsets"] as? [String : Double] {
+            obscuredContentInsets = UIEdgeInsets.fromMap(map: obscuredContentInsetsMap)
+            settings.removeValue(forKey: "obscuredContentInsets")
         }
         // nullable values with primitive type (Int, Double, etc.)
         // must be handled here as super.parse will not work
@@ -199,6 +205,17 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
             }
             if #available(iOS 18.0, *) {
                 realSettings["writingToolsBehavior"] = configuration.writingToolsBehavior.rawValue
+            }
+            if #available(iOS 17.0, *) {
+                realSettings["allowsInlinePredictions"] = configuration.allowsInlinePredictions
+            }
+            if #available(iOS 26.0, *) {
+                realSettings["obscuredContentInsets"] = UIEdgeInsets(
+                    top: webView.obscuredContentInsets.top,
+                    left: webView.obscuredContentInsets.leading,
+                    bottom: webView.obscuredContentInsets.bottom,
+                    right: webView.obscuredContentInsets.trailing
+                ).toMap()
             }
         }
         return realSettings

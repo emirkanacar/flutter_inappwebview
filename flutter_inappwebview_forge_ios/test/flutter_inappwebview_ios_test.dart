@@ -320,6 +320,11 @@ void _runSourceContractAssertions() {
         ),
     'iOS autocorrection setting is not wired to the document-start script',
   );
+  _assert(
+    settingsSource.contains('allowsInlinePredictions') &&
+        settingsSource.contains('obscuredContentInsets'),
+    'iOS inline-prediction and obscured-content-inset settings are missing',
+  );
   final autocorrectionSource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'
     'flutter_inappwebview_forge_ios/PluginScriptsJS/DisableAutocorrectionJS.swift',
@@ -390,6 +395,12 @@ void _runSourceContractAssertions() {
     cookieSource.contains('webViewId') &&
         cookieSource.contains('configuration.websiteDataStore.httpCookieStore'),
     'iOS cookie manager does not route scoped calls to the WebView data store',
+  );
+  _assert(
+    cookieSource.contains('WKHTTPCookieStoreObserver') &&
+        cookieSource.contains('addCookieChangedListener') &&
+        cookieSource.contains('cookiesDidChange'),
+    'iOS cookie store observer is not wired',
   );
 
   final printJobManagerSource = _sourceFile(
@@ -980,5 +991,35 @@ void _runSourceContractAssertions() {
   _assert(
     fullscreenController.contains('modalPresentationStyle = .fullScreen'),
     'native fullscreen controller is not presented full screen',
+  );
+
+  _assert(
+    source.contains('setAudioMuted(muted:'),
+    'iOS audio mute is not mapped to native media playback',
+  );
+  _assert(
+    source.contains('fetchData(of: .sessionStorage)'),
+    'iOS 26 sessionStorage fetch is not availability-guarded on the WebView',
+  );
+  _assert(
+    source.contains('isBlockedByScreenTime'),
+    'iOS 26 Screen Time query is missing',
+  );
+  _assert(
+    source.contains('completeNativeDownload'),
+    'iOS native download wait path is missing',
+  );
+  _assert(
+    source.contains('handled != true'),
+    'iOS native download default is no longer notify-only',
+  );
+
+  final findSource = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/'
+    'flutter_inappwebview_forge_ios/FindInteraction/FindInteractionController.swift',
+  ).readAsStringSync();
+  _assert(
+    findSource.contains('WKFindConfiguration') && findSource.contains('func findString'),
+    'iOS programmatic findString is missing',
   );
 }

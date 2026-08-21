@@ -45,6 +45,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     var webMessageListeners: [WebMessageListener] = []
     var currentOriginalUrl: URL?
     var inFullscreen = false
+    var audioMuted = false
     weak var fullscreenWindow: NSWindow? // Track the window that entered fullscreen
     private var printJobCompletionHandler: PrintJobController.CompletionHandler?
     private var contextMenuActionTargets: [ContextMenuActionTarget] = []
@@ -231,6 +232,17 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             
             if #available(macOS 13.3, *) {
                 isInspectable = settings.isInspectable
+            }
+
+            if #available(macOS 26.0, *) {
+                if let insets = settings.obscuredContentInsets {
+                    obscuredContentInsets = NSDirectionalEdgeInsets(
+                        top: insets.top,
+                        leading: insets.left,
+                        bottom: insets.bottom,
+                        trailing: insets.right
+                    )
+                }
             }
             
             if settings.clearCache {
@@ -423,6 +435,9 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             
             if #available(macOS 11.3, *) {
                 configuration.upgradeKnownHostsToHTTPS = settings.upgradeKnownHostsToHTTPS
+            }
+            if #available(macOS 14.0, *) {
+                configuration.allowsInlinePredictions = settings.allowsInlinePredictions
             }
         }
         
@@ -1309,35 +1324,146 @@ public class InAppWebView: WKWebView, WKUIDelegate,
     
     @available(macOS 11.3, *)
     public func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
-        if let url = response.url, let useOnDownloadStart = settings?.useOnDownloadStart, useOnDownloadStart {
-            let downloadStartRequest = DownloadStartRequest(url: url.absoluteString,
-                                                            userAgent: nil,
-                                                            contentDisposition: nil,
-                                                            mimeType: response.mimeType,
-                                                            contentLength: response.expectedContentLength,
-                                                            suggestedFilename: suggestedFilename,
-                                                            textEncodingName: response.textEncodingName)
-            channelDelegate?.onDownloadStarting(request: downloadStartRequest)
-        }
-        download.delegate = nil
-        // cancel the download
-        completionHandler(nil)
+        handleNativeDownload(
+            download: download,
+            response: response,
+            suggestedFilename: suggestedFilename,
+            completionHandler: completionHandler
+        )
     }
-    
+
     @available(macOS 11.3, *)
     public func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
-        let response = navigationResponse.response
-        if let url = response.url, let useOnDownloadStart = settings?.useOnDownloadStart, useOnDownloadStart {
-            let downloadStartRequest = DownloadStartRequest(url: url.absoluteString,
-                                                            userAgent: nil,
-                                                            contentDisposition: nil,
-                                                            mimeType: response.mimeType,
-                                                            contentLength: response.expectedContentLength,
-                                                            suggestedFilename: response.suggestedFilename,
-                                                            textEncodingName: response.textEncodingName)
-            channelDelegate?.onDownloadStarting(request: downloadStartRequest)
+        handleNativeDownload(
+            download: download,
+            response: navigationResponse.response,
+            suggestedFilename: navigationResponse.response.suggestedFilename ?? "download",
+            completionHandler: { _ in }
+        )
+    }
+
+    @available(macOS 11.3, *)
+    private func handleNativeDownload(
+        download: WKDownload,
+        response: URLResponse,
+        suggestedFilename: String,
+        completionHandler: @escaping (URL?) -> Void
+    ) {
+        guard let url = response.url, settings?.useOnDownloadStart == true else {
+            download.delegate = nil
+            completionHandler(nil)
+            return
         }
-        download.delegate = nil
+        let downloadId = UUID().uuidString
+        let downloadStartRequest = DownloadStartRequest(
+            url: url.absoluteString,
+            userAgent: nil,
+            contentDisposition: nil,
+            mimeType: response.mimeType,
+            contentLength: response.expectedContentLength,
+            suggestedFilename: suggestedFilename,
+            textEncodingName: response.textEncodingName,
+            downloadId: downloadId
+        )
+        let callback = WebViewChannelDelegate.DownloadStartCallback()
+        callback.defaultBehaviour = { [weak self] (response: DownloadStartResponse?) in
+            self?.completeNativeDownload(
+                download: download,
+                downloadId: downloadId,
+                response: response,
+                completionHandler: completionHandler
+            )
+        }
+        callback.nonNullSuccess = { [weak self] (response: DownloadStartResponse) in
+            self?.completeNativeDownload(
+                download: download,
+                downloadId: downloadId,
+                response: response,
+                completionHandler: completionHandler
+            )
+            return false
+        }
+        if let channelDelegate = channelDelegate {
+            channelDelegate.onDownloadStarting(request: downloadStartRequest, callback: callback)
+        } else {
+            callback.defaultBehaviour(nil)
+        }
+    }
+
+    @available(macOS 11.3, *)
+    private func completeNativeDownload(
+        download: WKDownload,
+        downloadId: String,
+        response: DownloadStartResponse?,
+        completionHandler: @escaping (URL?) -> Void
+    ) {
+        if response == nil || response?.action == 0 || response?.handled != true ||
+            response?.resultFilePath == nil || response?.resultFilePath?.isEmpty == true {
+            download.delegate = nil
+            completionHandler(nil)
+            return
+        }
+        let destination = URL(fileURLWithPath: response!.resultFilePath!)
+        try? FileManager.default.createDirectory(
+            at: destination.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        if let plugin = plugin {
+            let job = DownloadJobController(
+                plugin: plugin,
+                id: downloadId,
+                download: download,
+                destinationURL: destination
+            )
+            if let manager = plugin.downloadJobManager as? DownloadJobManager {
+                manager.jobs[downloadId] = job
+            }
+        }
+        completionHandler(destination)
+    }
+
+    public func setAudioMuted(muted: Bool, completionHandler: @escaping () -> Void) {
+        audioMuted = muted
+        if #available(macOS 12.0, *) {
+            setAllMediaPlaybackSuspended(muted, completionHandler: completionHandler)
+        } else {
+            completionHandler()
+        }
+    }
+
+    public func isAudioMuted() -> Bool {
+        return audioMuted
+    }
+
+    public func fetchWebViewData(dataTypes: [Int], completionHandler: @escaping (FlutterStandardTypedData?) -> Void) {
+        if #available(macOS 26.0, *) {
+            fetchData(of: .sessionStorage) { data, _ in
+                if let data = data {
+                    completionHandler(FlutterStandardTypedData(bytes: data))
+                } else {
+                    completionHandler(nil)
+                }
+            }
+        } else {
+            completionHandler(nil)
+        }
+    }
+
+    public func restoreWebViewData(data: Data, completionHandler: @escaping () -> Void) {
+        if #available(macOS 26.0, *) {
+            restoreData(data) { _ in
+                completionHandler()
+            }
+        } else {
+            completionHandler()
+        }
+    }
+
+    public func isBlockedByScreenTimeValue() -> Bool {
+        if #available(macOS 26.0, *) {
+            return isBlockedByScreenTime
+        }
+        return false
     }
     
     public func webView(_ webView: WKWebView,

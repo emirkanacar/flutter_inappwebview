@@ -38,6 +38,29 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
                     result(false)
                 }
                 break
+            case "findString":
+                if let findInteractionController = findInteractionController {
+                    let find = arguments!["find"] as! String
+                    let caseSensitive = arguments!["caseSensitive"] as? Bool ?? false
+                    let backwards = arguments!["backwards"] as? Bool ?? false
+                    let wraps = arguments!["wraps"] as? Bool ?? true
+                    findInteractionController.findString(
+                        find: find,
+                        caseSensitive: caseSensitive,
+                        backwards: backwards,
+                        wraps: wraps,
+                        completionHandler: { found, error in
+                            if error != nil {
+                                result(FlutterError(code: "FindInteractionChannelDelegate", message: error?.localizedDescription, details: nil))
+                                return
+                            }
+                            result(found)
+                        }
+                    )
+                } else {
+                    result(false)
+                }
+                break
             case "findNext":
                 if let findInteractionController = findInteractionController {
                     let forward = arguments!["forward"] as! Bool

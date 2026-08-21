@@ -14,7 +14,23 @@ class DownloadStartResponseAction_ {
 
   ///Cancel the download.
   @EnumSupportedPlatforms(
-    platforms: [EnumWindowsPlatform(value: 0), EnumLinuxPlatform(value: 0)],
+    platforms: [
+      EnumAndroidPlatform(value: 0),
+      EnumIOSPlatform(value: 0),
+      EnumMacOSPlatform(value: 0),
+      EnumWindowsPlatform(value: 0),
+      EnumLinuxPlatform(value: 0),
+    ],
   )
   static const CANCEL = const DownloadStartResponseAction_._internal(0);
+
+  ///Start a native plugin download to [DownloadStartResponse.resultFilePath].
+  @EnumSupportedPlatforms(
+    platforms: [
+      EnumAndroidPlatform(value: 1),
+      EnumIOSPlatform(value: 1),
+      EnumMacOSPlatform(value: 1),
+    ],
+  )
+  static const DOWNLOAD = const DownloadStartResponseAction_._internal(1);
 }

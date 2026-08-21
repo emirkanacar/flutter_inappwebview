@@ -1256,6 +1256,53 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
           _inAppBrowserEventHandler!.iosOnWebContentProcessDidTerminate();
         }
         break;
+      case "onVisualStateReady":
+        if ((webviewParams != null &&
+                webviewParams!.onVisualStateReady != null) ||
+            _inAppBrowserEventHandler != null) {
+          final requestId = (call.arguments["requestId"] as num?)?.toInt() ?? 0;
+          if (webviewParams != null && webviewParams!.onVisualStateReady != null)
+            webviewParams!.onVisualStateReady!(
+              _controllerFromPlatform,
+              requestId,
+            );
+          else
+            _inAppBrowserEventHandler!.onVisualStateReady(requestId);
+        }
+        break;
+      case "onWebViewNavigation":
+        if ((webviewParams != null &&
+                webviewParams!.onWebViewNavigation != null) ||
+            _inAppBrowserEventHandler != null) {
+          final event = WebViewNavigationEvent.fromMap(
+            call.arguments.cast<String, dynamic>(),
+          );
+          if (event == null) break;
+          if (webviewParams != null &&
+              webviewParams!.onWebViewNavigation != null)
+            webviewParams!.onWebViewNavigation!(
+              _controllerFromPlatform,
+              event,
+            );
+          else
+            _inAppBrowserEventHandler!.onWebViewNavigation(event);
+        }
+        break;
+      case "onWritingToolsActiveChanged":
+        if ((webviewParams != null &&
+                webviewParams!.onWritingToolsActiveChanged != null) ||
+            _inAppBrowserEventHandler != null) {
+          final isActive = call.arguments["isActive"] == true;
+          if (webviewParams != null &&
+              webviewParams!.onWritingToolsActiveChanged != null)
+            webviewParams!.onWritingToolsActiveChanged!(
+              _controllerFromPlatform,
+              isActive,
+            );
+          else
+            _inAppBrowserEventHandler!.onWritingToolsActiveChanged(isActive);
+        }
+        break;
       case "onPageCommitVisible":
         if ((webviewParams != null &&
                 webviewParams!.onPageCommitVisible != null) ||
@@ -3137,6 +3184,57 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('state', () => state);
     return await channel?.invokeMethod<bool>('restoreState', args) ?? false;
+  }
+
+  @override
+  Future<void> setAudioMuted({required bool muted}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('muted', () => muted);
+    await channel?.invokeMethod('setAudioMuted', args);
+  }
+
+  @override
+  Future<bool> isAudioMuted() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('isAudioMuted', args) ?? false;
+  }
+
+  @override
+  Future<void> navigate({
+    required WebUri url,
+    bool replaceHistory = false,
+    Map<String, String>? headers,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('url', () => url.toString());
+    args.putIfAbsent('replaceHistory', () => replaceHistory);
+    args.putIfAbsent('headers', () => headers);
+    await channel?.invokeMethod('navigate', args);
+  }
+
+  @override
+  Future<void> prerenderUrl({required WebUri url}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('url', () => url.toString());
+    await channel?.invokeMethod('prerenderUrl', args);
+  }
+
+  @override
+  Future<void> postVisualStateCallback({int? requestId}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('requestId', () => requestId);
+    await channel?.invokeMethod('postVisualStateCallback', args);
+  }
+
+  @override
+  Future<void> addJavaScriptOnEvent({
+    required String source,
+    String event = 'DOMContentLoaded',
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('source', () => source);
+    args.putIfAbsent('event', () => event);
+    await channel?.invokeMethod('addJavaScriptOnEvent', args);
   }
 
   @override

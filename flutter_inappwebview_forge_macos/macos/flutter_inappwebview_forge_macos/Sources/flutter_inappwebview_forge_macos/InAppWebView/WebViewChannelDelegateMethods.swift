@@ -89,4 +89,9 @@ public enum WebViewChannelDelegateMethods: String {
     case loadSimulatedRequest = "loadSimulatedRequest"
     case saveState = "saveState"
     case restoreState = "restoreState"
+    case setAudioMuted = "setAudioMuted"
+    case isAudioMuted = "isAudioMuted"
+    case fetchWebViewData = "fetchWebViewData"
+    case restoreWebViewData = "restoreWebViewData"
+    case isBlockedByScreenTime = "isBlockedByScreenTime"
 }

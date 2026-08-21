@@ -1,3 +1,29 @@
+## 1.0.55 - 2026-08-21
+
+- Feature-gate `WebViewCompat.setAudioMuted` / `isAudioMuted`.
+- Start an opt-in native `DownloadManager` job when
+  `onDownloadStarting` returns `handled` and `resultFilePath`; the
+  previous notify-only default is unchanged.
+- Emit `onVisualStateReady` from `WebView.postVisualStateCallback`.
+- Add Profile `addCustomHeader` / `removeCustomHeader` / `prefetchUrl`
+  behind `WebViewFeature` checks.
+- Depend on `androidx.webkit:1.15.0` while keeping `minSdk 19`. Expose
+  NavigationListener, `navigate`, prerender, BFCache, and isolated JS
+  event scripts through feature checks and reflection.
+- Depend on platform-interface 1.1.21.
+
+## 1.0.54 - 2026-08-21
+
+- Deprecated Android SDK call sites stay for `minSdk 19` and are now labeled:
+  `WebSettings.setSaveFormData`, `WebView.clearCache`, and
+  `CookieManager.removeAllCookie` (API 19-20 only). They are not removed.
+- Deprecated Dart `saveFormData` remains a no-op on API 26+; there is no
+  plugin replacement. `forceDark` / `forceDarkStrategy` remain SDK-deprecated
+  no-ops on Android 13+.
+- File-level `@file:Suppress("DEPRECATION")` isolation for cookie, print,
+  fullscreen, AbsoluteLayout, and find-in-page leftovers is unchanged until
+  an explicit minSdk increase.
+
 ## 1.0.53 - 2026-08-13
 
 - Add `InAppWebViewSettings.disableAutocorrection` support through an

@@ -19,6 +19,7 @@ import 'platform_tracing_controller.dart';
 import 'platform_webview_asset_loader.dart';
 import 'platform_webview_feature.dart';
 import 'print_job/platform_print_job_controller.dart';
+import 'download_job/platform_download_job_controller.dart';
 import 'pull_to_refresh/platform_pull_to_refresh_controller.dart';
 import 'web_authentication_session/platform_web_authenticate_session.dart';
 import 'web_message/platform_web_message_channel.dart';
@@ -174,6 +175,22 @@ abstract class InAppWebViewPlatform extends PlatformInterface {
   PlatformPrintJobController createPlatformPrintJobControllerStatic() {
     throw UnimplementedError(
       'createPlatformPrintJobControllerStatic is not implemented on the current platform.',
+    );
+  }
+
+  /// Creates a new [PlatformDownloadJobController].
+  PlatformDownloadJobController createPlatformDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) {
+    throw UnimplementedError(
+      'createPlatformDownloadJobController is not implemented on the current platform.',
+    );
+  }
+
+  /// Creates a new empty [PlatformDownloadJobController] to access static methods.
+  PlatformDownloadJobController createPlatformDownloadJobControllerStatic() {
+    throw UnimplementedError(
+      'createPlatformDownloadJobControllerStatic is not implemented on the current platform.',
     );
   }
 

@@ -2319,6 +2319,67 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
   final void Function(T controller, Size oldContentSize, Size newContentSize)?
   onContentSizeChanged;
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onVisualStateReady}
+  ///Event fired when the Android WebView is ready to be drawn.
+  ///
+  ///This is posted automatically after a finished page load and also after an
+  ///explicit [PlatformInAppWebViewController.postVisualStateCallback] call.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onVisualStateReady.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        available: '23',
+        apiName: 'WebView.postVisualStateCallback',
+        apiUrl:
+            'https://developer.android.com/reference/android/webkit/WebView#postVisualStateCallback(long,%20android.webkit.WebView.VisualStateCallback)',
+      ),
+    ],
+  )
+  final void Function(T controller, int requestId)? onVisualStateReady;
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWritingToolsActiveChanged}
+  ///Event fired when Apple Writing Tools becomes active or inactive.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWritingToolsActiveChanged.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: '18.0',
+        apiName: 'WKWebView.isWritingToolsActive',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/iswritingtoolsactive',
+      ),
+      MacOSPlatform(
+        available: '15.0',
+        apiName: 'WKWebView.isWritingToolsActive',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/iswritingtoolsactive',
+      ),
+    ],
+  )
+  final void Function(T controller, bool isActive)? onWritingToolsActiveChanged;
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWebViewNavigation}
+  ///Android `NavigationListener` lifecycle and performance events.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWebViewNavigation.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.addNavigationListener',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#addNavigationListener(android.webkit.WebView,java.util.concurrent.Executor,androidx.webkit.NavigationListener)',
+        note: 'Requires [WebViewFeature.NAVIGATION_LISTENER].',
+      ),
+    ],
+  )
+  final void Function(T controller, WebViewNavigationEvent event)?
+  onWebViewNavigation;
+
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onProcessFailed}
   ///Invoked when any of the processes in the WebView Process Group encounters one of the following conditions:
   ///- Unexpected exit: The process indicated by the event args has exited unexpectedly (usually due to a crash).
@@ -2757,6 +2818,9 @@ This is a limitation of the native WebKit APIs.""",
     this.onCameraCaptureStateChanged,
     this.onMicrophoneCaptureStateChanged,
     this.onContentSizeChanged,
+    this.onVisualStateReady,
+    this.onWritingToolsActiveChanged,
+    this.onWebViewNavigation,
     this.onProcessFailed,
     this.onNotificationReceived,
     this.onSaveAsUIShowing,

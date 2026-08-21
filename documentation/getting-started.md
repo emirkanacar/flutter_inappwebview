@@ -27,7 +27,7 @@ Add the root package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.74
+  flutter_inappwebview_forge: ^2.1.76
 ```
 
 Then fetch packages:
@@ -74,7 +74,9 @@ class BrowserPage extends StatelessWidget {
 ```
 
 For callbacks, remove `const` and add handlers such as `onWebViewCreated`
-and `onLoadStop`:
+and `onLoadStop`. Prefer `onReceivedError` over the deprecated `onLoadError`.
+See [Deprecated APIs](deprecated-api.md) when migrating older Options or
+platform-prefixed callback names.
 
 ```dart
 InAppWebView(

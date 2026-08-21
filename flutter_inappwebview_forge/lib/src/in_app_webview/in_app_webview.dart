@@ -438,6 +438,15 @@ class InAppWebView extends StatefulWidget {
       Size newContentSize,
     )?
     onContentSizeChanged,
+    void Function(InAppWebViewController controller, int requestId)?
+    onVisualStateReady,
+    void Function(InAppWebViewController controller, bool isActive)?
+    onWritingToolsActiveChanged,
+    void Function(
+      InAppWebViewController controller,
+      WebViewNavigationEvent event,
+    )?
+    onWebViewNavigation,
     void Function(
       InAppWebViewController controller,
       ProcessFailedDetail detail,
@@ -857,6 +866,18 @@ class InAppWebView extends StatefulWidget {
                        oldContentSize,
                        newContentSize,
                      )
+               : null,
+           onVisualStateReady: onVisualStateReady != null
+               ? (controller, requestId) =>
+                     onVisualStateReady.call(controller, requestId)
+               : null,
+           onWritingToolsActiveChanged: onWritingToolsActiveChanged != null
+               ? (controller, isActive) =>
+                     onWritingToolsActiveChanged.call(controller, isActive)
+               : null,
+           onWebViewNavigation: onWebViewNavigation != null
+               ? (controller, event) =>
+                     onWebViewNavigation.call(controller, event)
                : null,
            onProcessFailed: onProcessFailed != null
                ? (controller, detail) =>

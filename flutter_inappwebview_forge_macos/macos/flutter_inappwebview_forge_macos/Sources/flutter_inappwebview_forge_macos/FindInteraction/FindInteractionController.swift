@@ -7,6 +7,7 @@
 
 import Foundation
 import FlutterMacOS
+import WebKit
 
 public class FindInteractionController: NSObject, Disposable {
     
@@ -82,6 +83,30 @@ public class FindInteractionController: NSObject, Disposable {
             return
         }
         webView.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._clearMatches();", completionHandler: completionHandler)
+    }
+
+    public func findString(
+        find: String,
+        caseSensitive: Bool,
+        backwards: Bool,
+        wraps: Bool,
+        completionHandler: @escaping (Bool, Error?) -> Void
+    ) {
+        guard let webView else {
+            completionHandler(false, nil)
+            return
+        }
+        if #available(macOS 11.0, *) {
+            let configuration = WKFindConfiguration()
+            configuration.caseSensitive = caseSensitive
+            configuration.backwards = backwards
+            configuration.wraps = wraps
+            webView.find(find, configuration: configuration) { result in
+                completionHandler(result.matchFound, nil)
+            }
+        } else {
+            completionHandler(false, nil)
+        }
     }
     
     public func dispose() {

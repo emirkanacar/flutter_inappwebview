@@ -1527,6 +1527,20 @@ enum PlatformWebViewCreationParamsProperty {
   ///{@endtemplate}
   onUpdateVisitedHistory,
 
+  ///Can be used to check if the [PlatformWebViewCreationParams.onVisualStateReady] property is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onVisualStateReady.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 23+ ([Official API - WebView.postVisualStateCallback](https://developer.android.com/reference/android/webkit/WebView#postVisualStateCallback(long,%20android.webkit.WebView.VisualStateCallback)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [requestId]: all platforms
+  ///
+  ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  onVisualStateReady,
+
   ///Can be used to check if the [PlatformWebViewCreationParams.onWebContentProcessDidTerminate] property is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWebContentProcessDidTerminate.supported_platforms}
@@ -1556,6 +1570,21 @@ enum PlatformWebViewCreationParamsProperty {
   ///{@endtemplate}
   onWebViewCreated,
 
+  ///Can be used to check if the [PlatformWebViewCreationParams.onWebViewNavigation] property is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWebViewNavigation.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.addNavigationListener](https://developer.android.com/reference/androidx/webkit/WebViewCompat#addNavigationListener(android.webkit.WebView,java.util.concurrent.Executor,androidx.webkit.NavigationListener))):
+  ///    - Requires [WebViewFeature.NAVIGATION_LISTENER].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [event]: all platforms
+  ///
+  ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  onWebViewNavigation,
+
   ///Can be used to check if the [PlatformWebViewCreationParams.onWindowBlur] property is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWindowBlur.supported_platforms}
@@ -1583,6 +1612,21 @@ enum PlatformWebViewCreationParamsProperty {
   ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
   onWindowFocus,
+
+  ///Can be used to check if the [PlatformWebViewCreationParams.onWritingToolsActiveChanged] property is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.onWritingToolsActiveChanged.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 18.0+ ([Official API - WKWebView.isWritingToolsActive](https://developer.apple.com/documentation/webkit/wkwebview/iswritingtoolsactive))
+  ///- macOS WKWebView 15.0+ ([Official API - WKWebView.isWritingToolsActive](https://developer.apple.com/documentation/webkit/wkwebview/iswritingtoolsactive))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [isActive]: all platforms
+  ///
+  ///Use the [PlatformWebViewCreationParams.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  onWritingToolsActiveChanged,
 
   ///Can be used to check if the [PlatformWebViewCreationParams.onZoomScaleChanged] property is supported at runtime.
   ///
@@ -2374,6 +2418,11 @@ extension _PlatformWebViewCreationParamsPropertySupported
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebViewCreationParamsProperty.onVisualStateReady:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty
           .onWebContentProcessDidTerminate:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -2393,6 +2442,11 @@ extension _PlatformWebViewCreationParamsPropertySupported
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebViewCreationParamsProperty.onWebViewNavigation:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty.onWindowBlur:
         return kIsWeb && platform == null
             ? true
@@ -2411,6 +2465,12 @@ extension _PlatformWebViewCreationParamsPropertySupported
                     TargetPlatform.iOS,
                     TargetPlatform.macOS,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebViewCreationParamsProperty.onWritingToolsActiveChanged:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebViewCreationParamsProperty.onZoomScaleChanged:
         return kIsWeb && platform == null
             ? true

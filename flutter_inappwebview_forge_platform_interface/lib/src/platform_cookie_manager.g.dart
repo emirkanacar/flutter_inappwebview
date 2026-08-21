@@ -98,6 +98,21 @@ extension _PlatformCookieManagerClassSupported on PlatformCookieManager {
 
 ///List of [PlatformCookieManager]'s methods that can be used to check if they are supported or not by the current platform.
 enum PlatformCookieManagerMethod {
+  ///Can be used to check if the [PlatformCookieManager.addCookieChangedListener] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.addCookieChangedListener.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 11.0+ ([Official API - WKHTTPCookieStore.add](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/2882003-add))
+  ///- macOS WKWebView 10.13+ ([Official API - WKHTTPCookieStore.add](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/2882003-add))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [listener]: all platforms
+  ///
+  ///Use the [PlatformCookieManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  addCookieChangedListener,
+
   ///Can be used to check if the [PlatformCookieManager.deleteAllCookies] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.deleteAllCookies.supported_platforms}
@@ -258,6 +273,18 @@ enum PlatformCookieManagerMethod {
   ///{@endtemplate}
   getCookies,
 
+  ///Can be used to check if the [PlatformCookieManager.removeCookieChangedListener] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 11.0+
+  ///- macOS WKWebView 10.13+
+  ///
+  ///Use the [PlatformCookieManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  removeCookieChangedListener,
+
   ///Can be used to check if the [PlatformCookieManager.removeSessionCookies] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeSessionCookies.supported_platforms}
@@ -313,6 +340,12 @@ extension _PlatformCookieManagerMethodSupported on PlatformCookieManager {
     TargetPlatform? platform,
   }) {
     switch (method) {
+      case PlatformCookieManagerMethod.addCookieChangedListener:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformCookieManagerMethod.deleteAllCookies:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -378,6 +411,12 @@ extension _PlatformCookieManagerMethodSupported on PlatformCookieManager {
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformCookieManagerMethod.removeCookieChangedListener:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformCookieManagerMethod.removeSessionCookies:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [

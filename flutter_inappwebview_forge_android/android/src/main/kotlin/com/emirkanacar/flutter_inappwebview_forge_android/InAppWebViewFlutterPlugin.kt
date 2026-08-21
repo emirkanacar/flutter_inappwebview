@@ -7,6 +7,7 @@ import android.os.Build
 import com.emirkanacar.flutter_inappwebview_forge_android.chrome_custom_tabs.ChromeSafariBrowserManager
 import com.emirkanacar.flutter_inappwebview_forge_android.chrome_custom_tabs.NoHistoryCustomTabsActivityCallbacks
 import com.emirkanacar.flutter_inappwebview_forge_android.container.ContainerManager
+import com.emirkanacar.flutter_inappwebview_forge_android.download_job.DownloadJobManager
 import com.emirkanacar.flutter_inappwebview_forge_android.credential_database.CredentialDatabaseHandler
 import com.emirkanacar.flutter_inappwebview_forge_android.headless_in_app_webview.HeadlessInAppWebViewManager
 import com.emirkanacar.flutter_inappwebview_forge_android.in_app_browser.InAppBrowserManager
@@ -72,6 +73,9 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
 
     @JvmField
     var printJobManager: PrintJobManager? = null
+
+    @JvmField
+    var downloadJobManager: DownloadJobManager? = null
 
     @JvmField
     var tracingControllerManager: TracingControllerManager? = null
@@ -159,6 +163,7 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             printJobManager = PrintJobManager(this)
         }
+        downloadJobManager = DownloadJobManager(this)
         tracingControllerManager = TracingControllerManager(this)
         processGlobalConfigManager = ProcessGlobalConfigManager(this)
     }
@@ -199,6 +204,8 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
             printJobManager?.dispose()
             printJobManager = null
         }
+        downloadJobManager?.dispose()
+        downloadJobManager = null
         tracingControllerManager?.dispose()
         tracingControllerManager = null
         processGlobalConfigManager?.dispose()

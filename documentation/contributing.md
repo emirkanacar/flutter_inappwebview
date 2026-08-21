@@ -33,7 +33,10 @@ Use `documentation/` when the change affects application developers:
 - add a short example;
 - explain platform limitations;
 - describe lifecycle and ownership rules;
-- include the failure mode and the safe fallback.
+- include the failure mode and the safe fallback;
+- map deprecated Options, prefixed callbacks, and type aliases to current names.
+- name deprecated symbols in the affected package changelog when they are
+  documented, redirected, or later removed.
 
 Use `docs/` when the change records implementation evidence, issue triage,
 performance measurements, migration decisions, or release validation.

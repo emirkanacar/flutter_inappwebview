@@ -49,9 +49,11 @@ InAppWebView(
 ```
 
 `initialOptions` and the older option classes remain available for
-compatibility, but they are deprecated. Settings that are not supported by a
-platform are ignored or use that platform's fallback behavior. Check runtime
-capability before depending on a platform-specific setting.
+compatibility, but they are deprecated. See [Deprecated APIs](deprecated-api.md)
+for the Options-to-Settings, callback, and type-name mapping. Settings that
+are not supported by a platform are ignored or use that platform's fallback
+behavior. Check runtime capability before depending on a platform-specific
+setting.
 
 Useful settings include:
 

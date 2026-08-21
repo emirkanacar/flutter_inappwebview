@@ -189,6 +189,24 @@ enum PlatformFindInteractionControllerMethod {
   ///{@endtemplate}
   findNext,
 
+  ///Can be used to check if the [PlatformFindInteractionController.findString] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findString.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 14.0+ ([Official API - WKWebView.findString](https://developer.apple.com/documentation/webkit/wkwebview/3656413-findstring))
+  ///- macOS WKWebView 11.0+ ([Official API - WKWebView.findString](https://developer.apple.com/documentation/webkit/wkwebview/3656413-findstring))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [find]: all platforms
+  ///- [caseSensitive]: all platforms
+  ///- [backwards]: all platforms
+  ///- [wraps]: all platforms
+  ///
+  ///Use the [PlatformFindInteractionController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  findString,
+
   ///Can be used to check if the [PlatformFindInteractionController.getActiveFindSession] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.getActiveFindSession.supported_platforms}
@@ -335,6 +353,12 @@ extension _PlatformFindInteractionControllerMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.linux,
               TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformFindInteractionControllerMethod.findString:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformFindInteractionControllerMethod.getActiveFindSession:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

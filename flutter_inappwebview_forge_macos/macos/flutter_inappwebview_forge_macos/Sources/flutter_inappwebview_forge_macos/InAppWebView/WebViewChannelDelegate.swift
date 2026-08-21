@@ -715,6 +715,41 @@ public class WebViewChannelDelegate: ChannelDelegate {
                 result(false)
             }
             break
+        case .setAudioMuted:
+            if let webView = webView {
+                let muted = arguments?["muted"] as? Bool ?? false
+                webView.setAudioMuted(muted: muted) {
+                    result(true)
+                }
+            } else {
+                result(false)
+            }
+            break
+        case .isAudioMuted:
+            result(webView?.isAudioMuted() ?? false)
+            break
+        case .fetchWebViewData:
+            if let webView = webView {
+                let dataTypes = arguments?["dataTypes"] as? [Int] ?? [1]
+                webView.fetchWebViewData(dataTypes: dataTypes) { data in
+                    result(data)
+                }
+            } else {
+                result(nil)
+            }
+            break
+        case .restoreWebViewData:
+            if let webView = webView, let data = arguments?["data"] as? FlutterStandardTypedData {
+                webView.restoreWebViewData(data: data.data) {
+                    result(true)
+                }
+            } else {
+                result(false)
+            }
+            break
+        case .isBlockedByScreenTime:
+            result(webView?.isBlockedByScreenTimeValue() ?? false)
+            break
         }
     }
     
@@ -739,6 +774,31 @@ public class WebViewChannelDelegate: ChannelDelegate {
     
     public func onDownloadStarting(request: DownloadStartRequest) {
         invokeMethod("onDownloadStarting", arguments: request.toMap())
+    }
+
+    public func onDownloadStarting(request: DownloadStartRequest, callback: DownloadStartCallback) {
+        if !canDispatchCallbacks() {
+            callback.defaultBehaviour(nil)
+            return
+        }
+        invokeMethod("onDownloadStarting", arguments: request.toMap(), callback: callback)
+    }
+
+    public class DownloadStartCallback: BaseCallbackResult<DownloadStartResponse> {
+        override init() {
+            super.init()
+            self.decodeResult = { (obj: Any?) in
+                return DownloadStartResponse.fromMap(map: obj as? [String: Any?])
+            }
+        }
+
+        deinit {
+            self.defaultBehaviour(nil)
+        }
+    }
+
+    public func onWritingToolsActiveChanged(isActive: Bool) {
+        invokeMethod("onWritingToolsActiveChanged", arguments: ["isActive": isActive])
     }
     
     public func onCreateContextMenu(hitTestResult: HitTestResult) {

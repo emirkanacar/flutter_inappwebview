@@ -7,6 +7,7 @@
 
 import Foundation
 import Flutter
+import WebKit
 
 public class FindInteractionController: NSObject, Disposable {
     static let METHOD_CHANNEL_NAME_PREFIX = "com.emirkanacar/flutter_inappwebview_find_interaction_"
@@ -142,6 +143,30 @@ public class FindInteractionController: NSObject, Disposable {
             }
         } else {
             webView.evaluateJavaScript("window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._clearMatches();", completionHandler: completionHandler)
+        }
+    }
+
+    public func findString(
+        find: String,
+        caseSensitive: Bool,
+        backwards: Bool,
+        wraps: Bool,
+        completionHandler: @escaping (Bool, Error?) -> Void
+    ) {
+        guard let webView else {
+            completionHandler(false, nil)
+            return
+        }
+        if #available(iOS 14.0, *) {
+            let configuration = WKFindConfiguration()
+            configuration.caseSensitive = caseSensitive
+            configuration.backwards = backwards
+            configuration.wraps = wraps
+            webView.find(find, configuration: configuration) { result in
+                completionHandler(result.matchFound, nil)
+            }
+        } else {
+            completionHandler(false, nil)
         }
     }
     

@@ -676,6 +676,52 @@ In this case, this method will return always `true`.""",
     );
   }
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.addCookieChangedListener}
+  ///Starts observing cookie store changes.
+  ///
+  ///The listener is invoked whenever the underlying `WKHTTPCookieStore`
+  ///reports a change. Android has no equivalent observer.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.addCookieChangedListener.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        apiName: 'WKHTTPCookieStore.add',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/2882003-add',
+        available: '11.0',
+      ),
+      MacOSPlatform(
+        apiName: 'WKHTTPCookieStore.add',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/2882003-add',
+        available: '10.13',
+      ),
+    ],
+  )
+  Future<void> addCookieChangedListener(
+    FutureOr<void> Function(List<Cookie> cookies) listener,
+  ) {
+    throw UnimplementedError(
+      'addCookieChangedListener is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener}
+  ///Stops cookie store observation started by [addCookieChangedListener].
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [IOSPlatform(available: '11.0'), MacOSPlatform(available: '10.13')],
+  )
+  Future<void> removeCookieChangedListener() {
+    throw UnimplementedError(
+      'removeCookieChangedListener is not implemented on the current platform',
+    );
+  }
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManagerCreationParams.isClassSupported}
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

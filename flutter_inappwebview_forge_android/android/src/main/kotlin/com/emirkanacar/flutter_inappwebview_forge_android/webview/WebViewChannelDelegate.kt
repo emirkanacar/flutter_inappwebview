@@ -26,6 +26,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.types.ContentWorld;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.CreateWindowAction;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.CustomSchemeResponse;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.DownloadStartRequest;
+import com.emirkanacar.flutter_inappwebview_forge_android.types.DownloadStartResponse;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.GeolocationPermissionShowPromptResponse;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.HitTestResult;
 import com.emirkanacar.flutter_inappwebview_forge_android.types.HttpAuthResponse;
@@ -485,7 +486,13 @@ open class WebViewChannelDelegate(
       WebViewChannelDelegateMethods.hideInputMethod,
       WebViewChannelDelegateMethods.showInputMethod,
       WebViewChannelDelegateMethods.saveState,
-      WebViewChannelDelegateMethods.restoreState ->
+      WebViewChannelDelegateMethods.restoreState,
+      WebViewChannelDelegateMethods.setAudioMuted,
+      WebViewChannelDelegateMethods.isAudioMuted,
+      WebViewChannelDelegateMethods.navigate,
+      WebViewChannelDelegateMethods.prerenderUrl,
+      WebViewChannelDelegateMethods.postVisualStateCallback,
+      WebViewChannelDelegateMethods.addJavaScriptOnEvent ->
         handleLifecycleMethod(method, call, result)
 
       WebViewChannelDelegateMethods.clearFormData -> {
@@ -730,6 +737,37 @@ open class WebViewChannelDelegate(
         result.success(webView?.restoreState(call.argument<ByteArray>("state") ?: ByteArray(0)) ?: false)
       }
 
+      WebViewChannelDelegateMethods.setAudioMuted -> {
+        val muted = call.argument<Boolean>("muted") ?: false
+        result.success(webView?.setAudioMuted(muted) ?: false)
+      }
+
+      WebViewChannelDelegateMethods.isAudioMuted ->
+        result.success(webView?.isAudioMuted() ?: false)
+
+      WebViewChannelDelegateMethods.navigate -> {
+        val url = call.argument<String>("url")
+        val replaceHistory = call.argument<Boolean>("replaceHistory") ?: false
+        val headers = call.argument<Map<String, String>>("headers")
+        result.success(webView?.navigateTo(url, replaceHistory, headers) ?: false)
+      }
+
+      WebViewChannelDelegateMethods.prerenderUrl -> {
+        val url = call.argument<String>("url")
+        result.success(webView?.prerenderUrl(url) ?: false)
+      }
+
+      WebViewChannelDelegateMethods.postVisualStateCallback -> {
+        val requestId = (call.argument<Number>("requestId") ?: System.currentTimeMillis()).toLong()
+        result.success(webView?.postVisualStateReady(requestId) ?: false)
+      }
+
+      WebViewChannelDelegateMethods.addJavaScriptOnEvent -> {
+        val source = call.argument<String>("source")
+        val event = call.argument<String>("event") ?: "DOMContentLoaded"
+        result.success(webView?.addJavaScriptOnEvent(source, event) ?: false)
+      }
+
       else -> result.notImplemented()
     }
   }
@@ -786,8 +824,26 @@ open class WebViewChannelDelegate(
     })
   }
 
-  open fun onDownloadStarting(downloadStartRequest: DownloadStartRequest) {
-    invokeEvent("onDownloadStarting", downloadStartRequest.toMap())
+  open class DownloadStartCallback : BaseCallbackResultImpl<DownloadStartResponse>() {
+    override fun decodeResult(obj: Any?): DownloadStartResponse? =
+      DownloadStartResponse.fromMap(mutableMapValue(obj))
+  }
+
+  open fun onDownloadStarting(
+    downloadStartRequest: DownloadStartRequest,
+    callback: DownloadStartCallback
+  ) {
+    invokeCallback("onDownloadStarting", downloadStartRequest.toMap(), callback)
+  }
+
+  open fun onVisualStateReady(requestId: Long) {
+    invokeEvent("onVisualStateReady", HashMap<String, Any?>().apply {
+      put("requestId", requestId)
+    })
+  }
+
+  open fun onWebViewNavigation(event: MutableMap<String, Any?>) {
+    invokeEvent("onWebViewNavigation", event)
   }
 
   open fun onCreateContextMenu(hitTestResult: HitTestResult) {

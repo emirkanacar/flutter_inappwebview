@@ -49,6 +49,21 @@ cold start, first usable frame, memory, and page readiness remain a separate
 runtime-validation task; no device test is required for this source-only
 slice.
 
+## Local feature addition: native WebView API gaps
+
+Cross-platform mute, opt-in native downloads, Android visual-state
+callbacks, iOS/macOS cookie observers, Android Profile headers/prefetch,
+feature-gated AndroidX WebKit 1.15 navigation/prerender/BFCache APIs, and
+iOS 26 obscured-content/session-storage/Screen Time helpers are implemented
+in platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, macOS 1.1.10, and
+root 2.1.76. They are not upstream issue records and do not change the
+export counts. Source acceptance criteria are complete: mute is
+feature-gated, a `null` `onDownloadStarting` response remains notify-only,
+and 1.15/iOS 26 APIs are availability- or `WebViewFeature`-checked.
+Physical-device mute, DownloadManager/`WKDownload`, visual-state, cookie
+observer, Profile prefetch, NavigationListener/FCP/LCP, and iOS 26
+behavior remain runtime validation work.
+
 ## Status rules
 
 - **P0 containment:** crash, security, data-loss, or deadlock risk. Reproduce or add a safe guard before feature work.
@@ -77,6 +92,14 @@ was filed after the CSV snapshot. iOS 2.1.33 / root 2.1.74 replace
 contract. It is not one of the 125 exported issue records and does not change
 the active-queue counts; iOS 27 Simulator/device open-URL validation is
 tracked in the runtime register.
+
+The 5.x Options, platform-prefixed callback, and `IOS*`/`Android*` type
+shims stay as public compatibility APIs. Root 2.1.75, platform-interface
+1.1.20, and Android 1.0.54 document the current-name mapping, give
+`saveFormData` a non-empty deprecation message, and leave native Android
+SDK-deprecated call sites in place until an explicit minSdk increase. The
+sequence is [`deprecated-api-migration-plan.md`](deprecated-api-migration-plan.md).
+This is not an exported issue record and does not change the 125-issue counts.
 
 The 78 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),

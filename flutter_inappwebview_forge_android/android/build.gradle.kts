@@ -63,7 +63,7 @@ android {
     }
 
     dependencies {
-        implementation("androidx.webkit:webkit:1.14.0")
+        implementation("androidx.webkit:webkit:1.15.0")
         implementation("androidx.browser:browser:1.10.0")
         implementation("androidx.appcompat:appcompat:1.7.1")
         implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.2.0")

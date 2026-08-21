@@ -13,14 +13,22 @@ class DownloadStartResponse {
   ///If canceled, the download save dialog is not displayed regardless of the [handled] property.
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
+  ///- Linux WPE WebKit
   DownloadStartResponseAction? action;
 
-  ///Set this flag to `true` to hide the default download dialog for this download.
+  ///Set this flag to `true` to handle the download in the host app or start
+  ///a native plugin download when [resultFilePath] is also set.
   ///
   ///The download will progress as normal if it is not canceled, there will just be no default UI shown.
   ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   bool handled;
 
@@ -31,7 +39,14 @@ class DownloadStartResponse {
   ///If the path points to an existing file, the file will be overwritten.
   ///If the directory does not exist, it is created.
   ///
+  ///On Android, iOS, and macOS a non-null path with [handled] `true` starts a
+  ///native [PlatformDownloadJobController]. A `null` response keeps the
+  ///previous notify-only default.
+  ///
   ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
   ///- Windows WebView2
   String? resultFilePath;
   DownloadStartResponse({

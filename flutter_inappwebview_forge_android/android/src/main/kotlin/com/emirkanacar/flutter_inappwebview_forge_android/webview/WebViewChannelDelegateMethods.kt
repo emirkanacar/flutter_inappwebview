@@ -82,5 +82,11 @@ enum class WebViewChannelDelegateMethods {
     hideInputMethod,
     showInputMethod,
     saveState,
-    restoreState
+    restoreState,
+    setAudioMuted,
+    isAudioMuted,
+    navigate,
+    prerenderUrl,
+    postVisualStateCallback,
+    addJavaScriptOnEvent
 }

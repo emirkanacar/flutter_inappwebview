@@ -3440,6 +3440,249 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
     );
   }
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setAudioMuted}
+  ///Mutes or unmutes audio playback in this WebView.
+  ///
+  ///On Android this maps to `WebViewCompat.setAudioMuted` when
+  ///[WebViewFeature.MUTE_AUDIO] is supported. On iOS and macOS it maps to
+  ///`setAllMediaPlaybackSuspended`.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setAudioMuted.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.setAudioMuted',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#setAudioMuted(android.webkit.WebView,boolean)',
+        note:
+            'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
+      ),
+      IOSPlatform(
+        apiName: 'WKWebView.setAllMediaPlaybackSuspended',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/3752242-setallmediaplaybacksuspended',
+        available: '15.0',
+      ),
+      MacOSPlatform(
+        apiName: 'WKWebView.setAllMediaPlaybackSuspended',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/3752242-setallmediaplaybacksuspended',
+        available: '12.0',
+      ),
+    ],
+  )
+  Future<void> setAudioMuted({required bool muted}) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.setAudioMuted.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isAudioMuted}
+  ///Returns whether this WebView is muted.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isAudioMuted.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.isAudioMuted',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#isAudioMuted(android.webkit.WebView)',
+        note:
+            'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
+      ),
+      IOSPlatform(available: '15.0'),
+      MacOSPlatform(available: '12.0'),
+    ],
+  )
+  Future<bool> isAudioMuted() {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.isAudioMuted.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.navigate}
+  ///Loads [url] with optional history replacement and extra headers.
+  ///
+  ///This is the AndroidX `WebViewCompat.navigate` API. When the feature is
+  ///unavailable the call falls back to [loadUrl].
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.navigate.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.navigate',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#navigate(android.webkit.WebView,java.lang.String,androidx.webkit.NavigationParameters)',
+        note:
+            'Requires [WebViewFeature.NAVIGATION_LISTENER]. Falls back to loadUrl otherwise.',
+      ),
+    ],
+  )
+  Future<void> navigate({
+    required WebUri url,
+    bool replaceHistory = false,
+    Map<String, String>? headers,
+  }) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.navigate.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.prerenderUrl}
+  ///Speculatively prerenders [url] in this WebView.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.prerenderUrl.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.prerenderUrlAsync',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#prerenderUrlAsync(android.webkit.WebView,java.lang.String,java.util.concurrent.Executor,androidx.webkit.PrerenderOperationCallback)',
+        note: 'Requires [WebViewFeature.PRERENDER_URL].',
+      ),
+    ],
+  )
+  Future<void> prerenderUrl({required WebUri url}) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.prerenderUrl.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postVisualStateCallback}
+  ///Requests a callback when this WebView is ready to be drawn.
+  ///
+  ///When omitted, Android also posts a visual-state callback after each
+  ///finished page load and fires [PlatformWebViewCreationParams.onVisualStateReady].
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postVisualStateCallback.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebView.postVisualStateCallback',
+        apiUrl:
+            'https://developer.android.com/reference/android/webkit/WebView#postVisualStateCallback(long,%20android.webkit.WebView.VisualStateCallback)',
+        available: '23',
+      ),
+    ],
+  )
+  Future<void> postVisualStateCallback({int? requestId}) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.postVisualStateCallback.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.fetchWebViewData}
+  ///Fetches a serialized blob of WebView data such as session storage.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.fetchWebViewData.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.fetchData(of:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/fetchdata(of:completionhandler:)',
+      ),
+      MacOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.fetchData(of:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/fetchdata(of:completionhandler:)',
+      ),
+    ],
+  )
+  Future<Uint8List?> fetchWebViewData({required Set<WebViewDataType> dataTypes}) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.fetchWebViewData.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreWebViewData}
+  ///Restores WebView data previously returned by [fetchWebViewData].
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreWebViewData.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.restoreData(_:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/restoredata(_:completionhandler:)',
+      ),
+      MacOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.restoreData(_:completionHandler:)',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/restoredata(_:completionhandler:)',
+      ),
+    ],
+  )
+  Future<void> restoreWebViewData({required Uint8List data}) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.restoreWebViewData.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isBlockedByScreenTime}
+  ///Returns whether Screen Time is currently blocking this WebView.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isBlockedByScreenTime.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.isBlockedByScreenTime',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/isblockedbyscreentime',
+      ),
+      MacOSPlatform(
+        available: '26.0',
+        apiName: 'WKWebView.isBlockedByScreenTime',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/isblockedbyscreentime',
+      ),
+    ],
+  )
+  Future<bool> isBlockedByScreenTime() {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.isBlockedByScreenTime.name} is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addJavaScriptOnEvent}
+  ///Injects persistent JavaScript that runs as part of a document lifecycle event.
+  ///
+  ///This is the Android isolated-world / document-event injection API. When the
+  ///feature is unavailable the call is a no-op.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addJavaScriptOnEvent.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.addJavaScriptOnEvent',
+        note:
+            'Requires a WebView provider that advertises the document-event script feature.',
+      ),
+    ],
+  )
+  Future<void> addJavaScriptOnEvent({
+    required String source,
+    String event = 'DOMContentLoaded',
+  }) {
+    throw UnimplementedError(
+      '${PlatformInAppWebViewControllerMethod.addJavaScriptOnEvent.name} is not implemented on the current platform',
+    );
+  }
+
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isInFullscreen}
   ///Returns `true` if the `WebView` is in fullscreen mode, otherwise `false`.
   ///{@endtemplate}

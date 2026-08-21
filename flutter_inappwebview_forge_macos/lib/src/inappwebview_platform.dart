@@ -7,6 +7,7 @@ import 'http_auth_credentials_database.dart';
 import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/main.dart';
 import 'print_job/main.dart';
+import 'download_job/main.dart';
 import 'proxy_controller.dart';
 import 'web_authentication_session/main.dart';
 import 'web_message/main.dart';
@@ -130,6 +131,18 @@ class MacOSInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   MacOSPrintJobController createPlatformPrintJobControllerStatic() {
     return MacOSPrintJobController.static();
+  }
+
+  @override
+  MacOSDownloadJobController createPlatformDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) {
+    return MacOSDownloadJobController(params);
+  }
+
+  @override
+  MacOSDownloadJobController createPlatformDownloadJobControllerStatic() {
+    return MacOSDownloadJobController.static();
   }
 
   /// Creates a new empty [PlatformPullToRefreshController] to access static methods.

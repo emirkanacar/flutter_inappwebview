@@ -32,6 +32,7 @@ features:
 - Looking for copyable snippets? Read [Examples and recipes](/examples).
 - Using cookies, storage, auth, or an in-app browser? Read [Feature guide](/features).
 - Checking what changed? Read the [Changelog](/changelog) and [Migration guide](/migration-from-upstream).
+- Migrating off Options or `androidOn*` / `iosOn*` names? Read [Deprecated APIs](/deprecated-api).
 - Checking platform differences? Read [Platform guide](/platforms).
 - Debugging a device or signing issue? Read [Troubleshooting](/troubleshooting).
 

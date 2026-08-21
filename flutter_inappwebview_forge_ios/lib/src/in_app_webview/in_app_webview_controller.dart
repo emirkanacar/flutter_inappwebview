@@ -1586,6 +1586,53 @@ class IOSInAppWebViewController extends PlatformInAppWebViewController
             );
         }
         break;
+      case "onWritingToolsActiveChanged":
+        if ((webviewParams != null &&
+                webviewParams!.onWritingToolsActiveChanged != null) ||
+            _inAppBrowserEventHandler != null) {
+          final isActive = call.arguments["isActive"] == true;
+          if (webviewParams != null &&
+              webviewParams!.onWritingToolsActiveChanged != null)
+            webviewParams!.onWritingToolsActiveChanged!(
+              _controllerFromPlatform,
+              isActive,
+            );
+          else
+            _inAppBrowserEventHandler!.onWritingToolsActiveChanged(isActive);
+        }
+        break;
+      case "onVisualStateReady":
+        if ((webviewParams != null &&
+                webviewParams!.onVisualStateReady != null) ||
+            _inAppBrowserEventHandler != null) {
+          final requestId = (call.arguments["requestId"] as num?)?.toInt() ?? 0;
+          if (webviewParams != null && webviewParams!.onVisualStateReady != null)
+            webviewParams!.onVisualStateReady!(
+              _controllerFromPlatform,
+              requestId,
+            );
+          else
+            _inAppBrowserEventHandler!.onVisualStateReady(requestId);
+        }
+        break;
+      case "onWebViewNavigation":
+        if ((webviewParams != null &&
+                webviewParams!.onWebViewNavigation != null) ||
+            _inAppBrowserEventHandler != null) {
+          final event = WebViewNavigationEvent.fromMap(
+            call.arguments.cast<String, dynamic>(),
+          );
+          if (event == null) break;
+          if (webviewParams != null &&
+              webviewParams!.onWebViewNavigation != null)
+            webviewParams!.onWebViewNavigation!(
+              _controllerFromPlatform,
+              event,
+            );
+          else
+            _inAppBrowserEventHandler!.onWebViewNavigation(event);
+        }
+        break;
       case "onCallJsHandler":
         String handlerName = call.arguments["handlerName"];
         Map<String, dynamic> handlerDataMap = call.arguments["data"]
@@ -3026,6 +3073,45 @@ class IOSInAppWebViewController extends PlatformInAppWebViewController
     return MediaPlaybackState.fromNativeValue(
       await channel?.invokeMethod('requestMediaPlaybackState', args),
     );
+  }
+
+  @override
+  Future<void> setAudioMuted({required bool muted}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('muted', () => muted);
+    await channel?.invokeMethod('setAudioMuted', args);
+  }
+
+  @override
+  Future<bool> isAudioMuted() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('isAudioMuted', args) ?? false;
+  }
+
+  @override
+  Future<Uint8List?> fetchWebViewData({
+    required Set<WebViewDataType> dataTypes,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent(
+      'dataTypes',
+      () => dataTypes.map((type) => type.toNativeValue()).toList(),
+    );
+    return await channel?.invokeMethod<Uint8List>('fetchWebViewData', args);
+  }
+
+  @override
+  Future<void> restoreWebViewData({required Uint8List data}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('data', () => data);
+    await channel?.invokeMethod('restoreWebViewData', args);
+  }
+
+  @override
+  Future<bool> isBlockedByScreenTime() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('isBlockedByScreenTime', args) ??
+        false;
   }
 
   @override

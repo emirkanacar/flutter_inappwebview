@@ -8,6 +8,7 @@ the WebView model and platform details that match your application.
 
 - [Getting started](getting-started.md) - install the plugin and render your first WebView.
 - [Inline WebView](in-app-webview.md) - configure navigation, settings, callbacks, and controllers.
+- [Deprecated APIs](deprecated-api.md) - current names for Options, prefixed callbacks, and compatibility shims.
 - [Preload and reuse](preload-and-reuse.md) - reduce route-open latency with headless prewarming.
 - [Examples and recipes](examples.md) - copyable browser, bridge, navigation, and lifecycle patterns.
 - [Feature guide](features.md) - in-app browser, cookies, storage, localhost, and auth workflows.

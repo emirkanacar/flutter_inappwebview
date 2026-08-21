@@ -91,6 +91,21 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
     await channel?.invokeMethod('findAll', args);
   }
 
+  @override
+  Future<bool> findString({
+    required String find,
+    bool caseSensitive = false,
+    bool backwards = false,
+    bool wraps = true,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('find', () => find);
+    args.putIfAbsent('caseSensitive', () => caseSensitive);
+    args.putIfAbsent('backwards', () => backwards);
+    args.putIfAbsent('wraps', () => wraps);
+    return await channel?.invokeMethod<bool>('findString', args) ?? false;
+  }
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findNext}
   Future<void> findNext({bool forward = true}) async {
     Map<String, dynamic> args = <String, dynamic>{};

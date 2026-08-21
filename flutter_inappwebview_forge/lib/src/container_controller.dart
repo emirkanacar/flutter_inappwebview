@@ -47,6 +47,40 @@ class ContainerController {
   Future<bool> clearContainerData(String containerId) =>
       platform.clearContainerData(containerId);
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.addCustomHeader}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.addCustomHeader.supported_platforms}
+  Future<bool> addCustomHeader({
+    required String containerId,
+    required String headerName,
+    required String headerValue,
+    Set<String>? originRules,
+  }) => platform.addCustomHeader(
+    containerId: containerId,
+    headerName: headerName,
+    headerValue: headerValue,
+    originRules: originRules,
+  );
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.removeCustomHeader}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.removeCustomHeader.supported_platforms}
+  Future<bool> removeCustomHeader({
+    required String containerId,
+    required String headerName,
+  }) => platform.removeCustomHeader(
+    containerId: containerId,
+    headerName: headerName,
+  );
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.prefetchUrl}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.prefetchUrl.supported_platforms}
+  Future<bool> prefetchUrl({
+    required String containerId,
+    required String url,
+  }) => platform.prefetchUrl(containerId: containerId, url: url);
+
   /// Checks whether this API is available on [platform].
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformContainerController.static().isClassSupported(platform: platform);

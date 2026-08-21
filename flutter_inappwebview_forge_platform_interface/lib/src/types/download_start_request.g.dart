@@ -24,6 +24,14 @@ class DownloadStartRequest {
   ///- Windows WebView2
   int contentLength;
 
+  ///Plugin-assigned ID used to correlate a native [PlatformDownloadJobController].
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///- iOS WKWebView
+  ///- macOS WKWebView
+  String? downloadId;
+
   ///The mimetype of the content reported by the server.
   ///
   ///**Officially Supported Platforms/Implementations**:
@@ -67,6 +75,7 @@ class DownloadStartRequest {
   DownloadStartRequest({
     this.contentDisposition,
     required this.contentLength,
+    this.downloadId,
     this.mimeType,
     this.suggestedFilename,
     this.textEncodingName,
@@ -85,6 +94,7 @@ class DownloadStartRequest {
     final instance = DownloadStartRequest(
       contentDisposition: map['contentDisposition'],
       contentLength: map['contentLength'],
+      downloadId: map['downloadId'],
       mimeType: map['mimeType'],
       suggestedFilename: map['suggestedFilename'],
       textEncodingName: map['textEncodingName'],
@@ -99,6 +109,7 @@ class DownloadStartRequest {
     return {
       "contentDisposition": contentDisposition,
       "contentLength": contentLength,
+      "downloadId": downloadId,
       "mimeType": mimeType,
       "suggestedFilename": suggestedFilename,
       "textEncodingName": textEncodingName,
@@ -114,6 +125,6 @@ class DownloadStartRequest {
 
   @override
   String toString() {
-    return 'DownloadStartRequest{contentDisposition: $contentDisposition, contentLength: $contentLength, mimeType: $mimeType, suggestedFilename: $suggestedFilename, textEncodingName: $textEncodingName, url: $url, userAgent: $userAgent}';
+    return 'DownloadStartRequest{contentDisposition: $contentDisposition, contentLength: $contentLength, downloadId: $downloadId, mimeType: $mimeType, suggestedFilename: $suggestedFilename, textEncodingName: $textEncodingName, url: $url, userAgent: $userAgent}';
   }
 }

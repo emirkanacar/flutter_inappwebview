@@ -52,6 +52,21 @@ class FindInteractionController {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findAll.supported_platforms}
   Future<void> findAll({String? find}) => platform.findAll(find: find);
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findString}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findString.supported_platforms}
+  Future<bool> findString({
+    required String find,
+    bool caseSensitive = false,
+    bool backwards = false,
+    bool wraps = true,
+  }) => platform.findString(
+    find: find,
+    caseSensitive: caseSensitive,
+    backwards: backwards,
+    wraps: wraps,
+  );
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findNext}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findNext.supported_platforms}

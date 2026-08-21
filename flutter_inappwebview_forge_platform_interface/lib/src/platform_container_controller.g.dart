@@ -58,6 +58,24 @@ extension _PlatformContainerControllerClassSupported
 
 ///List of [PlatformContainerController]'s methods that can be used to check if they are supported or not by the current platform.
 enum PlatformContainerControllerMethod {
+  ///Can be used to check if the [PlatformContainerController.addCustomHeader] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.addCustomHeader.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 110+ ([Official API - Profile.addCustomHeader](https://developer.android.com/reference/androidx/webkit/Profile#addCustomHeader(java.lang.String,java.lang.String,java.util.Set))):
+  ///    - Requires [WebViewFeature.CUSTOM_REQUEST_HEADERS].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///- [headerName]: all platforms
+  ///- [headerValue]: all platforms
+  ///- [originRules]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  addCustomHeader,
+
   ///Can be used to check if the [PlatformContainerController.clearContainerData] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.clearContainerData.supported_platforms}
@@ -126,6 +144,38 @@ enum PlatformContainerControllerMethod {
   ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   hasContainer,
+
+  ///Can be used to check if the [PlatformContainerController.prefetchUrl] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.prefetchUrl.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 110+ ([Official API - Profile.prefetchUrlAsync](https://developer.android.com/reference/androidx/webkit/Profile#prefetchUrlAsync(java.lang.String,androidx.webkit.PrefetchParameters,java.util.concurrent.Executor,androidx.webkit.OutcomeReceiver))):
+  ///    - Requires [WebViewFeature.PROFILE_URL_PREFETCH].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///- [url]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  prefetchUrl,
+
+  ///Can be used to check if the [PlatformContainerController.removeCustomHeader] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.removeCustomHeader.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 110+ (Official API - Profile.removeCustomHeader):
+  ///    - Requires [WebViewFeature.CUSTOM_REQUEST_HEADERS].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///- [headerName]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  removeCustomHeader,
 }
 
 extension _PlatformContainerControllerMethodSupported
@@ -135,6 +185,11 @@ extension _PlatformContainerControllerMethodSupported
     TargetPlatform? platform,
   }) {
     switch (method) {
+      case PlatformContainerControllerMethod.addCustomHeader:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.clearContainerData:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
@@ -170,6 +225,16 @@ extension _PlatformContainerControllerMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.windows,
               TargetPlatform.linux,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformContainerControllerMethod.prefetchUrl:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformContainerControllerMethod.removeCustomHeader:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }

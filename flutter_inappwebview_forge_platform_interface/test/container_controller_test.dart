@@ -124,6 +124,39 @@ void main() {
     }
   });
 
+  test('profile header and prefetch methods are Android-only', () {
+    InAppWebViewPlatform.instance = _TestInAppWebViewPlatform();
+
+    expect(
+      PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.addCustomHeader,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.removeCustomHeader,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.prefetchUrl,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.addCustomHeader,
+        platform: TargetPlatform.iOS,
+      ),
+      isFalse,
+    );
+  });
+
   test('Windows pull-to-refresh no-scrollbar setting is serialized', () {
     final settings = PullToRefreshSettings(allowWithNoScrollbar: true);
 

@@ -6,6 +6,33 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.76 - 2026-08-21
+
+- Add `setAudioMuted` / `isAudioMuted`, opt-in native
+  `DownloadJobController` downloads, Android `onVisualStateReady`,
+  iOS/macOS cookie observers, `findString`, Android Profile headers
+  and prefetch, feature-gated AndroidX WebKit 1.15 navigation APIs,
+  and iOS 26 obscured-content / session-storage helpers.
+- A `null` `onDownloadStarting` response remains notify-only.
+- Ships with platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, and
+  macOS 1.1.10. Android `minSdk 19` is unchanged.
+
+## 2.1.75 - 2026-08-21
+
+- Deprecated, still present: `InAppWebViewGroupOptions` / `*Options`,
+  `initialOptions`, `setOptions` / `getOptions`, `onLoadError` /
+  `onLoadHttpError`, `onDownloadStart` / `onDownloadStartRequest`,
+  `androidOn*` / `iosOn*` callbacks, `clearCache()`, `findAllAsync`,
+  `JavaScriptHandlerCallback`, and `IOS*` / `Android*` type aliases. Use the
+  current names in [Deprecated APIs](deprecated-api.md). Removal needs a
+  major version; see the
+  [migration plan](https://github.com/emirkanacar/flutter_inappwebview/blob/master/docs/deprecated-api-migration-plan.md).
+- Deprecated `saveFormData` now states that Android Autofill replaced
+  WebView form-data saving. It is a no-op on API 26+ and has no Dart
+  replacement.
+- Deprecated `forceDark` / `forceDarkStrategy` remain; use
+  `algorithmicDarkeningAllowed`.
+
 ## 2.1.74 - 2026-08-21
 
 - iOS `InAppBrowser.openWithSystemBrowser` opens URLs with
@@ -56,9 +83,13 @@ complete, release-by-release record remains in the package source:
 ## Release policy
 
 Public Dart APIs and MethodChannel contracts are kept compatible whenever
-possible. Deprecated APIs remain documented during the compatibility window;
-removal requires an intentional major-version decision. Runtime validation
-notes are recorded separately in the repository engineering docs.
+possible. Deprecated APIs remain in the public surface during the
+compatibility window and are listed by name in each affected changelog and in
+[Deprecated APIs](deprecated-api.md). Removal requires an intentional
+major-version decision; the sequence is
+[Deprecated API migration plan](https://github.com/emirkanacar/flutter_inappwebview/blob/master/docs/deprecated-api-migration-plan.md).
+Runtime validation notes are recorded separately in the repository
+engineering docs.
 
 For the upstream history and original project context, see
 [Migration and upstream relationship](migration-from-upstream.md).

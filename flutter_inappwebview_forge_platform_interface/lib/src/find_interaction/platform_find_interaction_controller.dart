@@ -216,6 +216,41 @@ abstract class PlatformFindInteractionController extends PlatformInterface
     );
   }
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findString}
+  ///Searches the page for [find] without presenting the system find UI.
+  ///
+  ///On iOS/macOS this uses `WKWebView.findString`. A match is selected and
+  ///scrolled into view.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findString.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: '14.0',
+        apiName: 'WKWebView.findString',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/3656413-findstring',
+      ),
+      MacOSPlatform(
+        available: '11.0',
+        apiName: 'WKWebView.findString',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebview/3656413-findstring',
+      ),
+    ],
+  )
+  Future<bool> findString({
+    required String find,
+    bool caseSensitive = false,
+    bool backwards = false,
+    bool wraps = true,
+  }) {
+    throw UnimplementedError(
+      'findString is not implemented on the current platform',
+    );
+  }
+
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.setFindOptions}
   ///Sets the options used for find-on-page operations.
   ///{@endtemplate}

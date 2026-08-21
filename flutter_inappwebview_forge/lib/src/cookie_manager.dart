@@ -175,6 +175,19 @@ class CookieManager {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.flush.supported_platforms}
   Future<void> flush() => platform.flush();
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.addCookieChangedListener}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.addCookieChangedListener.supported_platforms}
+  Future<void> addCookieChangedListener(
+    FutureOr<void> Function(List<Cookie> cookies) listener,
+  ) => platform.addCookieChangedListener(listener);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener.supported_platforms}
+  Future<void> removeCookieChangedListener() =>
+      platform.removeCookieChangedListener();
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManagerCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformCookieManager.static().isClassSupported(platform: platform);

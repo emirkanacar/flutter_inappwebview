@@ -56,6 +56,20 @@ Simulator or device, plus a malformed or unopenable URL that still returns
 `cannot be opened!`. This record does not change the 78 CSV runtime-pending
 count.
 
+### Native WebView API gaps (local feature)
+
+Mute, opt-in native downloads, Android visual-state, iOS/macOS cookie
+observers, Android Profile headers/prefetch, feature-gated AndroidX WebKit
+1.15 navigation APIs, and iOS 26 obscured-content/session-storage/Screen
+Time helpers are source-complete in platform-interface 1.1.21, Android
+1.0.55, iOS 2.1.34, macOS 1.1.10, and root 2.1.76. They are not CSV issue
+records. Runtime validation requires a WebView provider that advertises
+`MUTE_AUDIO` / NavigationListener, a real `DownloadManager`/`WKDownload`
+transfer, `postVisualStateCallback` first-paint timing, cookie-store
+observer delivery, Profile prefetch, and an iOS 26 device for
+`obscuredContentInsets` and session-storage fetch/restore. This record
+does not change the 78 CSV runtime-pending count.
+
 PR [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)
 is source-fixed in the platform-interface, iOS, macOS, and root packages. The
 additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` value maps to

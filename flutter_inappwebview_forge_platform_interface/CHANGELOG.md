@@ -1,3 +1,29 @@
+## 1.1.21 - 2026-08-21
+
+- Add `InAppWebViewController.setAudioMuted` / `isAudioMuted`, native
+  `DownloadJobController` and opt-in `DownloadStartResponse` handling,
+  Android `onVisualStateReady`, iOS/macOS cookie-change observers,
+  `FindInteractionController.findString`, Android Profile
+  `addCustomHeader` / `prefetchUrl`, feature-gated AndroidX WebKit 1.15
+  navigation/prerender/BFCache APIs, and iOS 26
+  `obscuredContentInsets` / session-storage data / Screen Time checks.
+- Keep a `null` `onDownloadStarting` response as notify-only.
+
+## 1.1.20 - 2026-08-21
+
+- Deprecated `InAppWebViewSettings.saveFormData` now names Android Autofill
+  as the replacement model. The setting is a no-op on API 26+, has no Dart
+  replacement, and is not removed.
+- These public surfaces stay deprecated and present: `InAppWebViewGroupOptions`
+  / `InAppWebViewOptions`, `initialOptions`, `setOptions` / `getOptions`,
+  `onLoadError` / `onLoadHttpError`, `onDownloadStart` /
+  `onDownloadStartRequest`, `androidOn*` / `iosOn*` callbacks,
+  `clearCache()`, `findAllAsync`, `JavaScriptHandlerCallback`, and `IOS*` /
+  `Android*` type aliases. Current names are in
+  [Deprecated APIs](../documentation/deprecated-api.md).
+- Regenerate `prewarmConnections` capability docs to use the `urls`
+  parameter name.
+
 ## 1.1.19 - 2026-08-21
 
 - Rename the `prewarmConnections` positional parameter `URLs` to `urls` for

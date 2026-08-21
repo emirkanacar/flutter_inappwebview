@@ -34,6 +34,9 @@ export 'data_detector_types.dart'
 export 'dismiss_button_style.dart'
     show DismissButtonStyle, IOSSafariDismissButtonStyle;
 export 'download_start_request.dart' show DownloadStartRequest;
+export 'webview_navigation_event.dart' show WebViewNavigationEvent;
+export 'webview_navigation_event_type.dart' show WebViewNavigationEventType;
+export 'webview_data_type.dart' show WebViewDataType;
 export 'favicon.dart' show Favicon;
 export 'favicon_changed_request.dart' show FaviconChangedRequest;
 export 'favicon_image_format.dart' show FaviconImageFormat;

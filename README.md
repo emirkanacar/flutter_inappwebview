@@ -50,7 +50,7 @@ WebView gestures incorrectly on iOS.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.74
+  flutter_inappwebview_forge: ^2.1.76
 ```
 
 ```sh
@@ -137,6 +137,7 @@ User guides live in [`documentation/`](documentation/README.md):
 
 - [Getting started](documentation/getting-started.md)
 - [Inline WebView](documentation/in-app-webview.md)
+- [Deprecated APIs](documentation/deprecated-api.md)
 - [Preload and reuse](documentation/preload-and-reuse.md)
 - [Examples and recipes](documentation/examples.md)
 - [Feature guide](documentation/features.md)
@@ -151,6 +152,7 @@ Contributor and engineering records are in [`docs/`](docs/README.md):
 
 - [Project overview](docs/project-overview.md)
 - [Development guide](docs/development.md)
+- [Deprecated API migration plan](docs/deprecated-api-migration-plan.md)
 - [Known issues](docs/known-issues.md)
 - [Open work plan](docs/open-work-plan.md)
 
@@ -160,7 +162,7 @@ Replace the package name and import. Widget and controller names stay the same.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.74
+  flutter_inappwebview_forge: ^2.1.76
 ```
 
 ```dart

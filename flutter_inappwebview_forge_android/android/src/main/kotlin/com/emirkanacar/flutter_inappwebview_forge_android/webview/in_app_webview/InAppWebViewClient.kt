@@ -290,6 +290,9 @@ open class InAppWebViewClient(
     val js = JavaScriptBridgeJS.PLATFORM_READY_JS_SOURCE()
     webView.evaluateJavascript(js, null)
     webView.channelDelegate?.onLoadStop(url)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      webView.postVisualStateReady(System.currentTimeMillis())
+    }
   }
 
   override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {

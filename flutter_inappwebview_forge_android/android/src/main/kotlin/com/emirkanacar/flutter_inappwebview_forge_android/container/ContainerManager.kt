@@ -78,6 +78,88 @@ open class ContainerManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.success(false)
                 }
             }
+            "addCustomHeader" -> {
+                val containerId = call.argument<String>("containerId")
+                val headerName = call.argument<String>("headerName")
+                val headerValue = call.argument<String>("headerValue")
+                val originRules = call.argument<List<String>>("originRules")?.toSet()
+                if (profileStore == null ||
+                    containerId.isNullOrEmpty() ||
+                    headerName.isNullOrEmpty() ||
+                    headerValue == null ||
+                    !WebViewFeature.isFeatureSupported("CUSTOM_REQUEST_HEADERS")
+                ) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    val profile = profileStore.getOrCreateProfile(containerId)
+                    val method = profile.javaClass.methods.firstOrNull { it.name == "addCustomHeader" }
+                    if (method == null) {
+                        result.success(false)
+                        return
+                    }
+                    when (method.parameterCount) {
+                        2 -> method.invoke(profile, headerName, headerValue)
+                        3 -> method.invoke(profile, headerName, headerValue, originRules)
+                        else -> {
+                            result.success(false)
+                            return
+                        }
+                    }
+                    result.success(true)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
+            "removeCustomHeader" -> {
+                val containerId = call.argument<String>("containerId")
+                val headerName = call.argument<String>("headerName")
+                if (profileStore == null ||
+                    containerId.isNullOrEmpty() ||
+                    headerName.isNullOrEmpty() ||
+                    !WebViewFeature.isFeatureSupported("CUSTOM_REQUEST_HEADERS")
+                ) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    val profile = profileStore.getProfile(containerId)
+                    val method = profile?.javaClass?.methods?.firstOrNull { it.name == "removeCustomHeader" }
+                    if (profile == null || method == null) {
+                        result.success(false)
+                        return
+                    }
+                    method.invoke(profile, headerName)
+                    result.success(true)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
+            "prefetchUrl" -> {
+                val containerId = call.argument<String>("containerId")
+                val url = call.argument<String>("url")
+                if (profileStore == null ||
+                    containerId.isNullOrEmpty() ||
+                    url.isNullOrEmpty() ||
+                    !WebViewFeature.isFeatureSupported("PROFILE_URL_PREFETCH")
+                ) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    val profile = profileStore.getOrCreateProfile(containerId)
+                    val method = profile.javaClass.methods.firstOrNull { it.name == "prefetchUrlAsync" }
+                    if (method == null) {
+                        result.success(false)
+                        return
+                    }
+                    method.invoke(profile, url)
+                    result.success(true)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
             else -> result.notImplemented()
         }
     }

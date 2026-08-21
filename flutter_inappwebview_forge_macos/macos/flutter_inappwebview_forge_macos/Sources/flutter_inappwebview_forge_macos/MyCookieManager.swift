@@ -10,10 +10,11 @@ import WebKit
 import FlutterMacOS
 
 @available(macOS 10.13, *)
-public class MyCookieManager: ChannelDelegate {
+public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
     static let METHOD_CHANNEL_NAME = "com.emirkanacar/flutter_inappwebview_cookiemanager"
     var plugin: InAppWebViewFlutterPlugin?
     static var httpCookieStore = WKWebsiteDataStore.default().httpCookieStore
+    private var observingCookieStore = false
     
     init(plugin: InAppWebViewFlutterPlugin) {
         super.init(channel: FlutterMethodChannel(name: MyCookieManager.METHOD_CHANNEL_NAME, binaryMessenger: plugin.registrar.messenger))
@@ -85,9 +86,53 @@ public class MyCookieManager: ChannelDelegate {
             case "deleteAllCookies":
                 MyCookieManager.deleteAllCookies(result: result)
                 break
+            case "addCookieChangedListener":
+                if !observingCookieStore {
+                    MyCookieManager.httpCookieStore.add(self)
+                    observingCookieStore = true
+                }
+                result(true)
+                break
+            case "removeCookieChangedListener":
+                if observingCookieStore {
+                    MyCookieManager.httpCookieStore.remove(self)
+                    observingCookieStore = false
+                }
+                result(true)
+                break
             default:
                 result(FlutterMethodNotImplemented)
                 break
+        }
+    }
+
+    public func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
+        cookieStore.getAllCookies { [weak self] cookies in
+            var cookieList: [[String: Any?]] = []
+            for cookie in cookies {
+                var sameSite: String? = nil
+                if #available(macOS 10.15, *) {
+                    if let sameSiteValue = cookie.sameSitePolicy?.rawValue {
+                        sameSite = sameSiteValue.prefix(1).capitalized + sameSiteValue.dropFirst()
+                    }
+                }
+                var expiresDateTimestamp: Int64 = -1
+                if let expiresDate = cookie.expiresDate?.timeIntervalSince1970 {
+                    expiresDateTimestamp = Int64(expiresDate * 1000)
+                }
+                cookieList.append([
+                    "name": cookie.name,
+                    "value": cookie.value,
+                    "expiresDate": expiresDateTimestamp != -1 ? expiresDateTimestamp : nil,
+                    "isSessionOnly": cookie.isSessionOnly,
+                    "domain": cookie.domain,
+                    "sameSite": sameSite,
+                    "isSecure": cookie.isSecure,
+                    "isHttpOnly": cookie.isHTTPOnly,
+                    "path": cookie.path,
+                ])
+            }
+            self?.channel?.invokeMethod("onCookieChanged", arguments: ["cookies": cookieList])
         }
     }
     
@@ -293,6 +338,10 @@ public class MyCookieManager: ChannelDelegate {
     }
     
     public override func dispose() {
+        if observingCookieStore {
+            MyCookieManager.httpCookieStore.remove(self)
+            observingCookieStore = false
+        }
         super.dispose()
         plugin = nil
     }

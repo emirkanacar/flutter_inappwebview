@@ -97,6 +97,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var sansSerifFontFamily: String = "sans-serif"
     @JvmField var serifFontFamily: String = "sans-serif"
     @JvmField var standardFontFamily: String = "sans-serif"
+    @Deprecated("Android Autofill replaced WebView form-data saving; this setting is a no-op on API 26+.")
     @JvmField var saveFormData: Boolean? = true
     @JvmField var thirdPartyCookiesEnabled: Boolean? = true
     @JvmField var hardwareAcceleration: Boolean? = true
@@ -124,6 +125,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var webAuthenticationSupport: Int? = null
     @JvmField var containerId: String? = null
     @JvmField var paymentRequestEnabled: Boolean? = null
+    @JvmField var backForwardCacheEnabled: Boolean? = null
     @JvmField var webViewAssetLoader: MutableMap<String, Any?>? = null
     @JvmField var defaultVideoPoster: ByteArray? = null
     @JvmField var requestedWithHeaderOriginAllowList: MutableSet<String>? = null
@@ -238,6 +240,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "webAuthenticationSupport" -> webAuthenticationSupport = (value as Number).toInt()
                 "containerId" -> containerId = value as? String
                 "paymentRequestEnabled" -> paymentRequestEnabled = value as Boolean
+                "backForwardCacheEnabled" -> backForwardCacheEnabled = value as Boolean
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
                 "defaultVideoPoster" -> defaultVideoPoster = value as ByteArray
@@ -360,6 +363,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("webAuthenticationSupport", webAuthenticationSupport)
         put("containerId", containerId)
         put("paymentRequestEnabled", paymentRequestEnabled)
+        put("backForwardCacheEnabled", backForwardCacheEnabled)
         put("allowBackgroundAudioPlaying", allowBackgroundAudioPlaying)
         put("defaultVideoPoster", defaultVideoPoster)
         put("requestedWithHeaderOriginAllowList", requestedWithHeaderOriginAllowList?.toList())

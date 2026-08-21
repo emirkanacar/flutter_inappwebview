@@ -8,6 +8,7 @@ import 'http_auth_credentials_database.dart';
 import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/main.dart';
 import 'print_job/main.dart';
+import 'download_job/main.dart';
 import 'proxy_controller.dart';
 import 'pull_to_refresh/main.dart';
 import 'web_authentication_session/main.dart';
@@ -119,6 +120,18 @@ class IOSInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   IOSPrintJobController createPlatformPrintJobControllerStatic() {
     return IOSPrintJobController.static();
+  }
+
+  @override
+  IOSDownloadJobController createPlatformDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) {
+    return IOSDownloadJobController(params);
+  }
+
+  @override
+  IOSDownloadJobController createPlatformDownloadJobControllerStatic() {
+    return IOSDownloadJobController.static();
   }
 
   /// Creates a new [IOSPullToRefreshController].

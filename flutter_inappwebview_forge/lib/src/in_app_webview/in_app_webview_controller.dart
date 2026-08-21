@@ -738,6 +738,68 @@ class InAppWebViewController {
   Future<MediaPlaybackState?> requestMediaPlaybackState() =>
       platform.requestMediaPlaybackState();
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setAudioMuted}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.setAudioMuted.supported_platforms}
+  Future<void> setAudioMuted({required bool muted}) =>
+      platform.setAudioMuted(muted: muted);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isAudioMuted}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isAudioMuted.supported_platforms}
+  Future<bool> isAudioMuted() => platform.isAudioMuted();
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.navigate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.navigate.supported_platforms}
+  Future<void> navigate({
+    required WebUri url,
+    bool replaceHistory = false,
+    Map<String, String>? headers,
+  }) => platform.navigate(
+    url: url,
+    replaceHistory: replaceHistory,
+    headers: headers,
+  );
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.prerenderUrl}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.prerenderUrl.supported_platforms}
+  Future<void> prerenderUrl({required WebUri url}) =>
+      platform.prerenderUrl(url: url);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postVisualStateCallback}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.postVisualStateCallback.supported_platforms}
+  Future<void> postVisualStateCallback({int? requestId}) =>
+      platform.postVisualStateCallback(requestId: requestId);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addJavaScriptOnEvent}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.addJavaScriptOnEvent.supported_platforms}
+  Future<void> addJavaScriptOnEvent({
+    required String source,
+    String event = 'DOMContentLoaded',
+  }) => platform.addJavaScriptOnEvent(source: source, event: event);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.fetchWebViewData}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.fetchWebViewData.supported_platforms}
+  Future<Uint8List?> fetchWebViewData({
+    required Set<WebViewDataType> dataTypes,
+  }) => platform.fetchWebViewData(dataTypes: dataTypes);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreWebViewData}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreWebViewData.supported_platforms}
+  Future<void> restoreWebViewData({required Uint8List data}) =>
+      platform.restoreWebViewData(data: data);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isBlockedByScreenTime}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isBlockedByScreenTime.supported_platforms}
+  Future<bool> isBlockedByScreenTime() => platform.isBlockedByScreenTime();
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isInFullscreen}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.isInFullscreen.supported_platforms}

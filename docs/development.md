@@ -39,6 +39,21 @@ npm run format
 
 The build command runs `build_runner` with `--delete-conflicting-outputs`. Review generated diffs for accidental contract changes. Do not manually edit generated serializers to fix a single test; update the source annotation/model and regenerate.
 
+## Documentation site
+
+User guides live in `documentation/`. After changing public `///` comments or
+those guides, regenerate the Dart API reference and build the site:
+
+```sh
+npm install --prefix documentation
+npm run docs:site:build
+```
+
+`documentation/public/api/` and `documentation/.vitepress/dist/` are generated
+and must not be committed. Deprecated public names belong in the affected
+package changelog and in `documentation/deprecated-api.md`; the engineering
+sequence is `docs/deprecated-api-migration-plan.md`.
+
 ## Test ladder
 
 Use the smallest useful test first, then expand to the affected platform:

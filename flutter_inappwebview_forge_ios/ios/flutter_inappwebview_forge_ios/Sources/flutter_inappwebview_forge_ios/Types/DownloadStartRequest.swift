@@ -15,10 +15,12 @@ public class DownloadStartRequest: NSObject {
     var contentLength: Int64
     var suggestedFilename: String?
     var textEncodingName: String?
-    
+    var downloadId: String?
+
     public init(url: String, userAgent: String?, contentDisposition: String?,
                 mimeType: String?, contentLength: Int64,
-                suggestedFilename: String?, textEncodingName: String?) {
+                suggestedFilename: String?, textEncodingName: String?,
+                downloadId: String? = nil) {
         self.url = url
         self.userAgent = userAgent
         self.contentDisposition = contentDisposition
@@ -26,8 +28,9 @@ public class DownloadStartRequest: NSObject {
         self.contentLength = contentLength
         self.suggestedFilename = suggestedFilename
         self.textEncodingName = textEncodingName
+        self.downloadId = downloadId
     }
-    
+
     public func toMap () -> [String:Any?] {
         return [
             "url": url,
@@ -36,7 +39,8 @@ public class DownloadStartRequest: NSObject {
             "mimeType": mimeType,
             "contentLength": contentLength,
             "suggestedFilename": suggestedFilename,
-            "textEncodingName": textEncodingName
+            "textEncodingName": textEncodingName,
+            "downloadId": downloadId
         ]
     }
 }

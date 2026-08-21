@@ -78,17 +78,16 @@ void main() {
       factorySource,
       contains('headlessManager.webViews.remove(headlessWebViewId)'),
     );
-    expect(
-      factorySource,
-      contains('transferredFromHeadless'),
-    );
+    expect(factorySource, contains('transferredFromHeadless'));
     expect(
       factorySource,
       contains('transferredWebView.id?.let { transferredWebViewID ->'),
     );
     expect(
       factorySource,
-      contains('inAppWebViewManager?.webViews?.set(transferredWebViewID, resultWebView)'),
+      contains(
+        'inAppWebViewManager?.webViews?.set(transferredWebViewID, resultWebView)',
+      ),
     );
     expect(
       factorySource,
@@ -881,6 +880,37 @@ void main() {
     expect(clientSource, contains('@Suppress("DEPRECATION")'));
   });
 
+  test('Android cache helpers document SDK-deprecated call sites', () {
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final settingsSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+
+    expect(webViewSource, isNot(contains('@Deprecated("")')));
+    expect(
+      webViewSource,
+      contains(
+        'CookieManager.removeAllCookie is deprecated in the Android SDK; used only below API 21.',
+      ),
+    );
+    expect(
+      webViewSource,
+      contains(
+        'Calls WebView.clearCache, which is deprecated in the Android SDK; retained for minSdk 19 compatibility.',
+      ),
+    );
+    expect(
+      settingsSource,
+      contains(
+        'Android Autofill replaced WebView form-data saving; this setting is a no-op on API 26+.',
+      ),
+    );
+  });
+
   test('Android legacy APIs declare explicit native deprecation boundaries', () {
     const compatibilitySources = [
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/MyCookieManager.kt',
@@ -1358,5 +1388,31 @@ void main() {
     expect(scriptSource, contains('WEB_MESSAGE_LISTENER_JS_SOURCE()'));
     expect(bridgeSource, contains('onWebMessageListenerPostMessageReceived'));
     expect(bridgeSource, contains('TYPE_ARRAY_BUFFER'));
+  });
+
+  test('Android mute, visual-state, and native download stay feature-gated', () {
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final downloadSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'download_job/DownloadJobController.kt',
+    ).readAsStringSync();
+    final containerSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'container/ContainerManager.kt',
+    ).readAsStringSync();
+    final gradleSource = _sourceFile('android/build.gradle.kts').readAsStringSync();
+
+    expect(webViewSource, contains('WebViewFeature.MUTE_AUDIO'));
+    expect(webViewSource, contains('WebViewCompat.setAudioMuted'));
+    expect(webViewSource, contains('postVisualStateCallback'));
+    expect(webViewSource, contains('if (!response.handled || destination.isNullOrEmpty()) return'));
+    expect(downloadSource, contains('DownloadManager.Request'));
+    expect(containerSource, contains('addCustomHeader'));
+    expect(containerSource, contains('prefetchUrlAsync'));
+    expect(gradleSource, contains('androidx.webkit:webkit:1.15.0'));
+    expect(gradleSource, contains('minSdk = 19'));
   });
 }

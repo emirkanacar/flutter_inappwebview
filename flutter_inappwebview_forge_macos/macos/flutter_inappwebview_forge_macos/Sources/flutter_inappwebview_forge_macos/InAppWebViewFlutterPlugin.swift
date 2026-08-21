@@ -35,6 +35,7 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
     var headlessInAppWebViewManager: HeadlessInAppWebViewManager?
     var webAuthenticationSessionManager: WebAuthenticationSessionManager?
     var printJobManager: PrintJobManager?
+    var downloadJobManager: Any?
     var proxyManager: Any?
     var containerManager: ContainerManager?
     
@@ -57,6 +58,9 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
         myWebStorageManager = MyWebStorageManager(plugin: self)
         webAuthenticationSessionManager = WebAuthenticationSessionManager(plugin: self)
         printJobManager = PrintJobManager(plugin: self)
+        if #available(macOS 11.3, *) {
+            downloadJobManager = DownloadJobManager(plugin: self)
+        }
         if #available(macOS 14.0, *) {
             proxyManager = ProxyManager(plugin: self)
             containerManager = ContainerManager(plugin: self)
@@ -88,6 +92,10 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
         webAuthenticationSessionManager = nil
         printJobManager?.dispose()
         printJobManager = nil
+        if #available(macOS 11.3, *) {
+            (downloadJobManager as? DownloadJobManager)?.dispose()
+            downloadJobManager = nil
+        }
         if #available(macOS 14.0, *) {
             (proxyManager as? ProxyManager)?.dispose()
             proxyManager = nil

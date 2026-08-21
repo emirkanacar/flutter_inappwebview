@@ -73,7 +73,45 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
     return _instance!;
   }
 
-  Future<dynamic> _handleMethod(MethodCall call) async {}
+  Future<dynamic> _handleMethod(MethodCall call) async {
+    switch (call.method) {
+      case 'onCookieChanged':
+        final cookies = <Cookie>[];
+        final raw = call.arguments['cookies'] as List<dynamic>? ?? const [];
+        for (final item in raw) {
+          final cookie = Cookie.fromMap((item as Map).cast<String, dynamic>());
+          if (cookie != null) {
+            cookies.add(cookie);
+          }
+        }
+        for (final listener in List.of(_cookieChangedListeners)) {
+          await listener(cookies);
+        }
+        break;
+    }
+  }
+
+  final List<FutureOr<void> Function(List<Cookie> cookies)>
+  _cookieChangedListeners = [];
+
+  @override
+  Future<void> addCookieChangedListener(
+    FutureOr<void> Function(List<Cookie> cookies) listener,
+  ) async {
+    _cookieChangedListeners.add(listener);
+    if (_cookieChangedListeners.length == 1) {
+      await channel?.invokeMethod('addCookieChangedListener', <String, dynamic>{});
+    }
+  }
+
+  @override
+  Future<void> removeCookieChangedListener() async {
+    _cookieChangedListeners.clear();
+    await channel?.invokeMethod(
+      'removeCookieChangedListener',
+      <String, dynamic>{},
+    );
+  }
 
   void _addWebViewId(
     Map<String, dynamic> args,

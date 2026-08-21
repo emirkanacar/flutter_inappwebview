@@ -67,6 +67,12 @@ class DownloadStartRequest_ {
   )
   String? textEncodingName;
 
+  ///Plugin-assigned ID used to correlate a native [PlatformDownloadJobController].
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+  )
+  String? downloadId;
+
   DownloadStartRequest_({
     required this.url,
     this.userAgent,
@@ -75,5 +81,6 @@ class DownloadStartRequest_ {
     required this.contentLength,
     this.suggestedFilename,
     this.textEncodingName,
+    this.downloadId,
   });
 }

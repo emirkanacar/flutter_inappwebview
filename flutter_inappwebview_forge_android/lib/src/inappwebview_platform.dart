@@ -7,6 +7,7 @@ import 'http_auth_credentials_database.dart';
 import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/main.dart';
 import 'print_job/main.dart';
+import 'download_job/main.dart';
 import 'process_global_config.dart';
 import 'proxy_controller.dart';
 import 'container_controller.dart';
@@ -124,6 +125,18 @@ class AndroidInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   AndroidPrintJobController createPlatformPrintJobControllerStatic() {
     return AndroidPrintJobController.static();
+  }
+
+  @override
+  AndroidDownloadJobController createPlatformDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) {
+    return AndroidDownloadJobController(params);
+  }
+
+  @override
+  AndroidDownloadJobController createPlatformDownloadJobControllerStatic() {
+    return AndroidDownloadJobController.static();
   }
 
   /// Creates a new [AndroidPullToRefreshController].

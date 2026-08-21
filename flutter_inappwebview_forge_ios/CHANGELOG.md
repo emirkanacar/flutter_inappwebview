@@ -1,3 +1,16 @@
+## 2.1.34 - 2026-08-21
+
+- Map `setAudioMuted` / `isAudioMuted` to
+  `setAllMediaPlaybackSuspended`.
+- Start an opt-in `WKDownload` job when `onDownloadStarting` returns
+  `handled` and `resultFilePath`; the previous notify-only default is
+  unchanged.
+- Observe `WKHTTPCookieStore` changes, add
+  `allowsInlinePredictions`, `findString`, and iOS 26
+  `obscuredContentInsets`, session-storage fetch/restore, and
+  `isBlockedByScreenTime`.
+- Depend on platform-interface 1.1.21.
+
 ## 2.1.33 - 2026-08-21
 
 - Open system-browser URLs with

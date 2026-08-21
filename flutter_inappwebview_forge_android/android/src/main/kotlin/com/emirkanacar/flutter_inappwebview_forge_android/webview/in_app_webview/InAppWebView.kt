@@ -35,6 +35,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.find_interaction.FindI
 import com.emirkanacar.flutter_inappwebview_forge_android.in_app_browser.InAppBrowserDelegate
 import com.emirkanacar.flutter_inappwebview_forge_android.plugin_scripts_js.*
 import com.emirkanacar.flutter_inappwebview_forge_android.print_job.*
+import com.emirkanacar.flutter_inappwebview_forge_android.download_job.DownloadJobController
 import com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh.PullToRefreshLayout
 import com.emirkanacar.flutter_inappwebview_forge_android.types.*
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.InAppWebViewInterface
@@ -636,6 +637,21 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       }
     }
 
+    customSettings.backForwardCacheEnabled?.let { enabled ->
+      if (WebViewFeature.isFeatureSupported("BACK_FORWARD_CACHE")) {
+        try {
+          val method = WebSettingsCompat::class.java.methods.firstOrNull {
+            it.name == "setBackForwardCacheEnabled"
+          }
+          method?.invoke(null, settings, enabled)
+        } catch (_: Exception) {
+          // 1.16 replaced this setter with BackForwardCacheSettings.
+        }
+      }
+    }
+
+    maybeRegisterNavigationListener()
+
     if (
       customSettings.requestedWithHeaderOriginAllowList != null &&
       WebViewFeature.isFeatureSupported(WebViewFeature.REQUESTED_WITH_HEADER_ALLOW_LIST)
@@ -1061,7 +1077,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
   }
 
-  @Deprecated("")
+  @Deprecated("CookieManager.removeAllCookie is deprecated in the Android SDK; used only below API 21.")
   @Suppress("DEPRECATION")
   private fun clearCookies() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -1071,7 +1087,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
   }
 
-  @Deprecated("")
+  @Deprecated("Calls WebView.clearCache, which is deprecated in the Android SDK; retained for minSdk 19 compatibility.")
   override fun clearAllCache() {
     clearCache(true)
     clearCookies()
@@ -2112,18 +2128,55 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       mimeType: String,
       contentLength: Long
     ) {
-      channelDelegate?.onDownloadStarting(
-        DownloadStartRequest(
-          url,
-          userAgent,
-          contentDisposition,
-          mimeType,
-          contentLength,
-          URLUtil.guessFileName(url, contentDisposition, mimeType),
-          null
-        )
+      val downloadId = UUID.randomUUID().toString()
+      val request = DownloadStartRequest(
+        url,
+        userAgent,
+        contentDisposition,
+        mimeType,
+        contentLength,
+        URLUtil.guessFileName(url, contentDisposition, mimeType),
+        null,
+        downloadId
       )
+      val callback = object : WebViewChannelDelegate.DownloadStartCallback() {
+        override fun defaultBehaviour(result: DownloadStartResponse?) {
+          startNativeDownloadIfRequested(request, result)
+        }
+
+        override fun nonNullSuccess(result: DownloadStartResponse): Boolean {
+          startNativeDownloadIfRequested(request, result)
+          return false
+        }
+      }
+      val delegate = channelDelegate
+      if (delegate != null) {
+        delegate.onDownloadStarting(request, callback)
+      } else {
+        callback.completeDefaultBehaviour(null)
+      }
     }
+  }
+
+  private fun startNativeDownloadIfRequested(
+    request: DownloadStartRequest,
+    response: DownloadStartResponse?
+  ) {
+    if (response == null) return
+    if (response.action == 0) return
+    val destination = response.resultFilePath
+    if (!response.handled || destination.isNullOrEmpty()) return
+    val currentPlugin = plugin ?: return
+    val job = DownloadJobController(
+      request.downloadId ?: UUID.randomUUID().toString(),
+      request.url,
+      request.userAgent,
+      request.mimeType,
+      destination,
+      currentPlugin
+    )
+    currentPlugin.downloadJobManager?.jobs?.set(job.id, job)
+    job.start()
   }
 
   fun setDesktopMode(enabled: Boolean) {
@@ -2744,6 +2797,161 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
 
   override fun isInFullscreen(): Boolean = inFullscreen
+
+  fun setAudioMuted(muted: Boolean): Boolean {
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MUTE_AUDIO)) {
+      return false
+    }
+    WebViewCompat.setAudioMuted(this, muted)
+    return true
+  }
+
+  fun isAudioMuted(): Boolean {
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MUTE_AUDIO)) {
+      return false
+    }
+    return WebViewCompat.isAudioMuted(this)
+  }
+
+  fun navigateTo(
+    url: String?,
+    replaceHistory: Boolean,
+    headers: Map<String, String>?
+  ): Boolean {
+    if (url.isNullOrEmpty()) return false
+    if (WebViewFeature.isFeatureSupported("NAVIGATION_LISTENER")) {
+      try {
+        val method = WebViewCompat::class.java.getMethod(
+          "navigate",
+          WebView::class.java,
+          String::class.java
+        )
+        method.invoke(null, this, url)
+        return true
+      } catch (_: Exception) {
+        // Fall through to loadUrl when the installed WebView APK lacks navigate().
+      }
+    }
+    if (headers.isNullOrEmpty()) {
+      loadUrl(url)
+    } else {
+      loadUrl(url, headers)
+    }
+    return true
+  }
+
+  fun prerenderUrl(url: String?): Boolean {
+    if (url.isNullOrEmpty()) return false
+    if (!WebViewFeature.isFeatureSupported("PRERENDER_URL")) {
+      return false
+    }
+    try {
+      val method = WebViewCompat::class.java.methods.firstOrNull { it.name == "prerenderUrlAsync" }
+        ?: return false
+      method.invoke(null, this, url)
+      return true
+    } catch (_: Exception) {
+      return false
+    }
+  }
+
+  fun postVisualStateReady(requestId: Long): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      return false
+    }
+    postVisualStateCallback(requestId, object : WebView.VisualStateCallback() {
+      override fun onComplete(callbackId: Long) {
+        if (!lifecycle.acceptsCallbacks()) return
+        channelDelegate?.onVisualStateReady(callbackId)
+      }
+    })
+    return true
+  }
+
+  fun addJavaScriptOnEvent(source: String?, event: String): Boolean {
+    if (source.isNullOrEmpty()) return false
+    if (!WebViewFeature.isFeatureSupported("DOCUMENT_START_JAVASCRIPT")) {
+      return false
+    }
+    try {
+      val method = WebViewCompat::class.java.methods.firstOrNull { it.name == "addJavaScriptOnEvent" }
+        ?: return false
+      method.invoke(null, this, source, event)
+      return true
+    } catch (_: Exception) {
+      return false
+    }
+  }
+
+  fun maybeRegisterNavigationListener() {
+    if (!WebViewFeature.isFeatureSupported("NAVIGATION_LISTENER")) return
+    try {
+      val listenerClass = Class.forName("androidx.webkit.NavigationListener")
+      val proxy = java.lang.reflect.Proxy.newProxyInstance(
+        listenerClass.classLoader,
+        arrayOf(listenerClass)
+      ) { _, method, args ->
+        if (!lifecycle.acceptsCallbacks()) return@newProxyInstance null
+        val name = method.name
+        val payload = HashMap<String, Any?>()
+        when (name) {
+          "onNavigationStarted" -> payload["type"] = 0
+          "onNavigationRedirected" -> payload["type"] = 1
+          "onNavigationCompleted" -> payload["type"] = 2
+          "onPageDomContentLoadedEvent" -> payload["type"] = 3
+          "onPageLoadEvent" -> payload["type"] = 4
+          "onFirstContentfulPaintMillis" -> {
+            payload["type"] = 5
+            payload["durationMillis"] = (args?.getOrNull(1) as? Number)?.toInt()
+          }
+          "onLargestContentfulPaintMillis" -> {
+            payload["type"] = 6
+            payload["durationMillis"] = (args?.getOrNull(1) as? Number)?.toInt()
+          }
+          "onPerformanceMarkMillis" -> {
+            payload["type"] = 7
+            payload["markName"] = args?.getOrNull(1) as? String
+            payload["durationMillis"] = (args?.getOrNull(2) as? Number)?.toInt()
+          }
+          "onPageDeleted" -> payload["type"] = 8
+          else -> return@newProxyInstance null
+        }
+        val navigation = args?.getOrNull(0)
+        if (navigation != null) {
+          payload["url"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "getUrl" && it.parameterCount == 0 }
+            ?.invoke(navigation)?.toString()
+          payload["isSameDocument"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "isSameDocument" }
+            ?.invoke(navigation) as? Boolean
+          payload["isReload"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "isReload" }
+            ?.invoke(navigation) as? Boolean
+          payload["isBack"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "isBack" }
+            ?.invoke(navigation) as? Boolean
+          payload["isForward"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "isForward" }
+            ?.invoke(navigation) as? Boolean
+          payload["wasInitiatedByPage"] = navigation.javaClass.methods
+            .firstOrNull { it.name == "wasInitiatedByPage" }
+            ?.invoke(navigation) as? Boolean
+        }
+        channelDelegate?.onWebViewNavigation(payload)
+        null
+      }
+      val addMethod = WebViewCompat::class.java.methods.firstOrNull {
+        it.name == "addNavigationListener" && it.parameterCount >= 2
+      } ?: return
+      if (addMethod.parameterCount == 2) {
+        addMethod.invoke(null, this, proxy)
+      } else {
+        addMethod.invoke(null, this, java.util.concurrent.Executors.newSingleThreadExecutor(), proxy)
+      }
+    } catch (_: Exception) {
+      // The WebView APK or androidx.webkit build does not expose NavigationListener yet.
+    }
+  }
 
   override fun setInFullscreen(inFullscreen: Boolean) {
     this.inFullscreen = inFullscreen
