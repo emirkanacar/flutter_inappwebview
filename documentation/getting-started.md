@@ -27,7 +27,7 @@ Add the root package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.71
+  flutter_inappwebview_forge: ^2.1.72
 ```
 
 Then fetch packages:

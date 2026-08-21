@@ -47,7 +47,7 @@ new setting while preserving the public contract.
 
    ```yaml
    dependencies:
-     flutter_inappwebview_forge: ^2.1.71
+     flutter_inappwebview_forge: ^2.1.72
    ```
 
    ```dart

@@ -6,6 +6,13 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.72 - 2026-08-21
+
+- Flutter web applications can compile with `flutter build web --wasm`.
+- Localhost `dart:io` types stay behind `dart.library.io`; Web JavaScript
+  bridge values convert to Dart primitives.
+- `InAppLocalhostServer` remains unsupported on web.
+
 ## 2.1.71 - 2026-08-14
 
 - Added opt-in `InAppWebViewPreloader` for headless startup and reuse through

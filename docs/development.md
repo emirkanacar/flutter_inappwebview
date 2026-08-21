@@ -132,3 +132,67 @@ For issue-specific work, follow the detailed [issue resolution workflow](issue-r
 - iOS/macOS SPM and CocoaPods paths are checked.
 - Native device/OS/WebView/WebKit/WPE validation gaps are explicitly recorded.
 - `fvm flutter analyze --no-pub` and the relevant test suites pass.
+- README and documentation install snippets match the versions that will be
+  published.
+
+## Publishing to pub.dev
+
+Federated packages must be published in dependency order. A consumer package
+cannot resolve a new constraint until the dependency exists on pub.dev.
+
+1. Confirm you are a publisher on the pub.dev packages, then log in once:
+
+   ```sh
+   dart pub login
+   ```
+
+2. Dry-run the packages that will change. Keep local `path:` overrides
+   commented in published `pubspec.yaml` files.
+
+   ```sh
+   cd flutter_inappwebview_forge_platform_interface && fvm flutter pub publish --dry-run
+   cd ../flutter_inappwebview_forge_web && fvm flutter pub publish --dry-run
+   cd ../flutter_inappwebview_forge && fvm flutter pub publish --dry-run
+   ```
+
+3. Publish changed packages from the bottom of the graph first. For the
+   current WASM line that is:
+
+   ```sh
+   npm run publish:platform_interface
+   npm run publish:web
+   npm run publish:plugin
+   ```
+
+   If annotations or a native platform package also changed, publish those
+   before the packages that depend on them:
+
+   ```sh
+   npm run publish:annotations
+   npm run publish:android
+   npm run publish:ios
+   npm run publish:macos
+   npm run publish:windows
+   npm run publish:linux
+   ```
+
+   Do not republish an unchanged platform package. A version that already
+   exists on pub.dev cannot be overwritten.
+
+4. After each publish, wait until `pub.dev` shows the new version (usually
+   under a minute) before publishing the next package. If a dependent
+   publish fails with a version-solving error, wait and retry; do not bump
+   versions again.
+
+5. Confirm the public pages:
+
+   - https://pub.dev/packages/flutter_inappwebview_forge
+   - https://pub.dev/packages/flutter_inappwebview_forge_platform_interface
+   - https://pub.dev/packages/flutter_inappwebview_forge_web
+
+The convenience scripts live in the repository `package.json`. They call
+`flutter pub publish` in each package directory and prompt for confirmation.
+To publish everything that currently has a new version, use
+`npm run publish:interface_and_all_platforms` and then `npm run publish:plugin`.
+That republishes native packages only when their `pubspec.yaml` versions are
+new; otherwise pub.dev rejects the duplicate.
