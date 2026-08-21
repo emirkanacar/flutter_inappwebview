@@ -127,19 +127,17 @@ public class InAppBrowserManager: ChannelDelegate {
     }
     
     public func openWithSystemBrowser(url: String, result: @escaping FlutterResult) {
-        let absoluteUrl = URL(string: url)!.absoluteURL
-        if !UIApplication.shared.canOpenURL(absoluteUrl) {
+        guard let absoluteUrl = URL(string: url)?.absoluteURL else {
             result(FlutterError(code: "InAppBrowserManager", message: url + " cannot be opened!", details: nil))
             return
         }
-        else {
-            if #available(iOS 10.0, *) {
-                UIApplication.shared.open(absoluteUrl)
+        UIApplication.shared.open(absoluteUrl, options: [:]) { success in
+            if success {
+                result(true)
             } else {
-                UIApplication.shared.openURL(absoluteUrl)
+                result(FlutterError(code: "InAppBrowserManager", message: url + " cannot be opened!", details: nil))
             }
         }
-        result(true)
     }
     
     public override func dispose() {

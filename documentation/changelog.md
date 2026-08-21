@@ -6,6 +6,12 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.74 - 2026-08-21
+
+- iOS `InAppBrowser.openWithSystemBrowser` opens URLs with
+  `UIApplication.open(_:options:completionHandler:)` instead of the iOS 27
+  SDK-deprecated `canOpenURL` pre-check.
+
 ## 2.1.73 - 2026-08-21
 
 - Pub.dev static analysis now uses lowerCamelCase `urls` on

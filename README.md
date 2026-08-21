@@ -50,7 +50,7 @@ WebView gestures incorrectly on iOS.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.73
+  flutter_inappwebview_forge: ^2.1.74
 ```
 
 ```sh
@@ -160,7 +160,7 @@ Replace the package name and import. Widget and controller names stay the same.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.73
+  flutter_inappwebview_forge: ^2.1.74
 ```
 
 ```dart

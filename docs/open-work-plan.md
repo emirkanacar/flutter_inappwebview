@@ -70,6 +70,14 @@ platform-interface 1.1.17. They are not an exported issue record and therefore
 do not change the 125-issue counts; physical keyboard/WebView validation is
 tracked in the runtime register.
 
+Upstream [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
+was filed after the CSV snapshot. iOS 2.1.33 / root 2.1.74 replace
+`UIApplication.canOpenURL` in `openWithSystemBrowser` with
+`open(_:options:completionHandler:)` and keep the existing FlutterError
+contract. It is not one of the 125 exported issue records and does not change
+the active-queue counts; iOS 27 Simulator/device open-URL validation is
+tracked in the runtime register.
+
 The 78 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
 along with the nine PR-only records. They are resolved implementation work,
@@ -595,7 +603,9 @@ records; counts, issue IDs, and platform gates are maintained in
 [`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
 keeps only the 30 issue records that still need implementation, design, or
 reproduction. Fifteen host/platform boundaries are tracked above and are not
-counted as resolved implementations.
+counted as resolved implementations. [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
+is a post-export iOS SDK compatibility fix tracked in that runtime register
+and is not part of the 125-issue active queue.
 
 ## PR queue
 

@@ -1,3 +1,10 @@
+## 2.1.74 - 2026-08-21
+
+- Depend on iOS 2.1.33, which opens system-browser URLs through
+  `UIApplication.open(_:options:completionHandler:)` instead of the iOS 27
+  SDK-deprecated `canOpenURL` pre-check
+  ([#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)).
+
 ## 2.1.73 - 2026-08-21
 
 - Satisfy pub.dev Pana `lints_core` analysis by renaming the

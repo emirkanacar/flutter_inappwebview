@@ -34,6 +34,27 @@ Nine PR-only records also have local implementations but remain outside the
 [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), and
 [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825), and
 [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866).
+[#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) is
+a post-export upstream issue with a local source fix and is also outside the
+125-issue count.
+
+### iOS 27 `canOpenURL` deprecation (#2882)
+
+Issue [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
+is not in the 125-issue CSV snapshot. It is source-fixed in iOS 2.1.33 and
+root 2.1.74. `InAppBrowserManager.openWithSystemBrowser` now parses the URL
+with optional binding, calls
+`UIApplication.open(_:options:completionHandler:)`, and completes the
+existing `true` / `cannot be opened!` FlutterError contract from that
+result. The Dart API, channel name, method name, and `{url}` payload are
+unchanged. macOS already uses `NSWorkspace.shared.open` and was left
+unchanged. iOS package tests, `swift package dump-package`, and
+`flutter build ios --debug --no-codesign` for the iOS example against
+Xcode 27 / iOS 27.0 SDK pass. Runtime validation requires
+`InAppBrowser.openWithSystemBrowser(url: https://flutter.dev)` on an iOS 27
+Simulator or device, plus a malformed or unopenable URL that still returns
+`cannot be opened!`. This record does not change the 78 CSV runtime-pending
+count.
 
 PR [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866)
 is source-fixed in the platform-interface, iOS, macOS, and root packages. The

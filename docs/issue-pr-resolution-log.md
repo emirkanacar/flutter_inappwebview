@@ -15,6 +15,19 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-21 iOS 27 `canOpenURL` deprecation (upstream #2882)
+
+iOS 2.1.33 and root 2.1.74 replace the only `UIApplication.canOpenURL`
+call site in `InAppBrowserManager.openWithSystemBrowser` with
+`open(_:options:completionHandler:)` and complete the existing
+`cannot be opened!` FlutterError from that result. The public Dart API,
+channel name, method name, and `{url}` payload are unchanged; macOS already
+uses `NSWorkspace.shared.open` and was left unchanged. This issue is not in
+the 125-issue CSV snapshot. iOS package tests, SwiftPM dump-package, and the
+Xcode 27 iOS example debug build pass. An iOS 27 Simulator or device
+system-browser open, including a malformed URL error path, remains the
+runtime gate. No upstream issue or PR state was changed.
+
 ## 2026-08-21 Pub.dev lints_core static analysis (upstream #2757)
 
 Root 2.1.73 and platform-interface 1.1.19 address the published 2.1.72 Pana
@@ -555,11 +568,17 @@ tracked separately from that historical export:
 | Open implementation or reproduction | 30 issues | [open-work-plan.md](open-work-plan.md) |
 | PR-only local implementations awaiting runtime validation | 9 PRs | `#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, `#2825`, `#2866` |
 
+[#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
+is a post-export upstream issue, not one of the 125 CSV rows. It is
+source-fixed in iOS 2.1.33 / root 2.1.74 and tracked in the runtime register
+without changing the export counts.
+
 The issue inventory below remains the historical 125-record export and is not
 reduced when a record moves between the local status registers.
 
 ## Local resolution history
 
+| 2026-08-21 | iOS 27 `canOpenURL` deprecation [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) | No upstream PR | iOS 2.1.33 / root 2.1.74 open system-browser URLs through `UIApplication.open(_:options:completionHandler:)` and complete the existing FlutterError contract from that result. iOS package tests, SwiftPM dump-package, and the Xcode 27 example debug build pass. iOS 27 Simulator/device open-URL validation remains pending. This issue is not in the CSV snapshot. |
 | 2026-08-21 | Pub.dev lints_core static analysis | [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757) | Root 2.1.73 and platform-interface 1.1.19 rename `prewarmConnections` `URLs` to `urls` and declare `Future<void>` on `setServiceWorkerClient`. The iOS channel key remains `URLs`. Republish/Pana 50/50 remains pending. |
 | 2026-08-21 | Flutter web WASM compilation | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 gate `dart:io` localhost types and convert JS bridge values so `flutter build web --wasm` succeeds. Chrome WasmGC iframe/bridge runtime remains pending. |
 
@@ -644,6 +663,7 @@ reduced when a record moves between the local status registers.
 
 | Local release | Issue/report scope | Related PR records | Local result |
 | --- | --- | --- | --- |
+| 2.1.74 / iOS 2.1.33 | iOS 27 `canOpenURL` deprecation [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) | No upstream PR | Root 2.1.74 depends on iOS 2.1.33. System-browser URLs open through `UIApplication.open(_:options:completionHandler:)` and complete the existing FlutterError contract from that result. iOS package tests, SwiftPM dump-package, and the Xcode 27 example debug build pass; iOS 27 Simulator/device open-URL validation remains required. |
 | 2.1.48 / Android 1.0.43 | Android cookie mutation ANR [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718) | No upstream relationship inferred | API 21+ cookie mutations no longer force synchronous `CookieManager.flush()` on the WebView UI thread after asynchronous updates, and the explicit `flush` MethodChannel result now completes. The Android package suite passes 48/48 and the native debug build path compiles the fix. The A16 diagnostic passes 10/10 cycles with an empty final cookie list and no app crash/ANR; Android 10/provider and Play Console validation remain required. |
 | 2.1.40 / Android 1.0.37 | Android nullable and malformed permission callback payloads [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856) | [#2857](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2857) | Android permission request/cancellation payloads now validate the map, origin, and resources container before decoding, filter unknown resource entries, and preserve native default behavior for malformed payloads. The focused regression and Android package tests pass; API/provider validation remains required. |
 | 2.1.39 / iOS 2.1.22 | iOS popup `EXC_BAD_ACCESS` and async callback ownership [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867) | [#2776](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776) | Popup JavaScript remains in the initialized page world, and pending native/legacy async callbacks now complete with `WebView navigation started` before a new provisional navigation. Source tests and the iPhone 17 Pro iOS 26.2 three-cycle diagnostic pass; physical iOS 15–26/Xcode 16/26 validation remains required. |

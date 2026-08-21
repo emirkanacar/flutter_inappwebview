@@ -15,6 +15,19 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-08-21 iOS 27 `canOpenURL` deprecation
+
+Upstream [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
+was filed after the 125-issue CSV snapshot and does not change those export
+counts. iOS 2.1.33 / root 2.1.74 remove the only `UIApplication.canOpenURL`
+call site from `InAppBrowserManager.openWithSystemBrowser` and complete the
+existing MethodChannel success/`cannot be opened!` contract from
+`open(_:options:completionHandler:)`. macOS already reports
+`NSWorkspace.shared.open` and is unchanged. Source-contract tests, SwiftPM
+manifest validation, and the Xcode 27 iOS example debug build pass. An iOS 27
+Simulator or device `InAppBrowser.openWithSystemBrowser` run, including a
+malformed or unopenable URL, remains the runtime gate.
+
 ## 2026-08-14 WebView prewarm and reuse helper
 
 The root package now provides `InAppWebViewPreloader` for an opt-in
@@ -1143,6 +1156,18 @@ Issue [#2791](https://github.com/pichillilorenzo/flutter_inappwebview/issues/279
 The Forge Android client now lets HTTP/HTTPS main-frame navigations continue through WebView when the Dart policy returns `ALLOW`, so the original browsing context remains intact. If Dart returns `CANCEL`, the current native navigation is stopped when its navigation token is still current. Non-HTTP(S) schemes retain the asynchronous reload path needed by the existing API contract.
 
 **Remaining validation:** add a device integration test covering `window.opener`, `Referer`, `Sec-Fetch-Site`, POST navigation, and cancellation.
+
+### #2882 — iOS 27 `canOpenURL` deprecation
+
+**Local status:** Implemented in iOS 2.1.33 and root 2.1.74; iOS 27 Simulator/device open-URL validation pending. **Affected scope:** iOS `InAppBrowser.openWithSystemBrowser` native path. **Impact:** compiling against the iOS 27 SDK warns on `UIApplication.canOpenURL`, and that pre-check can also false-negative custom schemes that are not listed in `LSApplicationQueriesSchemes`. **Confidence:** Confirmed plugin call site; the Dart API, MethodChannel payload, and macOS `NSWorkspace.open` path are unchanged.
+
+Issue [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882) is not in the supplied 125-issue CSV snapshot. The only `canOpenURL` call site was `InAppBrowserManager.openWithSystemBrowser`, which force-unwrapped the URL, rejected the channel when `canOpenURL` returned false, then fire-and-forget `open`/`openURL` and always completed `true`. The iOS 15 deployment target already made the iOS 10 `openURL` branch dead.
+
+The Forge implementation now parses the URL with optional binding, calls `UIApplication.shared.open(_:options:completionHandler:)`, and invokes the existing `FlutterResult` exactly once from that completion: `true` on success, otherwise `FlutterError(code: "InAppBrowserManager", message: url + " cannot be opened!")`. The Dart `Future<void>` still completes on success and still throws `PlatformException` on failure; it now waits for UIKit's open result instead of the deprecated pre-check.
+
+iOS package source-contract tests, `swift package dump-package`, and `flutter build ios --debug --no-codesign` for the iOS example against Xcode 27 / iOS 27.0 SDK pass.
+
+**Remaining validation:** run `InAppBrowser.openWithSystemBrowser(url: https://flutter.dev)` on an iOS 27 Simulator or device, and confirm a malformed or unopenable URL still returns `cannot be opened!`.
 
 ### #2728 — Android 15 deprecated system-bar APIs
 

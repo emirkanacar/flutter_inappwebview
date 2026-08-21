@@ -454,6 +454,20 @@ void _runSourceContractAssertions() {
     'iOS in-app-browser manager retains nullable ownership placeholders',
   );
   _assert(
+    inAppBrowserManagerSource.contains(
+          'guard let absoluteUrl = URL(string: url)?.absoluteURL',
+        ) &&
+        inAppBrowserManagerSource.contains(
+          'open(absoluteUrl, options:',
+        ) &&
+        inAppBrowserManagerSource.contains('result(true)') &&
+        inAppBrowserManagerSource.contains('cannot be opened!') &&
+        !inAppBrowserManagerSource.contains('canOpenURL') &&
+        !inAppBrowserManagerSource.contains('openURL(') &&
+        !inAppBrowserManagerSource.contains('URL(string: url)!'),
+    'iOS openWithSystemBrowser still uses canOpenURL or force-unwraps the URL',
+  );
+  _assert(
     source.contains('guard let presentingViewController') &&
         source.contains('visibleViewController'),
     'iOS prompt presentation path does not guard missing presenters',

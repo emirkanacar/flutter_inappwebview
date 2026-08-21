@@ -1,3 +1,11 @@
+## 2.1.33 - 2026-08-21
+
+- Open system-browser URLs with
+  `UIApplication.open(_:options:completionHandler:)` instead of the iOS 27
+  SDK-deprecated `canOpenURL` pre-check, and complete the existing
+  `cannot be opened!` FlutterError from that result
+  ([#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)).
+
 ## 2.1.32 - 2026-08-21
 
 - Rename the Dart `prewarmConnections` parameter to `urls` while keeping
