@@ -15,6 +15,15 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-08-21 Pub.dev lints_core static analysis (upstream #2757)
+
+Root 2.1.73 and platform-interface 1.1.19 address the published 2.1.72 Pana
+40/50 static-analysis deduction: `prewarmConnections` uses lowerCamelCase
+`urls`, and `setServiceWorkerClient` declares `Future<void>`. The iOS
+MethodChannel payload key remains `URLs`. Focused source-contract tests
+pass. A republished Pana 50/50 score remains the remaining gate. No
+upstream issue or PR state was changed.
+
 ## 2026-08-21 Flutter web WASM compilation (upstream #2811)
 
 Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 compile with
@@ -551,6 +560,7 @@ reduced when a record moves between the local status registers.
 
 ## Local resolution history
 
+| 2026-08-21 | Pub.dev lints_core static analysis | [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757) | Root 2.1.73 and platform-interface 1.1.19 rename `prewarmConnections` `URLs` to `urls` and declare `Future<void>` on `setServiceWorkerClient`. The iOS channel key remains `URLs`. Republish/Pana 50/50 remains pending. |
 | 2026-08-21 | Flutter web WASM compilation | [#2811](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2811) | Platform-interface 1.1.18, Web 1.0.4, and root 2.1.72 gate `dart:io` localhost types and convert JS bridge values so `flutter build web --wasm` succeeds. Chrome WasmGC iframe/bridge runtime remains pending. |
 
 | 2026-08-13 | Universal Link navigation policy | [#2866](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2866) | The additive `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` maps to WebKit raw value `3` on iOS/macOS and falls back to `ALLOW` (`1`) on Android, Web, Windows, and Linux. iOS/macOS decode the raw policy defensively; focused Dart and native source-contract tests pass. An associated app and Universal Link domain are still required to validate an OAuth/form POST without app handoff. |

@@ -1,3 +1,8 @@
+## 2.1.32 - 2026-08-21
+
+- Rename the Dart `prewarmConnections` parameter to `urls` while keeping
+  the MethodChannel payload key `URLs`.
+
 ## 2.1.31 - 2026-08-13
 
 - Support `NavigationActionPolicy.ALLOW_WITHOUT_TRYING_APP_LINK` for keeping

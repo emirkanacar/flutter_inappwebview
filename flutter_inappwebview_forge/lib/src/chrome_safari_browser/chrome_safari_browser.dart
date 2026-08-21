@@ -196,8 +196,8 @@ class ChromeSafariBrowser implements PlatformChromeSafariBrowserEvents {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformChromeSafariBrowser.prewarmConnections}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformChromeSafariBrowser.prewarmConnections.supported_platforms}
-  static Future<PrewarmingToken?> prewarmConnections(List<WebUri> URLs) =>
-      PlatformChromeSafariBrowser.static().prewarmConnections(URLs);
+  static Future<PrewarmingToken?> prewarmConnections(List<WebUri> urls) =>
+      PlatformChromeSafariBrowser.static().prewarmConnections(urls);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformChromeSafariBrowser.invalidatePrewarmingToken}
   ///

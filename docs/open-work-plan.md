@@ -227,8 +227,10 @@ and its related upstream [#2758](https://github.com/pichillilorenzo/flutter_inap
 are fixed locally by changing disabled `linter.rules` overrides from the
 string `ignore` form to boolean `false` across the federated packages. The
 legacy Pana 0.23.3 failure reproduces with the old form and passes with the
-new form in an isolated package; full package publish analysis remains a
-release gate because these Forge package names are not yet published.
+new form in an isolated package. Published 2.1.72 scores static analysis
+40/50 for three `lints_core` INFO findings; root 2.1.73 and
+platform-interface 1.1.19 address those identifiers and return types. A
+republished Pana 50/50 score remains the remaining gate.
 
 Android release-gate issue [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687)
 is mitigated in the example release path. The Gradle build directory now

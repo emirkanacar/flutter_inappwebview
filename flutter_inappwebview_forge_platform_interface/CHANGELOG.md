@@ -1,3 +1,9 @@
+## 1.1.19 - 2026-08-21
+
+- Rename the `prewarmConnections` positional parameter `URLs` to `urls` for
+  `lints_core` identifier compatibility. The iOS MethodChannel payload key
+  remains `URLs`.
+
 ## 1.1.18 - 2026-08-21
 
 - Keep `dart:io` localhost types behind `dart.library.io` conditional

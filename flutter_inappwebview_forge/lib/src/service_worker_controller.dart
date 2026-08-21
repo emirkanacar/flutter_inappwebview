@@ -44,7 +44,7 @@ class ServiceWorkerController {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformServiceWorkerController.setServiceWorkerClient}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformServiceWorkerController.setServiceWorkerClient.supported_platforms}
-  setServiceWorkerClient(ServiceWorkerClient? value) =>
+  Future<void> setServiceWorkerClient(ServiceWorkerClient? value) =>
       platform.setServiceWorkerClient(value);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformServiceWorkerController.getAllowContentAccess}
@@ -142,7 +142,7 @@ class AndroidServiceWorkerController {
   }
 
   ///Sets the service worker client
-  setServiceWorkerClient(AndroidServiceWorkerClient? value) async {
+  Future<void> setServiceWorkerClient(AndroidServiceWorkerClient? value) async {
     await ServiceWorkerController.instance().setServiceWorkerClient(
       value != null
           ? ServiceWorkerClient(

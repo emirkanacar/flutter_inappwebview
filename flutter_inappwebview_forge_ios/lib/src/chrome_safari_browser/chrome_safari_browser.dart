@@ -58,9 +58,7 @@ class IOSChromeSafariBrowser extends PlatformChromeSafariBrowser
   );
 
   _init() {
-    channel = MethodChannel(
-      'com.emirkanacar/flutter_chromesafaribrowser_$id',
-    );
+    channel = MethodChannel('com.emirkanacar/flutter_chromesafaribrowser_$id');
     handler = _handleMethod;
     initMethodCallHandler();
   }
@@ -199,9 +197,9 @@ class IOSChromeSafariBrowser extends PlatformChromeSafariBrowser
   }
 
   @override
-  Future<PrewarmingToken?> prewarmConnections(List<WebUri> URLs) async {
+  Future<PrewarmingToken?> prewarmConnections(List<WebUri> urls) async {
     Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent('URLs', () => URLs.map((e) => e.toString()).toList());
+    args.putIfAbsent('URLs', () => urls.map((e) => e.toString()).toList());
     Map<String, dynamic>? result = (await _staticChannel.invokeMethod(
       "prewarmConnections",
       args,

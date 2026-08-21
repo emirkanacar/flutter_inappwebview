@@ -1156,11 +1156,13 @@ The Forge `InAppBrowserActivity` no longer emits a direct `statusBarColor` assig
 
 ### #2757 — pub.dev Pana analysis fails on disabled lint overrides
 
-**Local status:** Implemented in the federated analysis configuration; full pub.dev/publish validation pending. **Affected scope:** package analysis and pub.dev platform-support scoring. **Impact:** Pana 0.23.3 crashes before analysis when a package's `linter.rules` map uses the string `ignore` value, preventing analysis results and platform badges from being generated. **Confidence:** Confirmed tool failure and configuration fix.
+**Local status:** Implemented in the federated analysis configuration and in root 2.1.73 / platform-interface 1.1.19; republish/Pana 50/50 pending. **Affected scope:** package analysis and pub.dev platform-support scoring. **Impact:** Pana 0.23.3 crashes before analysis when a package's `linter.rules` map uses the string `ignore` value, preventing analysis results and platform badges from being generated. **Confidence:** Confirmed tool failure and configuration fix.
 
 The related upstream [PR #2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758) changes disabled linter overrides from `ignore` to boolean `false`. Forge applies the same compatibility fix across the federated package analysis options. In an isolated package, Pana 0.23.3 reproduces the `type 'String' is not a subtype of type 'bool'` failure with the old form and passes static analysis with the boolean form. The current Pana 0.23.17 tool also no longer contains that type assumption.
 
-**Remaining validation:** run Pana against the published Forge package set (or a complete local package graph with all dependency overrides) and retain the publish/platform-badge report. This record remains in the runtime validation register until that release gate passes.
+The published 2.1.72 Pana report scores static analysis 40/50 for three `lints_core` INFO findings: `prewarmConnections` used a `URLs` parameter name, and two `setServiceWorkerClient` methods omitted return types. Root 2.1.73 and platform-interface 1.1.19 rename the positional parameter to `urls` and declare `Future<void>` on those methods. The iOS MethodChannel payload key remains `URLs`.
+
+**Remaining validation:** republish 2.1.73 and retain a Pana report with static analysis 50/50. This record remains in the runtime validation register until that release gate passes.
 
 ### #2641 and #2685 — Android Java/WebView deprecation warning backlog
 

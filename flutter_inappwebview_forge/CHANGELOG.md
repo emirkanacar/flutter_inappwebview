@@ -1,3 +1,11 @@
+## 2.1.73 - 2026-08-21
+
+- Satisfy pub.dev Pana `lints_core` analysis by renaming the
+  `prewarmConnections` parameter `URLs` to `urls` and declaring
+  `Future<void>` on `ServiceWorkerController.setServiceWorkerClient`.
+  The iOS MethodChannel payload key remains `URLs`.
+- Depend on platform-interface 1.1.19 and iOS 2.1.32.
+
 ## 2.1.72 - 2026-08-21
 
 - Compile Flutter web applications with `--wasm` by keeping `dart:io`

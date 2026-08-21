@@ -562,7 +562,7 @@ abstract class PlatformChromeSafariBrowser extends PlatformInterface
   ///to present the browser soon. Many HTTP servers time out connections after a few minutes.
   ///After a timeout, prewarming delivers less performance benefit.
   ///
-  ///[URLs] - the URLs of servers that the browser should prewarm connections to.
+  ///[urls] - the URLs of servers that the browser should prewarm connections to.
   ///Only supports URLs with `http://` or `https://` schemes.
   ///{@endtemplate}
   ///
@@ -577,7 +577,7 @@ abstract class PlatformChromeSafariBrowser extends PlatformInterface
       ),
     ],
   )
-  Future<PrewarmingToken?> prewarmConnections(List<WebUri> URLs) {
+  Future<PrewarmingToken?> prewarmConnections(List<WebUri> urls) {
     throw UnimplementedError(
       'prewarmConnections is not implemented on the current platform',
     );
