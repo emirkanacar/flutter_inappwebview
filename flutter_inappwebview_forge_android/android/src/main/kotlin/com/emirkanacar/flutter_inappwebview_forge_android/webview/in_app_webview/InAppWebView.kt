@@ -649,8 +649,13 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         }
       }
     }
+    applyBackForwardCacheSettings(settings)
 
     maybeRegisterNavigationListener()
+
+    if (customSettings.useWebViewBuilder == true) {
+      applyWebViewBuilderConfiguration()
+    }
 
     if (
       customSettings.requestedWithHeaderOriginAllowList != null &&
@@ -2813,6 +2818,119 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     return WebViewCompat.isAudioMuted(this)
   }
 
+  private fun applyBackForwardCacheSettings(settings: android.webkit.WebSettings) {
+    val timeoutSeconds = customSettings.backForwardCacheTimeoutSeconds
+    val maxPages = customSettings.backForwardCacheMaxPagesInCache
+    if (timeoutSeconds == null && maxPages == null) {
+      return
+    }
+    // Prefer the 1.16 live BackForwardCacheSettings object when present.
+    try {
+      val getMethod = WebSettingsCompat::class.java.methods.firstOrNull {
+        it.name == "getBackForwardCacheSettings"
+      } ?: throw NoSuchMethodException("getBackForwardCacheSettings")
+      val bfSettings = getMethod.invoke(null, settings) ?: return
+      if (timeoutSeconds != null) {
+        try {
+          bfSettings.javaClass
+            .getMethod("setTimeoutSeconds", Long::class.javaPrimitiveType)
+            .invoke(bfSettings, timeoutSeconds.toLong())
+        } catch (_: Exception) {
+          bfSettings.javaClass
+            .getMethod("setTimeoutSeconds", Int::class.javaPrimitiveType)
+            .invoke(bfSettings, timeoutSeconds)
+        }
+      }
+      if (maxPages != null) {
+        bfSettings.javaClass
+          .getMethod("setMaxPagesInCache", Int::class.javaPrimitiveType)
+          .invoke(bfSettings, maxPages)
+      }
+      return
+    } catch (_: Exception) {
+      // Fall through to the 1.15 Builder-based setter when available.
+    }
+    if (!WebViewFeature.isFeatureSupported("BACK_FORWARD_CACHE") &&
+      !WebViewFeature.isFeatureSupported("BACK_FORWARD_CACHE_SETTINGS")
+    ) {
+      return
+    }
+    try {
+      val settingsClass = Class.forName("androidx.webkit.BackForwardCacheSettings")
+      val builderClass = Class.forName("androidx.webkit.BackForwardCacheSettings\$Builder")
+      val builder = builderClass.getConstructor().newInstance()
+      if (timeoutSeconds != null) {
+        try {
+          builderClass
+            .getMethod("setTimeoutSeconds", Long::class.javaPrimitiveType)
+            .invoke(builder, timeoutSeconds.toLong())
+        } catch (_: Exception) {
+          builderClass
+            .getMethod("setTimeoutSeconds", Int::class.javaPrimitiveType)
+            .invoke(builder, timeoutSeconds)
+        }
+      }
+      if (maxPages != null) {
+        builderClass
+          .getMethod("setMaxPagesInCache", Int::class.javaPrimitiveType)
+          .invoke(builder, maxPages)
+      }
+      val built = builderClass.getMethod("build").invoke(builder)
+      WebSettingsCompat::class.java
+        .getMethod("setBackForwardCacheSettings", android.webkit.WebSettings::class.java, settingsClass)
+        .invoke(null, settings, built)
+    } catch (_: Exception) {
+      // Provider or library shape does not expose BFCache depth settings.
+    }
+  }
+
+  private fun applyWebViewBuilderConfiguration() {
+    if (!WebViewFeature.isFeatureSupported("WEBVIEW_BUILDER") &&
+      !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)
+    ) {
+      // Still attempt applyTo when the class exists on newer AndroidX jars.
+    }
+    try {
+      val builderClass = Class.forName("androidx.webkit.WebViewBuilder")
+      val builder = builderClass.getConstructor().newInstance()
+      val profileName = customSettings.containerId
+      if (!profileName.isNullOrEmpty() &&
+        WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)
+      ) {
+        builderClass.getMethod("setProfile", String::class.java).invoke(builder, profileName)
+      }
+      val origins = customSettings.webViewBuilderOriginAllowList
+      if (!origins.isNullOrEmpty()) {
+        try {
+          val allowListClass = Class.forName("androidx.webkit.RestrictionAllowlist")
+          val allowListBuilderClass =
+            Class.forName("androidx.webkit.RestrictionAllowlist\$Builder")
+          val allowListBuilder = allowListBuilderClass.getConstructor().newInstance()
+          val addOrigin = allowListBuilderClass.methods.firstOrNull {
+            it.name.startsWith("add") && it.parameterCount == 1
+          }
+          origins.forEach { origin ->
+            addOrigin?.invoke(allowListBuilder, origin)
+          }
+          val allowList = allowListBuilderClass.getMethod("build").invoke(allowListBuilder)
+          builderClass.methods.firstOrNull {
+            it.name.contains("Allowlist", ignoreCase = true) && it.parameterCount == 1
+          }?.invoke(builder, allowList)
+        } catch (_: Exception) {
+          // Origin allowlists are optional on older builder shapes.
+        }
+      }
+      val applyTo = builderClass.methods.firstOrNull {
+        it.name == "applyTo" && it.parameterCount == 1
+      }
+      if (applyTo != null) {
+        applyTo.invoke(builder, this)
+      }
+    } catch (_: Exception) {
+      // Keep the default InAppWebView path when WebViewBuilder.applyTo is unavailable.
+    }
+  }
+
   fun navigateTo(
     url: String?,
     replaceHistory: Boolean,
@@ -2821,15 +2939,60 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     if (url.isNullOrEmpty()) return false
     if (WebViewFeature.isFeatureSupported("NAVIGATION_LISTENER")) {
       try {
-        val method = WebViewCompat::class.java.getMethod(
+        val paramsClass = Class.forName("androidx.webkit.NavigationParameters")
+        val builderClass = Class.forName("androidx.webkit.NavigationParameters\$Builder")
+        val builder = builderClass.getConstructor().newInstance()
+        if (replaceHistory) {
+          try {
+            builderClass
+              .getMethod("setShouldReplaceCurrentEntry", Boolean::class.javaPrimitiveType)
+              .invoke(builder, true)
+          } catch (_: Exception) {
+            try {
+              builderClass
+                .getMethod("setReplaceCurrentEntry", Boolean::class.javaPrimitiveType)
+                .invoke(builder, true)
+            } catch (_: Exception) {
+              // Older NavigationParameters builders omit replace-history.
+            }
+          }
+        }
+        if (!headers.isNullOrEmpty()) {
+          try {
+            builderClass
+              .getMethod("setAdditionalHeaders", Map::class.java)
+              .invoke(builder, headers)
+          } catch (_: Exception) {
+            try {
+              builderClass
+                .getMethod("setAdditionalHttpHeaders", Map::class.java)
+                .invoke(builder, headers)
+            } catch (_: Exception) {
+              // Headers stay on the loadUrl fallback when unsupported.
+            }
+          }
+        }
+        val navigationParameters = builderClass.getMethod("build").invoke(builder)
+        val navigateWithParams = WebViewCompat::class.java.getMethod(
           "navigate",
           WebView::class.java,
-          String::class.java
+          String::class.java,
+          paramsClass
         )
-        method.invoke(null, this, url)
+        navigateWithParams.invoke(null, this, url, navigationParameters)
         return true
       } catch (_: Exception) {
-        // Fall through to loadUrl when the installed WebView APK lacks navigate().
+        try {
+          val navigate = WebViewCompat::class.java.getMethod(
+            "navigate",
+            WebView::class.java,
+            String::class.java
+          )
+          navigate.invoke(null, this, url)
+          return true
+        } catch (_: Exception) {
+          // Fall through to loadUrl when the installed WebView APK lacks navigate().
+        }
       }
     }
     if (headers.isNullOrEmpty()) {
@@ -3194,15 +3357,37 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   override fun saveState(): ByteArray? {
+    return saveState(null, true)
+  }
+
+  override fun saveState(maxSizeBytes: Int?, includeForwardHistory: Boolean): ByteArray? {
     val bundle = Bundle()
-    if (saveState(bundle) != null) {
-      val parcel = Parcel.obtain()
-      bundle.writeToParcel(parcel, 0)
-      val bytes = parcel.marshall()
-      parcel.recycle()
-      return bytes
+    try {
+      val method = WebViewCompat::class.java.methods.firstOrNull {
+        it.name == "saveState" && it.parameterCount >= 3
+      }
+      if (method != null) {
+        val maxSize = maxSizeBytes ?: Int.MAX_VALUE
+        when (method.parameterCount) {
+          3 -> method.invoke(null, this, bundle, maxSize)
+          4 -> method.invoke(null, this, bundle, maxSize, includeForwardHistory)
+          else -> {
+            if (saveState(bundle) == null) return null
+          }
+        }
+      } else if (saveState(bundle) == null) {
+        return null
+      }
+    } catch (_: Exception) {
+      if (saveState(bundle) == null) {
+        return null
+      }
     }
-    return null
+    val parcel = Parcel.obtain()
+    bundle.writeToParcel(parcel, 0)
+    val bytes = parcel.marshall()
+    parcel.recycle()
+    return bytes
   }
 
   override fun restoreState(state: ByteArray): Boolean {

@@ -4298,6 +4298,27 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
     );
   }
 
+  ///Saves WebView state with AndroidX size / history controls when supported.
+  ///
+  ///When [maxSizeBytes] and [includeForwardHistory] are both omitted, this
+  ///delegates to [saveState]. On Android WebView providers that advertise
+  ///`WebViewCompat.saveState`, the optional arguments are forwarded.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebViewCompat.saveState',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebViewCompat#saveState(android.webkit.WebView,int,boolean)',
+      ),
+    ],
+  )
+  Future<Uint8List?> saveStateWithOptions({
+    int? maxSizeBytes,
+    bool includeForwardHistory = true,
+  }) {
+    return saveState();
+  }
+
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.restoreState}
   ///Restores the state of this WebView from the given [state] returned by the [saveState] method.
   ///If it is called after this WebView has had a chance to build state (load pages, create a back/forward list, etc.),

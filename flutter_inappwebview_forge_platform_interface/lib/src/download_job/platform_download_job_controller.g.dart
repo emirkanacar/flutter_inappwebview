@@ -14,6 +14,7 @@ extension _PlatformDownloadJobControllerCreationParamsClassSupported
   ///- Android WebView
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformDownloadJobControllerCreationParams.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -23,6 +24,7 @@ extension _PlatformDownloadJobControllerCreationParamsClassSupported
           TargetPlatform.android,
           TargetPlatform.iOS,
           TargetPlatform.macOS,
+          TargetPlatform.windows,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -37,6 +39,7 @@ enum PlatformDownloadJobControllerCreationParamsProperty {
   ///- Android WebView
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformDownloadJobControllerCreationParams.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -56,6 +59,7 @@ extension _PlatformDownloadJobControllerCreationParamsPropertySupported
               TargetPlatform.android,
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }
@@ -71,6 +75,7 @@ enum PlatformDownloadJobControllerMethod {
   ///- Android WebView
   ///- iOS WKWebView 14.5+
   ///- macOS WKWebView 11.3+
+  ///- Windows WebView2
   ///
   ///Use the [PlatformDownloadJobController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -84,6 +89,7 @@ enum PlatformDownloadJobControllerMethod {
   ///- Android WebView
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformDownloadJobController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -97,6 +103,7 @@ enum PlatformDownloadJobControllerMethod {
   ///- Android WebView
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformDownloadJobController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
@@ -116,6 +123,7 @@ extension _PlatformDownloadJobControllerMethodSupported
               TargetPlatform.android,
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformDownloadJobControllerMethod.dispose:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -123,6 +131,7 @@ extension _PlatformDownloadJobControllerMethodSupported
               TargetPlatform.android,
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformDownloadJobControllerMethod.getInfo:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -130,6 +139,7 @@ extension _PlatformDownloadJobControllerMethodSupported
               TargetPlatform.android,
               TargetPlatform.iOS,
               TargetPlatform.macOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
     }
   }

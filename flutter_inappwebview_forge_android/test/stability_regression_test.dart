@@ -1404,6 +1404,10 @@ void main() {
       'container/ContainerManager.kt',
     ).readAsStringSync();
     final gradleSource = _sourceFile('android/build.gradle.kts').readAsStringSync();
+    final startupSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'WebViewStartupCoordinator.kt',
+    ).readAsStringSync();
 
     expect(webViewSource, contains('WebViewFeature.MUTE_AUDIO'));
     expect(webViewSource, contains('WebViewCompat.setAudioMuted'));
@@ -1412,7 +1416,12 @@ void main() {
     expect(downloadSource, contains('DownloadManager.Request'));
     expect(containerSource, contains('addCustomHeader'));
     expect(containerSource, contains('prefetchUrlAsync'));
-    expect(gradleSource, contains('androidx.webkit:webkit:1.15.0'));
-    expect(gradleSource, contains('minSdk = 19'));
+    expect(containerSource, contains('preconnect'));
+    expect(webViewSource, contains('NavigationParameters'));
+    expect(webViewSource, contains('applyBackForwardCacheSettings'));
+    expect(webViewSource, contains('applyWebViewBuilderConfiguration'));
+    expect(startupSource, contains('WebViewOutcomeReceiver'));
+    expect(gradleSource, contains('androidx.webkit:webkit:1.16.0'));
+    expect(gradleSource, contains('minSdk = 24'));
   });
 }

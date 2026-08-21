@@ -22,7 +22,7 @@ package names, native implementations, and releases.
 
 - Dart SDK `^3.8.0`
 - Flutter `>=3.38.6`
-- Android `minSdkVersion >= 19`
+- Android `minSdkVersion >= 24`
 - iOS 15.0+
 - macOS 10.14+
 - Windows with the WebView2 runtime
@@ -35,7 +35,7 @@ versions can still dispatch WebView gestures incorrectly on iOS.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.76
+  flutter_inappwebview_forge: ^2.1.77
 ```
 
 ```sh
@@ -134,7 +134,7 @@ Keep the preloader alive until the inline WebView takes ownership.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.76
+  flutter_inappwebview_forge: ^2.1.77
 ```
 
 ```dart

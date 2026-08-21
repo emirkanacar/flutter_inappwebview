@@ -30,6 +30,14 @@ class WebViewFeature {
     'BACK_FORWARD_CACHE',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers fine-grained
+  ///[InAppWebViewSettings.backForwardCacheTimeoutSeconds] /
+  ///[InAppWebViewSettings.backForwardCacheMaxPagesInCache] controls.
+  static const BACK_FORWARD_CACHE_SETTINGS = WebViewFeature._internal(
+    'BACK_FORWARD_CACHE_SETTINGS',
+    'BACK_FORWARD_CACHE_SETTINGS',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewController.createWebMessageChannel].
   static const CREATE_WEB_MESSAGE_CHANNEL = WebViewFeature._internal(
     'CREATE_WEB_MESSAGE_CHANNEL',
@@ -147,6 +155,13 @@ class WebViewFeature {
   static const POST_WEB_MESSAGE = WebViewFeature._internal(
     'POST_WEB_MESSAGE',
     'POST_WEB_MESSAGE',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.preconnect].
+  static const PRECONNECT = WebViewFeature._internal(
+    'PRECONNECT',
+    'PRECONNECT',
   );
 
   ///Feature for [isFeatureSupported]. This feature covers
@@ -323,6 +338,13 @@ class WebViewFeature {
     'VISUAL_STATE_CALLBACK',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers opt-in
+  ///[InAppWebViewSettings.useWebViewBuilder] configuration.
+  static const WEBVIEW_BUILDER = WebViewFeature._internal(
+    'WEBVIEW_BUILDER',
+    'WEBVIEW_BUILDER',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.webAuthenticationSupport].
   static const WEB_AUTHENTICATION = WebViewFeature._internal(
     'WEB_AUTHENTICATION',
@@ -400,6 +422,7 @@ class WebViewFeature {
   static final Set<WebViewFeature> values = [
     WebViewFeature.ALGORITHMIC_DARKENING,
     WebViewFeature.BACK_FORWARD_CACHE,
+    WebViewFeature.BACK_FORWARD_CACHE_SETTINGS,
     WebViewFeature.CREATE_WEB_MESSAGE_CHANNEL,
     WebViewFeature.CUSTOM_REQUEST_HEADERS,
     WebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS,
@@ -419,6 +442,7 @@ class WebViewFeature {
     WebViewFeature.OFF_SCREEN_PRERASTER,
     WebViewFeature.PAYMENT_REQUEST,
     WebViewFeature.POST_WEB_MESSAGE,
+    WebViewFeature.PRECONNECT,
     WebViewFeature.PRERENDER_URL,
     WebViewFeature.PROFILE_URL_PREFETCH,
     WebViewFeature.PROXY_OVERRIDE,
@@ -447,6 +471,7 @@ class WebViewFeature {
     WebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
     WebViewFeature.USER_AGENT_METADATA,
     WebViewFeature.VISUAL_STATE_CALLBACK,
+    WebViewFeature.WEBVIEW_BUILDER,
     WebViewFeature.WEB_AUTHENTICATION,
     WebViewFeature.WEB_MESSAGE_ARRAY_BUFFER,
     WebViewFeature.WEB_MESSAGE_CALLBACK_ON_MESSAGE,
@@ -542,6 +567,8 @@ class WebViewFeature {
         return 'ALGORITHMIC_DARKENING';
       case 'BACK_FORWARD_CACHE':
         return 'BACK_FORWARD_CACHE';
+      case 'BACK_FORWARD_CACHE_SETTINGS':
+        return 'BACK_FORWARD_CACHE_SETTINGS';
       case 'CREATE_WEB_MESSAGE_CHANNEL':
         return 'CREATE_WEB_MESSAGE_CHANNEL';
       case 'CUSTOM_REQUEST_HEADERS':
@@ -580,6 +607,8 @@ class WebViewFeature {
         return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
+      case 'PRECONNECT':
+        return 'PRECONNECT';
       case 'PRERENDER_URL':
         return 'PRERENDER_URL';
       case 'PROFILE_URL_PREFETCH':
@@ -636,6 +665,8 @@ class WebViewFeature {
         return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
+      case 'WEBVIEW_BUILDER':
+        return 'WEBVIEW_BUILDER';
       case 'WEB_AUTHENTICATION':
         return 'WEB_AUTHENTICATION';
       case 'WEB_MESSAGE_ARRAY_BUFFER':
@@ -705,6 +736,13 @@ class AndroidWebViewFeature {
   static const BACK_FORWARD_CACHE = AndroidWebViewFeature._internal(
     'BACK_FORWARD_CACHE',
     'BACK_FORWARD_CACHE',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers fine-grained
+  ///back-forward cache timeout and page-limit settings.
+  static const BACK_FORWARD_CACHE_SETTINGS = AndroidWebViewFeature._internal(
+    'BACK_FORWARD_CACHE_SETTINGS',
+    'BACK_FORWARD_CACHE_SETTINGS',
   );
 
   ///
@@ -806,6 +844,13 @@ class AndroidWebViewFeature {
   static const POST_WEB_MESSAGE = AndroidWebViewFeature._internal(
     'POST_WEB_MESSAGE',
     'POST_WEB_MESSAGE',
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.preconnect].
+  static const PRECONNECT = AndroidWebViewFeature._internal(
+    'PRECONNECT',
+    'PRECONNECT',
   );
 
   ///Feature for [isFeatureSupported]. This feature covers
@@ -971,6 +1016,13 @@ class AndroidWebViewFeature {
     'VISUAL_STATE_CALLBACK',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers opt-in
+  ///[InAppWebViewSettings.useWebViewBuilder] configuration.
+  static const WEBVIEW_BUILDER = AndroidWebViewFeature._internal(
+    'WEBVIEW_BUILDER',
+    'WEBVIEW_BUILDER',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.webAuthenticationSupport].
   static const WEB_AUTHENTICATION = AndroidWebViewFeature._internal(
     'WEB_AUTHENTICATION',
@@ -1046,6 +1098,7 @@ class AndroidWebViewFeature {
   static final Set<AndroidWebViewFeature> values = [
     AndroidWebViewFeature.ALGORITHMIC_DARKENING,
     AndroidWebViewFeature.BACK_FORWARD_CACHE,
+    AndroidWebViewFeature.BACK_FORWARD_CACHE_SETTINGS,
     AndroidWebViewFeature.CREATE_WEB_MESSAGE_CHANNEL,
     AndroidWebViewFeature.CUSTOM_REQUEST_HEADERS,
     AndroidWebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS,
@@ -1062,6 +1115,7 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.OFF_SCREEN_PRERASTER,
     AndroidWebViewFeature.PAYMENT_REQUEST,
     AndroidWebViewFeature.POST_WEB_MESSAGE,
+    AndroidWebViewFeature.PRECONNECT,
     AndroidWebViewFeature.PRERENDER_URL,
     AndroidWebViewFeature.PROFILE_URL_PREFETCH,
     AndroidWebViewFeature.PROXY_OVERRIDE,
@@ -1088,6 +1142,7 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
     AndroidWebViewFeature.USER_AGENT_METADATA,
     AndroidWebViewFeature.VISUAL_STATE_CALLBACK,
+    AndroidWebViewFeature.WEBVIEW_BUILDER,
     AndroidWebViewFeature.WEB_AUTHENTICATION,
     AndroidWebViewFeature.WEB_MESSAGE_CALLBACK_ON_MESSAGE,
     AndroidWebViewFeature.WEB_MESSAGE_LISTENER,
@@ -1183,6 +1238,8 @@ class AndroidWebViewFeature {
         return 'ALGORITHMIC_DARKENING';
       case 'BACK_FORWARD_CACHE':
         return 'BACK_FORWARD_CACHE';
+      case 'BACK_FORWARD_CACHE_SETTINGS':
+        return 'BACK_FORWARD_CACHE_SETTINGS';
       case 'CREATE_WEB_MESSAGE_CHANNEL':
         return 'CREATE_WEB_MESSAGE_CHANNEL';
       case 'CUSTOM_REQUEST_HEADERS':
@@ -1215,6 +1272,8 @@ class AndroidWebViewFeature {
         return 'PAYMENT_REQUEST';
       case 'POST_WEB_MESSAGE':
         return 'POST_WEB_MESSAGE';
+      case 'PRECONNECT':
+        return 'PRECONNECT';
       case 'PRERENDER_URL':
         return 'PRERENDER_URL';
       case 'PROFILE_URL_PREFETCH':
@@ -1267,6 +1326,8 @@ class AndroidWebViewFeature {
         return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
+      case 'WEBVIEW_BUILDER':
+        return 'WEBVIEW_BUILDER';
       case 'WEB_AUTHENTICATION':
         return 'WEB_AUTHENTICATION';
       case 'WEB_MESSAGE_CALLBACK_ON_MESSAGE':

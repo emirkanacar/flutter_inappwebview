@@ -1,3 +1,10 @@
+## 2.1.35 - 2026-08-21
+
+- Apply iOS 26+ `WKWebView.conversationContext` (Smart Reply) from the
+  `conversationContext` settings map via soft-linked
+  `UIMessageConversationContext` / `UIMailConversationContext`.
+- Depend on platform-interface 1.1.22.
+
 ## 2.1.34 - 2026-08-21
 
 - Map `setAudioMuted` / `isAudioMuted` to

@@ -1,3 +1,13 @@
+## 1.1.22 - 2026-08-21
+
+- Add Profile `preconnect`, NavigationParameters-aware `navigate` docs,
+  BFCache timeout/max-pages settings, opt-in `useWebViewBuilder`,
+  `saveStateWithOptions`, ProcessGlobalConfig `uiThreadStartupMode`,
+  and iOS 26 `conversationContext` (Smart Reply) settings.
+- Mark Windows as a supported `DownloadJobController` platform.
+- Add `WebViewFeature.PRECONNECT`, `BACK_FORWARD_CACHE_SETTINGS`, and
+  `WEBVIEW_BUILDER`.
+
 ## 1.1.21 - 2026-08-21
 
 - Add `InAppWebViewController.setAudioMuted` / `isAudioMuted`, native

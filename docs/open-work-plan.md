@@ -53,16 +53,15 @@ slice.
 
 Cross-platform mute, opt-in native downloads, Android visual-state
 callbacks, iOS/macOS cookie observers, Android Profile headers/prefetch,
-feature-gated AndroidX WebKit 1.15 navigation/prerender/BFCache APIs, and
-iOS 26 obscured-content/session-storage/Screen Time helpers are implemented
-in platform-interface 1.1.21, Android 1.0.55, iOS 2.1.34, macOS 1.1.10, and
-root 2.1.76. They are not upstream issue records and do not change the
-export counts. Source acceptance criteria are complete: mute is
-feature-gated, a `null` `onDownloadStarting` response remains notify-only,
-and 1.15/iOS 26 APIs are availability- or `WebViewFeature`-checked.
-Physical-device mute, DownloadManager/`WKDownload`, visual-state, cookie
-observer, Profile prefetch, NavigationListener/FCP/LCP, and iOS 26
-behavior remain runtime validation work.
+feature-gated AndroidX WebKit navigation/prerender/BFCache APIs, and
+iOS 26 helpers are implemented through root 2.1.76 / 2.1.77. The follow-up
+wave (2.1.77) adds NavigationParameters, Profile `preconnect`, BFCache
+depth settings, opt-in WebViewBuilder, `saveStateWithOptions`,
+ProcessGlobalConfig UI-thread startup mode, Windows `DownloadJobController`
+parity, and iOS 26 `conversationContext`, and raises Android to
+**`minSdk 24` + `androidx.webkit:1.16.0`**. These are not upstream issue
+records and do not change the export counts. Physical-device validation
+remains in [`runtime-validation-pending.md`](runtime-validation-pending.md).
 
 ## Status rules
 

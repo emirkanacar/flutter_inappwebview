@@ -15,12 +15,14 @@ namespace flutter_inappwebview_plugin
     const std::optional<std::string> mimeType;
     const std::optional<std::string> suggestedFilename;
     const std::string url;
+    const std::optional<std::string> downloadId;
 
     DownloadStartRequest(const std::optional<std::string>& contentDisposition,
       const int64_t& contentLength,
       const std::optional<std::string>& mimeType,
       const std::optional<std::string>& suggestedFilename,
-      const std::string& url);
+      const std::string& url,
+      const std::optional<std::string>& downloadId = std::nullopt);
     ~DownloadStartRequest() = default;
 
     flutter::EncodableMap toEncodableMap() const;

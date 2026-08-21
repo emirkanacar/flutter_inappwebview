@@ -67,12 +67,23 @@ class ProcessGlobalConfigSettings {
   ///    - Available only if [WebViewFeature.STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS] feature is supported.
   ProcessGlobalConfigDirectoryBasePaths? directoryBasePaths;
 
+  ///Configures how WebView UI-thread startup work is scheduled.
+  ///
+  ///Pass an AndroidX `ProcessGlobalConfig` UI-thread startup mode constant when
+  ///the installed WebView provider supports it. Unsupported values are ignored.
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView (Official API - ProcessGlobalConfig.setUiThreadStartupMode):
+  ///    - Requires AndroidX WebKit 1.16+ and a supporting WebView provider.
+  int? uiThreadStartupMode;
+
   ///
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView ([Official API - ProcessGlobalConfig.apply](https://developer.android.com/reference/androidx/webkit/ProcessGlobalConfig#apply(androidx.webkit.ProcessGlobalConfig)))
   ProcessGlobalConfigSettings({
     this.dataDirectorySuffix,
     this.directoryBasePaths,
+    this.uiThreadStartupMode,
   });
 
   ///Gets a possible [ProcessGlobalConfigSettings] instance from a [Map] value.
@@ -89,6 +100,7 @@ class ProcessGlobalConfigSettings {
         map['directoryBasePaths']?.cast<String, dynamic>(),
         enumMethod: enumMethod,
       ),
+      uiThreadStartupMode: map['uiThreadStartupMode'],
     );
     return instance;
   }
@@ -117,6 +129,7 @@ class ProcessGlobalConfigSettings {
     return {
       "dataDirectorySuffix": dataDirectorySuffix,
       "directoryBasePaths": directoryBasePaths?.toMap(enumMethod: enumMethod),
+      "uiThreadStartupMode": uiThreadStartupMode,
     };
   }
 
@@ -133,7 +146,7 @@ class ProcessGlobalConfigSettings {
 
   @override
   String toString() {
-    return 'ProcessGlobalConfigSettings{dataDirectorySuffix: $dataDirectorySuffix, directoryBasePaths: $directoryBasePaths}';
+    return 'ProcessGlobalConfigSettings{dataDirectorySuffix: $dataDirectorySuffix, directoryBasePaths: $directoryBasePaths, uiThreadStartupMode: $uiThreadStartupMode}';
   }
 }
 
@@ -293,6 +306,18 @@ enum ProcessGlobalConfigSettingsProperty {
   ///Use the [ProcessGlobalConfigSettings.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
   directoryBasePaths,
+
+  ///Can be used to check if the [ProcessGlobalConfigSettings.uiThreadStartupMode] property is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.ProcessGlobalConfigSettings.uiThreadStartupMode.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView (Official API - ProcessGlobalConfig.setUiThreadStartupMode):
+  ///    - Requires AndroidX WebKit 1.16+ and a supporting WebView provider.
+  ///
+  ///Use the [ProcessGlobalConfigSettings.isPropertySupported] method to check if this property is supported at runtime.
+  ///{@endtemplate}
+  uiThreadStartupMode,
 }
 
 extension _ProcessGlobalConfigSettingsPropertySupported
@@ -308,6 +333,11 @@ extension _ProcessGlobalConfigSettingsPropertySupported
               TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case ProcessGlobalConfigSettingsProperty.directoryBasePaths:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
+      case ProcessGlobalConfigSettingsProperty.uiThreadStartupMode:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,

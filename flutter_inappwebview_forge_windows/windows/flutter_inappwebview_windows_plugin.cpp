@@ -4,6 +4,7 @@
 
 #include "cookie_manager.h"
 #include "container_manager.h"
+#include "download_job/download_job_manager.h"
 #include "headless_in_app_webview/headless_in_app_webview_manager.h"
 #include "in_app_browser/in_app_browser_manager.h"
 #include "in_app_webview/in_app_webview_manager.h"
@@ -37,6 +38,7 @@ namespace flutter_inappwebview_plugin
     cookieManager = std::make_unique<CookieManager>(this);
     platformUtil = std::make_unique<PlatformUtil>(this);
     containerManager = std::make_unique<ContainerManager>(this);
+    downloadJobManager = std::make_unique<DownloadJobManager>(this);
 
     window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -57,6 +59,10 @@ namespace flutter_inappwebview_plugin
     cookieManager = nullptr;
     platformUtil = nullptr;
     containerManager = nullptr;
+    if (downloadJobManager) {
+      downloadJobManager->dispose();
+      downloadJobManager = nullptr;
+    }
   }
 
 

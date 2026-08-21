@@ -2226,6 +2226,21 @@ enum PlatformInAppWebViewControllerMethod {
   ///{@endtemplate}
   saveState,
 
+  ///Can be used to check if the [PlatformInAppWebViewController.saveStateWithOptions] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.saveStateWithOptions.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebViewCompat.saveState](https://developer.android.com/reference/androidx/webkit/WebViewCompat#saveState(android.webkit.WebView,int,boolean)))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [maxSizeBytes]: all platforms
+  ///- [includeForwardHistory]: all platforms
+  ///
+  ///Use the [PlatformInAppWebViewController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  saveStateWithOptions,
+
   ///Can be used to check if the [PlatformInAppWebViewController.saveWebArchive] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.saveWebArchive.supported_platforms}
@@ -3737,6 +3752,11 @@ extension _PlatformInAppWebViewControllerMethodSupported
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.linux,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppWebViewControllerMethod.saveStateWithOptions:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppWebViewControllerMethod.saveWebArchive:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

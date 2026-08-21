@@ -1,3 +1,13 @@
+## 1.0.15 - 2026-08-21
+
+- Add Windows `DownloadJobController` parity for WebView2 downloads.
+  Returning `DownloadStartResponse(handled: true, resultFilePath: ...)` from
+  `onDownloadStarting` registers a native job that emits `onProgressChanged`
+  / `onComplete` over
+  `com.emirkanacar/flutter_inappwebview_downloadjobcontroller_<id>`. A `null`
+  response remains notify-only.
+- Depend on platform-interface 1.1.22.
+
 ## 1.0.14 - 2026-08-13
 
 - Add `InAppWebViewSettings.disableAutocorrection` support for editable

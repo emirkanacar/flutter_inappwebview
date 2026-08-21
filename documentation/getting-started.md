@@ -4,7 +4,7 @@
 
 - Dart SDK `^3.8.0`
 - Flutter `>=3.38.6`
-- Android `minSdkVersion >= 19`
+- Android `minSdkVersion >= 24`
 - iOS 15.0 or newer
 - macOS 10.14 or newer
 - Windows with the WebView2 runtime and NuGet tooling
@@ -27,7 +27,7 @@ Add the root package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.76
+  flutter_inappwebview_forge: ^2.1.77
 ```
 
 Then fetch packages:
@@ -165,7 +165,7 @@ The host application must allow network access:
 </manifest>
 ```
 
-Use an AndroidX project and keep `minSdkVersion` at least `19`. For cleartext
+Use an AndroidX project and keep `minSdkVersion` at least `24`. For cleartext
 HTTP, prefer a scoped network security configuration instead of enabling
 cleartext traffic for every domain:
 

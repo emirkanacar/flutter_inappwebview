@@ -127,5 +127,6 @@ interface InAppWebViewInterface {
     fun showInputMethod()
     fun hideInputMethod()
     fun saveState(): ByteArray?
+    fun saveState(maxSizeBytes: Int?, includeForwardHistory: Boolean): ByteArray?
     fun restoreState(state: ByteArray): Boolean
 }

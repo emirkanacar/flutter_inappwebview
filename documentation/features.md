@@ -17,9 +17,11 @@ common workflows are collected here.
 | Serve bundled files over localhost | `InAppLocalhostServer` | Native platforms |
 | Configure Android service workers | `ServiceWorkerController` | Android |
 | Start an external authentication flow | `WebAuthenticationSession` | Supported Apple platforms |
-| Start an opt-in native file download | `onDownloadStarting` + `DownloadJobController` | Android, iOS, macOS |
+| Start an opt-in native file download | `onDownloadStarting` + `DownloadJobController` | Android, iOS, macOS, Windows |
 | Observe cookie store changes | `CookieManager.addCookieChangedListener` | iOS, macOS |
 | Find text without the system UI | `FindInteractionController.findString` | iOS, macOS |
+| Warm a profile origin before navigation | `ContainerController.preconnect` | Android |
+| Restrict Android WebView construction | `useWebViewBuilder` | Android |
 
 Every capability has a runtime support check. Check support before exposing a
 platform-specific action in your UI.
@@ -151,13 +153,20 @@ if (await WebViewFeature.isFeatureSupported(
     url: 'https://example.com/account',
   );
 }
+
+if (await WebViewFeature.isFeatureSupported(WebViewFeature.PRECONNECT)) {
+  await containers.preconnect(
+    containerId: profileId,
+    url: 'https://example.com/',
+  );
+}
 ```
 
 ## Opt-in native downloads
 
 `onDownloadStarting` is notify-only when the callback returns `null`. To start
-a native Android `DownloadManager` or Apple `WKDownload` job, return a
-handled response with an absolute destination path:
+a native Android `DownloadManager`, Apple `WKDownload`, or Windows WebView2
+download job, return a handled response with an absolute destination path:
 
 ```dart
 InAppWebView(

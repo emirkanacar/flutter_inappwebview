@@ -322,8 +322,17 @@ void _runSourceContractAssertions() {
   );
   _assert(
     settingsSource.contains('allowsInlinePredictions') &&
-        settingsSource.contains('obscuredContentInsets'),
-    'iOS inline-prediction and obscured-content-inset settings are missing',
+        settingsSource.contains('obscuredContentInsets') &&
+        settingsSource.contains('conversationContext') &&
+        settingsSource.contains('makeConversationContext') &&
+        settingsSource.contains('UIMessageConversationContext'),
+    'iOS inline-prediction, obscured-content-inset, and conversationContext settings are missing',
+  );
+  _assert(
+    source.contains('applyConversationContext') &&
+        source.contains('clearConversationContextIfSupported') &&
+        source.contains('setConversationContext:'),
+    'iOS conversationContext is not wired to WKWebView Smart Reply',
   );
   final autocorrectionSource = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'

@@ -62,10 +62,14 @@ Useful settings include:
 - `proxySettings` for per-WebView proxy configuration where supported;
 - `javaScriptBridgeEnabled` and origin allowlists for bridge control;
 - `useHybridComposition` on Android when choosing a platform-view mode;
+- `useWebViewBuilder` and `webViewBuilderOriginAllowList` on Android when
+  `WebViewFeature.WEBVIEW_BUILDER` is supported;
 - `writingToolsBehavior` on Apple platforms where Writing Tools are available;
 - `allowsInlinePredictions` on Apple platforms;
-- `backForwardCacheEnabled` on Android when `WebViewFeature.BACK_FORWARD_CACHE`
-  is supported;
+- `conversationContext` on iOS 26+ for Smart Reply;
+- `backForwardCacheEnabled`, `backForwardCacheTimeoutSeconds`, and
+  `backForwardCacheMaxPagesInCache` on Android when BFCache features are
+  supported;
 - `obscuredContentInsets` on iOS/macOS 26+ when the WebView is under system
   chrome.
 
@@ -128,5 +132,7 @@ if (InAppWebViewController.isMethodSupported(
 
 Return `null` from `onDownloadStarting` to keep notify-only behavior. Return
 `DownloadStartResponse(handled: true, resultFilePath: absolutePath)` only when
-the application wants a native download job. Android `onVisualStateReady`
-fires after `postVisualStateCallback` or after a finished load.
+the application wants a native download job (Android, iOS, macOS, Windows).
+Android `onVisualStateReady` fires after `postVisualStateCallback` or after a
+finished load. Use `saveStateWithOptions` on Android when the provider
+supports size or forward-history controls.

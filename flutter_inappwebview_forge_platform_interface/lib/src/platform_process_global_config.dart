@@ -230,9 +230,25 @@ class ProcessGlobalConfigSettings_ {
   )
   ProcessGlobalConfigDirectoryBasePaths_? directoryBasePaths;
 
+  ///Configures how WebView UI-thread startup work is scheduled.
+  ///
+  ///Pass an AndroidX `ProcessGlobalConfig` UI-thread startup mode constant when
+  ///the installed WebView provider supports it. Unsupported values are ignored.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'ProcessGlobalConfig.setUiThreadStartupMode',
+        note:
+            'Requires AndroidX WebKit 1.16+ and a supporting WebView provider.',
+      ),
+    ],
+  )
+  int? uiThreadStartupMode;
+
   ProcessGlobalConfigSettings_({
     this.dataDirectorySuffix,
     this.directoryBasePaths,
+    this.uiThreadStartupMode,
   });
 
   ///{@template flutter_inappwebview_forge_platform_interface.ProcessGlobalConfigSettings.isClassSupported}

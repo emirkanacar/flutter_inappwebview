@@ -14,6 +14,9 @@ class ProcessGlobalConfigSettings : ISettings<ProcessGlobalConfig> {
     @JvmField
     var directoryBasePaths: DirectoryBasePaths? = null
 
+    @JvmField
+    var uiThreadStartupMode: Int? = null
+
     override fun parse(settings: MutableMap<String, Any?>): ProcessGlobalConfigSettings {
         settings.forEach { (key, value) ->
             when (key) {
@@ -21,6 +24,7 @@ class ProcessGlobalConfigSettings : ISettings<ProcessGlobalConfig> {
                 "directoryBasePaths" -> {
                     directoryBasePaths = asStringObjectMap(value)?.let { DirectoryBasePaths().parse(it) }
                 }
+                "uiThreadStartupMode" -> uiThreadStartupMode = (value as? Number)?.toInt()
             }
         }
         return this
@@ -51,11 +55,24 @@ class ProcessGlobalConfigSettings : ISettings<ProcessGlobalConfig> {
                 ?: throw IllegalArgumentException("cacheDirectoryBasePath is required.")
             config.setDirectoryBasePaths(context, File(dataPath), File(cachePath))
         }
+
+        val uiMode = uiThreadStartupMode
+        if (uiMode != null) {
+            try {
+                val method = ProcessGlobalConfig::class.java.methods.firstOrNull {
+                    it.name == "setUiThreadStartupMode" && it.parameterCount == 1
+                }
+                method?.invoke(config, uiMode)
+            } catch (_: Exception) {
+                // Provider or AndroidX build may not expose UI-thread startup modes.
+            }
+        }
         return config
     }
 
     override fun toMap(): MutableMap<String, Any?> = HashMap<String, Any?>().apply {
         put("dataDirectorySuffix", dataDirectorySuffix)
+        put("uiThreadStartupMode", uiThreadStartupMode)
     }
 
     override fun getRealSettings(obj: ProcessGlobalConfig): MutableMap<String, Any?> = toMap()

@@ -2014,6 +2014,20 @@ enum PlatformInAppBrowserEventsMethod {
   ///{@endtemplate}
   onUpdateVisitedHistory,
 
+  ///Can be used to check if the [PlatformInAppBrowserEvents.onVisualStateReady] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppBrowserEvents.onVisualStateReady.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 23+
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [requestId]: all platforms
+  ///
+  ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  onVisualStateReady,
+
   ///Can be used to check if the [PlatformInAppBrowserEvents.onWebContentProcessDidTerminate] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppBrowserEvents.onWebContentProcessDidTerminate.supported_platforms}
@@ -2026,6 +2040,20 @@ enum PlatformInAppBrowserEventsMethod {
   ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   onWebContentProcessDidTerminate,
+
+  ///Can be used to check if the [PlatformInAppBrowserEvents.onWebViewNavigation] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppBrowserEvents.onWebViewNavigation.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [event]: all platforms
+  ///
+  ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  onWebViewNavigation,
 
   ///Can be used to check if the [PlatformInAppBrowserEvents.onWindowBlur] method is supported at runtime.
   ///
@@ -2052,6 +2080,21 @@ enum PlatformInAppBrowserEventsMethod {
   ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   onWindowFocus,
+
+  ///Can be used to check if the [PlatformInAppBrowserEvents.onWritingToolsActiveChanged] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformInAppBrowserEvents.onWritingToolsActiveChanged.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 18.0+
+  ///- macOS WKWebView 15.0+
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [isActive]: all platforms
+  ///
+  ///Use the [PlatformInAppBrowserEvents.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  onWritingToolsActiveChanged,
 
   ///Can be used to check if the [PlatformInAppBrowserEvents.onZoomScaleChanged] method is supported at runtime.
   ///
@@ -2683,12 +2726,22 @@ extension _PlatformInAppBrowserEventsMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppBrowserEventsMethod.onVisualStateReady:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppBrowserEventsMethod.onWebContentProcessDidTerminate:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.iOS,
               TargetPlatform.macOS,
               TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppBrowserEventsMethod.onWebViewNavigation:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppBrowserEventsMethod.onWindowBlur:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
@@ -2701,6 +2754,12 @@ extension _PlatformInAppBrowserEventsMethodSupported
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformInAppBrowserEventsMethod.onWritingToolsActiveChanged:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
               TargetPlatform.iOS,
               TargetPlatform.macOS,
             ].contains(platform ?? defaultTargetPlatform);

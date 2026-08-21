@@ -15,6 +15,17 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-08-21 Native WebView API gaps follow-up
+
+Local feature, not a CSV issue. Root 2.1.77, platform-interface 1.1.22,
+Android 1.0.56, iOS 2.1.35, and Windows 1.0.15 add NavigationParameters,
+Profile `preconnect`, BFCache depth settings, opt-in WebViewBuilder,
+`saveStateWithOptions`, ProcessGlobalConfig UI-thread startup mode,
+Windows `DownloadJobController` parity, and iOS 26 `conversationContext`.
+**Breaking Android floor:** `minSdk 24` + `androidx.webkit:1.16.0` (Track C).
+Physical-device validation is tracked in
+[runtime-validation-pending.md](runtime-validation-pending.md).
+
 ## 2026-08-21 Native WebView API gaps
 
 Local feature, not a CSV issue. Root 2.1.76, platform-interface 1.1.21,
@@ -23,7 +34,7 @@ downloads, Android visual-state, iOS/macOS cookie observers, `findString`,
 Profile headers/prefetch, feature-gated WebKit 1.15 navigation APIs, and
 iOS 26 session-storage / Screen Time helpers. A `null`
 `onDownloadStarting` response remains notify-only. Declared `minSdk 19`
-is unchanged. Physical-device validation is tracked in
+is unchanged on that release line. Physical-device validation is tracked in
 [runtime-validation-pending.md](runtime-validation-pending.md).
 
 ## 2026-08-21 iOS 27 `canOpenURL` deprecation

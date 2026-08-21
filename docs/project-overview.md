@@ -27,12 +27,12 @@ The root package owns public Dart widgets, controllers, settings, browser APIs, 
 
 | Package | Native/runtime technology | Current version | Minimum Flutter | Main boundary |
 | --- | --- | ---: | --- | --- |
-| `flutter_inappwebview_forge` | Shared Dart API and example | 2.1.76 | 3.38.6 | Public controllers, widgets, settings, callbacks |
-| `flutter_inappwebview_forge_platform_interface` | Dart federated contract | 1.1.21 | 3.32.0 | Method/event names, payload maps, types, capability metadata |
-| `flutter_inappwebview_forge_android` | Android WebView, Kotlin, AndroidX | 1.0.55 | 3.32.0 | Method channels, platform views, WebView lifecycle |
-| `flutter_inappwebview_forge_ios` | `WKWebView`, Swift, SPM/CocoaPods | 2.1.34 | 3.38.6 | Scene-aware windows, WebKit delegates, native resources |
+| `flutter_inappwebview_forge` | Shared Dart API and example | 2.1.77 | 3.38.6 | Public controllers, widgets, settings, callbacks |
+| `flutter_inappwebview_forge_platform_interface` | Dart federated contract | 1.1.22 | 3.32.0 | Method/event names, payload maps, types, capability metadata |
+| `flutter_inappwebview_forge_android` | Android WebView, Kotlin, AndroidX | 1.0.56 | 3.32.0 | Method channels, platform views, WebView lifecycle |
+| `flutter_inappwebview_forge_ios` | `WKWebView`, Swift, SPM/CocoaPods | 2.1.35 | 3.38.6 | Scene-aware windows, WebKit delegates, native resources |
 | `flutter_inappwebview_forge_macos` | `WKWebView`, Swift, SPM/CocoaPods | 1.1.10 | 3.32.0 | macOS WebKit and browser windows |
-| `flutter_inappwebview_forge_windows` | WebView2, C++/WinRT | 1.0.14 | 3.32.0 | WebView2 controller, child-window composition, COM lifetime |
+| `flutter_inappwebview_forge_windows` | WebView2, C++/WinRT | 1.0.15 | 3.32.0 | WebView2 controller, child-window composition, COM lifetime |
 | `flutter_inappwebview_forge_linux` | WPE WebKit, C++/GTK/EGL | 1.0.8 | 3.32.0 | WPE rendering, textures, native channel delegates |
 | `flutter_inappwebview_forge_web` | Browser iframe and JavaScript | 1.0.4 | 3.32.0 | iframe lifecycle and same-origin URL access |
 

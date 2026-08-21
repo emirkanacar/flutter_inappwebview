@@ -89,7 +89,7 @@ enums) map 1:1 to the unprefixed type. Use the unprefixed name in new code.
 
 ## Native SDK deprecations that stay on purpose
 
-Android still declares `minSdkVersion 19`. Legacy WebView, cookie, print,
+Android still declares `minSdkVersion 24` (raised from 19 in 2.1.77). Legacy WebView, cookie, print,
 fullscreen, `forceDark`, and `saveFormData` call sites are isolated with
 file-level deprecation suppressions because there is no behavior-preserving
 replacement for that API range. Those native paths are not removed until an

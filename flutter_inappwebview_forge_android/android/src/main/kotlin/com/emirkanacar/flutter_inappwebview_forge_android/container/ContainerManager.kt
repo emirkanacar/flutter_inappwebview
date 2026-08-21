@@ -160,6 +160,32 @@ open class ContainerManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.success(false)
                 }
             }
+            "preconnect" -> {
+                val containerId = call.argument<String>("containerId")
+                val url = call.argument<String>("url")
+                if (profileStore == null ||
+                    containerId.isNullOrEmpty() ||
+                    url.isNullOrEmpty() ||
+                    !WebViewFeature.isFeatureSupported("PRECONNECT")
+                ) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    val profile = profileStore.getOrCreateProfile(containerId)
+                    val method = profile.javaClass.methods.firstOrNull {
+                        it.name == "preconnect" || it.name == "enqueuePreconnect"
+                    }
+                    if (method == null) {
+                        result.success(false)
+                        return
+                    }
+                    method.invoke(profile, url)
+                    result.success(true)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
             else -> result.notImplemented()
         }
     }

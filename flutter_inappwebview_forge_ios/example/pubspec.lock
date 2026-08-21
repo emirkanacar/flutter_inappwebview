@@ -76,11 +76,12 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_inappwebview_forge_internal_annotations:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../dev_packages/flutter_inappwebview_forge_internal_annotations"
-      relative: true
-    source: path
+      name: flutter_inappwebview_forge_internal_annotations
+      sha256: "2cab84a6a6693f82d4d9954a551e8e9c35ac67856c6005ac3362634c665c53e6"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   flutter_inappwebview_forge_ios:
     dependency: "direct main"
@@ -88,22 +89,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2.1.34"
+    version: "2.1.35"
   flutter_inappwebview_forge_platform_interface:
     dependency: "direct main"
     description:
       path: "../../flutter_inappwebview_forge_platform_interface"
       relative: true
     source: path
-    version: "1.1.21"
-  flutter_lints:
-    dependency: "direct overridden"
-    description:
-      name: flutter_lints
-      sha256: a25a15ebbdfc33ab1cd26c63a6ee519df92338a9c10f122adda92938253bef04
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
+    version: "1.1.22"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -148,14 +141,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  lints:
-    dependency: transitive
-    description:
-      name: lints
-      sha256: "0a217c6c989d21039f1498c3ed9f3ed71b354e69873f13a8dfc3c9fe76f1b452"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   matcher:
     dependency: transitive
     description:

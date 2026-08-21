@@ -49,6 +49,7 @@
 #include "../web_notification/web_notification_controller.h"
 #include "../print_job/print_job_controller.h"
 #include "../print_job/print_job_manager.h"
+#include "../download_job/download_job_manager.h"
 #include "in_app_webview.h"
 #include "in_app_webview_manager.h"
 #include "../container_manager.h"
@@ -1245,42 +1246,72 @@ namespace flutter_inappwebview_plugin
               wil::unique_cotaskmem_string downloadContentDisposition;
               std::optional<std::string> contentDisposition = SUCCEEDED(download->get_ContentDisposition(&downloadContentDisposition)) ? wide_to_utf8(downloadContentDisposition.get()) : std::optional<std::string>{};
 
-              wil::unique_cotaskmem_string resultFilePath;
-              std::optional<std::string> suggestedFilename = SUCCEEDED(download->get_ContentDisposition(&resultFilePath)) ? wide_to_utf8(resultFilePath.get()) : std::optional<std::string>{};
+              wil::unique_cotaskmem_string resultFilePathValue;
+              std::optional<std::string> suggestedFilename;
+              if (SUCCEEDED(download->get_ResultFilePath(&resultFilePathValue))) {
+                auto fullPath = wide_to_utf8(resultFilePathValue.get());
+                auto sep = fullPath.find_last_of("/\\");
+                suggestedFilename = sep == std::string::npos ? fullPath : fullPath.substr(sep + 1);
+              }
 
+              auto downloadId = get_uuid();
               auto request = std::make_shared<DownloadStartRequest>(
                 contentDisposition,
                 contentLength,
                 mimeType,
                 suggestedFilename,
-                url
+                url,
+                downloadId
               );
 
               auto callback = std::make_unique<WebViewChannelDelegate::DownloadStartRequestCallback>();
-              auto defaultBehaviour = [this, deferral, args](const std::optional<const std::shared_ptr<DownloadStartResponse>> response)
+              auto defaultBehaviour = [deferral](const std::optional<const std::shared_ptr<DownloadStartResponse>> response)
                 {
+                  // Notify-only: complete deferral without handling so WebView2 keeps default behavior.
                   failedLog(deferral->Complete());
                 };
-              callback->nonNullSuccess = [this, deferral, args](const std::shared_ptr<DownloadStartResponse> response)
+              callback->nonNullSuccess = [this, deferral, args, download, downloadId, url](const std::shared_ptr<DownloadStartResponse> response)
                 {
+                  auto action = response->action;
+                  if (action.has_value() && action.value() == DownloadStartResponseAction::cancel) {
+                    failedLog(args->put_Cancel(true));
+                    failedLog(args->put_Handled(TRUE));
+                    failedLog(deferral->Complete());
+                    return false;
+                  }
+
                   failedLog(args->put_Handled(response->handled));
                   auto resultFilePath = response->resultFilePath;
-                  if (resultFilePath.has_value()) {
+                  if (resultFilePath.has_value() && !resultFilePath.value().empty()) {
+                    try {
+                      std::filesystem::path destination(resultFilePath.value());
+                      if (destination.has_parent_path()) {
+                        std::filesystem::create_directories(destination.parent_path());
+                      }
+                    }
+                    catch (...) {
+                      // Best-effort directory creation; WebView2 may still write the file.
+                    }
                     failedLog(args->put_ResultFilePath(utf8_to_wide(resultFilePath.value()).c_str()));
                   }
-                  auto action = response->action;
-                  if (action.has_value()) {
-                    switch (action.value()) {
-                    case DownloadStartResponseAction::cancel:
-                      failedLog(args->put_Cancel(true));
-                      break;
-                    }
+
+                  if (response->handled &&
+                    resultFilePath.has_value() &&
+                    !resultFilePath.value().empty() &&
+                    plugin &&
+                    plugin->downloadJobManager) {
+                    plugin->downloadJobManager->create(
+                      downloadId,
+                      download,
+                      url,
+                      resultFilePath.value());
                   }
+
                   failedLog(deferral->Complete());
                   return false;
                 };
               callback->defaultBehaviour = defaultBehaviour;
-              callback->error = [this, defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
+              callback->error = [defaultBehaviour](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
                 {
                   debugLog(error_code + ", " + error_message);
                   defaultBehaviour(std::nullopt);

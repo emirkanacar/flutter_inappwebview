@@ -7,9 +7,11 @@ features with runtime capability checks.
 ## Android
 
 - Uses the system Android WebView provider.
-- Minimum SDK is 19. AndroidX WebKit is `1.15.0`; `1.15`/`1.16` APIs such as
-  mute, NavigationListener, prerender, BFCache, and Profile headers are
-  feature-checked at runtime and do not raise `minSdk`.
+- Minimum SDK is **24**. AndroidX WebKit is `1.16.0`. Apps that need API
+  19–23 must stay on plugin 2.1.76 / Android 1.0.55.
+- NavigationParameters, Profile preconnect/prefetch/headers, BFCache
+  depth settings, opt-in `WebViewBuilder`, muted audio, and NavigationListener
+  remain feature-checked against the installed WebView provider.
 - Hybrid composition is available and can be selected through settings.
 - WebView provider version, renderer behavior, permissions, IME, fullscreen,
   and file chooser behavior depend partly on the device provider.
@@ -28,7 +30,8 @@ missing manifest permissions.
   presentation.
 - WebKit availability varies by iOS release. Unsupported settings retain a
   safe fallback. iOS 26 APIs such as `obscuredContentInsets`, session-storage
-  fetch/restore, and `isBlockedByScreenTime` are availability-checked.
+  fetch/restore, `isBlockedByScreenTime`, and `conversationContext` (Smart
+  Reply) are availability-checked.
 - Physical-device validation is recommended for keyboard, scene transitions,
   popup windows, media, and WebKit process termination.
 
@@ -43,6 +46,9 @@ version and the selected data store.
 Windows uses WebView2. The installed WebView2 runtime is separate from the
 Flutter package version. Keep native enum and callback handling defensive
 because new WebView2 values can appear independently of the plugin release.
+Opt-in native downloads follow the same `onDownloadStarting` /
+`DownloadJobController` contract as Android and Apple platforms; a `null`
+response remains notify-only.
 
 ## Linux
 

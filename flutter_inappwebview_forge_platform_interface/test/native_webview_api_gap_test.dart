@@ -9,6 +9,19 @@ void main() {
       allowsInlinePredictions: true,
       backForwardCacheEnabled: true,
       obscuredContentInsets: const EdgeInsets.fromLTRB(1, 2, 3, 4),
+      conversationContext: const {
+        'type': 'message',
+        'threadIdentifier': 'thread-1',
+        'selfIdentifiers': ['me'],
+        'responsePrimaryRecipientIdentifiers': ['them'],
+        'entries': [
+          {
+            'text': 'Hello',
+            'senderIdentifier': 'them',
+            'entryIdentifier': 'e1',
+          },
+        ],
+      },
     );
 
     expect(settings.toMap()['allowsInlinePredictions'], isTrue);
@@ -16,6 +29,14 @@ void main() {
     expect(
       settings.toMap()['obscuredContentInsets'],
       containsPair('top', 2.0),
+    );
+    expect(
+      settings.toMap()['conversationContext'],
+      containsPair('threadIdentifier', 'thread-1'),
+    );
+    expect(
+      InAppWebViewSettings.fromMap(settings.toMap())?.conversationContext,
+      containsPair('type', 'message'),
     );
     expect(settings.copy().allowsInlinePredictions, isTrue);
     expect(
@@ -35,6 +56,13 @@ void main() {
     expect(
       InAppWebViewSettings.isPropertySupported(
         InAppWebViewSettingsProperty.obscuredContentInsets,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.conversationContext,
         platform: TargetPlatform.iOS,
       ),
       isTrue,
@@ -60,9 +88,40 @@ void main() {
       WebViewFeature.BACK_FORWARD_CACHE.toNativeValue(),
       'BACK_FORWARD_CACHE',
     );
+    expect(WebViewFeature.PRECONNECT.toNativeValue(), 'PRECONNECT');
+    expect(
+      WebViewFeature.BACK_FORWARD_CACHE_SETTINGS.toNativeValue(),
+      'BACK_FORWARD_CACHE_SETTINGS',
+    );
+    expect(WebViewFeature.WEBVIEW_BUILDER.toNativeValue(), 'WEBVIEW_BUILDER');
   });
 
-  test('DownloadStartResponse is opt-in on Android, iOS, and macOS', () {
+  test('BFCache depth and WebViewBuilder settings serialize on Android', () {
+    final settings = InAppWebViewSettings(
+      backForwardCacheTimeoutSeconds: 30,
+      backForwardCacheMaxPagesInCache: 3,
+      useWebViewBuilder: true,
+      webViewBuilderOriginAllowList: {'https://example.com'},
+    );
+    final map = settings.toMap();
+    expect(map['backForwardCacheTimeoutSeconds'], 30);
+    expect(map['backForwardCacheMaxPagesInCache'], 3);
+    expect(map['useWebViewBuilder'], isTrue);
+    expect(map['webViewBuilderOriginAllowList'], contains('https://example.com'));
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.useWebViewBuilder,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      PlatformContainerControllerMethod.preconnect,
+      isNotNull,
+    );
+  });
+
+  test('DownloadStartResponse is opt-in on Android, iOS, macOS, and Windows', () {
     final response = DownloadStartResponse(
       handled: true,
       action: DownloadStartResponseAction.DOWNLOAD,
@@ -94,7 +153,7 @@ void main() {
       const PlatformDownloadJobControllerCreationParams(
         id: 'job',
       ).isClassSupported(platform: TargetPlatform.windows),
-      isFalse,
+      isTrue,
     );
   });
 }

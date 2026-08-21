@@ -8,7 +8,8 @@
 namespace flutter_inappwebview_plugin
 {
   enum class DownloadStartResponseAction {
-    cancel = 0
+    cancel = 0,
+    download = 1
   };
 
   inline std::optional<DownloadStartResponseAction> DownloadStartResponseActionFromInteger(const std::optional<int64_t>& action)
@@ -17,8 +18,10 @@ namespace flutter_inappwebview_plugin
       switch (action.value()) {
       case 0:
         return DownloadStartResponseAction::cancel;
+      case 1:
+        return DownloadStartResponseAction::download;
       default:
-        return DownloadStartResponseAction::cancel;
+        return std::optional<DownloadStartResponseAction>{};
       }
     }
     return std::optional<DownloadStartResponseAction>{};

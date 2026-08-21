@@ -12,6 +12,7 @@ namespace flutter_inappwebview_plugin
   class CookieManager;
   class PlatformUtil;
   class ContainerManager;
+  class DownloadJobManager;
 
   class FlutterInappwebviewWindowsPlugin : public flutter::Plugin {
   public:
@@ -23,6 +24,7 @@ namespace flutter_inappwebview_plugin
     std::unique_ptr<CookieManager> cookieManager;
     std::unique_ptr<PlatformUtil> platformUtil;
     std::unique_ptr<ContainerManager> containerManager;
+    std::unique_ptr<DownloadJobManager> downloadJobManager;
 
     static void RegisterWithRegistrar(flutter::PluginRegistrarWindows* registrar);
 

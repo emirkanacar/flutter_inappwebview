@@ -1,3 +1,16 @@
+## 2.1.77 - 2026-08-21
+
+- Continue native WebView API gap coverage: Android NavigationParameters
+  + Profile `preconnect`, BFCache depth settings, opt-in WebViewBuilder,
+  `saveStateWithOptions`, ProcessGlobalConfig UI-thread startup mode,
+  Windows `DownloadJobController` parity, and iOS 26
+  `conversationContext` (Smart Reply).
+- **Android breaking floor:** `minSdkVersion` is now **24** and AndroidX
+  WebKit is `1.16.0`. Apps that still require API 19–23 must stay on
+  2.1.76 / Android 1.0.55.
+- Depend on platform-interface 1.1.22, Android 1.0.56, iOS 2.1.35,
+  Windows 1.0.15, and macOS 1.1.10.
+
 ## 2.1.76 - 2026-08-21
 
 - Add cross-platform `setAudioMuted` / `isAudioMuted`, opt-in native

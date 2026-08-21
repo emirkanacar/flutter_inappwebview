@@ -145,6 +145,22 @@ enum PlatformContainerControllerMethod {
   ///{@endtemplate}
   hasContainer,
 
+  ///Can be used to check if the [PlatformContainerController.preconnect] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.preconnect.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView 110+ ([Official API - Profile.preconnect](https://developer.android.com/reference/androidx/webkit/Profile#preconnect(java.lang.String))):
+  ///    - Requires [WebViewFeature.PRECONNECT].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///- [url]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  preconnect,
+
   ///Can be used to check if the [PlatformContainerController.prefetchUrl] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.prefetchUrl.supported_platforms}
@@ -225,6 +241,11 @@ extension _PlatformContainerControllerMethodSupported
               TargetPlatform.macOS,
               TargetPlatform.windows,
               TargetPlatform.linux,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformContainerControllerMethod.preconnect:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.prefetchUrl:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

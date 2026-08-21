@@ -30,6 +30,7 @@ class DownloadStartRequest {
   ///- Android WebView
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2
   String? downloadId;
 
   ///The mimetype of the content reported by the server.

@@ -3531,6 +3531,77 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   bool? backForwardCacheEnabled;
 
+  ///Timeout in seconds for pages retained in the Android Back/Forward Cache.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "BackForwardCacheSettings.setTimeoutSeconds",
+        note:
+            "Requires [WebViewFeature.BACK_FORWARD_CACHE_SETTINGS] or a compatible provider.",
+      ),
+    ],
+  )
+  int? backForwardCacheTimeoutSeconds;
+
+  ///Maximum number of pages retained in the Android Back/Forward Cache.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "BackForwardCacheSettings.setMaxPagesInCache",
+        note:
+            "Requires [WebViewFeature.BACK_FORWARD_CACHE_SETTINGS] or a compatible provider.",
+      ),
+    ],
+  )
+  int? backForwardCacheMaxPagesInCache;
+
+  ///When `true`, Android applies AndroidX `WebViewBuilder` configuration
+  ///(profile / origin allowlists) after constructing the native WebView.
+  ///
+  ///The default `InAppWebView` construction path is unchanged when this is
+  ///`null` or `false`. Requires a provider that advertises
+  ///[WebViewFeature.WEBVIEW_BUILDER] (typically via `applyTo` on WebKit 1.16+).
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "WebViewBuilder.applyTo",
+        apiUrl:
+            "https://developer.android.com/reference/androidx/webkit/WebViewBuilder",
+        note: "Requires [WebViewFeature.WEBVIEW_BUILDER].",
+      ),
+    ],
+  )
+  bool? useWebViewBuilder;
+
+  ///Origin allowlist applied through `WebViewBuilder` when
+  ///[useWebViewBuilder] is enabled.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: "WebViewBuilder RestrictionAllowlist",
+        note: "Requires [WebViewFeature.WEBVIEW_BUILDER].",
+      ),
+    ],
+  )
+  Set<String>? webViewBuilderOriginAllowList;
+
+  ///Smart Reply conversation context payload for Apple Intelligence on iOS 26+.
+  ///
+  ///Pass a map describing the messaging or mail thread. Unsupported keys and
+  ///platforms are ignored. Requires a device/SDK that exposes
+  ///`WKWebView.conversationContext`.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: "26.0",
+        apiName: "WKWebView.conversationContext",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebview/conversationcontext",
+      ),
+    ],
+  )
+  Map<String, dynamic>? conversationContext;
+
   @ExchangeableObjectConstructor()
   InAppWebViewSettings_({
     this.useShouldOverrideUrlLoading,
@@ -3749,6 +3820,11 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.allowsInlinePredictions,
     this.obscuredContentInsets,
     this.backForwardCacheEnabled,
+    this.backForwardCacheTimeoutSeconds,
+    this.backForwardCacheMaxPagesInCache,
+    this.useWebViewBuilder,
+    this.webViewBuilderOriginAllowList,
+    this.conversationContext,
   }) {
     if (this.minimumFontSize == null)
       this.minimumFontSize = Util.isAndroid ? 8 : 0;

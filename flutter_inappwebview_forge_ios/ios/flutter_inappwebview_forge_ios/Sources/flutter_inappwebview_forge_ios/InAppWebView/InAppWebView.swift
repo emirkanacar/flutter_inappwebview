@@ -729,6 +729,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                         trailing: insets.right
                     )
                 }
+                applyConversationContext(settings.conversationContext)
             }
             
             if settings.clearCache {
@@ -1823,6 +1824,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     nativeFullscreenController.dismissFullscreen(animated: true)
                 }
             }
+        }
+
+        if #available(iOS 26.0, *), newSettingsMap["conversationContext"] != nil {
+            applyConversationContext(newSettings.conversationContext)
         }
 
         let inputAccessoryViewSettingChanged = newSettingsMap["disableInputAccessoryView"] != nil &&
@@ -4789,6 +4794,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         nativeFullscreenFrameInfo = nil
         fullscreenPresentationState = .none
         inFullscreen = false
+        clearConversationContextIfSupported()
         channelDelegate?.dispose()
         channelDelegate = nil
         finishPendingNavigationActionDecisionsOnDispose()
@@ -4874,6 +4880,33 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
 
     private func disposedJavaScriptResult() -> [String: Any?] {
         ["value": NSNull(), "error": "WebView disposed"]
+    }
+
+    /// Applies Smart Reply conversation context via soft-linked UIKit types.
+    /// No-op on Mac Catalyst, older OS versions, or when classes are unavailable.
+    private func applyConversationContext(_ payload: [String: Any]?) {
+        #if targetEnvironment(macCatalyst)
+        return
+        #else
+        guard #available(iOS 26.0, *) else { return }
+        guard responds(to: NSSelectorFromString("setConversationContext:")) else { return }
+        if let payload = payload,
+           let context = InAppWebViewSettings.makeConversationContext(from: payload) {
+            setValue(context, forKey: "conversationContext")
+        } else {
+            setValue(nil, forKey: "conversationContext")
+        }
+        #endif
+    }
+
+    private func clearConversationContextIfSupported() {
+        #if targetEnvironment(macCatalyst)
+        return
+        #else
+        guard #available(iOS 26.0, *) else { return }
+        guard responds(to: NSSelectorFromString("setConversationContext:")) else { return }
+        setValue(nil, forKey: "conversationContext")
+        #endif
     }
     
     deinit {

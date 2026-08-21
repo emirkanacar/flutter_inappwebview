@@ -96,6 +96,38 @@ internal object WebViewStartupCoordinator {
             val config = WebViewStartUpConfig.Builder(executor)
                 .setShouldRunUiThreadStartUpTasks(true)
                 .build()
+            // Prefer the stable WebViewOutcomeReceiver overload from AndroidX WebKit 1.16+.
+            try {
+                val receiverClass = Class.forName("androidx.webkit.WebViewOutcomeReceiver")
+                val startUp = WebViewCompat::class.java.methods.firstOrNull { method ->
+                    method.name == "startUpWebView" &&
+                        method.parameterTypes.size == 3 &&
+                        receiverClass.isAssignableFrom(method.parameterTypes[2])
+                }
+                if (startUp != null) {
+                    val receiver = java.lang.reflect.Proxy.newProxyInstance(
+                        receiverClass.classLoader,
+                        arrayOf(receiverClass)
+                    ) { _, method, args ->
+                        when (method.name) {
+                            "onResult" -> complete(generation)
+                            "onError" -> {
+                                Log.w(
+                                    LOG_TAG,
+                                    "Asynchronous WebView startup reported an error; continuing normally.",
+                                    args?.getOrNull(0) as? Throwable
+                                )
+                                complete(generation)
+                            }
+                        }
+                        null
+                    }
+                    startUp.invoke(null, context, config, receiver)
+                    return
+                }
+            } catch (error: Exception) {
+                Log.w(LOG_TAG, "Stable WebViewOutcomeReceiver startup unavailable; trying legacy callback.", error)
+            }
             WebViewCompat.startUpWebView(
                 context,
                 config,

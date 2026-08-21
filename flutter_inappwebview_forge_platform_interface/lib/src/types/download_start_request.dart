@@ -69,7 +69,12 @@ class DownloadStartRequest_ {
 
   ///Plugin-assigned ID used to correlate a native [PlatformDownloadJobController].
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   String? downloadId;
 

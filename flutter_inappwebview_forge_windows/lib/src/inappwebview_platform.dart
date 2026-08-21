@@ -2,6 +2,7 @@ import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebvi
 
 import 'cookie_manager.dart';
 import 'container_controller.dart';
+import 'download_job/main.dart';
 import 'find_interaction/find_interaction_controller.dart';
 import 'in_app_browser/in_app_browser.dart';
 import 'in_app_webview/headless_in_app_webview.dart';
@@ -401,6 +402,18 @@ class WindowsInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   PlatformPrintJobController createPlatformPrintJobControllerStatic() {
     return _PlatformPrintJobController.static();
+  }
+
+  @override
+  WindowsDownloadJobController createPlatformDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) {
+    return WindowsDownloadJobController(params);
+  }
+
+  @override
+  WindowsDownloadJobController createPlatformDownloadJobControllerStatic() {
+    return WindowsDownloadJobController.static();
   }
 
   /// Creates a new empty [PlatformPullToRefreshController] to access static methods.

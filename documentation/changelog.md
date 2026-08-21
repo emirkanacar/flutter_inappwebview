@@ -6,6 +6,18 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.77 - 2026-08-21
+
+- Continue native WebView API gap coverage: Android NavigationParameters
+  + Profile `preconnect`, BFCache depth settings, opt-in WebViewBuilder,
+  `saveStateWithOptions`, ProcessGlobalConfig UI-thread startup mode,
+  Windows `DownloadJobController` parity, and iOS 26
+  `conversationContext` (Smart Reply).
+- **Android breaking floor:** `minSdkVersion` is now **24** and AndroidX
+  WebKit is `1.16.0`. Stay on 2.1.76 for API 19–23 hosts.
+- Ships with platform-interface 1.1.22, Android 1.0.56, iOS 2.1.35,
+  Windows 1.0.15, and macOS 1.1.10.
+
 ## 2.1.76 - 2026-08-21
 
 - Add `setAudioMuted` / `isAudioMuted`, opt-in native

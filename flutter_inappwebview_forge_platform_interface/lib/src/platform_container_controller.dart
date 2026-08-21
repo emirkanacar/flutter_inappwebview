@@ -354,6 +354,29 @@ abstract class PlatformContainerController extends PlatformInterface {
     );
   }
 
+  /// Preconnects to the origin of [url] on the Android profile.
+  ///
+  /// This can speed up a later navigation without starting a full prefetch.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.preconnect',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/Profile#preconnect(java.lang.String)',
+        available: '110',
+        note: 'Requires [WebViewFeature.PRECONNECT].',
+      ),
+    ],
+  )
+  Future<bool> preconnect({
+    required String containerId,
+    required String url,
+  }) {
+    throw UnimplementedError(
+      'preconnect is not implemented on the current platform',
+    );
+  }
+
   /// Checks whether this controller is available on [platform].
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

@@ -35,7 +35,7 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 
 - FVM selects Flutter `3.44.8` from `.fvmrc`; the package compatibility minimum remains Flutter `>=3.38.6`.
 - The root package requires Dart `^3.8.0` and Flutter `>=3.38.6`.
-- iOS support starts at iOS 15.0. macOS starts at 10.14. Android declares `minSdkVersion 19`; verify effective AndroidX requirements before changing that contract.
+- iOS support starts at iOS 15.0. macOS starts at 10.14. Android declares `minSdkVersion 24` (AndroidX WebKit `1.16.0`); older API 19–23 hosts must stay on 2.1.76 / Android 1.0.55.
 - Android native code is Kotlin and the Android build uses Kotlin DSL. The built-in Kotlin/AGP 9 migration is tracked in [`docs/android-kotlin-kts-migration-plan.md`](docs/android-kotlin-kts-migration-plan.md).
 - iOS and macOS support Swift Package Manager while retaining CocoaPods. The design is documented in [`docs/ios-uiscene-spm-migration-plan.md`](docs/ios-uiscene-spm-migration-plan.md).
 - Linux requires WPE WebKit and its development packages. Read `flutter_inappwebview_forge_linux/WPE_BACKEND.md` before changing CMake or rendering code.

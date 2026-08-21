@@ -7,8 +7,14 @@ namespace flutter_inappwebview_plugin
     const int64_t& contentLength,
     const std::optional<std::string>& mimeType,
     const std::optional<std::string>& suggestedFilename,
-    const std::string& url)
-    : contentDisposition(contentDisposition), contentLength(contentLength), mimeType(mimeType), suggestedFilename(suggestedFilename), url(url)
+    const std::string& url,
+    const std::optional<std::string>& downloadId)
+    : contentDisposition(contentDisposition),
+    contentLength(contentLength),
+    mimeType(mimeType),
+    suggestedFilename(suggestedFilename),
+    url(url),
+    downloadId(downloadId)
   {}
 
   flutter::EncodableMap DownloadStartRequest::toEncodableMap() const
@@ -18,7 +24,8 @@ namespace flutter_inappwebview_plugin
       {"contentLength", make_fl_value(contentLength)},
       {"mimeType", make_fl_value(mimeType)},
       {"suggestedFilename", make_fl_value(suggestedFilename)},
-      {"url", make_fl_value(url)}
+      {"url", make_fl_value(url)},
+      {"downloadId", make_fl_value(downloadId)}
     };
   }
 }

@@ -422,9 +422,26 @@ class WebViewFeature_ {
   );
 
   ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.preconnect].
+  static const PRECONNECT = const WebViewFeature_._internal("PRECONNECT");
+
+  ///Feature for [isFeatureSupported]. This feature covers
   ///[InAppWebViewSettings.backForwardCacheEnabled].
   static const BACK_FORWARD_CACHE = const WebViewFeature_._internal(
     "BACK_FORWARD_CACHE",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers fine-grained
+  ///[InAppWebViewSettings.backForwardCacheTimeoutSeconds] /
+  ///[InAppWebViewSettings.backForwardCacheMaxPagesInCache] controls.
+  static const BACK_FORWARD_CACHE_SETTINGS = const WebViewFeature_._internal(
+    "BACK_FORWARD_CACHE_SETTINGS",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers opt-in
+  ///[InAppWebViewSettings.useWebViewBuilder] configuration.
+  static const WEBVIEW_BUILDER = const WebViewFeature_._internal(
+    "WEBVIEW_BUILDER",
   );
 
   ///Feature for [isFeatureSupported]. This feature covers
@@ -761,9 +778,26 @@ class AndroidWebViewFeature_ {
   );
 
   ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.preconnect].
+  static const PRECONNECT = const AndroidWebViewFeature_._internal(
+    "PRECONNECT",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
   ///[InAppWebViewSettings.backForwardCacheEnabled].
   static const BACK_FORWARD_CACHE = const AndroidWebViewFeature_._internal(
     "BACK_FORWARD_CACHE",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers fine-grained
+  ///back-forward cache timeout and page-limit settings.
+  static const BACK_FORWARD_CACHE_SETTINGS =
+      const AndroidWebViewFeature_._internal("BACK_FORWARD_CACHE_SETTINGS");
+
+  ///Feature for [isFeatureSupported]. This feature covers opt-in
+  ///[InAppWebViewSettings.useWebViewBuilder] configuration.
+  static const WEBVIEW_BUILDER = const AndroidWebViewFeature_._internal(
+    "WEBVIEW_BUILDER",
   );
 
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.userAgentMetadata].

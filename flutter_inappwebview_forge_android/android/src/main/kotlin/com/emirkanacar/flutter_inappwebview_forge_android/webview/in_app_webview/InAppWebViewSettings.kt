@@ -126,6 +126,10 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var containerId: String? = null
     @JvmField var paymentRequestEnabled: Boolean? = null
     @JvmField var backForwardCacheEnabled: Boolean? = null
+    @JvmField var backForwardCacheTimeoutSeconds: Int? = null
+    @JvmField var backForwardCacheMaxPagesInCache: Int? = null
+    @JvmField var useWebViewBuilder: Boolean? = null
+    @JvmField var webViewBuilderOriginAllowList: MutableSet<String>? = null
     @JvmField var webViewAssetLoader: MutableMap<String, Any?>? = null
     @JvmField var defaultVideoPoster: ByteArray? = null
     @JvmField var requestedWithHeaderOriginAllowList: MutableSet<String>? = null
@@ -241,6 +245,13 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "containerId" -> containerId = value as? String
                 "paymentRequestEnabled" -> paymentRequestEnabled = value as Boolean
                 "backForwardCacheEnabled" -> backForwardCacheEnabled = value as Boolean
+                "backForwardCacheTimeoutSeconds" ->
+                    backForwardCacheTimeoutSeconds = (value as Number).toInt()
+                "backForwardCacheMaxPagesInCache" ->
+                    backForwardCacheMaxPagesInCache = (value as Number).toInt()
+                "useWebViewBuilder" -> useWebViewBuilder = value as Boolean
+                "webViewBuilderOriginAllowList" -> webViewBuilderOriginAllowList =
+                    (value as? List<*>)?.filterIsInstance<String>()?.toMutableSet()
                 "allowBackgroundAudioPlaying" -> allowBackgroundAudioPlaying = value as Boolean
                 "webViewAssetLoader" -> webViewAssetLoader = value as MutableMap<String, Any?>
                 "defaultVideoPoster" -> defaultVideoPoster = value as ByteArray
@@ -364,6 +375,10 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("containerId", containerId)
         put("paymentRequestEnabled", paymentRequestEnabled)
         put("backForwardCacheEnabled", backForwardCacheEnabled)
+        put("backForwardCacheTimeoutSeconds", backForwardCacheTimeoutSeconds)
+        put("backForwardCacheMaxPagesInCache", backForwardCacheMaxPagesInCache)
+        put("useWebViewBuilder", useWebViewBuilder)
+        put("webViewBuilderOriginAllowList", webViewBuilderOriginAllowList?.toList())
         put("allowBackgroundAudioPlaying", allowBackgroundAudioPlaying)
         put("defaultVideoPoster", defaultVideoPoster)
         put("requestedWithHeaderOriginAllowList", requestedWithHeaderOriginAllowList?.toList())

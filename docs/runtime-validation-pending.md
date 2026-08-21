@@ -56,6 +56,19 @@ Simulator or device, plus a malformed or unopenable URL that still returns
 `cannot be opened!`. This record does not change the 78 CSV runtime-pending
 count.
 
+### Native WebView API gaps follow-up (local feature)
+
+NavigationParameters, Profile `preconnect`, BFCache depth settings, opt-in
+WebViewBuilder, `saveStateWithOptions`, ProcessGlobalConfig UI-thread startup
+mode, Windows `DownloadJobController` parity, and iOS 26
+`conversationContext` are source-complete in platform-interface 1.1.22,
+Android 1.0.56 (`minSdk 24`, WebKit 1.16.0), iOS 2.1.35, Windows 1.0.15, and
+root 2.1.77. They are not CSV issue records. Runtime validation requires a
+WebView provider advertising PRECONNECT / WEBVIEW_BUILDER /
+BACK_FORWARD_CACHE_SETTINGS, WebView2 download progress on Windows, and an
+iOS 26 device for Smart Reply context attachment. This record does not change
+the 78 CSV runtime-pending count.
+
 ### Native WebView API gaps (local feature)
 
 Mute, opt-in native downloads, Android visual-state, iOS/macOS cookie

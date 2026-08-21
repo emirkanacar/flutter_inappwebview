@@ -1,3 +1,16 @@
+## 1.0.56 - 2026-08-21
+
+- **Breaking compatibility floor:** raise Android `minSdk` from 19 to
+  **24** and depend on `androidx.webkit:webkit:1.16.0`.
+- Pass full `NavigationParameters` (`replaceHistory` / headers) on
+  `navigate` when supported; fall back to `loadUrl`.
+- Add Profile `preconnect`, live BFCache timeout/max-pages settings,
+  opt-in `WebViewBuilder.applyTo`, `saveStateWithOptions`, and
+  ProcessGlobalConfig `uiThreadStartupMode`.
+- Prefer the stable `WebViewOutcomeReceiver` startup overload when the
+  provider exposes it.
+- Depend on platform-interface 1.1.22.
+
 ## 1.0.55 - 2026-08-21
 
 - Feature-gate `WebViewCompat.setAudioMuted` / `isAudioMuted`.

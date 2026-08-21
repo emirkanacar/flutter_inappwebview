@@ -150,7 +150,21 @@ void main() {
     );
     expect(
       PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.preconnect,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      PlatformContainerController.static().isMethodSupported(
         PlatformContainerControllerMethod.addCustomHeader,
+        platform: TargetPlatform.iOS,
+      ),
+      isFalse,
+    );
+    expect(
+      PlatformContainerController.static().isMethodSupported(
+        PlatformContainerControllerMethod.preconnect,
         platform: TargetPlatform.iOS,
       ),
       isFalse,

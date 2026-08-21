@@ -731,7 +731,17 @@ open class WebViewChannelDelegate(
         result.success(webView != null)
       }
 
-      WebViewChannelDelegateMethods.saveState -> result.success(webView?.saveState())
+      WebViewChannelDelegateMethods.saveState -> {
+        val maxSizeBytes = call.argument<Number>("maxSizeBytes")?.toInt()
+        val includeForwardHistory = call.argument<Boolean>("includeForwardHistory") ?: true
+        result.success(
+          if (maxSizeBytes == null && !call.hasArgument("includeForwardHistory")) {
+            webView?.saveState()
+          } else {
+            webView?.saveState(maxSizeBytes, includeForwardHistory)
+          }
+        )
+      }
 
       WebViewChannelDelegateMethods.restoreState -> {
         result.success(webView?.restoreState(call.argument<ByteArray>("state") ?: ByteArray(0)) ?: false)

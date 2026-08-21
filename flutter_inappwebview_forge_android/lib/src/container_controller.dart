@@ -122,4 +122,15 @@ class AndroidContainerController extends PlatformContainerController {
         'url': url,
       }) ??
       false;
+
+  @override
+  Future<bool> preconnect({
+    required String containerId,
+    required String url,
+  }) async =>
+      await _channel.invokeMethod<bool>('preconnect', <String, dynamic>{
+        'containerId': containerId,
+        'url': url,
+      }) ??
+      false;
 }

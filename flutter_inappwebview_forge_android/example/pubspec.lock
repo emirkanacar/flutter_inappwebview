@@ -81,13 +81,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.55"
+    version: "1.0.56"
   flutter_inappwebview_forge_internal_annotations:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "../../dev_packages/flutter_inappwebview_forge_internal_annotations"
-      relative: true
-    source: path
+      name: flutter_inappwebview_forge_internal_annotations
+      sha256: "2cab84a6a6693f82d4d9954a551e8e9c35ac67856c6005ac3362634c665c53e6"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   flutter_inappwebview_forge_platform_interface:
     dependency: "direct main"
@@ -95,7 +96,7 @@ packages:
       path: "../../flutter_inappwebview_forge_platform_interface"
       relative: true
     source: path
-    version: "1.1.21"
+    version: "1.1.22"
   flutter_lints:
     dependency: "direct dev"
     description:

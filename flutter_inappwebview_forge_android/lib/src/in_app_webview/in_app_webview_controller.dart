@@ -3180,6 +3180,18 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
   }
 
   @override
+  Future<Uint8List?> saveStateWithOptions({
+    int? maxSizeBytes,
+    bool includeForwardHistory = true,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{
+      'maxSizeBytes': maxSizeBytes,
+      'includeForwardHistory': includeForwardHistory,
+    };
+    return await channel?.invokeMethod<Uint8List?>('saveState', args);
+  }
+
+  @override
   Future<bool> restoreState(Uint8List? state) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('state', () => state);

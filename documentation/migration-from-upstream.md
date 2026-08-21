@@ -41,13 +41,20 @@ Compatibility does not mean every upstream behavior is identical. The Forge
 implementation may fix a lifecycle race, reject a stale callback, or add a
 new setting while preserving the public contract.
 
+## Android minimum SDK
+
+From **2.1.77**, Android `minSdkVersion` is **24** and the package depends on
+`androidx.webkit:1.16.0`. Applications that must support API 19–23 should stay
+on Forge **2.1.76** / Android **1.0.55**. See [Platform guide](platforms.md)
+and the [Changelog](changelog.md).
+
 ## Migration steps
 
 1. Replace the dependency and imports:
 
    ```yaml
    dependencies:
-     flutter_inappwebview_forge: ^2.1.76
+     flutter_inappwebview_forge: ^2.1.77
    ```
 
    ```dart

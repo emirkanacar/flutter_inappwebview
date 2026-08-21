@@ -7,3 +7,5 @@ dependency_overrides:
     path: ../flutter_inappwebview_forge_ios
   flutter_inappwebview_forge_macos:
     path: ../flutter_inappwebview_forge_macos
+  flutter_inappwebview_forge_windows:
+    path: ../flutter_inappwebview_forge_windows

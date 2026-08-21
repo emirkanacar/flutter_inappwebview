@@ -6,9 +6,12 @@ Scope: iOS and Android first
 
 Current state in this workspace:
 
-- AndroidX Browser is now `1.10.0`; AndroidX WebKit is `1.15.0` while the
-  minSdk 19 compatibility contract is preserved. WebKit 1.15/1.16 APIs are
-  feature-checked at runtime and do not raise the declared minSdk.
+- AndroidX Browser is `1.10.0`; AndroidX WebKit is **`1.16.0`** with
+  declared **`minSdk 24`** (Track C). Hosts that need API 19–23 must stay on
+  2.1.76 / Android 1.0.55 + WebKit 1.15.0.
+- Stable `WebViewOutcomeReceiver` startup, NavigationListener (feature-gated),
+  `saveStateWithOptions`, live BFCache settings, Profile preconnect, and
+  opt-in `WebViewBuilder.applyTo` are implemented on the Android package.
 - Android asynchronous provider startup is coordinated by `WebViewStartupCoordinator`, with a safe fallback for older or overridden WebKit providers.
 - Android synchronous platform callbacks use a shared main-looper dispatcher, bounded in-flight capacity, and method-specific timeouts; they never block the main looper indefinitely.
 - Android bridge/document-start registration and the first renderer load are ordered after platform-view attach; activity-free headless WebViews retain a direct path.
@@ -23,11 +26,10 @@ Current state in this workspace:
   headless prewarm and headless-to-inline KeepAlive handoff. It reuses the
   existing native lifecycle path; cold-start, first-frame, memory, and page
   readiness measurements remain runtime validation work.
-- AndroidX WebKit is now `1.15.0` on the main branch. Declared `minSdk 19`
-  is unchanged. NavigationListener, `navigate()`, prerender, BFCache, and
-  isolated JS event scripts are feature-checked and use reflection when the
-  WebView APK or AndroidX API is missing. `1.16.0` still requires a separate
-  minSdk 24 decision.
+- AndroidX WebKit is now `1.16.0` on the main branch with declared
+  `minSdk 24` (Track C). NavigationListener, `navigate()` with
+  NavigationParameters, prerender, BFCache depth settings, Profile
+  preconnect/headers/prefetch, and opt-in WebViewBuilder are feature-checked.
 
 The source-level slice is complete for this checkpoint. The next release decision must be based on release/profile measurements, not on dependency version numbers alone.
 

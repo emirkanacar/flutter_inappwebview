@@ -12,7 +12,7 @@ part 'platform_download_job_controller.g.dart';
 
 /// Object specifying creation parameters for creating a [PlatformDownloadJobController].
 @SupportedPlatforms(
-  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
 )
 @immutable
 class PlatformDownloadJobControllerCreationParams {
@@ -21,7 +21,7 @@ class PlatformDownloadJobControllerCreationParams {
 
   ///Download job ID.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
   )
   final String id;
 
@@ -51,7 +51,7 @@ typedef DownloadJobProgressHandler = Future<void> Function(double progress)?;
 ///from `onDownloadStarting` starts a native job. The previous notify-only
 ///default (a `null` response) is unchanged.
 @SupportedPlatforms(
-  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
 )
 abstract class PlatformDownloadJobController extends PlatformInterface
     implements Disposable {
@@ -98,13 +98,23 @@ abstract class PlatformDownloadJobController extends PlatformInterface
 
   ///Called when transfer progress changes.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   DownloadJobProgressHandler? onProgressChanged;
 
   ///Called when the job completes, fails, or is canceled.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   DownloadJobCompletionHandler? onComplete;
 
@@ -114,6 +124,7 @@ abstract class PlatformDownloadJobController extends PlatformInterface
       AndroidPlatform(),
       IOSPlatform(available: '14.5'),
       MacOSPlatform(available: '11.3'),
+      WindowsPlatform(),
     ],
   )
   Future<void> cancel() {
@@ -124,7 +135,12 @@ abstract class PlatformDownloadJobController extends PlatformInterface
 
   ///Returns a snapshot of the current job.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   Future<DownloadJobInfo?> getInfo() {
     throw UnimplementedError(
@@ -143,7 +159,12 @@ abstract class PlatformDownloadJobController extends PlatformInterface
 
   @override
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   void dispose() {
     throw UnimplementedError(
