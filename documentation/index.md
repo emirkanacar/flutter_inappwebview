@@ -29,7 +29,8 @@ features:
 
 - Building your first integration? Read [Getting started](/getting-started).
 - Optimizing route transitions? Read [Preload and reuse](/preload-and-reuse).
-- Looking for copyable snippets? Read [Examples and recipes](/examples).
+- Looking for copyable snippets? Read [Examples and recipes](/examples)
+  (downloads, navigate, BFCache, profile warmup, findString, conversationContext).
 - Using cookies, storage, auth, or an in-app browser? Read [Feature guide](/features).
 - Checking what changed? Read the [Changelog](/changelog) and [Migration guide](/migration-from-upstream).
 - Migrating off Options or `androidOn*` / `iosOn*` names? Read [Deprecated APIs](/deprecated-api).

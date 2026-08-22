@@ -56,3 +56,32 @@ when the owning feature or session ends.
 - Check memory after navigation to a heavy page and after disposal.
 - Treat provider, renderer, and OS behavior as separate from Flutter widget
   rebuild performance.
+
+## Android BFCache and state snapshots
+
+BFCache reduces back-navigation latency when the provider supports it. Tune
+timeout and page count together with `backForwardCacheEnabled`:
+
+```dart
+InAppWebViewSettings(
+  backForwardCacheEnabled: true,
+  backForwardCacheTimeoutSeconds: 90,
+  backForwardCacheMaxPagesInCache: 5,
+)
+```
+
+For process restoration without reloading HTML, prefer `saveStateWithOptions`
+when available and restore before the WebView builds a conflicting history
+list:
+
+```dart
+final state = await controller.saveStateWithOptions(
+  maxSizeBytes: 256 * 1024,
+  includeForwardHistory: false,
+);
+// Later, on a fresh WebView or before further navigation:
+await controller.restoreState(state!);
+```
+
+Measure memory alongside latency; retained BFCache entries and saved bundles
+both consume device resources.

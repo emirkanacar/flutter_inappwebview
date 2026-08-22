@@ -52,6 +52,16 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
   final TextEditingController _dataDirSuffixController = TextEditingController(
     text: 'test_suffix',
   );
+  final TextEditingController _uiThreadStartupModeController =
+      TextEditingController();
+
+  // ContainerController state
+  final TextEditingController _containerIdController = TextEditingController(
+    text: 'forge-demo-profile',
+  );
+  final TextEditingController _containerUrlController = TextEditingController(
+    text: 'https://flutter.dev',
+  );
 
   final Map<String, List<MethodResultEntry>> _methodHistory = {};
   final Map<String, int> _selectedHistoryIndex = {};
@@ -115,6 +125,9 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
     _proxyPortController.dispose();
     _bypassListController.dispose();
     _dataDirSuffixController.dispose();
+    _uiThreadStartupModeController.dispose();
+    _containerIdController.dispose();
+    _containerUrlController.dispose();
     super.dispose();
   }
 
@@ -720,48 +733,99 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
 
   // ProcessGlobalConfig methods
   Future<void> _applyProcessGlobalConfig() async {
-    final params = await showParameterDialog(
-      context: context,
-      title: 'Apply Process Global Config',
-      parameters: {'dataDirectorySuffix': _dataDirSuffixController.text.trim()},
-      requiredPaths: ['dataDirectorySuffix'],
+    final suffix = _dataDirSuffixController.text.trim();
+    final uiModeText = _uiThreadStartupModeController.text.trim();
+    final uiMode = uiModeText.isEmpty ? null : int.tryParse(uiModeText);
+    _recordMethodResult(
+      PlatformProcessGlobalConfigMethod.apply.name,
+      'Applying ProcessGlobalConfig...',
+      isError: false,
     );
-
-    if (params == null) return;
-    final suffix = params['dataDirectorySuffix']?.toString() ?? '';
-    if (suffix.isEmpty) {
-      _recordMethodResult(
-        PlatformProcessGlobalConfigMethod.apply.name,
-        'Please enter a data directory suffix',
-        isError: true,
-      );
-      return;
-    }
-    _dataDirSuffixController.text = suffix;
-
-    setState(() => _isLoading = true);
     try {
       await ProcessGlobalConfig.instance().apply(
-        settings: ProcessGlobalConfigSettings(dataDirectorySuffix: suffix),
+        settings: ProcessGlobalConfigSettings(
+          dataDirectorySuffix: suffix.isEmpty ? null : suffix,
+          uiThreadStartupMode: uiMode,
+        ),
       );
       _recordMethodResult(
         PlatformProcessGlobalConfigMethod.apply.name,
-        '$ProcessGlobalConfig applied',
+        '$ProcessGlobalConfig applied'
+        '${uiMode != null ? ' (uiThreadStartupMode=$uiMode)' : ''}',
         isError: false,
-      );
-      _logEvent(
-        EventType.ui,
-        '$ProcessGlobalConfig applied',
-        data: {'dataDirectorySuffix': suffix},
       );
     } catch (e) {
       _recordMethodResult(
         PlatformProcessGlobalConfigMethod.apply.name,
-        'Error: $e',
+        'Failed: $e',
         isError: true,
       );
-    } finally {
-      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _containerPreconnect() async {
+    final containerId = _containerIdController.text.trim();
+    final url = _containerUrlController.text.trim();
+    try {
+      final ok = await ContainerController.instance().preconnect(
+        containerId: containerId,
+        url: url,
+      );
+      _recordMethodResult(
+        PlatformContainerControllerMethod.preconnect.name,
+        'preconnect($containerId, $url) -> $ok',
+        isError: !ok,
+      );
+    } catch (e) {
+      _recordMethodResult(
+        PlatformContainerControllerMethod.preconnect.name,
+        'Failed: $e',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _containerPrefetch() async {
+    final containerId = _containerIdController.text.trim();
+    final url = _containerUrlController.text.trim();
+    try {
+      final ok = await ContainerController.instance().prefetchUrl(
+        containerId: containerId,
+        url: url,
+      );
+      _recordMethodResult(
+        PlatformContainerControllerMethod.prefetchUrl.name,
+        'prefetchUrl($containerId, $url) -> $ok',
+        isError: !ok,
+      );
+    } catch (e) {
+      _recordMethodResult(
+        PlatformContainerControllerMethod.prefetchUrl.name,
+        'Failed: $e',
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _containerAddHeader() async {
+    final containerId = _containerIdController.text.trim();
+    try {
+      final ok = await ContainerController.instance().addCustomHeader(
+        containerId: containerId,
+        headerName: 'X-Forge-Demo',
+        headerValue: 'example',
+      );
+      _recordMethodResult(
+        PlatformContainerControllerMethod.addCustomHeader.name,
+        'addCustomHeader($containerId) -> $ok',
+        isError: !ok,
+      );
+    } catch (e) {
+      _recordMethodResult(
+        PlatformContainerControllerMethod.addCustomHeader.name,
+        'Failed: $e',
+        isError: true,
+      );
     }
   }
 
@@ -808,6 +872,8 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
           _buildTracingControllerSection(),
           const SizedBox(height: 16),
           _buildWebViewEnvironmentSection(),
+          const SizedBox(height: 16),
+          _buildContainerControllerSection(),
           const SizedBox(height: 16),
           _buildProcessGlobalConfigSection(),
           const SizedBox(height: 16),
@@ -1580,6 +1646,18 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                TextField(
+                  controller: _uiThreadStartupModeController,
+                  decoration: const InputDecoration(
+                    labelText: 'UI Thread Startup Mode (optional int)',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                    helperText:
+                        'AndroidX ProcessGlobalConfig.setUiThreadStartupMode',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   child: _buildMethodButton(
@@ -1590,6 +1668,95 @@ class _ServiceControllersScreenState extends State<ServiceControllersScreen> {
                     ),
                     methodName: PlatformProcessGlobalConfigMethod.apply.name,
                   ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContainerControllerSection() {
+    final supportedPlatforms = SupportChecker.getSupportedPlatformsForClass(
+      '$ContainerController',
+    );
+
+    return Card(
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Text(
+              '$ContainerController',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SupportBadgesRow(
+                  supportedPlatforms: supportedPlatforms,
+                  compact: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _containerIdController,
+                  decoration: const InputDecoration(
+                    labelText: 'Container ID',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _containerUrlController,
+                  decoration: const InputDecoration(
+                    labelText: 'URL',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildMethodButton(
+                      'Add Header',
+                      _containerAddHeader,
+                      methodName:
+                          PlatformContainerControllerMethod.addCustomHeader.name,
+                    ),
+                    _buildMethodButton(
+                      'Preconnect',
+                      _containerPreconnect,
+                      methodName:
+                          PlatformContainerControllerMethod.preconnect.name,
+                    ),
+                    _buildMethodButton(
+                      'Prefetch',
+                      _containerPrefetch,
+                      methodName:
+                          PlatformContainerControllerMethod.prefetchUrl.name,
+                    ),
+                  ],
+                ),
+                _buildMethodHistory(
+                  PlatformContainerControllerMethod.preconnect.name,
+                ),
+                _buildMethodHistory(
+                  PlatformContainerControllerMethod.prefetchUrl.name,
+                ),
+                _buildMethodHistory(
+                  PlatformContainerControllerMethod.addCustomHeader.name,
                 ),
               ],
             ),

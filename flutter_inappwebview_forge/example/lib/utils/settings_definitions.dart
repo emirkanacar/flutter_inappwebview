@@ -442,6 +442,50 @@ Map<String, List<SettingDefinition>> getSettingDefinitions() {
         defaultValue: true,
         property: InAppWebViewSettingsProperty.browserAcceleratorKeysEnabled,
       ),
+      SettingDefinition(
+        name: 'Allows Inline Predictions',
+        description: 'Apple inline text predictions',
+        type: SettingType.boolean,
+        defaultValue: false,
+        property: InAppWebViewSettingsProperty.allowsInlinePredictions,
+      ),
+    ],
+    'Android WebKit': [
+      SettingDefinition(
+        name: 'Back/Forward Cache',
+        description: 'Enable Android BFCache when supported',
+        type: SettingType.boolean,
+        defaultValue: null,
+        property: InAppWebViewSettingsProperty.backForwardCacheEnabled,
+      ),
+      SettingDefinition(
+        name: 'BFCache Timeout Seconds',
+        description: 'Timeout for pages kept in BFCache',
+        type: SettingType.integer,
+        defaultValue: null,
+        property: InAppWebViewSettingsProperty.backForwardCacheTimeoutSeconds,
+      ),
+      SettingDefinition(
+        name: 'BFCache Max Pages',
+        description: 'Maximum pages retained in BFCache',
+        type: SettingType.integer,
+        defaultValue: null,
+        property: InAppWebViewSettingsProperty.backForwardCacheMaxPagesInCache,
+      ),
+      SettingDefinition(
+        name: 'Use WebViewBuilder',
+        description: 'Opt-in AndroidX WebViewBuilder configuration',
+        type: SettingType.boolean,
+        defaultValue: null,
+        property: InAppWebViewSettingsProperty.useWebViewBuilder,
+      ),
+      SettingDefinition(
+        name: 'Container ID',
+        description: 'Named persistent WebView profile/container',
+        type: SettingType.string,
+        defaultValue: null,
+        property: InAppWebViewSettingsProperty.containerId,
+      ),
     ],
     'Developer': [
       SettingDefinition(

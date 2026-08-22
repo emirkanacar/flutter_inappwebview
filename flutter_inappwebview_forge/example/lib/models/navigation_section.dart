@@ -97,6 +97,11 @@ final List<NavigationSection> defaultNavigationSections = [
         routeName: '/advanced/controllers',
       ),
       NavigationItem(
+        title: 'Native API Features',
+        icon: Icons.new_releases_outlined,
+        routeName: '/advanced/native-api-features',
+      ),
+      NavigationItem(
         title: 'Service Controllers',
         icon: Icons.settings_applications,
         routeName: '/advanced/service-controllers',

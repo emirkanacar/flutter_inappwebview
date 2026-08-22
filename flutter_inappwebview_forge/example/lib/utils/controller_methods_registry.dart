@@ -433,6 +433,56 @@ class ControllerMethodsRegistry {
             return 'Loading stopped';
           },
         ),
+        ControllerMethodEntry(
+          description: 'Navigates with NavigationParameters',
+          methodEnum: PlatformInAppWebViewControllerMethod.navigate,
+          parameters: {
+            'url': 'https://docs.flutter.dev',
+            'replaceHistory': false,
+            'headerName': 'X-Forge-Demo',
+            'headerValue': 'example',
+          },
+          requiredParameters: ['url'],
+          execute: (controller, params) async {
+            final url = params['url']?.toString() ?? 'https://docs.flutter.dev';
+            final replaceHistory = params['replaceHistory'] == true;
+            final headerName = params['headerName']?.toString();
+            final headerValue = params['headerValue']?.toString();
+            final headers = (headerName != null &&
+                    headerName.isNotEmpty &&
+                    headerValue != null)
+                ? <String, String>{headerName: headerValue}
+                : null;
+            await controller.navigate(
+              url: WebUri(url),
+              replaceHistory: replaceHistory,
+              headers: headers,
+            );
+            return 'Navigated to $url (replaceHistory=$replaceHistory)';
+          },
+        ),
+        ControllerMethodEntry(
+          description: 'Prerenders a URL',
+          methodEnum: PlatformInAppWebViewControllerMethod.prerenderUrl,
+          parameters: {'url': 'https://docs.flutter.dev'},
+          requiredParameters: ['url'],
+          execute: (controller, params) async {
+            final url = params['url']?.toString() ?? 'https://docs.flutter.dev';
+            await controller.prerenderUrl(url: WebUri(url));
+            return 'Prerender requested for $url';
+          },
+        ),
+        ControllerMethodEntry(
+          description: 'Posts a visual-state callback',
+          methodEnum:
+              PlatformInAppWebViewControllerMethod.postVisualStateCallback,
+          parameters: {'requestId': 1},
+          execute: (controller, params) async {
+            final requestId = (params['requestId'] as num?)?.toInt() ?? 1;
+            await controller.postVisualStateCallback(requestId: requestId);
+            return 'Visual-state request $requestId posted';
+          },
+        ),
       ],
     );
   }
@@ -1084,19 +1134,37 @@ class ControllerMethodsRegistry {
           },
         ),
         ControllerMethodEntry(
-          description: 'Checks if muted',
+          description: 'Checks if muted (legacy media API)',
           methodEnum: PlatformInAppWebViewControllerMethod.isMuted,
           execute: (controller, params) async {
             return await controller.isMuted();
           },
         ),
         ControllerMethodEntry(
-          description: 'Sets mute state',
+          description: 'Sets mute state (legacy media API)',
           methodEnum: PlatformInAppWebViewControllerMethod.setMuted,
           parameters: {'muted': true},
           execute: (controller, params) async {
             await controller.setMuted(muted: params['muted'] as bool? ?? true);
             return 'Muted';
+          },
+        ),
+        ControllerMethodEntry(
+          description: 'Checks WebView audio mute (AndroidX)',
+          methodEnum: PlatformInAppWebViewControllerMethod.isAudioMuted,
+          execute: (controller, params) async {
+            return await controller.isAudioMuted();
+          },
+        ),
+        ControllerMethodEntry(
+          description: 'Sets WebView audio mute (AndroidX / Apple)',
+          methodEnum: PlatformInAppWebViewControllerMethod.setAudioMuted,
+          parameters: {'muted': true},
+          execute: (controller, params) async {
+            await controller.setAudioMuted(
+              muted: params['muted'] as bool? ?? true,
+            );
+            return 'Audio muted';
           },
         ),
       ],
@@ -1172,6 +1240,24 @@ class ControllerMethodsRegistry {
             return state != null
                 ? 'State saved: ${state.length} bytes'
                 : 'Save failed';
+          },
+        ),
+        ControllerMethodEntry(
+          description: 'Saves WebView state with size/history options',
+          methodEnum: PlatformInAppWebViewControllerMethod.saveStateWithOptions,
+          parameters: {
+            'maxSizeBytes': 524288,
+            'includeForwardHistory': false,
+          },
+          execute: (controller, params) async {
+            final state = await controller.saveStateWithOptions(
+              maxSizeBytes: (params['maxSizeBytes'] as num?)?.toInt(),
+              includeForwardHistory:
+                  params['includeForwardHistory'] as bool? ?? true,
+            );
+            return state != null
+                ? 'State saved with options: ${state.length} bytes'
+                : 'Save with options failed';
           },
         ),
         ControllerMethodEntry(

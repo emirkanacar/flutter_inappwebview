@@ -136,3 +136,46 @@ the application wants a native download job (Android, iOS, macOS, Windows).
 Android `onVisualStateReady` fires after `postVisualStateCallback` or after a
 finished load. Use `saveStateWithOptions` on Android when the provider
 supports size or forward-history controls.
+
+## Android navigation and profile warmup
+
+```dart
+// NavigationParameters when supported:
+await controller.navigate(
+  url: WebUri('https://example.com/docs'),
+  replaceHistory: false,
+  headers: {'X-Forge-Demo': '1'},
+);
+
+// Profile warmup before attaching a container WebView:
+final containers = ContainerController.instance();
+await containers.preconnect(
+  containerId: 'work',
+  url: 'https://example.com/',
+);
+```
+
+## BFCache and WebViewBuilder
+
+```dart
+InAppWebView(
+  initialSettings: InAppWebViewSettings(
+    backForwardCacheEnabled: true,
+    backForwardCacheTimeoutSeconds: 60,
+    backForwardCacheMaxPagesInCache: 3,
+    useWebViewBuilder: true,
+    webViewBuilderOriginAllowList: {'https://example.com'},
+  ),
+)
+```
+
+Check `WebViewFeature.BACK_FORWARD_CACHE_SETTINGS` and
+`WebViewFeature.WEBVIEW_BUILDER` on Android before depending on these settings.
+
+## iOS 26 conversation context
+
+When Smart Reply or related WebKit features need thread metadata, set
+`conversationContext` at creation time and gate with
+`InAppWebViewSettings.isPropertySupported(
+InAppWebViewSettingsProperty.conversationContext)`.
+See [Examples and recipes](examples.md) for a sample map shape.

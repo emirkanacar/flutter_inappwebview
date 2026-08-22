@@ -76,6 +76,11 @@ and the [Changelog](changelog.md).
    still present. The
    [migration plan](https://github.com/emirkanacar/flutter_inappwebview/blob/master/docs/deprecated-api-migration-plan.md)
    records when they can be removed.
+7. Adopt additive 2.1.76+ APIs where they fit: `setAudioMuted`,
+   `onDownloadStarting` with optional `DownloadJobController`, `navigate` /
+   `prerenderUrl`, profile `preconnect`, BFCache depth settings,
+   `saveStateWithOptions`, and iOS 26 `conversationContext`. Copyable snippets
+   are in [Examples and recipes](examples.md).
 
 Do not add both the upstream and Forge implementations to the same app unless
 you have a deliberate platform-registration plan. Duplicate platform

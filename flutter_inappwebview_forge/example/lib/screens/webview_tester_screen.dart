@@ -986,11 +986,23 @@ class _WebViewTesterScreenState extends State<WebViewTesterScreen>
             'mimeType': downloadStartRequest.mimeType,
             'contentLength': downloadStartRequest.contentLength,
             'suggestedFilename': downloadStartRequest.suggestedFilename,
+            'downloadId': downloadStartRequest.downloadId,
           },
         );
+        // Cancel in the tester by default. Use Native API Features for
+        // notify-only (null) and DownloadJobController handled downloads.
         return DownloadStartResponse(
           handled: true,
           action: DownloadStartResponseAction.CANCEL,
+        );
+      },
+
+      // 32b. onVisualStateReady (Android postVisualStateCallback)
+      onVisualStateReady: (controller, requestId) {
+        _logEvent(
+          EventType.ui,
+          PlatformWebViewCreationParamsProperty.onVisualStateReady.name,
+          data: {'requestId': requestId},
         );
       },
 

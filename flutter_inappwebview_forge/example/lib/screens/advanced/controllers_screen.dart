@@ -220,6 +220,42 @@ class _ControllersScreenState extends State<ControllersScreen> {
   }
 
   // Find Interaction methods
+  Future<void> _findString() async {
+    final params = await showParameterDialog(
+      context: context,
+      title: 'Find String',
+      parameters: {
+        'find': _searchController.text.trim(),
+        'caseSensitive': false,
+        'wraps': true,
+      },
+      requiredPaths: ['find'],
+    );
+
+    if (params == null) return;
+    final query = params['find']?.toString() ?? '';
+    if (query.isEmpty) {
+      _recordMethodResult(
+        PlatformFindInteractionControllerMethod.findString.name,
+        'Please enter search text',
+        isError: true,
+      );
+      return;
+    }
+    _searchController.text = query;
+    final found = await _findInteractionController?.findString(
+      find: query,
+      caseSensitive: params['caseSensitive'] == true,
+      wraps: params['wraps'] != false,
+    );
+    _recordMethodResult(
+      PlatformFindInteractionControllerMethod.findString.name,
+      'findString("$query") -> $found',
+      isError: false,
+      value: found,
+    );
+  }
+
   Future<void> _findAll() async {
     final params = await showParameterDialog(
       context: context,
@@ -765,11 +801,19 @@ class _ControllersScreenState extends State<ControllersScreen> {
                       onPressed: _webViewReady ? _findAll : null,
                       child: const Text('Find'),
                     ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _webViewReady ? _findString : null,
+                      child: const Text('Find String'),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),
                 _buildMethodHistory(
                   PlatformFindInteractionControllerMethod.findAll.name,
+                ),
+                _buildMethodHistory(
+                  PlatformFindInteractionControllerMethod.findString.name,
                 ),
                 const SizedBox(height: 12),
 

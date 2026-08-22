@@ -21,7 +21,16 @@ common workflows are collected here.
 | Observe cookie store changes | `CookieManager.addCookieChangedListener` | iOS, macOS |
 | Find text without the system UI | `FindInteractionController.findString` | iOS, macOS |
 | Warm a profile origin before navigation | `ContainerController.preconnect` | Android |
+| Prefetch a profile URL | `ContainerController.prefetchUrl` | Android |
+| Add profile-scoped request headers | `ContainerController.addCustomHeader` | Android |
 | Restrict Android WebView construction | `useWebViewBuilder` | Android |
+| Tune Android BFCache retention | `backForwardCacheTimeoutSeconds`, `backForwardCacheMaxPagesInCache` | Android |
+| Navigate with replace/history and headers | `InAppWebViewController.navigate` | Android (fallback: `loadUrl`) |
+| Prerender a URL | `InAppWebViewController.prerenderUrl` | Android |
+| Save state with bundle limits | `InAppWebViewController.saveStateWithOptions` | Android |
+| Wait for first paint | `postVisualStateCallback` + `onVisualStateReady` | Android |
+| Smart Reply context | `InAppWebViewSettings.conversationContext` | iOS 26+ |
+| Configure Android startup globally | `ProcessGlobalConfigSettings.uiThreadStartupMode` | Android |
 
 Every capability has a runtime support check. Check support before exposing a
 platform-specific action in your UI.
@@ -184,6 +193,96 @@ Returning `handled: true` without a path, or returning `CANCEL`, does not
 start a plugin download. Progress and completion stay on
 `DownloadJobController` when a job ID is available.
 
+```dart
+DownloadJobController? job;
+
+InAppWebView(
+  onDownloadStarting: (controller, request) async {
+    final path = '/tmp/${request.suggestedFilename ?? 'download.bin'}';
+    final downloadId = request.downloadId;
+
+    if (downloadId != null && DownloadJobController.isClassSupported()) {
+      job?.dispose();
+      job = DownloadJobController(id: downloadId)
+        ..onProgressChanged = (progress) async {
+          debugPrint('progress: ${(progress * 100).toStringAsFixed(0)}%');
+        }
+        ..onComplete = (completed, error) async {
+          debugPrint(completed ? 'done' : 'error: $error');
+        };
+    }
+
+    return DownloadStartResponse(
+      handled: true,
+      action: DownloadStartResponseAction.DOWNLOAD,
+      resultFilePath: path,
+    );
+  },
+)
+```
+
+Windows WebView2 follows the same contract as Android and Apple platforms.
+Linux and Web do not expose `DownloadJobController`; handle downloads in Dart
+or cancel explicitly.
+
+## Android navigation, prerender, and BFCache
+
+`navigate` accepts `replaceHistory` and optional request headers when
+AndroidX NavigationParameters is available:
+
+```dart
+await controller.navigate(
+  url: WebUri('https://example.com/next'),
+  replaceHistory: true,
+  headers: {'Authorization': 'Bearer token'},
+);
+```
+
+`prerenderUrl` starts provider-side speculative loading when
+`WebViewFeature.PRERENDER_URL` is supported.
+
+BFCache depth is configured at WebView creation:
+
+```dart
+InAppWebViewSettings(
+  backForwardCacheEnabled: true,
+  backForwardCacheTimeoutSeconds: 120,
+  backForwardCacheMaxPagesInCache: 6,
+)
+```
+
+## Android WebViewBuilder
+
+Enable immutable WebView construction only for trusted origins:
+
+```dart
+InAppWebViewSettings(
+  useWebViewBuilder: true,
+  webViewBuilderOriginAllowList: {'https://example.com'},
+)
+```
+
+## Save state with options
+
+`saveStateWithOptions` forwards AndroidX bundle size and forward-history
+controls when supported; otherwise it delegates to `saveState`:
+
+```dart
+final bytes = await controller.saveStateWithOptions(
+  maxSizeBytes: 1024 * 1024,
+  includeForwardHistory: false,
+);
+if (bytes != null) {
+  await controller.restoreState(bytes);
+}
+```
+
+## Visual state and first paint
+
+On Android, subscribe to `onVisualStateReady` and optionally call
+`postVisualStateCallback` when you need an explicit request ID for overlay
+timing. Do not equate `onLoadStop` with a painted frame.
+
 ## Find text in the page
 
 Use `FindInteractionController.findString` on iOS 14+ and macOS 11+ to select
@@ -195,6 +294,54 @@ final found = await find.findString(find: 'invoice');
 ```
 
 Keep the same controller instance for the WebView that owns it.
+
+On other platforms, use `findAll` and `findNext` from the same controller.
+
+## iOS 26 conversation context
+
+Pass a WebKit-shaped map through `conversationContext` when Smart Reply or
+related features need thread metadata:
+
+```dart
+InAppWebViewSettings(
+  conversationContext: {
+    'type': 'message',
+    'threadIdentifier': 'thread-1',
+    'entries': [
+      {'text': 'Hello', 'senderIdentifier': 'user', 'entryIdentifier': 'e1'},
+    ],
+  },
+)
+```
+
+Check `InAppWebViewSettings.isPropertySupported(
+InAppWebViewSettingsProperty.conversationContext)` before exposing UI that
+depends on it.
+
+## Process-global Android configuration
+
+Apply `ProcessGlobalConfig` once at startup. `uiThreadStartupMode` maps to
+AndroidX when the installed WebKit version supports it:
+
+```dart
+await ProcessGlobalConfig.instance().apply(
+  settings: ProcessGlobalConfigSettings(
+    dataDirectorySuffix: 'my_app',
+    uiThreadStartupMode: 1,
+  ),
+);
+```
+
+## Mute APIs by platform
+
+| Platform | Preferred API |
+| --- | --- |
+| Android | `setAudioMuted` / `isAudioMuted` + `WebViewFeature.MUTE_AUDIO` |
+| iOS / macOS | `setAudioMuted` / `isAudioMuted` |
+| Linux | `setMuted` / `isMuted` |
+
+These are parallel APIs, not deprecated aliases. Pick the supported method for
+the current platform.
 
 ## Inspect Web Storage
 

@@ -10,8 +10,10 @@ features with runtime capability checks.
 - Minimum SDK is **24**. AndroidX WebKit is `1.16.0`. Apps that need API
   19–23 must stay on plugin 2.1.76 / Android 1.0.55.
 - NavigationParameters, Profile preconnect/prefetch/headers, BFCache
-  depth settings, opt-in `WebViewBuilder`, muted audio, and NavigationListener
-  remain feature-checked against the installed WebView provider.
+  depth settings, opt-in `WebViewBuilder`, muted audio (`setAudioMuted`),
+  NavigationListener fallbacks, `saveStateWithOptions`, and
+  `ProcessGlobalConfig.uiThreadStartupMode` remain feature-checked against the
+  installed WebView provider.
 - Hybrid composition is available and can be selected through settings.
 - WebView provider version, renderer behavior, permissions, IME, fullscreen,
   and file chooser behavior depend partly on the device provider.

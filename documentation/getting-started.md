@@ -136,14 +136,37 @@ if (InAppWebViewController.isMethodSupported(
 ```
 
 `onVisualStateReady` reports when Android has a first paintable frame.
-`navigate` and `prerenderUrl` use AndroidX WebKit 1.15 when
+`navigate` and `prerenderUrl` use AndroidX WebKit 1.15+ when
 `WebViewFeature.NAVIGATION_LISTENER` or `WebViewFeature.PRERENDER_URL` is
 present; otherwise `navigate` falls back to `loadUrl`.
+
+```dart
+if (InAppWebViewController.isMethodSupported(
+  PlatformInAppWebViewControllerMethod.navigate,
+)) {
+  await controller.navigate(
+    url: WebUri('https://example.com/next'),
+    replaceHistory: true,
+    headers: {'X-App-Session': sessionId},
+  );
+}
+
+if (InAppWebViewController.isMethodSupported(
+  PlatformInAppWebViewControllerMethod.saveStateWithOptions,
+)) {
+  final state = await controller.saveStateWithOptions(
+    maxSizeBytes: 512 * 1024,
+    includeForwardHistory: false,
+  );
+  debugPrint('saved ${state?.length ?? 0} bytes');
+}
+```
 
 On iOS/macOS 26+, `fetchWebViewData` / `restoreWebViewData` can snapshot
 session storage, and `isBlockedByScreenTime` reports Screen Time blocking.
 Check `InAppWebViewController.isMethodSupported` before calling them. See
-[Feature guide](features.md) for downloads, cookie observers, and find.
+[Feature guide](features.md) and [Examples and recipes](examples.md) for
+downloads, cookie observers, find, BFCache, and profile preconnect.
 
 ## Android setup
 

@@ -21,6 +21,7 @@ import 'package:flutter_inappwebview_forge_example/screens/browsers/inapp_browse
 import 'package:flutter_inappwebview_forge_example/screens/browsers/chrome_safari_browser_screen.dart';
 import 'package:flutter_inappwebview_forge_example/screens/browsers/headless_webview_screen.dart';
 import 'package:flutter_inappwebview_forge_example/screens/advanced/controllers_screen.dart';
+import 'package:flutter_inappwebview_forge_example/screens/advanced/native_api_features_screen.dart';
 import 'package:flutter_inappwebview_forge_example/screens/advanced/service_controllers_screen.dart';
 import 'package:flutter_inappwebview_forge_example/screens/advanced/static_methods_screen.dart';
 import 'package:flutter_inappwebview_forge_example/screens/support_matrix/support_matrix_screen.dart';
@@ -134,6 +135,8 @@ class _MyAppState extends State<MyApp> {
             ChromeSafariBrowserScreen(),
         '/browsers/headless': (context) => HeadlessWebViewScreen(),
         '/advanced/controllers': (context) => ControllersScreen(),
+        '/advanced/native-api-features': (context) =>
+            const NativeApiFeaturesScreen(),
         '/advanced/service-controllers': (context) =>
             ServiceControllersScreen(),
         '/advanced/static-methods': (context) => StaticMethodsScreen(),

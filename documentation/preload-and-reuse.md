@@ -75,3 +75,31 @@ Compare the same release/profile build with and without prewarming. Measure:
 
 Prewarming is an optimization, not a guarantee that the page is fully loaded
 when the route appears.
+
+## Profile warmup before prewarm
+
+When the headless WebView uses a named Android profile, warm DNS/TLS and
+optional prefetch before `prewarm()`:
+
+```dart
+const profileId = 'dashboard-profile';
+const url = 'https://example.com/dashboard';
+
+final containers = ContainerController.instance();
+
+if (await WebViewFeature.isFeatureSupported(WebViewFeature.PRECONNECT)) {
+  await containers.preconnect(containerId: profileId, url: url);
+}
+
+final preloader = InAppWebViewPreloader(
+  headlessWebView: HeadlessInAppWebView(
+    initialSettings: InAppWebViewSettings(containerId: profileId),
+    initialUrlRequest: URLRequest(url: WebUri(url)),
+  ),
+);
+
+await preloader.prewarm();
+```
+
+Profile headers, prefetch, and preconnect are no-ops when the installed WebView
+provider does not advertise the corresponding `WebViewFeature`.

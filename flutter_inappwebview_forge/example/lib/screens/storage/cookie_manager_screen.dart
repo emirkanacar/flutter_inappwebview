@@ -39,6 +39,8 @@ class _CookieManagerScreenState extends State<CookieManagerScreen> {
   final Map<String, int> _selectedHistoryIndex = {};
   static const int _maxHistoryEntries = 3;
 
+  bool _cookieListenerActive = false;
+
   Future<void> _getCookies() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) {
@@ -528,6 +530,56 @@ class _CookieManagerScreenState extends State<CookieManagerScreen> {
     }
   }
 
+  Future<void> _addCookieChangedListener() async {
+    setState(() => _isLoading = true);
+    try {
+      await _cookieManager.addCookieChangedListener((cookies) async {
+        if (!mounted) return;
+        _recordMethodResult(
+          PlatformCookieManagerMethod.addCookieChangedListener.name,
+          'Cookie store changed (${cookies.length} cookies reported)',
+          isError: false,
+          value: cookies.length,
+        );
+      });
+      setState(() => _cookieListenerActive = true);
+      _recordMethodResult(
+        PlatformCookieManagerMethod.addCookieChangedListener.name,
+        'Cookie change listener attached',
+        isError: false,
+      );
+    } catch (e) {
+      _recordMethodResult(
+        PlatformCookieManagerMethod.addCookieChangedListener.name,
+        'Error attaching cookie listener: $e',
+        isError: true,
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _removeCookieChangedListener() async {
+    setState(() => _isLoading = true);
+    try {
+      await _cookieManager.removeCookieChangedListener();
+      setState(() => _cookieListenerActive = false);
+      _recordMethodResult(
+        PlatformCookieManagerMethod.removeCookieChangedListener.name,
+        'Cookie change listener removed',
+        isError: false,
+      );
+    } catch (e) {
+      _recordMethodResult(
+        PlatformCookieManagerMethod.removeCookieChangedListener.name,
+        'Error removing cookie listener: $e',
+        isError: true,
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   void _recordMethodResult(
     String methodName,
     String message, {
@@ -702,6 +754,18 @@ class _CookieManagerScreenState extends State<CookieManagerScreen> {
                   PlatformCookieManagerMethod.flush,
                   'Flush cookies to persistent storage',
                   _flush,
+                ),
+                _buildMethodSection(
+                  PlatformCookieManagerMethod.addCookieChangedListener,
+                  _cookieListenerActive
+                      ? 'Cookie change listener is active'
+                      : 'Observe iOS/macOS cookie store changes',
+                  _addCookieChangedListener,
+                ),
+                _buildMethodSection(
+                  PlatformCookieManagerMethod.removeCookieChangedListener,
+                  'Stop observing cookie store changes',
+                  _removeCookieChangedListener,
                 ),
                 const SizedBox(height: 16),
                 _buildCookiesList(),

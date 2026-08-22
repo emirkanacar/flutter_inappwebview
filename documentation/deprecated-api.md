@@ -29,6 +29,57 @@ InAppWebView(
 )
 ```
 
+## Common before/after snippets
+
+### Error callbacks
+
+```dart
+// Before:
+// onLoadError: (controller, url, code, message) { ... }
+
+// After:
+onReceivedError: (controller, request, error) {
+  if (request.isForMainFrame != true) return;
+  debugPrint('${error.type}: ${error.description}');
+},
+```
+
+### Download callbacks
+
+```dart
+// Before:
+// onDownloadStartRequest: (controller, request) async { ... }
+
+// After:
+onDownloadStarting: (controller, request) async {
+  return null; // notify-only
+  // or return DownloadStartResponse(...);
+},
+```
+
+### Find-in-page on the controller
+
+```dart
+// Before:
+// await controller.findAllAsync(find: 'term');
+
+// After:
+final find = FindInteractionController();
+await find.findAll(find: 'term');
+// iOS/macOS alternative:
+await find.findString(find: 'term');
+```
+
+### Cache clearing
+
+```dart
+// Before:
+// await controller.clearCache();
+
+// After:
+await InAppWebViewController.clearAllCache();
+```
+
 ## Widget and controller callbacks
 
 | Deprecated | Current |
@@ -58,7 +109,7 @@ InAppWebView(
 | Deprecated | Current |
 | --- | --- |
 | `clearCache()` | `InAppWebViewController.clearAllCache` |
-| `findAllAsync` / `findNext` / `clearMatches` | `FindInteractionController` |
+| `findAllAsync` / `findNext` / `clearMatches` on controller | `FindInteractionController.findAll` / `findNext` / `clearMatches` |
 | `getScale` | `getZoomScale` |
 | `setSafeBrowsingWhitelist` | `setSafeBrowsingAllowlist` |
 | `iosWKPdfConfiguration` | `pdfConfiguration` |
@@ -73,6 +124,20 @@ InAppWebView(
 | `AndroidWebStorageManager`, `IOSWebStorageManager` | `WebStorageManager` |
 | `AndroidCookieManager` | `CookieManager` |
 | `AndroidServiceWorkerController` / `AndroidServiceWorkerClient` | unprefixed classes |
+| `setOptions` / `getOptions` on controller | `setSettings` / `getSettings` |
+| `tRexRunnerHtml` / `tRexRunnerCss` on controller | static `tRexRunnerHtml` / `tRexRunnerCss` on `InAppWebViewController` |
+
+## Platform-specific APIs that are not deprecated
+
+Some similarly named methods target different engines. Use runtime checks instead
+of assuming one name works everywhere:
+
+| API | Platform | Notes |
+| --- | --- | --- |
+| `setAudioMuted` / `isAudioMuted` | Android, iOS, macOS | AndroidX / WebKit media suspension |
+| `setMuted` / `isMuted` | Linux WPE | WebKit mute for WPE WebView |
+| `navigate` | Android primary | Falls back to `loadUrl` when NavigationParameters is unavailable |
+| `saveStateWithOptions` | Android primary | Delegates to `saveState` when options are unsupported |
 
 ## Settings fields that remain for compatibility
 
