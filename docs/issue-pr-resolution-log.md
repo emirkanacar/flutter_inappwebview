@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-09-01
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,25 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-09-01 Android/iOS platform verification follow-up
+
+This local validation does not map to a new upstream issue and does not change
+the CSV `OPEN` metadata. The iOS adapter now matches the Xcode 26.6
+`WKWebView.obscuredContentInsets` `UIEdgeInsets` declaration instead of using
+the macOS directional inset contract. The public Dart setting and channel map
+are unchanged. The iOS source regression, four package tests, SwiftPM manifest,
+device/no-codesign Xcode build, and iOS 17 Simulator platform smoke test pass.
+Physical iOS 26 inset read/write validation remains pending.
+
+Android #2687 coverage now includes the platform example: its build directory
+resolves from `projectDirectory`, `flutter build apk --debug` discovers the APK
+under `example/build`, 69 Dart tests and five native JUnit tests pass, and the
+Kotlin/AAR plus Android 15 physical-device platform smoke gates pass. Both
+platform example integration entrypoints now load deterministic inline HTML,
+observe `onLoadStop`, evaluate JavaScript, and dispose without a network
+dependency. Release/AAB/JDK/provider coverage remains pending; no upstream
+issue or PR state was changed.
 
 ## 2026-08-21 Native WebView API gaps
 

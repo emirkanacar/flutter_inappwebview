@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-09-01
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -76,6 +76,19 @@ remains in [`runtime-validation-pending.md`](runtime-validation-pending.md).
 - **Active open work:** no complete local implementation boundary has been established, or a runtime failure has returned the issue to implementation/reproduction.
 
 ## Local resolutions outside this plan
+
+The 2026-09-01 Flutter 3.44.8 / Xcode 26.6 verification corrected two local
+build gates without changing exported issue counts. iOS now applies and reads
+the iOS 26 `WKWebView.obscuredContentInsets` property as `UIEdgeInsets`; the
+public Dart setting, serialized `top`/`left`/`bottom`/`right` map, availability
+guard, and older-iOS fallback are unchanged. Android's platform example now
+derives `../build` from `projectDirectory`, matching the root example and
+Flutter's artifact discovery contract. Focused regressions fail against the
+old sources and pass after the fixes; iOS package/SwiftPM/Xcode builds, Android
+package/JUnit/Kotlin/AAR/Flutter APK builds, and deterministic platform example
+integration smoke tests pass on an iOS 17 Simulator and Android 15 device.
+Physical iOS 26 inset read/write behavior and Android release/AAB/JDK/provider
+coverage remain in the runtime register.
 
 The local iOS input accessory refresh and cross-platform
 `disableAutocorrection` setting are implemented in root 2.1.70, iOS 2.1.31,

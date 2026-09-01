@@ -74,6 +74,24 @@ void main() {
     expect(source, isNot(contains('proguard-android.txt')));
   });
 
+  test('Android platform example writes artifacts where Flutter expects', () {
+    final buildFile = File('example/android/build.gradle.kts').existsSync()
+        ? File('example/android/build.gradle.kts')
+        : File(
+            'flutter_inappwebview_forge_android/example/android/build.gradle.kts',
+          );
+    final source = buildFile.readAsStringSync();
+
+    expect(
+      source,
+      contains('rootProject.layout.projectDirectory.dir("../build")'),
+    );
+    expect(
+      source,
+      isNot(contains('rootProject.layout.buildDirectory.dir("../build")')),
+    );
+  });
+
   test('Android allow-list parsing filters malformed channel values', () {
     final source =
         File(

@@ -103,6 +103,11 @@ The first implementation slice is complete:
 - The FileProvider authority suffix (`flutter_inappwebview_android.fileprovider`) was preserved for URI compatibility with existing applications.
 - The Flutter 3.44.8 template does not enable the AGP 9 built-in Kotlin model. This checkpoint uses KTS with the transitional Kotlin Gradle plugin model; the built-in Kotlin step will be applied when the toolchain moves to Flutter `>=3.47.0`.
 - The plugin `compileDebugKotlin`/`compileDebugJavaWithJavac` tasks, both root/platform example `assembleDebug` builds, and the Android package FileProvider path test passed with Flutter 3.44.8. The examples were built after offline dependency resolution.
+- On 2026-09-01, the platform example's build directory was corrected to use
+  `rootProject.layout.projectDirectory`, matching the root example. Flutter
+  now discovers `build/app/outputs/flutter-apk/app-debug.apk`; the native
+  JUnit/Kotlin/AAR tasks and the network-free WebView integration smoke test
+  pass on an Android 15/API 35 SM-G991N with JDK 17.
 
 The Java-to-Kotlin migration is complete at this checkpoint. API 19–36/performance validation in Phase 4 and the AGP 9 built-in Kotlin migration after Flutter `>=3.47.0` remain open.
 

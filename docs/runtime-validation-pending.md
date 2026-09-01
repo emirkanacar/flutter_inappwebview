@@ -1,6 +1,6 @@
 # Runtime Validation Pending
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-09-01
 
 This register contains issue records whose local implementation or mitigation
 is complete, but whose target device, provider, browser, native runtime, or
@@ -76,7 +76,10 @@ observers, Android Profile headers/prefetch, feature-gated AndroidX WebKit
 1.15 navigation APIs, and iOS 26 obscured-content/session-storage/Screen
 Time helpers are source-complete in platform-interface 1.1.21, Android
 1.0.55, iOS 2.1.34, macOS 1.1.10, and root 2.1.76. They are not CSV issue
-records. Runtime validation requires a WebView provider that advertises
+records. The current iOS source corrects the Xcode 26.6 compile gate by using
+the iOS `UIEdgeInsets` property contract; the package regression, SwiftPM
+manifest, Xcode device/no-codesign build, and iOS 17 Simulator platform smoke
+test pass. Runtime validation still requires a WebView provider that advertises
 `MUTE_AUDIO` / NavigationListener, a real `DownloadManager`/`WKDownload`
 transfer, `postVisualStateCallback` first-paint timing, cookie-store
 observer delivery, Profile prefetch, and an iOS 26 device for
@@ -515,14 +518,16 @@ identifiers and return types. A republished Pana 50/50 score remains the
 remaining gate.
 
 Android release-gate issue [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687)
-is mitigated in the example release path. The Gradle build directory now
-resolves from the project directory to the Flutter-expected `example/build`
-path. After a normal release tooling regeneration (without `--no-pub`), the
-JDK 21 release build produces `build/app/outputs/flutter-apk/app-release.apk`,
-the Android plugin `syncReleaseLibJars` task succeeds, and the APK installs and
-launches on the API 35 `emulator-5554` with `MainActivity` resumed and no fatal
-crash in the smoke log. Clean JDK 17/provider/AAB/publish validation remains
-required.
+is mitigated in both root and platform example build paths. Each Gradle build
+directory now resolves from the project directory to the Flutter-expected
+`example/build` path. After normal release tooling regeneration (without
+`--no-pub`), the JDK 21 root example release build produces
+`build/app/outputs/flutter-apk/app-release.apk`, the Android plugin
+`syncReleaseLibJars` task succeeds, and the APK installs and launches on the
+API 35 `emulator-5554`. The platform example also completes its JDK 17 debug
+Flutter build, native JUnit/Kotlin/AAR tasks, and network-free WebView smoke
+test on an Android 15/API 35 SM-G991N. Clean JDK 17/21 release,
+provider/AAB/publish validation remains required.
 
 iOS/macOS [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)
 now isolates the authentication presentation provider behind the iOS 13/macOS

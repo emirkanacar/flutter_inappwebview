@@ -860,11 +860,6 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'webview/in_app_webview/InAppWebViewClient.kt',
     ).readAsStringSync();
-    final delegateSource = _sourceFile(
-      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
-      'webview/WebViewChannelDelegate.kt',
-    ).readAsStringSync();
-
     expect(cookieSource, contains('@Suppress("DEPRECATION")'));
     expect(
       cookieSource,

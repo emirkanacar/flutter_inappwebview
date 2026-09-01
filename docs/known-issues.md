@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-09-01
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 78 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 30 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -14,6 +14,27 @@ The confidence labels below describe the evidence available during this review:
   remains open for host updates or additional evidence.
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
+
+## 2026-09-01 Android/iOS platform verification follow-up
+
+Local validation, not a new CSV issue. Xcode 26.6 declares the iOS 26
+`WKWebView.obscuredContentInsets` property as `UIEdgeInsets`, while the iOS
+adapter attempted to assign `NSDirectionalEdgeInsets` and read
+`leading`/`trailing`. This prevented every iOS example build with that SDK.
+The adapter now uses `UIEdgeInsets` and the existing `toMap()` conversion, so
+the public Dart property, MethodChannel map, iOS 26 availability boundary, and
+iOS 15 deployment target are unchanged. The source regression, iOS package
+suite, SwiftPM manifest, Xcode 26.6 device/no-codesign build, and iOS 17
+Simulator platform-example smoke test pass. Physical iOS 26 inset read/write
+validation remains pending.
+
+The Android platform example also resolved `../build` relative to Gradle's
+default build directory, leaving APKs under `example/android/build` where
+Flutter could not discover them. It now mirrors the root example's
+`projectDirectory` mapping. Android Dart tests, native JUnit/Kotlin/AAR tasks,
+`flutter build apk --debug`, and the network-free WebView smoke test pass on an
+SM-G991N running Android 15/API 35. Release/AAB/JDK/provider coverage remains
+part of #2687's runtime gate.
 
 ## 2026-08-21 Native WebView API gaps follow-up
 
@@ -340,7 +361,7 @@ The runtime GL realize path now also switches to the same fallback when GtkGLAre
 
 #### #2687 - Android release JAR synchronization
 
-**Local status:** Mitigated in the example release path; JDK/provider/publish validation pending. **Affected scope:** Android example Gradle output discovery and plugin release artifact synchronization. **Impact:** Flutter could report no APK or a stale release registrant could retain the dev-only `integration_test` plugin, masking the actual plugin release gate. **Fix:** the example Gradle script now resolves its root build directory from the project directory (`../build`), so release output is placed under `example/build` as Flutter expects. A normal `flutter build apk --release` regenerates release tooling without the dev-only `integration_test` registrant; with JDK 21, `flutter build apk --release --no-pub` produces `build/app/outputs/flutter-apk/app-release.apk`, and `:flutter_inappwebview_forge_android:syncReleaseLibJars` succeeds. The APK installs on the API 35 `emulator-5554`; `MainActivity` remains resumed and no fatal crash appears in the smoke log. **Remaining validation:** clean JDK 17/21 matrix, real provider/device, AAB/publish artifact inspection, and ensuring the first release-tooling regeneration is run after pub changes. The remaining #2685/#2641 deprecation warning families are separate active work.
+**Local status:** Mitigated in both example build paths; JDK/provider/publish validation pending. **Affected scope:** Android example Gradle output discovery and plugin release artifact synchronization. **Impact:** Flutter could report no APK or a stale release registrant could retain the dev-only `integration_test` plugin, masking the actual plugin release gate. **Fix:** the root and Android platform example Gradle scripts resolve their build directories from the project directory (`../build`), so debug/release output is placed under `example/build` as Flutter expects. A normal `flutter build apk --release` regenerates release tooling without the dev-only `integration_test` registrant; with JDK 21, the root example release build produces `build/app/outputs/flutter-apk/app-release.apk`, and `:flutter_inappwebview_forge_android:syncReleaseLibJars` succeeds. With JDK 17, the platform example now completes `flutter build apk --debug`, native JUnit/Kotlin/AAR tasks, and an Android 15/API 35 physical-device WebView smoke test. **Remaining validation:** clean JDK 17/21 release matrix, real provider/device, AAB/publish artifact inspection, and ensuring the first release-tooling regeneration is run after pub changes. The remaining #2685/#2641 deprecation warning families are separate active work.
 
 #### #2782, #2783 - Android callback ownership and input stability
 

@@ -1,3 +1,10 @@
+## Unreleased
+
+- Use the iOS 26 `WKWebView.obscuredContentInsets` `UIEdgeInsets` contract
+  when applying and reading the setting, fixing Xcode 26.6 Swift compilation.
+- Add a network-free iOS platform example integration smoke test covering
+  WebView creation, inline HTML loading, JavaScript evaluation, and disposal.
+
 ## 2.1.35 - 2026-08-21
 
 - Apply iOS 26+ `WKWebView.conversationContext` (Smart Reply) from the

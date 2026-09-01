@@ -40,19 +40,13 @@ dev_dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  flutter_lints: ^2.0.3
 
 dependency_overrides:
   flutter_inappwebview_forge_internal_annotations:
     path: ../../dev_packages/flutter_inappwebview_forge_internal_annotations
   flutter_inappwebview_forge_platform_interface:
     path: ../../flutter_inappwebview_forge_platform_interface
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^2.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

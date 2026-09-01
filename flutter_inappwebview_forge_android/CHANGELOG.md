@@ -1,3 +1,11 @@
+## Unreleased
+
+- Resolve the Android platform example build directory from the Gradle project
+  directory so Flutter discovers generated APKs under `example/build`.
+- Add a network-free Android platform example integration smoke test covering
+  WebView creation, inline HTML loading, JavaScript evaluation, and disposal;
+  configure the previously empty example widget-test entrypoint.
+
 ## 1.0.56 - 2026-08-21
 
 - **Breaking compatibility floor:** raise Android `minSdk` from 19 to

@@ -329,6 +329,21 @@ void _runSourceContractAssertions() {
     'iOS inline-prediction, obscured-content-inset, and conversationContext settings are missing',
   );
   _assert(
+    source.contains('obscuredContentInsets = UIEdgeInsets(') &&
+        !source.contains('obscuredContentInsets = NSDirectionalEdgeInsets(') &&
+        settingsSource.contains(
+          'realSettings["obscuredContentInsets"] = '
+          'webView.obscuredContentInsets.toMap()',
+        ) &&
+        !settingsSource.contains(
+          'left: webView.obscuredContentInsets.leading',
+        ) &&
+        !settingsSource.contains(
+          'right: webView.obscuredContentInsets.trailing',
+        ),
+    'iOS obscured-content insets do not match the UIEdgeInsets WebKit contract',
+  );
+  _assert(
     source.contains('applyConversationContext') &&
         source.contains('clearConversationContextIfSupported') &&
         source.contains('setConversationContext:'),

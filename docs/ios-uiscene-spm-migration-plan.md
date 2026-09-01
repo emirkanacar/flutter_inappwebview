@@ -1,6 +1,6 @@
 # Apple UIScene and Swift Package Manager Migration Plan
 
-Last reviewed: 2026-08-06  
+Last reviewed: 2026-09-01
 Status: Phase 1 implementation complete; device/release validation pending  
 Scope: iOS UIScene support, plus SPM manifests for the iOS and macOS implementations
 
@@ -43,6 +43,10 @@ Flutter 3.44 enables Swift Package Manager as the default native dependency path
 - `swift package dump-package` resolves the iOS package at iOS 15.0 and the macOS package at macOS 10.14.
 - `pod ipc spec` resolves both iOS podspec platform entries at iOS 15.0.
 - `flutter build ios --debug --no-codesign --no-pub` passes with Xcode's iOS 15+ deployment-target range.
+- Xcode 26.6 device/no-codesign compilation passes after aligning the iOS 26
+  `WKWebView.obscuredContentInsets` adapter with `UIEdgeInsets`; the platform
+  example's network-free WebView integration smoke test also passes on an iOS
+  17 Simulator.
 - The root and iOS packages are versioned at `2.0.0`; the macOS SPM update is versioned at `1.1.0`.
 
 ### Remaining validation
