@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 
 import '../types/enum_method.dart';
@@ -38,8 +39,11 @@ class X509PublicKey {
           publicKeyAsn1Objects = ASN1DERDecoder.decode(
             data: keyData.toList(growable: true),
           );
-        } catch (_) {
-          // Ignore errors (best effort).
+        } catch (e) {
+          // Malformed field: keep parsing the rest of the certificate.
+          if (kDebugMode) {
+            debugPrint('[X509Certificate] ignored malformed field: $e');
+          }
         }
 
         if (publicKeyAsn1Objects != null && publicKeyAsn1Objects.isNotEmpty) {

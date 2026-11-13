@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -88,8 +89,11 @@ class X509Certificate {
       Uint8List? derDataDecoded;
       try {
         derDataDecoded = Uint8List.fromList(base64Decode(base64buffer));
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        // Malformed field: keep parsing the rest of the certificate.
+        if (kDebugMode) {
+          debugPrint('[X509Certificate] ignored malformed field: $e');
+        }
       }
       if (derDataDecoded != null) {
         return derDataDecoded;
@@ -455,8 +459,11 @@ dynamic firstLeafValue({required ASN1Object block}) {
     ASN1Object? subFirst;
     try {
       subFirst = sub.first;
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     if (subFirst != null) {
       return firstLeafValue(block: subFirst);

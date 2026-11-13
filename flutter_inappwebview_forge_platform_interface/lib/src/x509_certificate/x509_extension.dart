@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
 import '../types/enum_method.dart';
@@ -29,8 +30,11 @@ class X509Extension {
       ASN1Object? valueBlock;
       try {
         valueBlock = sub.last;
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        // Malformed field: keep parsing the rest of the certificate.
+        if (kDebugMode) {
+          debugPrint('[X509Certificate] ignored malformed field: $e');
+        }
       }
       if (valueBlock != null) {
         return firstLeafValue(block: valueBlock);
@@ -45,8 +49,11 @@ class X509Extension {
       ASN1Object? valueBlock;
       try {
         valueBlock = sub.last;
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        // Malformed field: keep parsing the rest of the certificate.
+        if (kDebugMode) {
+          debugPrint('[X509Certificate] ignored malformed field: $e');
+        }
       }
       return valueBlock;
     }
@@ -58,8 +65,11 @@ class X509Extension {
     var sub = <ASN1Object>[];
     try {
       sub = block?.sub?.last.sub?.last.sub ?? <ASN1Object>[];
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
 
     for (var item in sub) {
@@ -90,8 +100,11 @@ class X509Extension {
     var sub = <ASN1Object>[];
     try {
       sub = block?.sub?.last.sub?.last.sub ?? <ASN1Object>[];
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     for (var item in sub) {
       var name = generalName(item: item);
@@ -112,8 +125,11 @@ class X509Extension {
         String? name;
         try {
           name = item.sub?.last.sub?.last.value as String?;
-        } catch (_) {
-          // Ignore errors (best effort).
+        } catch (e) {
+          // Malformed field: keep parsing the rest of the certificate.
+          if (kDebugMode) {
+            debugPrint('[X509Certificate] ignored malformed field: $e');
+          }
         }
         return name;
       case 1:
@@ -136,8 +152,11 @@ class X509Extension {
             var data = utf8.encode(value);
             var oid = ASN1DERDecoder.decodeOid(contentData: data);
             return oid;
-          } catch (_) {
-            // Ignore errors (best effort).
+          } catch (e) {
+            // Malformed field: keep parsing the rest of the certificate.
+            if (kDebugMode) {
+              debugPrint('[X509Certificate] ignored malformed field: $e');
+            }
           }
         }
         break;
@@ -288,8 +307,11 @@ class AuthorityKeyIdentifierExtension extends X509Extension {
         (element) => element.identifier?.tagNumber().toValue() == 0,
       );
       return sub.encoded;
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     return null;
   }
@@ -315,8 +337,11 @@ class AuthorityKeyIdentifierExtension extends X509Extension {
         });
       }
       return result;
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     return null;
   }
@@ -332,8 +357,11 @@ class AuthorityKeyIdentifierExtension extends X509Extension {
         (element) => element.identifier?.tagNumber().toValue() == 2,
       );
       return sub.encoded;
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     return null;
   }

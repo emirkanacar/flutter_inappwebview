@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'asn1_object.dart';
 
 class ASN1DistinguishedNames {
@@ -102,8 +103,11 @@ class ASN1DistinguishedNames {
       String? value;
       try {
         value = oidBlock.parent?.sub?.last.value as String?;
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        // Malformed field: keep parsing the rest of the certificate.
+        if (kDebugMode) {
+          debugPrint('[X509Certificate] ignored malformed field: $e');
+        }
       }
       if (value != null) {
         result += quote(value);

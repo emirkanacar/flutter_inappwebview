@@ -349,8 +349,10 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       try {
         var bytes = await rootBundle.load(assetPath);
         html = utf8.decode(bytes.buffer.asUint8List());
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        debugPrint(
+          '[InAppWebViewController] getHtml: could not read asset "$assetPath": $e',
+        );
       }
     }
 

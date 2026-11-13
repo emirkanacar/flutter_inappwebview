@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -98,8 +99,11 @@ class ASN1DERDecoder {
               String? str;
               try {
                 str = utf8.decode(contentData);
-              } catch (_) {
-                // Ignore errors (best effort).
+              } catch (e) {
+                // Malformed field: keep parsing the rest of the certificate.
+                if (kDebugMode) {
+                  debugPrint('[X509Certificate] ignored malformed field: $e');
+                }
               }
               if (str != null) {
                 asn1obj.value = str;
@@ -119,8 +123,11 @@ class ASN1DERDecoder {
           String? str;
           try {
             str = utf8.decode(contentData);
-          } catch (_) {
-            // Ignore errors (best effort).
+          } catch (e) {
+            // Malformed field: keep parsing the rest of the certificate.
+            if (kDebugMode) {
+              debugPrint('[X509Certificate] ignored malformed field: $e');
+            }
           }
           if (str != null) {
             asn1obj.value = str;
@@ -140,8 +147,11 @@ class ASN1DERDecoder {
       int? first;
       try {
         first = iterator.current;
-      } catch (_) {
-        // Ignore errors (best effort).
+      } catch (e) {
+        // Malformed field: keep parsing the rest of the certificate.
+        if (kDebugMode) {
+          debugPrint('[X509Certificate] ignored malformed field: $e');
+        }
       }
       if (first != null) {
         if ((first & 0x80) != 0) {
@@ -154,8 +164,11 @@ class ASN1DERDecoder {
               int? n;
               try {
                 n = iterator.current;
-              } catch (_) {
-                // Ignore errors (best effort).
+              } catch (e) {
+                // Malformed field: keep parsing the rest of the certificate.
+                if (kDebugMode) {
+                  debugPrint('[X509Certificate] ignored malformed field: $e');
+                }
               }
               if (n != null) {
                 data.add(n);
@@ -188,8 +201,11 @@ class ASN1DERDecoder {
         int? n;
         try {
           n = iterator.current;
-        } catch (_) {
-          // Ignore errors (best effort).
+        } catch (e) {
+          // Malformed field: keep parsing the rest of the certificate.
+          if (kDebugMode) {
+            debugPrint('[X509Certificate] ignored malformed field: $e');
+          }
         }
         if (n != null) {
           byteArray.add(n);
@@ -254,8 +270,11 @@ class ASN1DERDecoder {
     String? utc;
     try {
       utc = utf8.decode(contentData);
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     if (utc == null) {
       return null;
@@ -350,8 +369,11 @@ class ASN1DERDecoder {
     String? gentime;
     try {
       gentime = utf8.decode(contentData);
-    } catch (_) {
-      // Ignore errors (best effort).
+    } catch (e) {
+      // Malformed field: keep parsing the rest of the certificate.
+      if (kDebugMode) {
+        debugPrint('[X509Certificate] ignored malformed field: $e');
+      }
     }
     if (gentime == null) {
       return null;

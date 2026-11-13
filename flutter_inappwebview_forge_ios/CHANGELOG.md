@@ -1,5 +1,7 @@
 ## Unreleased
 
+- `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback
+  cannot read the Flutter asset instead of swallowing the error.
 - Resolve the `flutter analyze` infos reported by the pub.dev static
   analysis check (`this.` qualifiers, empty catches, `print` replaced by
   `debugPrint`, overridden fields replaced by typed getters, super

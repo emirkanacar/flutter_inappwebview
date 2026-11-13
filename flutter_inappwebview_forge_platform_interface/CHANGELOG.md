@@ -1,5 +1,7 @@
 ## Unreleased
 
+- X.509 certificate parsing now logs skipped malformed fields with
+  `debugPrint` in debug builds; parsing behavior is unchanged.
 - Resolve the `flutter analyze` infos reported by the pub.dev static
   analysis check (`this.` qualifiers, empty catches, `print` replaced by
   `debugPrint`, overridden fields replaced by typed getters, super
