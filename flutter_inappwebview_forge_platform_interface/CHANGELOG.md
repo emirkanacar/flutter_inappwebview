@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Add `example/README.md` showing how a platform implementation registers
+  `InAppWebViewPlatform` and implements a platform class.
 - X.509 certificate parsing now logs skipped malformed fields with
   `debugPrint` in debug builds; parsing behavior is unchanged.
 - Resolve the `flutter analyze` infos reported by the pub.dev static
