@@ -1,4 +1,4 @@
-## Unreleased
+## 1.0.9 - 2026-11-13
 
 - Resolve the `flutter analyze` infos reported by the pub.dev static
   analysis check (`this.` qualifiers, empty catches, `print` replaced by

@@ -54,7 +54,7 @@ and the [Changelog](changelog.md).
 
    ```yaml
    dependencies:
-     flutter_inappwebview_forge: ^2.1.78
+     flutter_inappwebview_forge: ^2.1.79
    ```
 
    ```dart

@@ -1,4 +1,4 @@
-## Unreleased
+## 1.0.57 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback
   cannot read the Flutter asset instead of swallowing the error.

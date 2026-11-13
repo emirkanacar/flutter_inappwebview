@@ -1,9 +1,11 @@
-## Unreleased
+## 2.1.79 - 2026-11-13
 
 - Resolve all `flutter analyze` infos reported by the pub.dev static
   analysis check (unnecessary library name, `this.` qualifiers, missing
   `@override`, overridden `platform` fields replaced by typed getters,
   collection literals, `??=`). No public API or behavior change.
+- Ships with platform-interface 1.1.23, Android 1.0.57, iOS 2.1.37,
+  macOS 1.1.12, Windows 1.0.16, Linux 1.0.9, and Web 1.0.5.
 
 ## 2.1.78 - 2026-11-13
 

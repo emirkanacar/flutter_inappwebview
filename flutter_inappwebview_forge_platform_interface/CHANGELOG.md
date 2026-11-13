@@ -1,4 +1,4 @@
-## Unreleased
+## 1.1.23 - 2026-11-13
 
 - Add `example/README.md` showing how a platform implementation registers
   `InAppWebViewPlatform` and implements a platform class.

@@ -59,7 +59,7 @@ count.
 ### Web `Sandbox.ALLOW_ALL` iframe sandbox
 
 `iframeSandbox: Sandbox.ALLOW_ALL` produced `sandbox="null"` because the
-generated `Sandbox` equality never matched `ALLOW_ALL`. The Web package now
+generated `Sandbox` equality never matched `ALLOW_ALL`. Web 1.0.5 now
 detects the value with `isIframeSandboxAllowAll` and removes the attribute.
 The unit regression test failed before the fix and passes after it. Runtime
 gate: in a browser, an `ALLOW_ALL` iframe has no `sandbox` attribute and

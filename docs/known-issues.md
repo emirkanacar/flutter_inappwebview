@@ -17,7 +17,7 @@ For the active backlog, priorities, work packages, and acceptance criteria, see 
 
 ## 2026-11-13 Web `Sandbox.ALLOW_ALL` iframe sandbox
 
-Web platform (found during the pub.dev static-analysis cleanup, not a CSV
+Web 1.0.5 (found during the pub.dev static-analysis cleanup, not a CSV
 record): `iframeSandbox: Sandbox.ALLOW_ALL` was compared with `==`, but the
 generated `Sandbox` equality compares against a null native value and never
 matched, so the iframe received `sandbox="null"` (the most restrictive

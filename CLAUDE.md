@@ -11,14 +11,14 @@ contract; this file only adds Claude Code specifics.
 
 | Package | Version |
 | --- | ---: |
-| `flutter_inappwebview_forge` | 2.1.78 |
-| `flutter_inappwebview_forge_platform_interface` | 1.1.22 |
-| `flutter_inappwebview_forge_android` | 1.0.56 |
-| `flutter_inappwebview_forge_ios` | 2.1.36 |
-| `flutter_inappwebview_forge_macos` | 1.1.11 |
-| `flutter_inappwebview_forge_windows` | 1.0.15 |
-| `flutter_inappwebview_forge_linux` | 1.0.8 |
-| `flutter_inappwebview_forge_web` | 1.0.4 |
+| `flutter_inappwebview_forge` | 2.1.79 |
+| `flutter_inappwebview_forge_platform_interface` | 1.1.23 |
+| `flutter_inappwebview_forge_android` | 1.0.57 |
+| `flutter_inappwebview_forge_ios` | 2.1.37 |
+| `flutter_inappwebview_forge_macos` | 1.1.12 |
+| `flutter_inappwebview_forge_windows` | 1.0.16 |
+| `flutter_inappwebview_forge_linux` | 1.0.9 |
+| `flutter_inappwebview_forge_web` | 1.0.5 |
 
 Read versions from each `pubspec.yaml` before writing release notes; this
 table is a snapshot. When a version changes, update this table,
