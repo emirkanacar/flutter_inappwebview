@@ -21,6 +21,35 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
+    'iOS obscuredContentInsets uses the SDK UIEdgeInsets type (issue #2)',
+    () {
+      final webViewSource = _sourceFile(
+        'ios/flutter_inappwebview_forge_ios/Sources/'
+        'flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift',
+      ).readAsStringSync();
+      final settingsSource = _sourceFile(
+        'ios/flutter_inappwebview_forge_ios/Sources/'
+        'flutter_inappwebview_forge_ios/InAppWebView/InAppWebViewSettings.swift',
+      ).readAsStringSync();
+      _assert(
+        !webViewSource.contains('NSDirectionalEdgeInsets') &&
+            !settingsSource.contains('NSDirectionalEdgeInsets'),
+        'WKWebView.obscuredContentInsets is UIEdgeInsets, not NSDirectionalEdgeInsets',
+      );
+      _assert(
+        !settingsSource.contains('obscuredContentInsets.leading') &&
+            !settingsSource.contains('obscuredContentInsets.trailing'),
+        'UIEdgeInsets has no leading/trailing members',
+      );
+      _assert(
+        webViewSource.contains('obscuredContentInsets = insets') &&
+            settingsSource.contains('webView.obscuredContentInsets.toMap()'),
+        'iOS obscuredContentInsets is not assigned/read as UIEdgeInsets',
+      );
+    },
+  );
+
+  test(
     'iOS goBack tolerates a missing native channel during teardown',
     () async {
       final controller = IOSInAppWebViewController(

@@ -146,7 +146,7 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
                           isSecure: Bool?,
                           isHttpOnly: Bool?,
                           sameSite: String?,
-                          cookieStore: WKHTTPCookieStore = MyCookieManager.httpCookieStore,
+                          cookieStore: WKHTTPCookieStore,
                           result: @escaping FlutterResult) {
         var properties: [HTTPCookiePropertyKey: Any] = [:]
         properties[.originURL] = url
@@ -198,7 +198,7 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
     }
     
     public static func getCookies(url: String,
-                                  cookieStore: WKHTTPCookieStore = MyCookieManager.httpCookieStore,
+                                  cookieStore: WKHTTPCookieStore,
                                   result: @escaping FlutterResult) {
         var cookieList: [[String: Any?]] = []
         
@@ -276,7 +276,7 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
         }
     }
     
-    public static func deleteCookie(url: String, name: String, path: String, domain: String?, cookieStore: WKHTTPCookieStore = MyCookieManager.httpCookieStore, result: @escaping FlutterResult) {
+    public static func deleteCookie(url: String, name: String, path: String, domain: String?, cookieStore: WKHTTPCookieStore, result: @escaping FlutterResult) {
         var domain = domain
         cookieStore.getAllCookies { (cookies) in
             for cookie in cookies {
@@ -301,7 +301,7 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
         }
     }
     
-    public static func deleteCookies(url: String, path: String, domain: String?, cookieStore: WKHTTPCookieStore = MyCookieManager.httpCookieStore, result: @escaping FlutterResult) {
+    public static func deleteCookies(url: String, path: String, domain: String?, cookieStore: WKHTTPCookieStore, result: @escaping FlutterResult) {
         var domain = domain
         let dispatchGroup = DispatchGroup()
         cookieStore.getAllCookies { (cookies) in

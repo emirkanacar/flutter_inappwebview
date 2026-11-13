@@ -6,6 +6,15 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.78 - 2026-11-13
+
+- Fix iOS and macOS builds on Xcode 27 / Swift 6.4
+  ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)): `obscuredContentInsets` now uses the SDK
+  `UIEdgeInsets` / `NSEdgeInsets` type, and macOS no longer exposes an
+  internal cookie-store default argument or stores the macOS 14-only
+  `ContainerManager` directly. No Dart API change.
+- Ships with iOS 2.1.36 and macOS 1.1.11.
+
 ## 2.1.77 - 2026-08-21
 
 - Continue native WebView API gap coverage: Android NavigationParameters

@@ -136,12 +136,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
                 realSettings["allowsInlinePredictions"] = configuration.allowsInlinePredictions
             }
             if #available(macOS 26.0, *) {
-                realSettings["obscuredContentInsets"] = NSEdgeInsets(
-                    top: webView.obscuredContentInsets.top,
-                    left: webView.obscuredContentInsets.leading,
-                    bottom: webView.obscuredContentInsets.bottom,
-                    right: webView.obscuredContentInsets.trailing
-                ).toMap()
+                realSettings["obscuredContentInsets"] = webView.obscuredContentInsets.toMap()
             }
         }
         return realSettings

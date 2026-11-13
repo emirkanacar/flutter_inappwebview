@@ -1,3 +1,8 @@
+## 2.1.78 - 2026-11-13
+
+- Fix iOS and macOS builds on Xcode 27 / Swift 6.4 ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)).
+  Ships with iOS 2.1.36 and macOS 1.1.11; no Dart API change.
+
 ## 2.1.77 - 2026-08-21
 
 - Continue native WebView API gap coverage: Android NavigationParameters

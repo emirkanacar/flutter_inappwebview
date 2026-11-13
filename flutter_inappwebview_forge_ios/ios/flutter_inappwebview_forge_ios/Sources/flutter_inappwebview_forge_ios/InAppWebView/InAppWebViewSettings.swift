@@ -220,12 +220,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
                 realSettings["allowsInlinePredictions"] = configuration.allowsInlinePredictions
             }
             if #available(iOS 26.0, *) {
-                realSettings["obscuredContentInsets"] = UIEdgeInsets(
-                    top: webView.obscuredContentInsets.top,
-                    left: webView.obscuredContentInsets.leading,
-                    bottom: webView.obscuredContentInsets.bottom,
-                    right: webView.obscuredContentInsets.trailing
-                ).toMap()
+                realSettings["obscuredContentInsets"] = webView.obscuredContentInsets.toMap()
             }
             realSettings["conversationContext"] = conversationContext
         }

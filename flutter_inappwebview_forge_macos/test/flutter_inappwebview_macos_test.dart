@@ -14,6 +14,49 @@ void main() {
     'macOS native source contracts remain guarded',
     _runSourceContractAssertions,
   );
+  test(
+    'macOS sources compile with Xcode 27 / Swift 6.4 (issue #2)',
+    _runXcode27CompatibilityAssertions,
+  );
+}
+
+void _runXcode27CompatibilityAssertions() {
+  const base =
+      'macos/flutter_inappwebview_forge_macos/Sources/'
+      'flutter_inappwebview_forge_macos/';
+  final cookieSource =
+      _sourceFile('${base}MyCookieManager.swift').readAsStringSync();
+  final pluginSource =
+      _sourceFile('${base}InAppWebViewFlutterPlugin.swift').readAsStringSync();
+  final webViewSource =
+      _sourceFile('${base}InAppWebView/InAppWebView.swift').readAsStringSync();
+  final settingsSource = _sourceFile(
+    '${base}InAppWebView/InAppWebViewSettings.swift',
+  ).readAsStringSync();
+
+  if (cookieSource.contains('= MyCookieManager.httpCookieStore')) {
+    throw StateError(
+      'public MyCookieManager methods must not use the internal '
+      'httpCookieStore as a default argument',
+    );
+  }
+  if (pluginSource.contains('var containerManager: ContainerManager?') ||
+      !pluginSource.contains('var containerManager: Any?') ||
+      !pluginSource.contains('(containerManager as? ContainerManager)?.dispose()')) {
+    throw StateError(
+      'macOS 14-only ContainerManager must be stored type-erased on the plugin',
+    );
+  }
+  if (webViewSource.contains('NSDirectionalEdgeInsets') ||
+      settingsSource.contains('NSDirectionalEdgeInsets') ||
+      settingsSource.contains('obscuredContentInsets.leading') ||
+      settingsSource.contains('obscuredContentInsets.trailing') ||
+      !webViewSource.contains('obscuredContentInsets = insets') ||
+      !settingsSource.contains('webView.obscuredContentInsets.toMap()')) {
+    throw StateError(
+      'WKWebView.obscuredContentInsets is NSEdgeInsets on macOS 26',
+    );
+  }
 }
 
 void _runSourceContractAssertions() {

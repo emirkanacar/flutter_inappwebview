@@ -1,3 +1,10 @@
+## 2.1.36 - 2026-11-13
+
+- Fix the Xcode 27 / iOS 27 SDK build ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)): assign
+  `WKWebView.obscuredContentInsets` as `UIEdgeInsets` and read it back with
+  `left` / `right` instead of `NSDirectionalEdgeInsets` `leading` /
+  `trailing`. The `obscuredContentInsets` settings map is unchanged.
+
 ## 2.1.35 - 2026-08-21
 
 - Apply iOS 26+ `WKWebView.conversationContext` (Smart Reply) from the

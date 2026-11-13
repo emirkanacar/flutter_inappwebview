@@ -11,11 +11,11 @@ contract; this file only adds Claude Code specifics.
 
 | Package | Version |
 | --- | ---: |
-| `flutter_inappwebview_forge` | 2.1.77 |
+| `flutter_inappwebview_forge` | 2.1.78 |
 | `flutter_inappwebview_forge_platform_interface` | 1.1.22 |
 | `flutter_inappwebview_forge_android` | 1.0.56 |
-| `flutter_inappwebview_forge_ios` | 2.1.35 |
-| `flutter_inappwebview_forge_macos` | 1.1.10 |
+| `flutter_inappwebview_forge_ios` | 2.1.36 |
+| `flutter_inappwebview_forge_macos` | 1.1.11 |
 | `flutter_inappwebview_forge_windows` | 1.0.15 |
 | `flutter_inappwebview_forge_linux` | 1.0.8 |
 | `flutter_inappwebview_forge_web` | 1.0.4 |

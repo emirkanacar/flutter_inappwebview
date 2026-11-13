@@ -722,12 +722,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
 
             if #available(iOS 26.0, *) {
                 if let insets = settings.obscuredContentInsets {
-                    obscuredContentInsets = NSDirectionalEdgeInsets(
-                        top: insets.top,
-                        leading: insets.left,
-                        bottom: insets.bottom,
-                        trailing: insets.right
-                    )
+                    obscuredContentInsets = insets
                 }
                 applyConversationContext(settings.conversationContext)
             }

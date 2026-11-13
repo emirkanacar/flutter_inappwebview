@@ -1,6 +1,6 @@
 # Issue and PR Resolution Log
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-11-13
 
 This document records the issue and pull-request exports supplied for the Forge maintenance work and relates them to the implementation already present in this repository.
 
@@ -14,6 +14,16 @@ This document records the issue and pull-request exports supplied for the Forge 
 - “Fixed”, “mitigated”, and “validation pending” describe the local implementation boundary. They do not change upstream GitHub state.
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
+
+## 2026-11-13 Xcode 27 iOS/macOS build fix (Forge #2)
+
+Root 2.1.78, iOS 2.1.36, and macOS 1.1.11 fix the Xcode 27 / Swift 6.4
+compile failures reported in [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)
+(`obscuredContentInsets` SDK type, macOS cookie default argument, macOS
+`ContainerManager` availability). This is a Forge-repository issue, not a
+CSV record; the CSV export counts are unchanged. Details and the runtime gate
+are in [known-issues.md](known-issues.md) and
+[runtime-validation-pending.md](runtime-validation-pending.md).
 
 ## 2026-08-21 Native WebView API gaps
 

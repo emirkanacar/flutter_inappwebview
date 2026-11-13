@@ -37,7 +37,7 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
     var printJobManager: PrintJobManager?
     var downloadJobManager: Any?
     var proxyManager: Any?
-    var containerManager: ContainerManager?
+    var containerManager: Any?
     
     var webViewControllers: [String: InAppBrowserWebViewController?] = [:]
     var safariViewControllers: [String: Any?] = [:]
@@ -99,7 +99,7 @@ public class InAppWebViewFlutterPlugin: NSObject, FlutterPlugin {
         if #available(macOS 14.0, *) {
             (proxyManager as? ProxyManager)?.dispose()
             proxyManager = nil
-            containerManager?.dispose()
+            (containerManager as? ContainerManager)?.dispose()
             containerManager = nil
         }
     }

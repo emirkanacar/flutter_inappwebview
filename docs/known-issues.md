@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-11-13
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 78 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 30 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -14,6 +14,29 @@ The confidence labels below describe the evidence available during this review:
   remains open for host updates or additional evidence.
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
+
+## 2026-11-13 Xcode 27 / Swift 6.4 iOS and macOS build failure (Forge #2)
+
+Forge-repository issue [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2), not a CSV record. iOS 2.1.35 and macOS
+1.1.10 (root 2.1.77) failed to compile on Xcode 27.2 / Swift 6.4.2:
+`WKWebView.obscuredContentInsets` is `UIEdgeInsets` (iOS 26) /
+`NSEdgeInsets` (macOS 26), but the 2.1.76 code assigned
+`NSDirectionalEdgeInsets` and read `leading` / `trailing`; macOS public
+cookie helpers used the internal `MyCookieManager.httpCookieStore` as a
+default argument; and the macOS plugin stored the macOS 14-only
+`ContainerManager` directly although the module targets macOS 10.14 (12.0
+after the Flutter 3.50 template migration). iOS 2.1.36, macOS 1.1.11, and
+root 2.1.78 assign/read the SDK inset type, drop the cookie default argument
+(iOS parity; all callers pass the store), and store `containerManager` as
+`Any?`. The Dart settings map (`top/left/bottom/right`), channel names, and
+platform interface are unchanged; the Dart side was verified and left
+unchanged. Source-contract regression tests failed before the fix and pass
+after it. iOS/macOS package tests, `swift package dump-package`, the iOS
+native lifecycle tests, and `flutter build ios --debug --no-codesign` /
+`flutter build macos --debug` for both examples (Flutter 3.50.0, Swift
+Package Manager plugin integration) pass. Runtime gate: an iOS 26+ and macOS
+26+ run that applies `obscuredContentInsets` and reads it back through
+`getSettings`, plus a CocoaPods-only host build.
 
 ## 2026-08-21 Native WebView API gaps follow-up
 

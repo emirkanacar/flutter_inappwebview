@@ -1,3 +1,15 @@
+## 1.1.11 - 2026-11-13
+
+- Fix the Xcode 27 / Swift 6.4 build ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)):
+  - Remove the internal `MyCookieManager.httpCookieStore` default argument
+    from the public `getCookies` / `setCookie` / `deleteCookie` /
+    `deleteCookies` helpers (iOS parity; every caller passes the store).
+  - Store the macOS 14-only `ContainerManager` type-erased (`Any?`) on the
+    plugin, matching `proxyManager` and iOS.
+  - Assign and read `WKWebView.obscuredContentInsets` as `NSEdgeInsets`
+    instead of `NSDirectionalEdgeInsets`.
+- The channel names and settings payloads are unchanged.
+
 ## 1.1.10 - 2026-08-21
 
 - Map `setAudioMuted` / `isAudioMuted` to

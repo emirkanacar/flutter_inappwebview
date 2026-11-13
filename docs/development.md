@@ -97,6 +97,13 @@ swift package dump-package
 flutter build ios --debug --no-codesign
 ```
 
+Build both the iOS and macOS examples with the newest installed Xcode before
+releasing an Apple package. Newer Swift compilers reject patterns older ones
+accepted (for example internal values in public default arguments, or stored
+properties whose type is newer than the deployment target), and SDK property
+types can differ from the documentation used at implementation time
+(`obscuredContentInsets` is `UIEdgeInsets` / `NSEdgeInsets`, see Forge #2).
+
 Run the native checks from the relevant package directory. Validate both SPM and CocoaPods metadata when changing package manifests or resources. Device testing is required for scene transitions, Web Authentication, keyboard dismissal, fullscreen video, and WebKit crashes.
 
 ### Linux
