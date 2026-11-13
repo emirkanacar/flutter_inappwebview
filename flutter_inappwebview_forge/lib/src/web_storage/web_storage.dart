@@ -83,53 +83,63 @@ abstract class Storage implements PlatformStorage {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.controller}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.controller.supported_platforms}
+  @override
   PlatformInAppWebViewController? get controller => platform.controller;
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.webStorageType}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.webStorageType.supported_platforms}
+  @override
   WebStorageType get webStorageType => platform.webStorageType;
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.length}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.length.supported_platforms}
+  @override
   Future<int?> length() => platform.length();
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.setItem}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.setItem.supported_platforms}
+  @override
   Future<void> setItem({required String key, required dynamic value}) =>
       platform.setItem(key: key, value: value);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.getItem}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.getItem.supported_platforms}
+  @override
   Future<dynamic> getItem({required String key}) => platform.getItem(key: key);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.removeItem}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.removeItem.supported_platforms}
+  @override
   Future<void> removeItem({required String key}) =>
       platform.removeItem(key: key);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.getItems}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.getItems.supported_platforms}
+  @override
   Future<List<WebStorageItem>> getItems() => platform.getItems();
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.clear}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.clear.supported_platforms}
+  @override
   Future<void> clear() => platform.clear();
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.key}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.key.supported_platforms}
+  @override
   Future<String> key({required int index}) => platform.key(index: index);
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.dispose}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformStorage.dispose.supported_platforms}
+  @override
   void dispose() => platform.dispose();
 }
 
@@ -157,11 +167,12 @@ class LocalStorage extends Storage {
   }) : this.fromPlatform(platform: PlatformLocalStorage(params));
 
   /// Constructs a [LocalStorage] from a specific platform implementation.
-  LocalStorage.fromPlatform({required this.platform})
-    : super.fromPlatform(platform: platform);
+  LocalStorage.fromPlatform({required PlatformLocalStorage super.platform})
+    : super.fromPlatform();
 
   /// Implementation of [PlatformLocalStorage] for the current platform.
-  final PlatformLocalStorage platform;
+  @override
+  PlatformLocalStorage get platform => super.platform as PlatformLocalStorage;
 
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
   static bool isClassSupported({TargetPlatform? platform}) =>
@@ -210,11 +221,13 @@ class SessionStorage extends Storage {
   }) : this.fromPlatform(platform: PlatformSessionStorage(params));
 
   /// Constructs a [SessionStorage] from a specific platform implementation.
-  SessionStorage.fromPlatform({required this.platform})
-    : super.fromPlatform(platform: platform);
+  SessionStorage.fromPlatform({required PlatformSessionStorage super.platform})
+    : super.fromPlatform();
 
   /// Implementation of [PlatformSessionStorage] for the current platform.
-  final PlatformSessionStorage platform;
+  @override
+  PlatformSessionStorage get platform =>
+      super.platform as PlatformSessionStorage;
 
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
   static bool isClassSupported({TargetPlatform? platform}) =>

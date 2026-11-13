@@ -19,7 +19,7 @@
  *
 */
 
-library flutter_inappwebview_forge;
+library;
 
 export 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart'
     hide

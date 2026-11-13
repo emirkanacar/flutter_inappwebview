@@ -31,8 +31,8 @@ class InAppWebViewController {
 
   /// Constructs a [InAppWebViewController] from a specific platform implementation.
   InAppWebViewController.fromPlatform({required this.platform}) {
-    android = AndroidInAppWebViewController(controller: this.platform);
-    ios = IOSInAppWebViewController(controller: this.platform);
+    android = AndroidInAppWebViewController(controller: platform);
+    ios = IOSInAppWebViewController(controller: platform);
   }
 
   /// Implementation of [PlatformInAppWebViewController] for the current platform.

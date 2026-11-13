@@ -32,9 +32,7 @@ class HttpAuthCredentialDatabase {
 
   ///Gets the [HttpAuthCredentialDatabase] shared instance.
   static HttpAuthCredentialDatabase instance() {
-    if (_instance == null) {
-      _instance = HttpAuthCredentialDatabase();
-    }
+    _instance ??= HttpAuthCredentialDatabase();
     return _instance!;
   }
 

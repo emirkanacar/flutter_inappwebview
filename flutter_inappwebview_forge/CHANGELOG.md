@@ -1,3 +1,10 @@
+## Unreleased
+
+- Resolve all `flutter analyze` infos reported by the pub.dev static
+  analysis check (unnecessary library name, `this.` qualifiers, missing
+  `@override`, overridden `platform` fields replaced by typed getters,
+  collection literals, `??=`). No public API or behavior change.
+
 ## 2.1.78 - 2026-11-13
 
 - Fix iOS and macOS builds on Xcode 27 / Swift 6.4 ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)).

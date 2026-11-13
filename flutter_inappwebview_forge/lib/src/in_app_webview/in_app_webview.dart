@@ -33,7 +33,7 @@ class InAppWebView extends StatefulWidget {
        );
 
   /// Constructs a [InAppWebView] from a specific platform implementation.
-  InAppWebView.fromPlatform({super.key, required this.platform});
+  const InAppWebView.fromPlatform({super.key, required this.platform});
 
   /// Implementation of [PlatformInAppWebView] for the current platform.
   final PlatformInAppWebViewWidget platform;
@@ -918,7 +918,7 @@ class InAppWebView extends StatefulWidget {
        );
 
   @override
-  _InAppWebViewState createState() => _InAppWebViewState();
+  State<InAppWebView> createState() => _InAppWebViewState();
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidgetCreationParams.isClassSupported}
   static bool isClassSupported({TargetPlatform? platform}) =>

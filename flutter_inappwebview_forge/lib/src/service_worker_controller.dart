@@ -30,9 +30,7 @@ class ServiceWorkerController {
 
   ///Gets the [ServiceWorkerController] shared instance.
   static ServiceWorkerController instance() {
-    if (_instance == null) {
-      _instance = ServiceWorkerController();
-    }
+    _instance ??= ServiceWorkerController();
     return _instance!;
   }
 

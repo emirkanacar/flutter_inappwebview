@@ -49,7 +49,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
   /// Constructs a [InAppBrowser] from a specific platform
   /// implementation.
   InAppBrowser.fromPlatform(this.platform) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
   }
 
   /// Implementation of [PlatformInAppBrowser] for the current platform.
@@ -124,7 +124,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     @Deprecated('Use settings instead') InAppBrowserClassOptions? options,
     InAppBrowserClassSettings? settings,
   }) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
     return platform.openUrlRequest(
       urlRequest: urlRequest,
       options: options,
@@ -140,7 +140,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     @Deprecated('Use settings instead') InAppBrowserClassOptions? options,
     InAppBrowserClassSettings? settings,
   }) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
     return platform.openFile(
       assetFilePath: assetFilePath,
       options: options,
@@ -161,7 +161,7 @@ class InAppBrowser implements PlatformInAppBrowserEvents {
     @Deprecated('Use settings instead') InAppBrowserClassOptions? options,
     InAppBrowserClassSettings? settings,
   }) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
     return platform.openData(
       data: data,
       mimeType: mimeType,

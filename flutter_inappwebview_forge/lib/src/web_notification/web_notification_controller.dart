@@ -47,7 +47,7 @@ class WebNotificationController {
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebNotificationController.onClose.supported_platforms}
   WebNotificationCloseHandler? get onClose => platform.onClose;
 
-  void set onClose(WebNotificationCloseHandler? handler) {
+  set onClose(WebNotificationCloseHandler? handler) {
     platform.onClose = handler;
   }
 

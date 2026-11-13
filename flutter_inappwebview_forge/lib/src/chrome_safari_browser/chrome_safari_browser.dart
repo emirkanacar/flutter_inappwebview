@@ -28,7 +28,7 @@ class ChromeSafariBrowser implements PlatformChromeSafariBrowserEvents {
   /// Constructs a [ChromeSafariBrowser] from a specific platform
   /// implementation.
   ChromeSafariBrowser.fromPlatform(this.platform) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
   }
 
   /// Implementation of [PlatformChromeSafariBrowser] for the current platform.
@@ -52,7 +52,7 @@ class ChromeSafariBrowser implements PlatformChromeSafariBrowserEvents {
     ChromeSafariBrowserClassOptions? options,
     ChromeSafariBrowserSettings? settings,
   }) {
-    this.platform.eventHandler = this;
+    platform.eventHandler = this;
     return platform.open(
       url: url,
       headers: headers,
