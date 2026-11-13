@@ -11,7 +11,7 @@ deprecation cleanup gated on minSdk
 
 Keep the 5.x `Options`, `androidOn*` / `iosOn*`, and `IOS*` / `Android*`
 compatibility shims working while new code uses current names. Do not remove a
-public shim, MethodChannel name, or minSdk 19 native fallback in a patch or
+public shim, MethodChannel name, or pre-API-24 native fallback in a patch or
 minor release.
 
 Application-facing mapping:
@@ -96,7 +96,7 @@ internal shims can keep calling each other.
 
 ### Phase 3 — Native SDK cleanup (blocked)
 
-- Raise Android minSdk only with a separate release decision.
+- Android minSdk was raised to 24 in Android 1.0.56 / 2.1.77; remaining SDK-deprecated cleanup still needs its own release decision.
 - After minSdk 21, remove pre-Lollipop `CookieManager.removeSessionCookie` /
   `removeAllCookie`.
 - After minSdk 24+, re-evaluate `forceDark`, `saveFormData`,
@@ -129,7 +129,7 @@ Do not describe this only as "compatibility shims" without the old names.
 - New application code can migrate using only
   [Deprecated APIs](../documentation/deprecated-api.md) and this plan.
 - 2.1.x still compiles existing 5.x Options and prefixed-callback call sites.
-- Native Android SDK-deprecated paths remain for minSdk 19 until Phase 3.
+- Native Android SDK-deprecated paths (originally kept for minSdk 19) remain until Phase 3, even though the floor is now minSdk 24.
 - A major-version removal has an explicit changelog section listing every
   deleted public symbol.
 

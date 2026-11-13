@@ -41,7 +41,7 @@ Recommended first implementation sequence:
 
 1. Establish a release/profile performance baseline and collect the device WebView version.
 2. Keep the landed `androidx.browser` `1.10.0` upgrade isolated and revalidate it against the Android regression matrix.
-3. Keep declared `minSdk 19` while `androidx.webkit` is `1.15.0`; feature-check 1.15 APIs rather than raising the floor.
+3. Done (Track C, Android 1.0.56): declared `minSdk 24` with `androidx.webkit` `1.16.0`. The 1.15.0 / `minSdk 19` line is frozen at 2.1.76 / Android 1.0.55.
 4. Implement the Android startup and blocking-callback changes suggested by [PR #2844](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2844) and issues [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)/[#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849).
 5. Implement the iOS `contentInset`, focus, JavaScript-evaluation, and disposal/lifecycle fixes.
 6. Evaluate `androidx.webkit:1.15.0` and `1.16.0` on explicit minSdk branches rather than changing the main compatibility contract implicitly.
@@ -87,7 +87,7 @@ There are three different version surfaces. They must be tracked separately.
 
 | Surface | Current repository state | Upgrade model | Plan |
 | --- | --- | --- | --- |
-| AndroidX WebKit | `androidx.webkit:webkit:1.15.0` | Bundled compatibility library; 1.16 remains a candidate upgrade line | Feature-check 1.15 APIs on the minSdk 19 branch; do not move to 1.16 until the minSdk 24 decision is explicit. |
+| AndroidX WebKit | `androidx.webkit:webkit:1.16.0` | Bundled compatibility library | Track C shipped in Android 1.0.56 with `minSdk 24`; feature-check 1.16 APIs at runtime. API 19-23 hosts stay on 2.1.76 / WebKit 1.15.0. |
 | AndroidX Browser | `androidx.browser:browser:1.10.0` | Bundled AndroidX library | Completed in Phase 1; run the Android regression matrix before release. |
 | Android System WebView | Device-provided | Updated independently on user devices | Record `WebViewCompat.getCurrentWebViewPackage()` where available; do not treat AndroidX upgrades as engine upgrades. |
 | iOS `WKWebView` | System WebKit; minimum deployment target is iOS 15 | Delivered with the iOS runtime and SDK | Do not look for a package version bump; test OS/Xcode/WebKit behavior across supported iOS 15+ versions. |
@@ -96,7 +96,7 @@ The AndroidX WebKit candidate lines must be checked against the official release
 
 AndroidX WebKit is a compatibility layer over the separately updated WebView APK. The application controls the AndroidX library version, but not the WebView APK version installed on each device: [Jetpack WebKit overview](https://developer.android.com/develop/ui/views/layout/webapps/jetpack-webkit-overview). The Android WebView package can be read for telemetry using the platform/compatibility API: [WebView API reference](https://developer.android.com/reference/android/webkit/WebView#getCurrentWebViewPackage()).
 
-The current `minSdkVersion 19` declaration therefore needs an effective-minimum audit. No minSdk increase should be made until the supported-user distribution, resolved dependency graph, built AAR/manifest behavior, and installability on the retained API matrix are verified.
+The `minSdkVersion 24` floor was adopted in Android 1.0.56 (Track C). Installability and the API 24/29/35/36 matrix remain runtime gates in [runtime-validation-pending.md](runtime-validation-pending.md).
 
 ### Version tracks
 

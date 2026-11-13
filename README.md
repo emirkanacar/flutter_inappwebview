@@ -36,7 +36,7 @@ native implementations, and release process.
 | --- | --- |
 | Dart | `^3.8.0` |
 | Flutter | `>=3.38.6` |
-| Android | `minSdkVersion >= 19`, AGP `>= 7.3.0` |
+| Android | `minSdkVersion >= 24`, AGP `>= 7.3.0` (stay on 2.1.76 for API 19-23) |
 | iOS | 15.0+, Xcode 15+ |
 | macOS | 10.14+, Xcode 15+ |
 | Windows | WebView2 runtime and NuGet CLI on `PATH` |
@@ -50,7 +50,7 @@ WebView gestures incorrectly on iOS.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.76
+  flutter_inappwebview_forge: ^2.1.77
 ```
 
 ```sh
@@ -163,7 +163,7 @@ Replace the package name and import. Widget and controller names stay the same.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.76
+  flutter_inappwebview_forge: ^2.1.77
 ```
 
 ```dart

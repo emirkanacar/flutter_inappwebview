@@ -82,7 +82,7 @@ The main example has extensive integration coverage under `flutter_inappwebview_
 ### Android
 
 - Compile the plugin and build the root/platform examples in debug and release modes.
-- Exercise API 19/21/23/24/29/35/36 where the selected dependency track supports them.
+- Exercise API 24/29/35/36 (the declared floor is `minSdk 24`). API 19-23 coverage applies only to the 2.1.76 / Android 1.0.55 compatibility line.
 - For lifecycle changes, test attach/detach/reattach, KeepAlive, fullscreen, keyboard, renderer loss, and disposal on a real device.
 - Validate release artifacts with:
 

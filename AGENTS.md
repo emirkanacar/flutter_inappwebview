@@ -15,8 +15,13 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 | `flutter_inappwebview_forge_linux/` | Linux WPE WebKit C++ implementation and Linux example |
 | `flutter_inappwebview_forge_web/` | Browser iframe implementation and Web example |
 | `dev_packages/` | Internal annotations and code generators |
-| `tool/` | Repository checks, including Android 16 KB artifact validation |
-| `docs/` | Architecture, development, migration, triage, and release notes |
+| `tool/` | Repository checks: Android 16 KB artifact validation, iOS native lifecycle test runner, documentation-site API generation/verification |
+| `docs/` | Engineering records: architecture, development, migration, triage, runtime-validation, and release notes |
+| `documentation/` | User-facing VitePress guide site; generated `public/api/` and `.vitepress/dist/` are not committed |
+| `scripts/` | Legacy test/publish helper scripts (emulator wait, test runners) |
+| `test_node_server/` | Local Node test server and TLS/client certificates used by integration tests |
+| `web_support/` | TypeScript source for the Web iframe helper; `npm run build` there bundles it into `flutter_inappwebview_forge_web/lib/assets/web/web_support.js` (do not hand-edit the bundle) |
+| `.github/workflows/` | Docs site deployment plus issue lock/stale/no-response automation |
 
 ## Working rules
 
@@ -35,7 +40,8 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 
 - FVM selects Flutter `3.44.8` from `.fvmrc`; the package compatibility minimum remains Flutter `>=3.38.6`.
 - The root package requires Dart `^3.8.0` and Flutter `>=3.38.6`.
-- iOS support starts at iOS 15.0. macOS starts at 10.14. Android declares `minSdkVersion 24` (AndroidX WebKit `1.16.0`); older API 19–23 hosts must stay on 2.1.76 / Android 1.0.55.
+- iOS support starts at iOS 15.0. macOS starts at 10.14. Android declares `minSdkVersion 24` (AndroidX WebKit `1.16.0`); older API 19-23 hosts must stay on 2.1.76 / Android 1.0.55.
+- Android builds with `compileSdk 36`, Java/JVM target 17, AGP `8.13.2` and Kotlin `2.2.20` in the standalone plugin build; the Kotlin Android plugin is applied only when AGP < 9.
 - Android native code is Kotlin and the Android build uses Kotlin DSL. The built-in Kotlin/AGP 9 migration is tracked in [`docs/android-kotlin-kts-migration-plan.md`](docs/android-kotlin-kts-migration-plan.md).
 - iOS and macOS support Swift Package Manager while retaining CocoaPods. The design is documented in [`docs/ios-uiscene-spm-migration-plan.md`](docs/ios-uiscene-spm-migration-plan.md).
 - Linux requires WPE WebKit and its development packages. Read `flutter_inappwebview_forge_linux/WPE_BACKEND.md` before changing CMake or rendering code.
@@ -59,6 +65,16 @@ npm run format
 npm run docs:gen
 ```
 
+The user documentation site lives in `documentation/` (VitePress):
+
+```sh
+npm install --prefix documentation
+npm run docs:site:dev     # generates documentation/public/api/ on first run
+npm run docs:site:build   # regenerates the dart doc API reference, builds, and verifies
+```
+
+Publishing goes bottom-up through the federated graph (`publish:annotations`, `publish:platform_interface`, platform packages, then `publish:plugin`). Follow the "Publishing to pub.dev" section of [`docs/development.md`](docs/development.md) and never publish without explicit authorization.
+
 `npm run build` runs `build_runner` for the platform-interface package. After generation, inspect all changed generated files and run the platform-interface tests.
 
 ## Test selection
@@ -78,6 +94,7 @@ cd flutter_inappwebview_forge_android && fvm flutter test
 cd flutter_inappwebview_forge_ios && fvm flutter test
 cd flutter_inappwebview_forge_web && fvm flutter test
 tool/check_android_16k_alignment.sh <release.apk-or-aab>
+tool/run_ios_native_lifecycle_tests.sh   # swiftc-based WebViewLifecycleCoordinator tests
 ```
 
 For Apple package validation, use `swift package dump-package` in each native package and build with the full Xcode installation. For Linux, verify the required `pkg-config` modules before running Flutter.
@@ -124,3 +141,9 @@ work plan with its environment and native evidence.
 - [`docs/known-issues.md`](docs/known-issues.md): detailed issue triage and remaining validation.
 - [`docs/issue-pr-resolution-log.md`](docs/issue-pr-resolution-log.md): supplied issue/PR export and local resolution history.
 - [`docs/open-work-plan.md`](docs/open-work-plan.md): unresolved work, priorities, acceptance criteria, and implementation sequence.
+- [`docs/runtime-validation-pending.md`](docs/runtime-validation-pending.md): implemented issues still waiting for device/provider/browser/native evidence.
+- [`docs/issue-resolution-workflow.md`](docs/issue-resolution-workflow.md): mandatory per-issue triage, fix, validation, and documentation steps.
+- [`docs/performance-and-webview-upgrade-plan.md`](docs/performance-and-webview-upgrade-plan.md): startup, channel pressure, AndroidX WebKit tracks, and device validation.
+- [`docs/deprecated-api-migration-plan.md`](docs/deprecated-api-migration-plan.md): 5.x shim retention and removal phases.
+- [`docs/android-kotlin-kts-migration-plan.md`](docs/android-kotlin-kts-migration-plan.md) and [`docs/ios-uiscene-spm-migration-plan.md`](docs/ios-uiscene-spm-migration-plan.md): native build-system migrations.
+- [`documentation/README.md`](documentation/README.md): user-facing guides (getting started, features, platforms, examples, deprecated APIs, migration, changelog).

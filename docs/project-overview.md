@@ -1,6 +1,6 @@
 # Project Overview
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-11-13
 
 `flutter_inappwebview_forge` is a federated Flutter plugin that exposes a common Dart API for embedding a WebView, running a headless WebView, and opening an in-app browser. Native implementations translate the shared API into the WebView technology supplied by each operating system.
 
@@ -53,7 +53,7 @@ The JavaScript bridge, document-start scripts, content blockers, web messages, b
 
 ### Android
 
-Android uses Kotlin native sources under `android/src/main/kotlin` and Kotlin DSL build files. The declared minimum SDK is 19, while AndroidX WebKit compatibility must be checked before dependency upgrades. Sensitive paths include WebView provider startup, document-start script registration, platform-view attach, IME focus, fullscreen cleanup, synchronous request interception, cookie deletion, and navigation-context preservation.
+Android uses Kotlin native sources under `android/src/main/kotlin` and Kotlin DSL build files. The declared minimum SDK is 24 with AndroidX WebKit `1.16.0`, compile SDK 36, and Java/Kotlin JVM target 17; hosts that still need API 19-23 must stay on 2.1.76 / Android 1.0.55. AndroidX WebKit compatibility must be checked before dependency upgrades. Sensitive paths include WebView provider startup, document-start script registration, platform-view attach, IME focus, fullscreen cleanup, synchronous request interception, cookie deletion, and navigation-context preservation.
 
 The Android implementation does not ship a plugin-owned JNI/NDK library. The consuming application's final APK/AAB still needs the [16 KB alignment check](../tool/check_android_16k_alignment.sh) because Flutter and transitive dependencies may contain native libraries.
 

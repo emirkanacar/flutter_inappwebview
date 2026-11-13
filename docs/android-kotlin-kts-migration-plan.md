@@ -147,7 +147,7 @@ This separation prevents existing applications from silently losing `FileProvide
 - Pin the Flutter stable version, Dart SDK, AGP, Gradle, Android Studio, and JDK versions in CI.
 - Use JDK 17 as the baseline build environment; run JDK 21/24 only as additional compatibility checks.
 - Take the AGP 9.x and matching Gradle version from the selected Flutter template.
-- Preserve the `minSdk 19`, AndroidX WebKit `1.14.0`, and Browser `1.10.0` contracts independently of this migration.
+- Preserve the current `minSdk 24`, AndroidX WebKit `1.16.0`, and Browser `1.10.0` contracts independently of this migration (the original checkpoint was minSdk 19 / WebKit 1.14.0).
 - Record MethodChannel/EventChannel names, method names, payload maps, the WebView platform-view ID, and the JavaScript bridge name in baseline tests.
 - Finalize the FileProvider authority decision before implementation begins.
 
