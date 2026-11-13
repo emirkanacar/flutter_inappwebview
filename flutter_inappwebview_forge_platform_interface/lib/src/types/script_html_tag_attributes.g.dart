@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'script_html_tag_attributes.dart';
 
 // **************************************************************************
@@ -80,9 +82,9 @@ class ScriptHtmlTagAttributes {
     this.onLoad,
     this.onError,
   }) {
-    if (this.onLoad != null || this.onError != null) {
+    if (onLoad != null || onError != null) {
       assert(
-        this.id != null,
+        id != null,
         'onLoad and onError callbacks require the id property to be set.',
       );
     }

@@ -75,11 +75,11 @@ class LinuxCookieManager extends PlatformCookieManager {
       'name': name,
       'value': value,
       'path': path,
-      if (domain != null) 'domain': domain,
-      if (expiresDate != null) 'expiresDate': expiresDate,
-      if (maxAge != null) 'maxAge': maxAge,
-      if (isSecure != null) 'isSecure': isSecure,
-      if (isHttpOnly != null) 'isHttpOnly': isHttpOnly,
+      'domain': ?domain,
+      'expiresDate': ?expiresDate,
+      'maxAge': ?maxAge,
+      'isSecure': ?isSecure,
+      'isHttpOnly': ?isHttpOnly,
       if (sameSite != null) 'sameSite': sameSite.toString().split('.').last,
     };
 

@@ -56,6 +56,16 @@ Simulator or device, plus a malformed or unopenable URL that still returns
 `cannot be opened!`. This record does not change the 78 CSV runtime-pending
 count.
 
+### Web `Sandbox.ALLOW_ALL` iframe sandbox
+
+`iframeSandbox: Sandbox.ALLOW_ALL` produced `sandbox="null"` because the
+generated `Sandbox` equality never matched `ALLOW_ALL`. The Web package now
+detects the value with `isIframeSandboxAllowAll` and removes the attribute.
+The unit regression test failed before the fix and passes after it. Runtime
+gate: in a browser, an `ALLOW_ALL` iframe has no `sandbox` attribute and
+runs scripts, while `ALLOW_NONE` still yields an empty `sandbox`.
+Details: [`known-issues.md`](known-issues.md).
+
 ### Android example build directory (Forge PR #1)
 
 Android platform example (Forge PR #1, not a CSV record):

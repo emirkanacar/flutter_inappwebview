@@ -12,8 +12,8 @@ class ServerTrustAuthResponseAction_ {
   const ServerTrustAuthResponseAction_._internal(this._value);
 
   ///Instructs the WebView to cancel the authentication challenge.
-  static const CANCEL = const ServerTrustAuthResponseAction_._internal(0);
+  static const CANCEL = ServerTrustAuthResponseAction_._internal(0);
 
   ///Instructs the WebView to proceed with the authentication challenge.
-  static const PROCEED = const ServerTrustAuthResponseAction_._internal(1);
+  static const PROCEED = ServerTrustAuthResponseAction_._internal(1);
 }

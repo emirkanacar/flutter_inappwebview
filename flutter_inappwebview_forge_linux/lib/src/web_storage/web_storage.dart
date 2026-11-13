@@ -11,7 +11,7 @@ import '../in_app_webview/in_app_webview_controller.dart';
 /// more information.
 class LinuxWebStorageCreationParams extends PlatformWebStorageCreationParams {
   /// Creates a new [LinuxWebStorageCreationParams] instance.
-  LinuxWebStorageCreationParams({
+  const LinuxWebStorageCreationParams({
     required super.localStorage,
     required super.sessionStorage,
   });
@@ -61,7 +61,7 @@ class LinuxWebStorage extends PlatformWebStorage {
 /// more information.
 class LinuxStorageCreationParams extends PlatformStorageCreationParams {
   /// Creates a new [LinuxStorageCreationParams] instance.
-  LinuxStorageCreationParams({
+  const LinuxStorageCreationParams({
     required super.controller,
     required super.webStorageType,
   });
@@ -121,7 +121,9 @@ abstract mixin class LinuxStorage implements PlatformStorage {
 
     try {
       return json.decode(itemValue);
-    } catch (e) {}
+    } catch (_) {
+      // Ignore errors (best effort).
+    }
 
     return itemValue;
   }
@@ -204,7 +206,8 @@ abstract mixin class LinuxStorage implements PlatformStorage {
 /// When adding additional fields make sure they can be null or have a default
 /// value to avoid breaking changes. See [PlatformLocalStorageCreationParams] for
 /// more information.
-class LinuxLocalStorageCreationParams extends PlatformLocalStorageCreationParams {
+class LinuxLocalStorageCreationParams
+    extends PlatformLocalStorageCreationParams {
   /// Creates a new [LinuxLocalStorageCreationParams] instance.
   LinuxLocalStorageCreationParams(super.params);
 

@@ -3,3 +3,10 @@ targets:
     sources:
       exclude:
         - example/**.dart
+    builders:
+      source_gen|combining_builder:
+        options:
+          # Generated serializers are not hand-maintained; keep lint output
+          # focused on the annotated source templates.
+          ignore_for_file:
+            - type=lint

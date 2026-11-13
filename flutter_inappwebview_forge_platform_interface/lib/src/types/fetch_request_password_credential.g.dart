@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'fetch_request_password_credential.dart';
 
 // **************************************************************************
@@ -36,12 +38,12 @@ class FetchRequestPasswordCredential extends FetchRequestCredential {
       return null;
     }
     final instance = FetchRequestPasswordCredential(
+      type: map['type'],
       iconURL: map['iconURL'] != null ? WebUri(map['iconURL']) : null,
       id: map['id'],
       name: map['name'],
       password: map['password'],
     );
-    instance.type = map['type'];
     return instance;
   }
 

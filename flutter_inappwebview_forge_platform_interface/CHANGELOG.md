@@ -1,3 +1,12 @@
+## Unreleased
+
+- Resolve the `flutter analyze` infos reported by the pub.dev static
+  analysis check (`this.` qualifiers, empty catches, `print` replaced by
+  `debugPrint`, overridden fields replaced by typed getters, super
+  parameters, collection literals). Generated `.g.dart`
+  serializers now carry `// ignore_for_file: type=lint` (via `build.yaml`)
+  and were regenerated from the cleaned templates. No public API or behavior change.
+
 ## 1.1.22 - 2026-08-21
 
 - Add Profile `preconnect`, NavigationParameters-aware `navigate` docs,

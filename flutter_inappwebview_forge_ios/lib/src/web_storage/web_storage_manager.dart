@@ -97,7 +97,7 @@ class IOSWebStorageManager extends PlatformWebStorageManager
         [];
     for (var record in records) {
       List<String> dataTypesString = record["dataTypes"].cast<String>();
-      Set<WebsiteDataType> dataTypes = Set();
+      Set<WebsiteDataType> dataTypes = {};
       for (var dataTypeValue in dataTypesString) {
         var dataType = WebsiteDataType.fromNativeValue(dataTypeValue);
         if (dataType != null) {

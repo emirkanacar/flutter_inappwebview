@@ -32,6 +32,6 @@ class UIImage_ {
 
   @ExchangeableObjectConstructor()
   UIImage_({this.name, this.systemName, this.data}) {
-    assert(this.name != null || this.systemName != null || this.data != null);
+    assert(name != null || systemName != null || data != null);
   }
 }

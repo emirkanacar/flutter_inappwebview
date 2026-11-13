@@ -13,11 +13,9 @@ class WebStorageType_ {
   const WebStorageType_._internal(this._value);
 
   ///`window.localStorage`: same as [SESSION_STORAGE], but persists even when the browser is closed and reopened.
-  static const LOCAL_STORAGE = const WebStorageType_._internal("localStorage");
+  static const LOCAL_STORAGE = WebStorageType_._internal("localStorage");
 
   ///`window.sessionStorage`: maintains a separate storage area for each given origin that's available for the duration
   ///of the page session (as long as the browser is open, including page reloads and restores).
-  static const SESSION_STORAGE = const WebStorageType_._internal(
-    "sessionStorage",
-  );
+  static const SESSION_STORAGE = WebStorageType_._internal("sessionStorage");
 }

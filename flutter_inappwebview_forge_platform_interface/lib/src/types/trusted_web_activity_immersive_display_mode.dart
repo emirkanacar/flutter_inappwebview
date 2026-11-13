@@ -29,11 +29,11 @@ class TrustedWebActivityImmersiveDisplayMode_
     this.displayCutoutMode = LayoutInDisplayCutoutMode_.DEFAULT,
     this.layoutInDisplayCutoutMode,
   }) {
-    this.displayCutoutMode = this.layoutInDisplayCutoutMode != null
+    displayCutoutMode = layoutInDisplayCutoutMode != null
         ? LayoutInDisplayCutoutMode_.fromNativeValue(
             layoutInDisplayCutoutMode?.toNativeValue(),
           )!
-        : this.displayCutoutMode;
+        : displayCutoutMode;
   }
 
   @ExchangeableObjectMethod(toMapMergeWith: true)

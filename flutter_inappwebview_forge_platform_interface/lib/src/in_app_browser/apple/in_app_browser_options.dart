@@ -101,7 +101,7 @@ class IOSInAppBrowserOptions implements BrowserOptions, IosOptions {
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -111,6 +111,6 @@ class IOSInAppBrowserOptions implements BrowserOptions, IosOptions {
 
   @override
   IOSInAppBrowserOptions copy() {
-    return IOSInAppBrowserOptions.fromMap(this.toMap());
+    return IOSInAppBrowserOptions.fromMap(toMap());
   }
 }

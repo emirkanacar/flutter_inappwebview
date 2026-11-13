@@ -11,10 +11,10 @@ class ShouldAllowDeprecatedTLSAction_ {
   const ShouldAllowDeprecatedTLSAction_._internal(this._value);
 
   ///Cancel the navigation.
-  static const CANCEL = const ShouldAllowDeprecatedTLSAction_._internal(0);
+  static const CANCEL = ShouldAllowDeprecatedTLSAction_._internal(0);
 
   ///Allow the navigation to continue.
-  static const ALLOW = const ShouldAllowDeprecatedTLSAction_._internal(1);
+  static const ALLOW = ShouldAllowDeprecatedTLSAction_._internal(1);
 }
 
 ///Class that is used by [PlatformWebViewCreationParams.shouldAllowDeprecatedTLS] event.
@@ -28,8 +28,8 @@ class IOSShouldAllowDeprecatedTLSAction_ {
   const IOSShouldAllowDeprecatedTLSAction_._internal(this._value);
 
   ///Cancel the navigation.
-  static const CANCEL = const IOSShouldAllowDeprecatedTLSAction_._internal(0);
+  static const CANCEL = IOSShouldAllowDeprecatedTLSAction_._internal(0);
 
   ///Allow the navigation to continue.
-  static const ALLOW = const IOSShouldAllowDeprecatedTLSAction_._internal(1);
+  static const ALLOW = IOSShouldAllowDeprecatedTLSAction_._internal(1);
 }

@@ -133,8 +133,8 @@ class IOSInAppWebViewWidgetCreationParams
     super.initialSettings,
     super.contextMenu,
     super.initialUserScripts,
-    this.pullToRefreshController,
-    this.findInteractionController,
+    IOSPullToRefreshController? super.pullToRefreshController,
+    IOSFindInteractionController? super.findInteractionController,
   });
 
   /// Constructs a [IOSInAppWebViewWidgetCreationParams] using a
@@ -259,10 +259,12 @@ class IOSInAppWebViewWidgetCreationParams
       );
 
   @override
-  final IOSFindInteractionController? findInteractionController;
+  IOSFindInteractionController? get findInteractionController =>
+      super.findInteractionController as IOSFindInteractionController?;
 
   @override
-  final IOSPullToRefreshController? pullToRefreshController;
+  IOSPullToRefreshController? get pullToRefreshController =>
+      super.pullToRefreshController as IOSPullToRefreshController?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidget}
@@ -390,9 +392,7 @@ class IOSInAppWebViewWidget extends PlatformInAppWebViewWidget {
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'platform_pull_to_refresh_controller.dart';
 
 // **************************************************************************

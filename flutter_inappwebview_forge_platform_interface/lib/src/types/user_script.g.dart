@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'user_script.dart';
 
 // **************************************************************************
@@ -64,13 +66,11 @@ class UserScript {
     Set<String>? allowedOriginRules,
     ContentWorld? contentWorld,
   }) {
-    this.allowedOriginRules = allowedOriginRules != null
-        ? allowedOriginRules
-        : Set.from(["*"]);
+    this.allowedOriginRules = allowedOriginRules ?? {"*"};
     this.contentWorld = contentWorld ?? ContentWorld.PAGE;
-    this.forMainFrameOnly = this.iosForMainFrameOnly != null
-        ? this.iosForMainFrameOnly!
-        : this.forMainFrameOnly;
+    forMainFrameOnly = iosForMainFrameOnly != null
+        ? iosForMainFrameOnly!
+        : forMainFrameOnly;
   }
 
   ///Gets a possible [UserScript] instance from a [Map] value.

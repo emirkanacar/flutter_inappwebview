@@ -10,11 +10,11 @@ class MediaCaptureState_ {
   const MediaCaptureState_._internal(this._value);
 
   ///The media device is off.
-  static const NONE = const MediaCaptureState_._internal(0);
+  static const NONE = MediaCaptureState_._internal(0);
 
   ///The media device is actively capturing audio or video.
-  static const ACTIVE = const MediaCaptureState_._internal(1);
+  static const ACTIVE = MediaCaptureState_._internal(1);
 
   ///The media device is muted, and not actively capturing audio or video.
-  static const MUTED = const MediaCaptureState_._internal(2);
+  static const MUTED = MediaCaptureState_._internal(2);
 }

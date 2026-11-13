@@ -79,10 +79,10 @@ class InAppBrowserMenuItem_ {
     this.showAsAction = false,
   }) {
     assert(
-      this.icon == null ||
-          this.icon is Uint8List ||
-          this.icon is UIImage ||
-          this.icon is AndroidResource,
+      icon == null ||
+          icon is Uint8List ||
+          icon is UIImage ||
+          icon is AndroidResource,
     );
   }
 }

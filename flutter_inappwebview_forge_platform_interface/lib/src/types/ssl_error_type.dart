@@ -295,22 +295,22 @@ class AndroidSslError_ {
   const AndroidSslError_._internal(this._value);
 
   ///The certificate is not yet valid
-  static const SSL_NOTYETVALID = const AndroidSslError_._internal(0);
+  static const SSL_NOTYETVALID = AndroidSslError_._internal(0);
 
   ///The certificate has expired
-  static const SSL_EXPIRED = const AndroidSslError_._internal(1);
+  static const SSL_EXPIRED = AndroidSslError_._internal(1);
 
   ///Hostname mismatch
-  static const SSL_IDMISMATCH = const AndroidSslError_._internal(2);
+  static const SSL_IDMISMATCH = AndroidSslError_._internal(2);
 
   ///The certificate authority is not trusted
-  static const SSL_UNTRUSTED = const AndroidSslError_._internal(3);
+  static const SSL_UNTRUSTED = AndroidSslError_._internal(3);
 
   ///The date of the certificate is invalid
-  static const SSL_DATE_INVALID = const AndroidSslError_._internal(4);
+  static const SSL_DATE_INVALID = AndroidSslError_._internal(4);
 
   ///A generic error occurred
-  static const SSL_INVALID = const AndroidSslError_._internal(5);
+  static const SSL_INVALID = AndroidSslError_._internal(5);
 }
 
 ///Class that represents the iOS-specific primary error associated to the server SSL certificate.
@@ -325,20 +325,20 @@ class IOSSslError_ {
   const IOSSslError_._internal(this._value);
 
   ///Indicates an invalid setting or result.
-  static const INVALID = const IOSSslError_._internal(0);
+  static const INVALID = IOSSslError_._internal(0);
 
   ///Indicates a user-configured deny; do not proceed.
-  static const DENY = const IOSSslError_._internal(3);
+  static const DENY = IOSSslError_._internal(3);
 
   ///Indicates the evaluation succeeded and the certificate is implicitly trusted, but user intent was not explicitly specified.
-  static const UNSPECIFIED = const IOSSslError_._internal(4);
+  static const UNSPECIFIED = IOSSslError_._internal(4);
 
   ///Indicates a trust policy failure which can be overridden by the user.
-  static const RECOVERABLE_TRUST_FAILURE = const IOSSslError_._internal(5);
+  static const RECOVERABLE_TRUST_FAILURE = IOSSslError_._internal(5);
 
   ///Indicates a trust failure which cannot be overridden by the user.
-  static const FATAL_TRUST_FAILURE = const IOSSslError_._internal(6);
+  static const FATAL_TRUST_FAILURE = IOSSslError_._internal(6);
 
   ///Indicates a failure other than that of trust evaluation.
-  static const OTHER_ERROR = const IOSSslError_._internal(7);
+  static const OTHER_ERROR = IOSSslError_._internal(7);
 }

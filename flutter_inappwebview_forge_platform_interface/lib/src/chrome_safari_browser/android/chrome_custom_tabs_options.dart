@@ -113,8 +113,7 @@ class AndroidChromeCustomTabsOptions
   }
 
   static AndroidChromeCustomTabsOptions fromMap(Map<String, dynamic> map) {
-    AndroidChromeCustomTabsOptions options =
-        new AndroidChromeCustomTabsOptions();
+    AndroidChromeCustomTabsOptions options = AndroidChromeCustomTabsOptions();
     // ignore: deprecated_member_use_from_same_package
     options.addDefaultShareMenuItem = map["addDefaultShareMenuItem"];
     options.shareState = map["shareState"];
@@ -147,7 +146,7 @@ class AndroidChromeCustomTabsOptions
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -157,6 +156,6 @@ class AndroidChromeCustomTabsOptions
 
   @override
   AndroidChromeCustomTabsOptions copy() {
-    return AndroidChromeCustomTabsOptions.fromMap(this.toMap());
+    return AndroidChromeCustomTabsOptions.fromMap(toMap());
   }
 }

@@ -12,8 +12,8 @@ class JsPromptResponseAction_ {
   const JsPromptResponseAction_._internal(this._value);
 
   ///Confirm that the user hit confirm button.
-  static const CONFIRM = const JsPromptResponseAction_._internal(0);
+  static const CONFIRM = JsPromptResponseAction_._internal(0);
 
   ///Confirm that the user hit cancel button.
-  static const CANCEL = const JsPromptResponseAction_._internal(1);
+  static const CANCEL = JsPromptResponseAction_._internal(1);
 }

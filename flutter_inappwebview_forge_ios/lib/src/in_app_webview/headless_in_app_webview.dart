@@ -16,7 +16,7 @@ import 'in_app_webview_controller.dart';
 class IOSHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [IOSHeadlessInAppWebViewCreationParams] instance.
-  IOSHeadlessInAppWebViewCreationParams({
+  const IOSHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
     super.windowId,
@@ -130,8 +130,8 @@ class IOSHeadlessInAppWebViewCreationParams
     super.initialSettings,
     super.contextMenu,
     super.initialUserScripts,
-    this.pullToRefreshController,
-    this.findInteractionController,
+    IOSPullToRefreshController? super.pullToRefreshController,
+    IOSFindInteractionController? super.findInteractionController,
   });
 
   /// Creates a [IOSHeadlessInAppWebViewCreationParams] instance based on [PlatformHeadlessInAppWebViewCreationParams].
@@ -250,10 +250,12 @@ class IOSHeadlessInAppWebViewCreationParams
       );
 
   @override
-  final IOSFindInteractionController? findInteractionController;
+  IOSFindInteractionController? get findInteractionController =>
+      super.findInteractionController as IOSFindInteractionController?;
 
   @override
-  final IOSPullToRefreshController? pullToRefreshController;
+  IOSPullToRefreshController? get pullToRefreshController =>
+      super.pullToRefreshController as IOSPullToRefreshController?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformHeadlessInAppWebView}
@@ -265,7 +267,7 @@ class IOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.emirkanacar/flutter_headless_inappwebview',
   );
 
@@ -299,7 +301,7 @@ class IOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   IOSHeadlessInAppWebViewCreationParams get _iosParams =>
       params as IOSHeadlessInAppWebViewCreationParams;
 
-  _init() {
+  void _init() {
     _webViewController = IOSInAppWebViewController(
       IOSInAppWebViewControllerCreationParams(id: id, webviewParams: params),
     );
@@ -328,6 +330,7 @@ class IOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     return null;
   }
 
+  @override
   Future<void> run() async {
     if (_started) {
       return;
@@ -385,9 +388,7 @@ class IOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

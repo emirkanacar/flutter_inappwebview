@@ -45,7 +45,7 @@ class X509Certificate {
 
   static X509Certificate fromDerData({required Uint8List der}) {
     var asn1 = ASN1DERDecoder.decode(data: der.toList(growable: true));
-    if (asn1.length > 0) {
+    if (asn1.isNotEmpty) {
       var block1 = asn1.first.subAtIndex(0);
       if (block1 != null) {
         var certificate = X509Certificate();
@@ -67,7 +67,7 @@ class X509Certificate {
   }
 
   ///Read possible PEM encoding
-  static Uint8List? decodeToDER({required pemData}) {
+  static Uint8List? decodeToDER({required dynamic pemData}) {
     var pem = String.fromCharCodes(pemData);
     if (pem.contains(X509Certificate.beginPemBlock)) {
       var lines = pem.split("\n");
@@ -88,7 +88,9 @@ class X509Certificate {
       Uint8List? derDataDecoded;
       try {
         derDataDecoded = Uint8List.fromList(base64Decode(base64buffer));
-      } catch (e) {}
+      } catch (_) {
+        // Ignore errors (best effort).
+      }
       if (derDataDecoded != null) {
         return derDataDecoded;
       }
@@ -99,15 +101,13 @@ class X509Certificate {
   String get description =>
       asn1?.fold(
         "",
-        (value, element) => (value ?? '') + element.description + '\n',
+        (value, element) => '${value ?? ''}${element.description}\n',
       ) ??
       '';
 
   ///Checks that the given date is within the certificate's validity period.
   bool checkValidity({DateTime? date}) {
-    if (date == null) {
-      date = DateTime.now();
-    }
+    date ??= DateTime.now();
     if (notBefore != null && notAfter != null) {
       return date.isAfter(notBefore!) && date.isBefore(notAfter!);
     }
@@ -167,7 +167,7 @@ class X509Certificate {
         var oidBlock = issuerBlock.findOid(oidValue: oid);
         if (oidBlock != null) {
           var sub = oidBlock.parent?.sub;
-          if (sub != null && sub.length > 0 && sub.last.value is String) {
+          if (sub != null && sub.isNotEmpty && sub.last.value is String) {
             return sub.last.value;
           } else {
             return null;
@@ -211,7 +211,7 @@ class X509Certificate {
         var oidBlock = subjectBlock.findOid(oidValue: oid);
         if (oidBlock != null) {
           var sub = oidBlock.parent?.sub;
-          if (sub != null && sub.length > 0 && sub.last.value is String) {
+          if (sub != null && sub.isNotEmpty && sub.last.value is String) {
             return sub.last.value;
           } else {
             return null;
@@ -277,9 +277,9 @@ class X509Certificate {
     var oidBlock = block1?.findOid(oid: OID.keyUsage);
     if (oidBlock != null) {
       var sub = oidBlock.parent?.sub;
-      if (sub != null && sub.length > 0) {
+      if (sub != null && sub.isNotEmpty) {
         var data = sub.last.subAtIndex(0)?.value;
-        int bits = (data is List<int> && data.length > 0) ? data.first : 0;
+        int bits = (data is List<int> && data.isNotEmpty) ? data.first : 0;
         for (var index = 0; index < 8; index++) {
           var value = bits & (1 << index).toUnsigned(8) != 0;
           result.insert(0, value);
@@ -451,11 +451,13 @@ class X509Certificate {
 
 dynamic firstLeafValue({required ASN1Object block}) {
   var sub = block.sub;
-  if (sub != null && sub.length > 0) {
+  if (sub != null && sub.isNotEmpty) {
     ASN1Object? subFirst;
     try {
       subFirst = sub.first;
-    } catch (e) {}
+    } catch (_) {
+      // Ignore errors (best effort).
+    }
     if (subFirst != null) {
       return firstLeafValue(block: subFirst);
     }

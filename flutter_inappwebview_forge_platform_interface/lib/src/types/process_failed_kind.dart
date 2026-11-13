@@ -24,7 +24,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const BROWSER_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const BROWSER_PROCESS_EXITED = ProcessFailedKind_._internal(
     'BROWSER_PROCESS_EXITED',
   );
 
@@ -41,7 +41,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const RENDER_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const RENDER_PROCESS_EXITED = ProcessFailedKind_._internal(
     'RENDER_PROCESS_EXITED',
   );
 
@@ -68,7 +68,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const RENDER_PROCESS_UNRESPONSIVE = const ProcessFailedKind_._internal(
+  static const RENDER_PROCESS_UNRESPONSIVE = ProcessFailedKind_._internal(
     'RENDER_PROCESS_UNRESPONSIVE',
   );
 
@@ -85,7 +85,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const FRAME_RENDER_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const FRAME_RENDER_PROCESS_EXITED = ProcessFailedKind_._internal(
     'FRAME_RENDER_PROCESS_EXITED',
   );
 
@@ -102,7 +102,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const UTILITY_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const UTILITY_PROCESS_EXITED = ProcessFailedKind_._internal(
     'UTILITY_PROCESS_EXITED',
   );
 
@@ -120,8 +120,9 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const SANDBOX_HELPER_PROCESS_EXITED =
-      const ProcessFailedKind_._internal('SANDBOX_HELPER_PROCESS_EXITED');
+  static const SANDBOX_HELPER_PROCESS_EXITED = ProcessFailedKind_._internal(
+    'SANDBOX_HELPER_PROCESS_EXITED',
+  );
 
   ///Indicates that the GPU process ended unexpectedly.
   ///The failed process is recreated automatically.
@@ -136,7 +137,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const GPU_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const GPU_PROCESS_EXITED = ProcessFailedKind_._internal(
     'GPU_PROCESS_EXITED',
   );
 
@@ -153,7 +154,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const PPAPI_PLUGIN_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const PPAPI_PLUGIN_PROCESS_EXITED = ProcessFailedKind_._internal(
     'PPAPI_PLUGIN_PROCESS_EXITED',
   );
 
@@ -170,7 +171,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const PPAPI_BROKER_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const PPAPI_BROKER_PROCESS_EXITED = ProcessFailedKind_._internal(
     'PPAPI_BROKER_PROCESS_EXITED',
   );
 
@@ -185,7 +186,7 @@ class ProcessFailedKind_ {
       ),
     ],
   )
-  static const UNKNOWN_PROCESS_EXITED = const ProcessFailedKind_._internal(
+  static const UNKNOWN_PROCESS_EXITED = ProcessFailedKind_._internal(
     'UNKNOWN_PROCESS_EXITED',
   );
 }

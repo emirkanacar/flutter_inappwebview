@@ -81,11 +81,11 @@ class ScreenshotConfiguration_ {
     @Deprecated("Use afterScreenUpdates instead") this.iosAfterScreenUpdates,
     this.afterScreenUpdates = true,
   }) : compressFormat = compressFormat ?? CompressFormat_.PNG {
-    assert(this.quality >= 0);
+    assert(quality >= 0);
     // ignore: deprecated_member_use_from_same_package
-    this.afterScreenUpdates = this.iosAfterScreenUpdates != null
+    afterScreenUpdates = iosAfterScreenUpdates != null
         // ignore: deprecated_member_use_from_same_package
-        ? this.iosAfterScreenUpdates!
-        : this.afterScreenUpdates;
+        ? iosAfterScreenUpdates!
+        : afterScreenUpdates;
   }
 }

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'in_app_webview_settings.dart';
 
 // **************************************************************************
@@ -2419,13 +2421,12 @@ class InAppWebViewSettings {
     this.webViewBuilderOriginAllowList,
     this.conversationContext,
   }) {
-    if (this.minimumFontSize == null)
-      this.minimumFontSize = Util.isAndroid ? 8 : 0;
+    minimumFontSize ??= Util.isAndroid ? 8 : 0;
     assert(
-      this.resourceCustomSchemes == null ||
-          (this.resourceCustomSchemes != null &&
-              !this.resourceCustomSchemes!.contains("http") &&
-              !this.resourceCustomSchemes!.contains("https")),
+      resourceCustomSchemes == null ||
+          (resourceCustomSchemes != null &&
+              !resourceCustomSchemes!.contains("http") &&
+              !resourceCustomSchemes!.contains("https")),
     );
     assert(
       allowingReadAccessTo == null || allowingReadAccessTo!.isScheme("file"),

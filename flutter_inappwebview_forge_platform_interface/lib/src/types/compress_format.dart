@@ -20,7 +20,7 @@ class CompressFormat_ {
       EnumWindowsPlatform(),
     ],
   )
-  static const PNG = const CompressFormat_._internal("PNG");
+  static const PNG = CompressFormat_._internal("PNG");
 
   ///Compress to the `JPEG` format.
   ///Quality of `0` means compress for the smallest size.
@@ -33,7 +33,7 @@ class CompressFormat_ {
       EnumWindowsPlatform(),
     ],
   )
-  static const JPEG = const CompressFormat_._internal("JPEG");
+  static const JPEG = CompressFormat_._internal("JPEG");
 
   ///Compress to the `WEBP` lossy format.
   ///Quality of `0` means compress for the smallest size.
@@ -41,18 +41,18 @@ class CompressFormat_ {
   @EnumSupportedPlatforms(
     platforms: [EnumAndroidPlatform(), EnumWindowsPlatform()],
   )
-  static const WEBP = const CompressFormat_._internal("WEBP");
+  static const WEBP = CompressFormat_._internal("WEBP");
 
   ///Compress to the `WEBP` lossy format.
   ///Quality of `0` means compress for the smallest size.
   ///`100` means compress for max visual quality.
   @EnumSupportedPlatforms(platforms: [EnumAndroidPlatform(available: '30')])
-  static const WEBP_LOSSY = const CompressFormat_._internal("WEBP_LOSSY");
+  static const WEBP_LOSSY = CompressFormat_._internal("WEBP_LOSSY");
 
   ///Compress to the `WEBP` lossless format.
   ///Quality refers to how much effort to put into compression.
   ///A value of `0` means to compress quickly, resulting in a relatively large file size.
   ///`100` means to spend more time compressing, resulting in a smaller file.
   @EnumSupportedPlatforms(platforms: [EnumAndroidPlatform(available: '30')])
-  static const WEBP_LOSSLESS = const CompressFormat_._internal("WEBP_LOSSLESS");
+  static const WEBP_LOSSLESS = CompressFormat_._internal("WEBP_LOSSLESS");
 }

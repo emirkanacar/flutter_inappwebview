@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'layout_in_display_cutout_mode.dart';
 
 // **************************************************************************

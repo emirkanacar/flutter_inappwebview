@@ -18,7 +18,7 @@ class WindowType_ {
       EnumWindowsPlatform(value: 'WINDOW'),
     ],
   )
-  static const WINDOW = const WindowType_._internal('WINDOW');
+  static const WINDOW = WindowType_._internal('WINDOW');
 
   ///Adds the new browser window as a child window of the main window.
   @EnumSupportedPlatforms(
@@ -27,11 +27,11 @@ class WindowType_ {
       EnumWindowsPlatform(value: 'CHILD'),
     ],
   )
-  static const CHILD = const WindowType_._internal('CHILD');
+  static const CHILD = WindowType_._internal('CHILD');
 
   ///Adds the new browser window as a new tab in a tabbed window of the main window.
   @EnumSupportedPlatforms(
     platforms: [EnumMacOSPlatform(value: 'TABBED', available: "10.12+")],
   )
-  static const TABBED = const WindowType_._internal('TABBED');
+  static const TABBED = WindowType_._internal('TABBED');
 }

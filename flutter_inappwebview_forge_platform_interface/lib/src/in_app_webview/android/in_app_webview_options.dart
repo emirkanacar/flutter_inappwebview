@@ -445,7 +445,7 @@ class AndroidInAppWebViewOptions
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -455,6 +455,6 @@ class AndroidInAppWebViewOptions
 
   @override
   AndroidInAppWebViewOptions copy() {
-    return AndroidInAppWebViewOptions.fromMap(this.toMap());
+    return AndroidInAppWebViewOptions.fromMap(toMap());
   }
 }

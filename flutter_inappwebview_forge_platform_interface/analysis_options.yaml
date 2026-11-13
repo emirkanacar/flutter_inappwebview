@@ -9,6 +9,9 @@ linter:
 # https://dart.dev/guides/language/analysis-options
 analyzer:
   errors:
+    # Code generation templates are named `Foo_` and produce the public `Foo`
+    # class in the matching .g.dart part file.
+    camel_case_types: ignore
     constant_identifier_names: ignore
     deprecated_member_use: ignore
     deprecated_member_use_from_same_package: ignore

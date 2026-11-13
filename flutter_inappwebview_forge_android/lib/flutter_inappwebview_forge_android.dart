@@ -1,3 +1,3 @@
-library flutter_inappwebview_forge_android;
+library;
 
 export 'src/main.dart';

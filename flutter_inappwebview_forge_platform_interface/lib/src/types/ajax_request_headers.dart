@@ -8,8 +8,8 @@ part 'ajax_request_headers.g.dart';
 ///Class that represents the HTTP headers of an [AjaxRequest].
 @ExchangeableObject()
 class AjaxRequestHeaders_ {
-  Map<String, dynamic> _headers;
-  Map<String, dynamic> _newHeaders = {};
+  final Map<String, dynamic> _headers;
+  final Map<String, dynamic> _newHeaders = {};
 
   @ExchangeableObjectConstructor()
   AjaxRequestHeaders_(this._headers);
@@ -28,7 +28,7 @@ class AjaxRequestHeaders_ {
 
   ///Gets the HTTP headers of the [AjaxRequest].
   Map<String, dynamic> getHeaders() {
-    return this._headers;
+    return _headers;
   }
 
   ///Sets/updates an HTTP header of the [AjaxRequest]. If there is already an existing [header] with the same name, the values are merged into one single request header.

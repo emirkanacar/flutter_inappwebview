@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'url_protection_space_http_auth_credentials.dart';
 
 // **************************************************************************

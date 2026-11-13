@@ -12,8 +12,8 @@ class AjaxRequestAction_ {
   const AjaxRequestAction_._internal(this._value);
 
   ///Aborts the current [AjaxRequest].
-  static const ABORT = const AjaxRequestAction_._internal(0);
+  static const ABORT = AjaxRequestAction_._internal(0);
 
   ///Proceeds with the current [AjaxRequest].
-  static const PROCEED = const AjaxRequestAction_._internal(1);
+  static const PROCEED = AjaxRequestAction_._internal(1);
 }

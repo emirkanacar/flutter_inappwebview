@@ -7,7 +7,7 @@ part 'javascript_handler_callback.g.dart';
 
 ///Use [JavaScriptHandlerFunction] instead.
 @Deprecated('Use JavaScriptHandlerFunction instead')
-typedef dynamic JavaScriptHandlerCallback(List<dynamic> arguments);
+typedef JavaScriptHandlerCallback = dynamic Function(List<dynamic> arguments);
 
 ///This type represents a callback, added with [PlatformInAppWebViewController.addJavaScriptHandler], that listens to post messages sent from JavaScript.
 ///
@@ -19,7 +19,8 @@ typedef dynamic JavaScriptHandlerCallback(List<dynamic> arguments);
 ///
 ///Also, a [JavaScriptHandlerFunction] can return json data to the JavaScript side.
 ///In this case, simply return data that you want to send and it will be automatically json encoded using [jsonEncode] from the `dart:convert` library.
-typedef dynamic JavaScriptHandlerFunction(JavaScriptHandlerFunctionData data);
+typedef JavaScriptHandlerFunction =
+    dynamic Function(JavaScriptHandlerFunctionData data);
 
 ///A class that represents the data passed to a [JavaScriptHandlerFunction] added with [PlatformInAppWebViewController.addJavaScriptHandler].
 @ExchangeableObject()

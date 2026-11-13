@@ -145,14 +145,14 @@ class ContentBlockerTrigger {
     this.unlessTopUrl = const <String>[],
     this.loadContext = const <ContentBlockerTriggerLoadContext>[],
   }) {
-    assert(!(this.ifDomain.isEmpty || this.unlessDomain.isEmpty) == false);
-    assert(this.loadType.length <= 2);
-    assert(!(this.ifTopUrl.isEmpty || this.unlessTopUrl.isEmpty) == false);
+    assert(!(ifDomain.isEmpty || unlessDomain.isEmpty) == false);
+    assert(loadType.length <= 2);
+    assert(!(ifTopUrl.isEmpty || unlessTopUrl.isEmpty) == false);
   }
 
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) {
     List<String> resourceTypeStringList = [];
-    resourceType.forEach((type) {
+    for (var type in resourceType) {
       switch (enumMethod ?? EnumMethod.nativeValue) {
         case EnumMethod.nativeValue:
           if (type.isSupported()) {
@@ -166,9 +166,9 @@ class ContentBlockerTrigger {
           resourceTypeStringList.add(type.name());
           break;
       }
-    });
+    }
     List<String> loadTypeStringList = [];
-    loadType.forEach((type) {
+    for (var type in loadType) {
       switch (enumMethod ?? EnumMethod.nativeValue) {
         case EnumMethod.nativeValue:
           if (type.isSupported()) {
@@ -182,9 +182,9 @@ class ContentBlockerTrigger {
           loadTypeStringList.add(type.name());
           break;
       }
-    });
+    }
     List<String> loadContextStringList = [];
-    loadContext.forEach((type) {
+    for (var type in loadContext) {
       switch (enumMethod ?? EnumMethod.nativeValue) {
         case EnumMethod.nativeValue:
           if (type.isSupported()) {
@@ -198,7 +198,7 @@ class ContentBlockerTrigger {
           loadContextStringList.add(type.name());
           break;
       }
-    });
+    }
 
     Map<String, dynamic> map = {
       "url-filter": urlFilter,
@@ -217,7 +217,7 @@ class ContentBlockerTrigger {
         .where(
           (key) =>
               map[key] == null ||
-              (map[key] is List && (map[key] as List).length == 0),
+              (map[key] is List && (map[key] as List).isEmpty),
         ) // filter keys
         .toList() // create a copy to avoid concurrent modifications
         .forEach(map.remove);
@@ -236,7 +236,7 @@ class ContentBlockerTrigger {
     List<String> resourceTypeStringList = List<String>.from(
       map["resource-type"] ?? [],
     );
-    resourceTypeStringList.forEach((typeValue) {
+    for (var typeValue in resourceTypeStringList) {
       var type = switch (enumMethod ?? EnumMethod.nativeValue) {
         EnumMethod.nativeValue =>
           ContentBlockerTriggerResourceType.fromNativeValue(typeValue),
@@ -248,10 +248,10 @@ class ContentBlockerTrigger {
       if (type != null) {
         resourceType.add(type);
       }
-    });
+    }
 
     List<String> loadTypeStringList = List<String>.from(map["load-type"] ?? []);
-    loadTypeStringList.forEach((typeValue) {
+    for (var typeValue in loadTypeStringList) {
       var type = switch (enumMethod ?? EnumMethod.nativeValue) {
         EnumMethod.nativeValue => ContentBlockerTriggerLoadType.fromNativeValue(
           typeValue,
@@ -262,12 +262,12 @@ class ContentBlockerTrigger {
       if (type != null) {
         loadType.add(type);
       }
-    });
+    }
 
     List<String> loadContextStringList = List<String>.from(
       map["load-context"] ?? [],
     );
-    loadContextStringList.forEach((typeValue) {
+    for (var typeValue in loadContextStringList) {
       var context = switch (enumMethod ?? EnumMethod.nativeValue) {
         EnumMethod.nativeValue =>
           ContentBlockerTriggerLoadContext.fromNativeValue(typeValue),
@@ -279,7 +279,7 @@ class ContentBlockerTrigger {
       if (context != null) {
         loadContext.add(context);
       }
-    });
+    }
 
     return ContentBlockerTrigger(
       urlFilter: map["url-filter"],
@@ -315,8 +315,8 @@ class ContentBlockerAction {
   String? selector;
 
   ContentBlockerAction({required this.type, this.selector}) {
-    if (this.type == ContentBlockerActionType.CSS_DISPLAY_NONE) {
-      assert(this.selector != null);
+    if (type == ContentBlockerActionType.CSS_DISPLAY_NONE) {
+      assert(selector != null);
     }
   }
 
@@ -334,7 +334,7 @@ class ContentBlockerAction {
         .where(
           (key) =>
               map[key] == null ||
-              (map[key] is List && (map[key] as List).length == 0),
+              (map[key] is List && (map[key] as List).isEmpty),
         ) // filter keys
         .toList() // create a copy to avoid concurrent modifications
         .forEach(map.remove);

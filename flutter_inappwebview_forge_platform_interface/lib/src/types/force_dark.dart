@@ -11,13 +11,13 @@ class ForceDark_ {
 
   ///Disable force dark, irrespective of the force dark mode of the WebView parent.
   ///In this mode, WebView content will always be rendered as-is, regardless of whether native views are being automatically darkened.
-  static const OFF = const ForceDark_._internal(0);
+  static const OFF = ForceDark_._internal(0);
 
   ///Enable force dark dependent on the state of the WebView parent view.
-  static const AUTO = const ForceDark_._internal(1);
+  static const AUTO = ForceDark_._internal(1);
 
   ///Unconditionally enable force dark. In this mode WebView content will always be rendered so as to emulate a dark theme.
-  static const ON = const ForceDark_._internal(2);
+  static const ON = ForceDark_._internal(2);
 }
 
 ///An Android-specific class used to indicate the force dark mode.
@@ -34,11 +34,11 @@ class AndroidForceDark_ {
 
   ///Disable force dark, irrespective of the force dark mode of the WebView parent.
   ///In this mode, WebView content will always be rendered as-is, regardless of whether native views are being automatically darkened.
-  static const FORCE_DARK_OFF = const AndroidForceDark_._internal(0);
+  static const FORCE_DARK_OFF = AndroidForceDark_._internal(0);
 
   ///Enable force dark dependent on the state of the WebView parent view.
-  static const FORCE_DARK_AUTO = const AndroidForceDark_._internal(1);
+  static const FORCE_DARK_AUTO = AndroidForceDark_._internal(1);
 
   ///Unconditionally enable force dark. In this mode WebView content will always be rendered so as to emulate a dark theme.
-  static const FORCE_DARK_ON = const AndroidForceDark_._internal(2);
+  static const FORCE_DARK_ON = AndroidForceDark_._internal(2);
 }

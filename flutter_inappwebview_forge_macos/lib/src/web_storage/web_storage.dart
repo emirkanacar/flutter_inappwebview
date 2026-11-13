@@ -11,7 +11,7 @@ import '../in_app_webview/in_app_webview_controller.dart';
 /// more information.
 class MacOSWebStorageCreationParams extends PlatformWebStorageCreationParams {
   /// Creates a new [MacOSWebStorageCreationParams] instance.
-  MacOSWebStorageCreationParams({
+  const MacOSWebStorageCreationParams({
     required super.localStorage,
     required super.sessionStorage,
   });
@@ -61,7 +61,7 @@ class MacOSWebStorage extends PlatformWebStorage {
 /// more information.
 class MacOSStorageCreationParams extends PlatformStorageCreationParams {
   /// Creates a new [MacOSStorageCreationParams] instance.
-  MacOSStorageCreationParams({
+  const MacOSStorageCreationParams({
     required super.controller,
     required super.webStorageType,
   });
@@ -121,7 +121,9 @@ abstract mixin class MacOSStorage implements PlatformStorage {
 
     try {
       return json.decode(itemValue);
-    } catch (e) {}
+    } catch (_) {
+      // Ignore errors (best effort).
+    }
 
     return itemValue;
   }

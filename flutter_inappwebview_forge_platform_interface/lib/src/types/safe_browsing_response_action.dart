@@ -12,13 +12,11 @@ class SafeBrowsingResponseAction_ {
   const SafeBrowsingResponseAction_._internal(this._value);
 
   ///Act as if the user clicked the "back to safety" button.
-  static const BACK_TO_SAFETY = const SafeBrowsingResponseAction_._internal(0);
+  static const BACK_TO_SAFETY = SafeBrowsingResponseAction_._internal(0);
 
   ///Act as if the user clicked the "visit this unsafe site" button.
-  static const PROCEED = const SafeBrowsingResponseAction_._internal(1);
+  static const PROCEED = SafeBrowsingResponseAction_._internal(1);
 
   ///Display the default interstitial.
-  static const SHOW_INTERSTITIAL = const SafeBrowsingResponseAction_._internal(
-    2,
-  );
+  static const SHOW_INTERSTITIAL = SafeBrowsingResponseAction_._internal(2);
 }

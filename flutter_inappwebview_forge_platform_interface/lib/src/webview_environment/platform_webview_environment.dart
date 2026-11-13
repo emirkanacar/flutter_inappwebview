@@ -464,6 +464,7 @@ abstract class PlatformWebViewEnvironment extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewEnvironment.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(platforms: [WindowsPlatform(), LinuxPlatform()])
   Future<void> dispose() {
     throw UnimplementedError(

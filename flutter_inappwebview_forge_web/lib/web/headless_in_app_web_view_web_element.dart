@@ -18,10 +18,10 @@ class HeadlessInAppWebViewWebElement extends ChannelController {
     required BinaryMessenger messenger,
     required this.webView,
   }) {
-    this._messenger = messenger;
+    _messenger = messenger;
 
     channel = MethodChannel(
-      'com.emirkanacar/flutter_headless_inappwebview_${this.id}',
+      'com.emirkanacar/flutter_headless_inappwebview_$id',
       const StandardMethodCodec(),
       _messenger,
     );
@@ -62,8 +62,8 @@ class HeadlessInAppWebViewWebElement extends ChannelController {
   }
 
   void setSize(Size size) {
-    webView?.iframeContainer.style.width = size.width.toString() + "px";
-    webView?.iframeContainer.style.height = size.height.toString() + "px";
+    webView?.iframeContainer.style.width = "${size.width}px";
+    webView?.iframeContainer.style.height = "${size.height}px";
   }
 
   InAppWebViewWebElement? disposeAndGetFlutterWebView() {

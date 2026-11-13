@@ -22,7 +22,7 @@ class LinuxInAppWebViewWidgetCreationParams
     super.keepAlive,
     super.preventGestureDelay,
     super.windowId,
-    this.webViewEnvironment,
+    LinuxWebViewEnvironment? super.webViewEnvironment,
     super.onWebViewCreated,
     super.onLoadStart,
     super.onLoadStop,
@@ -195,7 +195,8 @@ class LinuxInAppWebViewWidgetCreationParams
       );
 
   @override
-  final LinuxWebViewEnvironment? webViewEnvironment;
+  LinuxWebViewEnvironment? get webViewEnvironment =>
+      super.webViewEnvironment as LinuxWebViewEnvironment?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidget}
@@ -317,9 +318,7 @@ class LinuxInAppWebViewWidget extends PlatformInAppWebViewWidget {
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

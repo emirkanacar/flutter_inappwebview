@@ -32,8 +32,8 @@ class PlatformPullToRefreshControllerCreationParams {
     @Deprecated("Use settings instead") PullToRefreshOptions? options,
     PullToRefreshSettings? settings,
     this.onRefresh,
-  }) : this.options = options ?? PullToRefreshOptions(),
-       this.settings = settings ?? PullToRefreshSettings();
+  }) : options = options ?? PullToRefreshOptions(),
+       settings = settings ?? PullToRefreshSettings();
 
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformPullToRefreshControllerCreationParams.options}
   /// Use [settings] instead.

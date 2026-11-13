@@ -10,12 +10,12 @@ class WebAuthenticationSupport_ {
   const WebAuthenticationSupport_._internal(this._value);
 
   ///Disable WebAuthn requests from the WebView.
-  static const NONE = const WebAuthenticationSupport_._internal(0);
+  static const NONE = WebAuthenticationSupport_._internal(0);
 
   ///Allow WebAuthn requests for the app in which the WebView is embedded.
-  static const FOR_APP = const WebAuthenticationSupport_._internal(1);
+  static const FOR_APP = WebAuthenticationSupport_._internal(1);
 
   ///Allow WebAuthn requests for any website. This requires the app to have the
   ///privileges and Digital Asset Links needed by the Android WebView.
-  static const FOR_BROWSER = const WebAuthenticationSupport_._internal(2);
+  static const FOR_BROWSER = WebAuthenticationSupport_._internal(2);
 }

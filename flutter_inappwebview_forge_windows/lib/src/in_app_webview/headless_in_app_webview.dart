@@ -16,10 +16,10 @@ import 'in_app_webview_controller.dart';
 class WindowsHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [WindowsHeadlessInAppWebViewCreationParams] instance.
-  WindowsHeadlessInAppWebViewCreationParams({
+  const WindowsHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
-    this.webViewEnvironment,
+    WindowsWebViewEnvironment? super.webViewEnvironment,
     super.windowId,
     super.onWebViewCreated,
     super.onLoadStart,
@@ -137,7 +137,7 @@ class WindowsHeadlessInAppWebViewCreationParams
     super.contextMenu,
     super.initialUserScripts,
     super.pullToRefreshController,
-    this.findInteractionController,
+    WindowsFindInteractionController? super.findInteractionController,
   });
 
   /// Creates a [WindowsHeadlessInAppWebViewCreationParams] instance based on [PlatformHeadlessInAppWebViewCreationParams].
@@ -263,10 +263,12 @@ class WindowsHeadlessInAppWebViewCreationParams
       );
 
   @override
-  final WindowsFindInteractionController? findInteractionController;
+  WindowsFindInteractionController? get findInteractionController =>
+      super.findInteractionController as WindowsFindInteractionController?;
 
   @override
-  final WindowsWebViewEnvironment? webViewEnvironment;
+  WindowsWebViewEnvironment? get webViewEnvironment =>
+      super.webViewEnvironment as WindowsWebViewEnvironment?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformHeadlessInAppWebView}
@@ -278,7 +280,7 @@ class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.emirkanacar/flutter_headless_inappwebview',
   );
 
@@ -311,7 +313,7 @@ class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   WindowsHeadlessInAppWebViewCreationParams get _windowsParams =>
       params as WindowsHeadlessInAppWebViewCreationParams;
 
-  _init() {
+  void _init() {
     _webViewController = WindowsInAppWebViewController(
       WindowsInAppWebViewControllerCreationParams(
         id: id,
@@ -342,6 +344,7 @@ class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     return null;
   }
 
+  @override
   Future<void> run() async {
     if (_started) {
       return;
@@ -386,7 +389,7 @@ class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     } catch (e) {
       _running = false;
       _started = false;
-      throw e;
+      rethrow;
     }
   }
 
@@ -406,9 +409,7 @@ class WindowsHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'fetch_request_credential_default.dart';
 
 // **************************************************************************
@@ -20,8 +22,10 @@ class FetchRequestCredentialDefault extends FetchRequestCredential {
     if (map == null) {
       return null;
     }
-    final instance = FetchRequestCredentialDefault(value: map['value']);
-    instance.type = map['type'];
+    final instance = FetchRequestCredentialDefault(
+      type: map['type'],
+      value: map['value'],
+    );
     return instance;
   }
 

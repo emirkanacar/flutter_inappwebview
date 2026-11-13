@@ -28,5 +28,5 @@ class SslError_ {
     @Deprecated('Use code instead') this.iosError,
     this.code,
     this.message,
-  }) {}
+  });
 }

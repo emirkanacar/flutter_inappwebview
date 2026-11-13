@@ -53,9 +53,9 @@ class IOSPullToRefreshController extends PlatformPullToRefreshController
     return _staticValue;
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       debugLoggingSettings:
           PlatformPullToRefreshController.debugLoggingSettings,
       method: method,

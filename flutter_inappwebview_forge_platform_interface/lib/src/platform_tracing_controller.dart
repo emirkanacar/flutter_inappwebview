@@ -261,7 +261,7 @@ class TracingSettings_ {
   @ExchangeableObjectConstructor()
   TracingSettings_({this.categories = const [], this.tracingMode}) {
     assert(
-      this.categories
+      categories
           .map(
             (e) => e.runtimeType is String || e.runtimeType is TracingCategory,
           )

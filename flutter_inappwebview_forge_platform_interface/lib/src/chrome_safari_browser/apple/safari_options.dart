@@ -86,7 +86,7 @@ class IOSSafariOptions implements ChromeSafariBrowserOptions, IosOptions {
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -96,6 +96,6 @@ class IOSSafariOptions implements ChromeSafariBrowserOptions, IosOptions {
 
   @override
   IOSSafariOptions copy() {
-    return IOSSafariOptions.fromMap(this.toMap());
+    return IOSSafariOptions.fromMap(toMap());
   }
 }

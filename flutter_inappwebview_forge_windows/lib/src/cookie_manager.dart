@@ -15,7 +15,9 @@ import 'webview_environment/webview_environment.dart';
 class WindowsCookieManagerCreationParams
     extends PlatformCookieManagerCreationParams {
   /// Creates a new [WindowsCookieManagerCreationParams] instance.
-  const WindowsCookieManagerCreationParams({this.webViewEnvironment});
+  const WindowsCookieManagerCreationParams({
+    WindowsWebViewEnvironment? super.webViewEnvironment,
+  });
 
   /// Creates a [WindowsCookieManagerCreationParams] instance based on [PlatformCookieManagerCreationParams].
   factory WindowsCookieManagerCreationParams.fromPlatformCookieManagerCreationParams(
@@ -30,7 +32,8 @@ class WindowsCookieManagerCreationParams
   }
 
   @override
-  final WindowsWebViewEnvironment? webViewEnvironment;
+  WindowsWebViewEnvironment? get webViewEnvironment =>
+      super.webViewEnvironment as WindowsWebViewEnvironment?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager}
@@ -67,9 +70,7 @@ class WindowsCookieManager extends PlatformCookieManager
     WindowsWebViewEnvironment? webViewEnvironment,
   }) {
     if (webViewEnvironment == null) {
-      if (_instance == null) {
-        _instance = _init();
-      }
+      _instance ??= _init();
       return _instance!;
     } else {
       return WindowsCookieManager(
@@ -149,7 +150,7 @@ class WindowsCookieManager extends PlatformCookieManager
         await channel?.invokeMethod<List>('getCookies', args) ?? [];
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
 
-    cookieListMap.forEach((cookieMap) {
+    for (var cookieMap in cookieListMap) {
       cookies.add(
         Cookie(
           name: cookieMap["name"],
@@ -165,7 +166,7 @@ class WindowsCookieManager extends PlatformCookieManager
           path: cookieMap["path"],
         ),
       );
-    });
+    }
     return cookies;
   }
 
@@ -192,7 +193,7 @@ class WindowsCookieManager extends PlatformCookieManager
     cookies = cookies.cast<Map<dynamic, dynamic>>();
     for (var i = 0; i < cookies.length; i++) {
       cookies[i] = cookies[i].cast<String, dynamic>();
-      if (cookies[i]["name"] == name)
+      if (cookies[i]["name"] == name) {
         return Cookie(
           name: cookies[i]["name"],
           value: cookies[i]["value"],
@@ -206,6 +207,7 @@ class WindowsCookieManager extends PlatformCookieManager
           isHttpOnly: cookies[i]["isHttpOnly"],
           path: cookies[i]["path"],
         );
+      }
     }
     return null;
   }
@@ -276,5 +278,5 @@ class WindowsCookieManager extends PlatformCookieManager
 }
 
 extension InternalCookieManager on WindowsCookieManager {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

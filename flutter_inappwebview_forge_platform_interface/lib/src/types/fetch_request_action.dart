@@ -12,8 +12,8 @@ class FetchRequestAction_ {
   const FetchRequestAction_._internal(this._value);
 
   ///Aborts the fetch request.
-  static const ABORT = const FetchRequestAction_._internal(0);
+  static const ABORT = FetchRequestAction_._internal(0);
 
   ///Proceeds with the fetch request.
-  static const PROCEED = const FetchRequestAction_._internal(1);
+  static const PROCEED = FetchRequestAction_._internal(1);
 }

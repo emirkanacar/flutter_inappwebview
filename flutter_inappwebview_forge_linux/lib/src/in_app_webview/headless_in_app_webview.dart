@@ -16,11 +16,11 @@ import 'in_app_webview_controller.dart';
 class LinuxHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [LinuxHeadlessInAppWebViewCreationParams] instance.
-  LinuxHeadlessInAppWebViewCreationParams({
+  const LinuxHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
     super.windowId,
-    this.webViewEnvironment,
+    LinuxWebViewEnvironment? super.webViewEnvironment,
     super.onWebViewCreated,
     super.onLoadStart,
     super.onLoadStop,
@@ -129,7 +129,7 @@ class LinuxHeadlessInAppWebViewCreationParams
     super.contextMenu,
     super.initialUserScripts,
     super.pullToRefreshController,
-    this.findInteractionController,
+    LinuxFindInteractionController? super.findInteractionController,
   });
 
   /// Creates a [LinuxHeadlessInAppWebViewCreationParams] instance based on [PlatformHeadlessInAppWebViewCreationParams].
@@ -246,10 +246,12 @@ class LinuxHeadlessInAppWebViewCreationParams
       );
 
   @override
-  final LinuxWebViewEnvironment? webViewEnvironment;
+  LinuxWebViewEnvironment? get webViewEnvironment =>
+      super.webViewEnvironment as LinuxWebViewEnvironment?;
 
   @override
-  final LinuxFindInteractionController? findInteractionController;
+  LinuxFindInteractionController? get findInteractionController =>
+      super.findInteractionController as LinuxFindInteractionController?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformHeadlessInAppWebView}
@@ -261,7 +263,7 @@ class LinuxHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.emirkanacar/flutter_headless_inappwebview',
   );
 
@@ -383,9 +385,7 @@ class LinuxHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

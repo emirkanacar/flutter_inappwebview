@@ -1,3 +1,10 @@
+## Unreleased
+
+- Resolve the `flutter analyze` infos reported by the pub.dev static
+  analysis check (`this.` qualifiers, empty catches, `print` replaced by
+  `debugPrint`, overridden fields replaced by typed getters, super
+  parameters, collection literals). No public API or behavior change.
+
 ## 1.0.15 - 2026-08-21
 
 - Add Windows `DownloadJobController` parity for WebView2 downloads.

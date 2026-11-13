@@ -133,7 +133,7 @@ class MacOSInAppWebViewWidgetCreationParams
     super.contextMenu,
     super.initialUserScripts,
     super.pullToRefreshController,
-    this.findInteractionController,
+    MacOSFindInteractionController? super.findInteractionController,
   });
 
   /// Constructs a [MacOSInAppWebViewWidgetCreationParams] using a
@@ -257,7 +257,8 @@ class MacOSInAppWebViewWidgetCreationParams
       );
 
   @override
-  final MacOSFindInteractionController? findInteractionController;
+  MacOSFindInteractionController? get findInteractionController =>
+      super.findInteractionController as MacOSFindInteractionController?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidget}
@@ -384,9 +385,7 @@ class MacOSInAppWebViewWidget extends PlatformInAppWebViewWidget {
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

@@ -12,5 +12,5 @@ class FetchRequestCredentialDefault_ extends FetchRequestCredential_ {
   ///The value of the credentials.
   String? value;
 
-  FetchRequestCredentialDefault_({type, this.value}) : super(type: type);
+  FetchRequestCredentialDefault_({super.type, this.value});
 }

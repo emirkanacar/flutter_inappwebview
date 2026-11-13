@@ -345,10 +345,7 @@ abstract class PlatformContainerController extends PlatformInterface {
       ),
     ],
   )
-  Future<bool> prefetchUrl({
-    required String containerId,
-    required String url,
-  }) {
+  Future<bool> prefetchUrl({required String containerId, required String url}) {
     throw UnimplementedError(
       'prefetchUrl is not implemented on the current platform',
     );
@@ -368,10 +365,7 @@ abstract class PlatformContainerController extends PlatformInterface {
       ),
     ],
   )
-  Future<bool> preconnect({
-    required String containerId,
-    required String url,
-  }) {
+  Future<bool> preconnect({required String containerId, required String url}) {
     throw UnimplementedError(
       'preconnect is not implemented on the current platform',
     );

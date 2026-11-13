@@ -35,7 +35,7 @@ bool _alreadyShown = false;
 void _logPluginSupportLinks() {
   if (_alreadyShown || !kDebugMode) return;
   _alreadyShown = true;
-  print("""\n
+  debugPrint("""\n
 🚀 Hi, flutter_inappwebview_forge here, thank you for using it! Report issues and follow maintenance updates at https://github.com/emirkanacar/flutter_inappwebview
 """);
 }

@@ -23,7 +23,7 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const UNEXPECTED = const ProcessFailedReason_._internal('UNEXPECTED');
+  static const UNEXPECTED = ProcessFailedReason_._internal('UNEXPECTED');
 
   ///The process became unresponsive. This only applies to the main frame's render process.
   @EnumSupportedPlatforms(
@@ -36,9 +36,7 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const UNRESPONSIVE = const ProcessFailedReason_._internal(
-    'UNRESPONSIVE',
-  );
+  static const UNRESPONSIVE = ProcessFailedReason_._internal('UNRESPONSIVE');
 
   ///The process was terminated. For example, from Task Manager.
   @EnumSupportedPlatforms(
@@ -51,7 +49,7 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const TERMINATED = const ProcessFailedReason_._internal('TERMINATED');
+  static const TERMINATED = ProcessFailedReason_._internal('TERMINATED');
 
   ///The process crashed.
   @EnumSupportedPlatforms(
@@ -64,7 +62,7 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const CRASHED = const ProcessFailedReason_._internal('CRASHED');
+  static const CRASHED = ProcessFailedReason_._internal('CRASHED');
 
   ///The process failed to launch.
   @EnumSupportedPlatforms(
@@ -77,9 +75,7 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const LAUNCH_FAILED = const ProcessFailedReason_._internal(
-    'LAUNCH_FAILED',
-  );
+  static const LAUNCH_FAILED = ProcessFailedReason_._internal('LAUNCH_FAILED');
 
   ///The process terminated due to running out of memory.
   @EnumSupportedPlatforms(
@@ -92,7 +88,5 @@ class ProcessFailedReason_ {
       ),
     ],
   )
-  static const OUT_OF_MEMORY = const ProcessFailedReason_._internal(
-    'OUT_OF_MEMORY',
-  );
+  static const OUT_OF_MEMORY = ProcessFailedReason_._internal('OUT_OF_MEMORY');
 }

@@ -16,9 +16,9 @@ class CustomTabsRelationType_ {
 
   ///For App -> Web transitions, requests the app to use the declared origin to be used as origin for the client app in the web APIs context.
   @EnumSupportedPlatforms(platforms: [EnumAndroidPlatform(value: 1)])
-  static const USE_AS_ORIGIN = const CustomTabsRelationType_._internal(1);
+  static const USE_AS_ORIGIN = CustomTabsRelationType_._internal(1);
 
   ///Requests the ability to handle all URLs from a given origin.
   @EnumSupportedPlatforms(platforms: [EnumAndroidPlatform(value: 2)])
-  static const HANDLE_ALL_URLS = const CustomTabsRelationType_._internal(2);
+  static const HANDLE_ALL_URLS = CustomTabsRelationType_._internal(2);
 }

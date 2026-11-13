@@ -11,15 +11,15 @@ class NavigationResponseAction_ {
   const NavigationResponseAction_._internal(this._value);
 
   ///Cancel the navigation.
-  static const CANCEL = const NavigationResponseAction_._internal(0);
+  static const CANCEL = NavigationResponseAction_._internal(0);
 
   ///Allow the navigation to continue.
-  static const ALLOW = const NavigationResponseAction_._internal(1);
+  static const ALLOW = NavigationResponseAction_._internal(1);
 
   ///Turn the navigation into a download.
   ///
   ///**NOTE**: available only on iOS 14.5+. It will fallback to [CANCEL].
-  static const DOWNLOAD = const NavigationResponseAction_._internal(2);
+  static const DOWNLOAD = NavigationResponseAction_._internal(2);
 }
 
 ///Class that is used by [PlatformWebViewCreationParams.onNavigationResponse] event.
@@ -33,8 +33,8 @@ class IOSNavigationResponseAction_ {
   const IOSNavigationResponseAction_._internal(this._value);
 
   ///Cancel the navigation.
-  static const CANCEL = const IOSNavigationResponseAction_._internal(0);
+  static const CANCEL = IOSNavigationResponseAction_._internal(0);
 
   ///Allow the navigation to continue.
-  static const ALLOW = const IOSNavigationResponseAction_._internal(1);
+  static const ALLOW = IOSNavigationResponseAction_._internal(1);
 }

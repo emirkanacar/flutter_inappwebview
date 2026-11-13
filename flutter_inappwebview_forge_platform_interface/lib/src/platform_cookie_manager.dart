@@ -714,7 +714,10 @@ In this case, this method will return always `true`.""",
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.removeCookieChangedListener.supported_platforms}
   @SupportedPlatforms(
-    platforms: [IOSPlatform(available: '11.0'), MacOSPlatform(available: '10.13')],
+    platforms: [
+      IOSPlatform(available: '11.0'),
+      MacOSPlatform(available: '10.13'),
+    ],
   )
   Future<void> removeCookieChangedListener() {
     throw UnimplementedError(

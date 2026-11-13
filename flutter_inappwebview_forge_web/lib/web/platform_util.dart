@@ -9,7 +9,7 @@ class PlatformUtil extends ChannelController {
   late BinaryMessenger _messenger;
 
   PlatformUtil({required BinaryMessenger messenger}) {
-    this._messenger = messenger;
+    _messenger = messenger;
 
     channel = MethodChannel(
       'com.emirkanacar/flutter_inappwebview_platformutil',

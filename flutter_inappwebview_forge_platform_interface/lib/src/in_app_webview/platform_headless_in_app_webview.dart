@@ -407,6 +407,7 @@ abstract class PlatformHeadlessInAppWebView extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformHeadlessInAppWebView.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(
     platforms: [
       AndroidPlatform(),

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Resolve the `flutter analyze` infos reported by the pub.dev static
+  analysis check (`this.` qualifiers, empty catches, `print` replaced by
+  `debugPrint`, overridden fields replaced by typed getters, super
+  parameters, collection literals). No public API or behavior change.
 - Example: resolve the Gradle build directory from
   `rootProject.layout.projectDirectory` so `flutter build apk` writes the
   APK to `example/build`, where Flutter looks for it (Forge PR #1).

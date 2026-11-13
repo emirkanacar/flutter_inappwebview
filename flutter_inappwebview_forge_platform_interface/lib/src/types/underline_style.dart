@@ -10,31 +10,31 @@ class UnderlineStyle_ {
   const UnderlineStyle_._internal(this._value);
 
   ///Do not draw a line.
-  static const STYLE_NONE = const UnderlineStyle_._internal(0);
+  static const STYLE_NONE = UnderlineStyle_._internal(0);
 
   ///Draw a single line.
-  static const SINGLE = const UnderlineStyle_._internal(1);
+  static const SINGLE = UnderlineStyle_._internal(1);
 
   ///Draw a thick line.
-  static const THICK = const UnderlineStyle_._internal(2);
+  static const THICK = UnderlineStyle_._internal(2);
 
   ///Draw a double line.
-  static const DOUBLE = const UnderlineStyle_._internal(9);
+  static const DOUBLE = UnderlineStyle_._internal(9);
 
   ///Draw a line of dots.
-  static const PATTERN_DOT = const UnderlineStyle_._internal(256);
+  static const PATTERN_DOT = UnderlineStyle_._internal(256);
 
   ///Draw a line of dashes.
-  static const PATTERN_DASH = const UnderlineStyle_._internal(512);
+  static const PATTERN_DASH = UnderlineStyle_._internal(512);
 
   ///Draw a line of alternating dashes and dots.
-  static const PATTERN_DASH_DOT = const UnderlineStyle_._internal(768);
+  static const PATTERN_DASH_DOT = UnderlineStyle_._internal(768);
 
   ///Draw a line of alternating dashes and two dots.
-  static const PATTERN_DASH_DOT_DOT = const UnderlineStyle_._internal(1024);
+  static const PATTERN_DASH_DOT_DOT = UnderlineStyle_._internal(1024);
 
   ///Draw the line only beneath or through words, not whitespace.
-  static const BY_WORD = const UnderlineStyle_._internal(32768);
+  static const BY_WORD = UnderlineStyle_._internal(32768);
 }
 
 ///An iOS-specific Class that represents the constants for the underline style and strikethrough style attribute keys.
@@ -47,31 +47,29 @@ class IOSNSUnderlineStyle_ {
   const IOSNSUnderlineStyle_._internal(this._value);
 
   ///Do not draw a line.
-  static const STYLE_NONE = const IOSNSUnderlineStyle_._internal(0);
+  static const STYLE_NONE = IOSNSUnderlineStyle_._internal(0);
 
   ///Draw a single line.
-  static const SINGLE = const IOSNSUnderlineStyle_._internal(1);
+  static const SINGLE = IOSNSUnderlineStyle_._internal(1);
 
   ///Draw a thick line.
-  static const THICK = const IOSNSUnderlineStyle_._internal(2);
+  static const THICK = IOSNSUnderlineStyle_._internal(2);
 
   ///Draw a double line.
-  static const DOUBLE = const IOSNSUnderlineStyle_._internal(9);
+  static const DOUBLE = IOSNSUnderlineStyle_._internal(9);
 
   ///Draw a line of dots.
-  static const PATTERN_DOT = const IOSNSUnderlineStyle_._internal(256);
+  static const PATTERN_DOT = IOSNSUnderlineStyle_._internal(256);
 
   ///Draw a line of dashes.
-  static const PATTERN_DASH = const IOSNSUnderlineStyle_._internal(512);
+  static const PATTERN_DASH = IOSNSUnderlineStyle_._internal(512);
 
   ///Draw a line of alternating dashes and dots.
-  static const PATTERN_DASH_DOT = const IOSNSUnderlineStyle_._internal(768);
+  static const PATTERN_DASH_DOT = IOSNSUnderlineStyle_._internal(768);
 
   ///Draw a line of alternating dashes and two dots.
-  static const PATTERN_DASH_DOT_DOT = const IOSNSUnderlineStyle_._internal(
-    1024,
-  );
+  static const PATTERN_DASH_DOT_DOT = IOSNSUnderlineStyle_._internal(1024);
 
   ///Draw the line only beneath or through words, not whitespace.
-  static const BY_WORD = const IOSNSUnderlineStyle_._internal(32768);
+  static const BY_WORD = IOSNSUnderlineStyle_._internal(32768);
 }

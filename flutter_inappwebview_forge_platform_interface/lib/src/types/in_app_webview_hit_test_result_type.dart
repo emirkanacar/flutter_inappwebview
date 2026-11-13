@@ -10,31 +10,28 @@ class InAppWebViewHitTestResultType_ {
   const InAppWebViewHitTestResultType_._internal(this._value);
 
   ///Default [InAppWebViewHitTestResult], where the target is unknown.
-  static const UNKNOWN_TYPE = const InAppWebViewHitTestResultType_._internal(0);
+  static const UNKNOWN_TYPE = InAppWebViewHitTestResultType_._internal(0);
 
   ///[InAppWebViewHitTestResult] for hitting a phone number.
-  static const PHONE_TYPE = const InAppWebViewHitTestResultType_._internal(2);
+  static const PHONE_TYPE = InAppWebViewHitTestResultType_._internal(2);
 
   ///[InAppWebViewHitTestResult] for hitting a map address.
-  static const GEO_TYPE = const InAppWebViewHitTestResultType_._internal(3);
+  static const GEO_TYPE = InAppWebViewHitTestResultType_._internal(3);
 
   ///[InAppWebViewHitTestResult] for hitting an email address.
-  static const EMAIL_TYPE = const InAppWebViewHitTestResultType_._internal(4);
+  static const EMAIL_TYPE = InAppWebViewHitTestResultType_._internal(4);
 
   ///[InAppWebViewHitTestResult] for hitting an HTML::img tag.
-  static const IMAGE_TYPE = const InAppWebViewHitTestResultType_._internal(5);
+  static const IMAGE_TYPE = InAppWebViewHitTestResultType_._internal(5);
 
   ///[InAppWebViewHitTestResult] for hitting a HTML::a tag with src=http.
-  static const SRC_ANCHOR_TYPE = const InAppWebViewHitTestResultType_._internal(
-    7,
-  );
+  static const SRC_ANCHOR_TYPE = InAppWebViewHitTestResultType_._internal(7);
 
   ///[InAppWebViewHitTestResult] for hitting a HTML::a tag with src=http + HTML::img.
-  static const SRC_IMAGE_ANCHOR_TYPE =
-      const InAppWebViewHitTestResultType_._internal(8);
+  static const SRC_IMAGE_ANCHOR_TYPE = InAppWebViewHitTestResultType_._internal(
+    8,
+  );
 
   ///[InAppWebViewHitTestResult] for hitting an edit text area.
-  static const EDIT_TEXT_TYPE = const InAppWebViewHitTestResultType_._internal(
-    9,
-  );
+  static const EDIT_TEXT_TYPE = InAppWebViewHitTestResultType_._internal(9);
 }

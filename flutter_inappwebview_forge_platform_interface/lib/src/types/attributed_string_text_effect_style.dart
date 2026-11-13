@@ -10,8 +10,9 @@ class AttributedStringTextEffectStyle_ {
   const AttributedStringTextEffectStyle_._internal(this._value);
 
   ///A graphical text effect that gives glyphs the appearance of letterpress printing, which involves pressing the type into the paper.
-  static const LETTERPRESS_STYLE =
-      const AttributedStringTextEffectStyle_._internal("letterpressStyle");
+  static const LETTERPRESS_STYLE = AttributedStringTextEffectStyle_._internal(
+    "letterpressStyle",
+  );
 }
 
 ///An iOS-specific Class that represents the supported proxy types.
@@ -25,5 +26,5 @@ class IOSNSAttributedStringTextEffectStyle_ {
 
   ///A graphical text effect that gives glyphs the appearance of letterpress printing, which involves pressing the type into the paper.
   static const LETTERPRESS_STYLE =
-      const IOSNSAttributedStringTextEffectStyle_._internal("letterpressStyle");
+      IOSNSAttributedStringTextEffectStyle_._internal("letterpressStyle");
 }

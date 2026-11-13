@@ -16,13 +16,13 @@ class PrintJobPaginationMode_ {
 
   ///
   @EnumSupportedPlatforms(platforms: [EnumMacOSPlatform(value: 0)])
-  static const AUTOMATIC = const PrintJobPaginationMode_._internal('AUTOMATIC');
+  static const AUTOMATIC = PrintJobPaginationMode_._internal('AUTOMATIC');
 
   ///
   @EnumSupportedPlatforms(platforms: [EnumMacOSPlatform(value: 1)])
-  static const FIT = const PrintJobPaginationMode_._internal("FIT");
+  static const FIT = PrintJobPaginationMode_._internal("FIT");
 
   ///
   @EnumSupportedPlatforms(platforms: [EnumMacOSPlatform(value: 2)])
-  static const CLIP = const PrintJobPaginationMode_._internal("CLIP");
+  static const CLIP = PrintJobPaginationMode_._internal("CLIP");
 }

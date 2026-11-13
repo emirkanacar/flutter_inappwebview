@@ -172,5 +172,5 @@ class MacOSHttpAuthCredentialDatabase extends PlatformHttpAuthCredentialDatabase
 
 extension InternalHttpAuthCredentialDatabase
     on MacOSHttpAuthCredentialDatabase {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

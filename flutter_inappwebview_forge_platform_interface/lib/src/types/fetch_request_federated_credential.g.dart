@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'fetch_request_federated_credential.dart';
 
 // **************************************************************************
@@ -40,13 +42,13 @@ class FetchRequestFederatedCredential extends FetchRequestCredential {
       return null;
     }
     final instance = FetchRequestFederatedCredential(
+      type: map['type'],
       iconURL: map['iconURL'] != null ? WebUri(map['iconURL']) : null,
       id: map['id'],
       name: map['name'],
       protocol: map['protocol'],
       provider: map['provider'],
     );
-    instance.type = map['type'];
     return instance;
   }
 

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'trusted_web_activity_immersive_display_mode.dart';
 
 // **************************************************************************
@@ -26,11 +28,11 @@ class TrustedWebActivityImmersiveDisplayMode
     this.displayCutoutMode = LayoutInDisplayCutoutMode.DEFAULT,
     this.layoutInDisplayCutoutMode,
   }) {
-    this.displayCutoutMode = this.layoutInDisplayCutoutMode != null
+    displayCutoutMode = layoutInDisplayCutoutMode != null
         ? LayoutInDisplayCutoutMode.fromNativeValue(
             layoutInDisplayCutoutMode?.toNativeValue(),
           )!
-        : this.displayCutoutMode;
+        : displayCutoutMode;
   }
 
   ///Gets a possible [TrustedWebActivityImmersiveDisplayMode] instance from a [Map] value.

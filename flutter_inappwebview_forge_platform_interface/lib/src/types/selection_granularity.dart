@@ -10,10 +10,10 @@ class SelectionGranularity_ {
   const SelectionGranularity_._internal(this._value);
 
   ///Selection granularity varies automatically based on the selection.
-  static const DYNAMIC = const SelectionGranularity_._internal(0);
+  static const DYNAMIC = SelectionGranularity_._internal(0);
 
   ///Selection endpoints can be placed at any character boundary.
-  static const CHARACTER = const SelectionGranularity_._internal(1);
+  static const CHARACTER = SelectionGranularity_._internal(1);
 }
 
 ///An iOS-specific class used to set the level of granularity with which the user can interactively select content in the web view.
@@ -26,8 +26,8 @@ class IOSWKSelectionGranularity_ {
   const IOSWKSelectionGranularity_._internal(this._value);
 
   ///Selection granularity varies automatically based on the selection.
-  static const DYNAMIC = const IOSWKSelectionGranularity_._internal(0);
+  static const DYNAMIC = IOSWKSelectionGranularity_._internal(0);
 
   ///Selection endpoints can be placed at any character boundary.
-  static const CHARACTER = const IOSWKSelectionGranularity_._internal(1);
+  static const CHARACTER = IOSWKSelectionGranularity_._internal(1);
 }

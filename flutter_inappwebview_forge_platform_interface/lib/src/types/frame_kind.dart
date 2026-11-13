@@ -23,7 +23,7 @@ class FrameKind_ {
       ),
     ],
   )
-  static const UNKNOWN = const FrameKind_._internal('UNKNOWN');
+  static const UNKNOWN = FrameKind_._internal('UNKNOWN');
 
   ///Indicates that the frame is a primary main frame(webview).
   @EnumSupportedPlatforms(
@@ -36,7 +36,7 @@ class FrameKind_ {
       ),
     ],
   )
-  static const MAIN_FRAME = const FrameKind_._internal('MAIN_FRAME');
+  static const MAIN_FRAME = FrameKind_._internal('MAIN_FRAME');
 
   ///Indicates that the frame is an iframe.
   @EnumSupportedPlatforms(
@@ -49,7 +49,7 @@ class FrameKind_ {
       ),
     ],
   )
-  static const IFRAME = const FrameKind_._internal('IFRAME');
+  static const IFRAME = FrameKind_._internal('IFRAME');
 
   ///Indicates that the frame is an embed element.
   @EnumSupportedPlatforms(
@@ -62,7 +62,7 @@ class FrameKind_ {
       ),
     ],
   )
-  static const EMBED = const FrameKind_._internal('EMBED');
+  static const EMBED = FrameKind_._internal('EMBED');
 
   ///Indicates that the frame is an object element.
   @EnumSupportedPlatforms(
@@ -75,5 +75,5 @@ class FrameKind_ {
       ),
     ],
   )
-  static const OBJECT = const FrameKind_._internal('OBJECT');
+  static const OBJECT = FrameKind_._internal('OBJECT');
 }

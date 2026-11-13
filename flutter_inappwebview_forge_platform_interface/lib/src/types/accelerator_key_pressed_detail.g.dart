@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'accelerator_key_pressed_detail.dart';
 
 // **************************************************************************

@@ -22,7 +22,7 @@ class DownloadStartResponseAction_ {
       EnumLinuxPlatform(value: 0),
     ],
   )
-  static const CANCEL = const DownloadStartResponseAction_._internal(0);
+  static const CANCEL = DownloadStartResponseAction_._internal(0);
 
   ///Start a native plugin download to [DownloadStartResponse.resultFilePath].
   @EnumSupportedPlatforms(
@@ -32,5 +32,5 @@ class DownloadStartResponseAction_ {
       EnumMacOSPlatform(value: 1),
     ],
   )
-  static const DOWNLOAD = const DownloadStartResponseAction_._internal(1);
+  static const DOWNLOAD = DownloadStartResponseAction_._internal(1);
 }

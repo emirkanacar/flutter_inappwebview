@@ -93,5 +93,5 @@ class AndroidWebViewFeature extends PlatformWebViewFeature
 }
 
 extension InternalWebViewFeature on AndroidWebViewFeature {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

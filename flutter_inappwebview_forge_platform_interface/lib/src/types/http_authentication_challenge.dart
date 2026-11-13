@@ -46,11 +46,11 @@ class HttpAuthenticationChallenge_ extends URLAuthenticationChallenge_ {
 
   HttpAuthenticationChallenge_({
     required this.previousFailureCount,
-    required URLProtectionSpace_ protectionSpace,
+    required super.protectionSpace,
     @Deprecated("Use failureResponse instead") this.iosFailureResponse,
     this.failureResponse,
     this.proposedCredential,
     @Deprecated("Use error instead") this.iosError,
     this.error,
-  }) : super(protectionSpace: protectionSpace);
+  });
 }

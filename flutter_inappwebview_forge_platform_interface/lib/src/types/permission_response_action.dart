@@ -12,13 +12,13 @@ class PermissionResponseAction_ {
   const PermissionResponseAction_._internal(this._value);
 
   ///Denies the request.
-  static const DENY = const PermissionResponseAction_._internal(0);
+  static const DENY = PermissionResponseAction_._internal(0);
 
   ///Grants origin the permission to access the given resources.
-  static const GRANT = const PermissionResponseAction_._internal(1);
+  static const GRANT = PermissionResponseAction_._internal(1);
 
   ///Prompt the user for permission for the requested resource.
-  static const PROMPT = const PermissionResponseAction_._internal(2);
+  static const PROMPT = PermissionResponseAction_._internal(2);
 }
 
 ///Class used by [PermissionRequestResponse] class.
@@ -31,8 +31,8 @@ class PermissionRequestResponseAction_ {
   const PermissionRequestResponseAction_._internal(this._value);
 
   ///Denies the request.
-  static const DENY = const PermissionRequestResponseAction_._internal(0);
+  static const DENY = PermissionRequestResponseAction_._internal(0);
 
   ///Grants origin the permission to access the given resources.
-  static const GRANT = const PermissionRequestResponseAction_._internal(1);
+  static const GRANT = PermissionRequestResponseAction_._internal(1);
 }

@@ -100,7 +100,10 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
   ) async {
     _cookieChangedListeners.add(listener);
     if (_cookieChangedListeners.length == 1) {
-      await channel?.invokeMethod('addCookieChangedListener', <String, dynamic>{});
+      await channel?.invokeMethod(
+        'addCookieChangedListener',
+        <String, dynamic>{},
+      );
     }
   }
 
@@ -189,19 +192,21 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
     HTTPCookieSameSitePolicy? sameSite,
     PlatformInAppWebViewController? webViewController,
   }) async {
-    var cookieValue = name + "=" + value + "; Path=" + path;
+    var cookieValue = "$name=$value; Path=$path";
 
-    if (domain != null) cookieValue += "; Domain=" + domain;
+    if (domain != null) cookieValue += "; Domain=$domain";
 
-    if (expiresDate != null)
-      cookieValue += "; Expires=" + await _getCookieExpirationDate(expiresDate);
+    if (expiresDate != null) {
+      cookieValue += "; Expires=${await _getCookieExpirationDate(expiresDate)}";
+    }
 
-    if (maxAge != null) cookieValue += "; Max-Age=" + maxAge.toString();
+    if (maxAge != null) cookieValue += "; Max-Age=$maxAge";
 
     if (isSecure != null && isSecure) cookieValue += "; Secure";
 
-    if (sameSite != null && sameSite.isSupported())
-      cookieValue += "; SameSite=" + sameSite.toNativeValue()!;
+    if (sameSite != null && sameSite.isSupported()) {
+      cookieValue += "; SameSite=${sameSite.toNativeValue()!}";
+    }
 
     cookieValue += ";";
 
@@ -260,7 +265,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
         await channel?.invokeMethod<List>('getCookies', args) ?? [];
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
 
-    cookieListMap.forEach((cookieMap) {
+    for (var cookieMap in cookieListMap) {
       cookies.add(
         Cookie(
           name: cookieMap["name"],
@@ -276,7 +281,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
           path: cookieMap["path"],
         ),
       );
-    });
+    }
     return cookies;
   }
 
@@ -300,12 +305,12 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
                 .split(';')
                 .map((documentCookie) => documentCookie.trim())
                 .toList();
-        documentCookies.forEach((documentCookie) {
+        for (var documentCookie in documentCookies) {
           List<String> cookie = documentCookie.split('=');
           if (cookie.length > 1) {
             cookies.add(Cookie(name: cookie[0], value: cookie[1]));
           }
-        });
+        }
         return cookies;
       }
     }
@@ -330,12 +335,12 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
             .split(';')
             .map((documentCookie) => documentCookie.trim())
             .toList();
-    documentCookies.forEach((documentCookie) {
+    for (var documentCookie in documentCookies) {
       List<String> cookie = documentCookie.split('=');
       if (cookie.length > 1) {
         cookies.add(Cookie(name: cookie[0], value: cookie[1]));
       }
-    });
+    }
     await headlessWebView.dispose();
     return cookies;
   }
@@ -372,7 +377,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
     cookies = cookies.cast<Map<dynamic, dynamic>>();
     for (var i = 0; i < cookies.length; i++) {
       cookies[i] = cookies[i].cast<String, dynamic>();
-      if (cookies[i]["name"] == name)
+      if (cookies[i]["name"] == name) {
         return Cookie(
           name: cookies[i]["name"],
           value: cookies[i]["value"],
@@ -386,6 +391,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
           isHttpOnly: cookies[i]["isHttpOnly"],
           path: cookies[i]["path"],
         );
+      }
     }
     return null;
   }
@@ -482,7 +488,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
         await channel?.invokeMethod<List>('getAllCookies', args) ?? [];
     cookieListMap = cookieListMap.cast<Map<dynamic, dynamic>>();
 
-    cookieListMap.forEach((cookieMap) {
+    for (var cookieMap in cookieListMap) {
       cookies.add(
         Cookie(
           name: cookieMap["name"],
@@ -498,7 +504,7 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
           path: cookieMap["path"],
         ),
       );
-    });
+    }
     return cookies;
   }
 
@@ -526,5 +532,5 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
 }
 
 extension InternalCookieManager on IOSCookieManager {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

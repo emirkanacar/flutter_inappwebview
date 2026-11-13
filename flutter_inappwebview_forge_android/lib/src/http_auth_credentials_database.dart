@@ -173,5 +173,5 @@ class AndroidHttpAuthCredentialDatabase
 
 extension InternalHttpAuthCredentialDatabase
     on AndroidHttpAuthCredentialDatabase {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

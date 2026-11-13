@@ -51,9 +51,9 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
     return _staticValue;
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       debugLoggingSettings:
           PlatformFindInteractionController.debugLoggingSettings,
       method: method,
@@ -85,6 +85,7 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findAll}
+  @override
   Future<void> findAll({String? find}) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('find', () => find);
@@ -107,6 +108,7 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.findNext}
+  @override
   Future<void> findNext({bool forward = true}) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('forward', () => forward);
@@ -114,12 +116,14 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.clearMatches}
+  @override
   Future<void> clearMatches() async {
     Map<String, dynamic> args = <String, dynamic>{};
     await channel?.invokeMethod('clearMatches', args);
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.setSearchText}
+  @override
   Future<void> setSearchText(String? searchText) async {
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('searchText', () => searchText);
@@ -127,12 +131,14 @@ class MacOSFindInteractionController extends PlatformFindInteractionController
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.getSearchText}
+  @override
   Future<String?> getSearchText() async {
     Map<String, dynamic> args = <String, dynamic>{};
     return await channel?.invokeMethod<String?>('getSearchText', args);
   }
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformFindInteractionController.getActiveFindSession}
+  @override
   Future<FindSession?> getActiveFindSession() async {
     Map<String, dynamic> args = <String, dynamic>{};
     Map<String, dynamic>? result = (await channel?.invokeMethod(

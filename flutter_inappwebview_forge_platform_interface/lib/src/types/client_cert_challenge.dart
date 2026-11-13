@@ -60,7 +60,7 @@ class ClientCertChallenge_ extends URLAuthenticationChallenge_ {
   List<SslCertificate_>? mutuallyTrustedCertificates;
 
   ClientCertChallenge_({
-    required URLProtectionSpace_ protectionSpace,
+    required super.protectionSpace,
     @Deprecated('Use principals instead') this.androidPrincipals,
     this.principals,
     @Deprecated('Use keyTypes instead') this.androidKeyTypes,
@@ -68,5 +68,5 @@ class ClientCertChallenge_ extends URLAuthenticationChallenge_ {
     this.allowedCertificateAuthorities,
     this.isProxy,
     this.mutuallyTrustedCertificates,
-  }) : super(protectionSpace: protectionSpace);
+  });
 }

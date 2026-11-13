@@ -17,5 +17,5 @@ class WebViewDataType_ {
       EnumMacOSPlatform(available: '26.0', value: 1),
     ],
   )
-  static const SESSION_STORAGE = const WebViewDataType_._internal(1);
+  static const SESSION_STORAGE = WebViewDataType_._internal(1);
 }

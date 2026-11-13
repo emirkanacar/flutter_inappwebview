@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'sandbox.dart';
 
 // **************************************************************************
@@ -16,7 +18,7 @@ class Sandbox {
       Sandbox._internal(value, nativeValue());
 
   ///Allow all.
-  static const ALLOW_ALL = const [_ALL];
+  static const ALLOW_ALL = [_ALL];
 
   ///Allows for downloads to occur with a gesture from the user.
   static const ALLOW_DOWNLOADS = Sandbox._internal(
@@ -31,7 +33,7 @@ class Sandbox {
   static const ALLOW_MODALS = Sandbox._internal('allow-modals', 'allow-modals');
 
   ///Allow none.
-  static const ALLOW_NONE = const [_NONE];
+  static const ALLOW_NONE = [_NONE];
 
   ///Lets the resource lock the screen orientation.
   static const ALLOW_ORIENTATION_LOCK = Sandbox._internal(

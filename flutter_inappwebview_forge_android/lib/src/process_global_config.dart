@@ -90,5 +90,5 @@ class AndroidProcessGlobalConfig extends PlatformProcessGlobalConfig
 }
 
 extension InternalProcessGlobalConfig on AndroidProcessGlobalConfig {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

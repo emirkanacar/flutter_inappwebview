@@ -188,6 +188,7 @@ abstract class PlatformWebStorage extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorage.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(
     platforms: [
       AndroidPlatform(),
@@ -568,6 +569,7 @@ class PlatformLocalStorageCreationParams extends PlatformStorageCreationParams {
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformLocalStorageCreationParams.isClassSupported}
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
   ///{@endtemplate}
+  @override
   bool isClassSupported({TargetPlatform? platform}) =>
       _PlatformLocalStorageCreationParamsClassSupported.isClassSupported(
         platform: platform,
@@ -803,6 +805,7 @@ class PlatformSessionStorageCreationParams
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformSessionStorageCreationParams.isClassSupported}
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
   ///{@endtemplate}
+  @override
   bool isClassSupported({TargetPlatform? platform}) =>
       _PlatformSessionStorageCreationParamsClassSupported.isClassSupported(
         platform: platform,

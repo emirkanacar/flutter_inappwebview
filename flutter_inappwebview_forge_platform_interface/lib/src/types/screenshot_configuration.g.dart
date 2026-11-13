@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'screenshot_configuration.dart';
 
 // **************************************************************************
@@ -71,10 +73,10 @@ class ScreenshotConfiguration {
     @Deprecated("Use afterScreenUpdates instead") this.iosAfterScreenUpdates,
     this.afterScreenUpdates = true,
   }) : compressFormat = compressFormat ?? CompressFormat.PNG {
-    assert(this.quality >= 0);
-    this.afterScreenUpdates = this.iosAfterScreenUpdates != null
-        ? this.iosAfterScreenUpdates!
-        : this.afterScreenUpdates;
+    assert(quality >= 0);
+    afterScreenUpdates = iosAfterScreenUpdates != null
+        ? iosAfterScreenUpdates!
+        : afterScreenUpdates;
   }
 
   ///Gets a possible [ScreenshotConfiguration] instance from a [Map] value.

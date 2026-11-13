@@ -10,6 +10,5 @@ part 'server_trust_challenge.g.dart';
 ///It provides all the information about the challenge.
 @ExchangeableObject()
 class ServerTrustChallenge_ extends URLAuthenticationChallenge_ {
-  ServerTrustChallenge_({required URLProtectionSpace_ protectionSpace})
-    : super(protectionSpace: protectionSpace);
+  ServerTrustChallenge_({required super.protectionSpace});
 }

@@ -15,6 +15,19 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-11-13 Web `Sandbox.ALLOW_ALL` iframe sandbox
+
+Web platform (found during the pub.dev static-analysis cleanup, not a CSV
+record): `iframeSandbox: Sandbox.ALLOW_ALL` was compared with `==`, but the
+generated `Sandbox` equality compares against a null native value and never
+matched, so the iframe received `sandbox="null"` (the most restrictive
+sandbox). `isIframeSandboxAllowAll` in
+`flutter_inappwebview_forge_web/lib/web/iframe_sandbox.dart` now detects the
+value by its native value and the `sandbox` attribute is removed, on both
+creation and `setSettings`. `test/iframe_sandbox_test.dart` failed before the
+fix and passes after it. Runtime gate: browser check that an `ALLOW_ALL`
+iframe has no `sandbox` attribute and can run scripts.
+
 ## 2026-11-13 Android example build directory (Forge PR #1)
 
 Android platform example (Forge PR #1, not a CSV record):

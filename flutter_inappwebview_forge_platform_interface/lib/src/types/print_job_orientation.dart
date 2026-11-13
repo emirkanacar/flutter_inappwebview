@@ -21,7 +21,7 @@ class PrintJobOrientation_ {
       EnumWindowsPlatform(value: 0),
     ],
   )
-  static const PORTRAIT = const PrintJobOrientation_._internal(0);
+  static const PORTRAIT = PrintJobOrientation_._internal(0);
 
   ///Pages are printed in landscape orientation.
   @EnumSupportedPlatforms(
@@ -32,5 +32,5 @@ class PrintJobOrientation_ {
       EnumWindowsPlatform(value: 1),
     ],
   )
-  static const LANDSCAPE = const PrintJobOrientation_._internal(1);
+  static const LANDSCAPE = PrintJobOrientation_._internal(1);
 }

@@ -59,7 +59,7 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
     return _staticValue;
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
       className: runtimeType.toString(),
       id: id,
@@ -154,5 +154,5 @@ class LinuxWebViewEnvironment extends PlatformWebViewEnvironment
 }
 
 extension InternalLinuxWebViewEnvironment on LinuxWebViewEnvironment {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

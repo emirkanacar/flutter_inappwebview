@@ -164,5 +164,5 @@ class AndroidServiceWorkerController extends PlatformServiceWorkerController
 }
 
 extension InternalServiceWorkerController on AndroidServiceWorkerController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

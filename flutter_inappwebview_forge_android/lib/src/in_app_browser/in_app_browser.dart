@@ -17,10 +17,10 @@ import '../pull_to_refresh/pull_to_refresh_controller.dart';
 class AndroidInAppBrowserCreationParams
     extends PlatformInAppBrowserCreationParams {
   /// Creates a new [AndroidInAppBrowserCreationParams] instance.
-  AndroidInAppBrowserCreationParams({
+  const AndroidInAppBrowserCreationParams({
     super.contextMenu,
-    this.pullToRefreshController,
-    this.findInteractionController,
+    AndroidPullToRefreshController? super.pullToRefreshController,
+    AndroidFindInteractionController? super.findInteractionController,
     super.initialUserScripts,
     super.windowId,
   });
@@ -43,10 +43,12 @@ class AndroidInAppBrowserCreationParams
   }
 
   @override
-  final AndroidFindInteractionController? findInteractionController;
+  AndroidFindInteractionController? get findInteractionController =>
+      super.findInteractionController as AndroidFindInteractionController?;
 
   @override
-  final AndroidPullToRefreshController? pullToRefreshController;
+  AndroidPullToRefreshController? get pullToRefreshController =>
+      super.pullToRefreshController as AndroidPullToRefreshController?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppBrowser}
@@ -78,7 +80,7 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
   AndroidInAppBrowserCreationParams get _androidParams =>
       params as AndroidInAppBrowserCreationParams;
 
-  static const MethodChannel _staticChannel = const MethodChannel(
+  static const MethodChannel _staticChannel = MethodChannel(
     'com.emirkanacar/flutter_inappbrowser',
   );
 
@@ -87,7 +89,7 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
   @override
   ContextMenu? get contextMenu => _contextMenu;
 
-  Map<int, InAppBrowserMenuItem> _menuItems = HashMap();
+  final Map<int, InAppBrowserMenuItem> _menuItems = HashMap();
   bool _isOpened = false;
   AndroidInAppWebViewController? _webViewController;
 
@@ -96,7 +98,7 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
     return _isOpened ? _webViewController : null;
   }
 
-  _init() {
+  void _init() {
     channel = MethodChannel('com.emirkanacar/flutter_inappbrowser_$id');
     handler = _handleMethod;
     initMethodCallHandler();
@@ -105,15 +107,15 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
       AndroidInAppWebViewControllerCreationParams(id: id),
       channel!,
       this,
-      this.initialUserScripts,
+      initialUserScripts,
     );
     _androidParams.pullToRefreshController?.init(id);
     _androidParams.findInteractionController?.init(id);
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       id: id,
       debugLoggingSettings: PlatformInAppBrowser.debugLoggingSettings,
       method: method,
@@ -130,9 +132,9 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
       case "onMenuItemClicked":
         _debugLog(call.method, call.arguments);
         int id = call.arguments["id"].toInt();
-        if (this._menuItems[id] != null) {
-          if (this._menuItems[id]?.onClick != null) {
-            this._menuItems[id]?.onClick!();
+        if (_menuItems[id] != null) {
+          if (_menuItems[id]?.onClick != null) {
+            _menuItems[id]?.onClick!();
           }
         }
         break;
@@ -262,9 +264,9 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
 
   @override
   void addMenuItems(List<InAppBrowserMenuItem> menuItems) {
-    menuItems.forEach((menuItem) {
+    for (var menuItem in menuItems) {
       _menuItems[menuItem.id] = menuItem;
-    });
+    }
   }
 
   @override
@@ -382,7 +384,7 @@ class AndroidInAppBrowser extends PlatformInAppBrowser with ChannelController {
 
   @override
   bool isOpened() {
-    return this._isOpened;
+    return _isOpened;
   }
 
   @override

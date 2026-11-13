@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 ///Class that implements the [Uri] interface to maintain also the raw string value used by [Uri.parse].
 ///
 ///This class is used because some strings coming from the native platform side
@@ -47,11 +49,11 @@ class WebUri implements Uri {
   WebUri(String source, {this.forceToStringRawValue = false}) {
     _rawValue = source;
     try {
-      _uri = Uri.parse(this._rawValue);
+      _uri = Uri.parse(_rawValue);
       _isValidUri = true;
     } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
+      debugPrint('$e');
+      debugPrint('$stacktrace');
     }
   }
 

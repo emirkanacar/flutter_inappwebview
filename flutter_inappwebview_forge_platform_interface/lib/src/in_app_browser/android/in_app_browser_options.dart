@@ -54,7 +54,7 @@ class AndroidInAppBrowserOptions implements BrowserOptions, AndroidOptions {
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -64,6 +64,6 @@ class AndroidInAppBrowserOptions implements BrowserOptions, AndroidOptions {
 
   @override
   AndroidInAppBrowserOptions copy() {
-    return AndroidInAppBrowserOptions.fromMap(this.toMap());
+    return AndroidInAppBrowserOptions.fromMap(toMap());
   }
 }

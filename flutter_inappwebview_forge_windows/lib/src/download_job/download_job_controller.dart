@@ -21,8 +21,9 @@ class WindowsDownloadJobControllerCreationParams
 class WindowsDownloadJobController extends PlatformDownloadJobController
     with ChannelController {
   /// Creates a Windows download job controller.
-  WindowsDownloadJobController(PlatformDownloadJobControllerCreationParams params)
-    : super.implementation(
+  WindowsDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) : super.implementation(
         params is WindowsDownloadJobControllerCreationParams
             ? params
             : WindowsDownloadJobControllerCreationParams.fromPlatformDownloadJobControllerCreationParams(

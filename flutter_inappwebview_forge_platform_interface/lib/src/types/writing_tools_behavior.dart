@@ -14,14 +14,14 @@ class IOSWritingToolsBehavior_ {
   const IOSWritingToolsBehavior_._internal(this._value);
 
   ///Prevents Writing Tools from modifying text in the WebView.
-  static const NONE = const IOSWritingToolsBehavior_._internal(-1);
+  static const NONE = IOSWritingToolsBehavior_._internal(-1);
 
   ///Lets the system choose the most appropriate Writing Tools experience.
-  static const DEFAULT = const IOSWritingToolsBehavior_._internal(0);
+  static const DEFAULT = IOSWritingToolsBehavior_._internal(0);
 
   ///Requests the complete inline-editing Writing Tools experience.
-  static const COMPLETE = const IOSWritingToolsBehavior_._internal(1);
+  static const COMPLETE = IOSWritingToolsBehavior_._internal(1);
 
   ///Requests the limited overlay-panel Writing Tools experience.
-  static const LIMITED = const IOSWritingToolsBehavior_._internal(2);
+  static const LIMITED = IOSWritingToolsBehavior_._internal(2);
 }

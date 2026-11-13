@@ -52,24 +52,22 @@ class AndroidChromeSafariBrowser extends PlatformChromeSafariBrowser
   }
 
   ChromeSafariBrowserActionButton? _actionButton;
-  Map<int, ChromeSafariBrowserMenuItem> _menuItems = new HashMap();
+  final Map<int, ChromeSafariBrowserMenuItem> _menuItems = HashMap();
   ChromeSafariBrowserSecondaryToolbar? _secondaryToolbar;
   bool _isOpened = false;
-  static const MethodChannel _staticChannel = const MethodChannel(
+  static const MethodChannel _staticChannel = MethodChannel(
     'com.emirkanacar/flutter_chromesafaribrowser',
   );
 
-  _init() {
-    channel = MethodChannel(
-      'com.emirkanacar/flutter_chromesafaribrowser_$id',
-    );
+  void _init() {
+    channel = MethodChannel('com.emirkanacar/flutter_chromesafaribrowser_$id');
     handler = _handleMethod;
     initMethodCallHandler();
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       id: id,
       debugLoggingSettings: PlatformChromeSafariBrowser.debugLoggingSettings,
       method: method,
@@ -121,24 +119,24 @@ class AndroidChromeSafariBrowser extends PlatformChromeSafariBrowser
         String url = call.arguments["url"];
         String title = call.arguments["title"];
         int id = call.arguments["id"].toInt();
-        if (this._actionButton?.id == id) {
-          if (this._actionButton?.action != null) {
-            this._actionButton?.action!(url, title);
+        if (_actionButton?.id == id) {
+          if (_actionButton?.action != null) {
+            _actionButton?.action!(url, title);
           }
-          if (this._actionButton?.onClick != null) {
-            this._actionButton?.onClick!(WebUri(url), title);
+          if (_actionButton?.onClick != null) {
+            _actionButton?.onClick!(WebUri(url), title);
           }
-        } else if (this._menuItems[id] != null) {
-          if (this._menuItems[id]?.action != null) {
-            this._menuItems[id]?.action!(url, title);
+        } else if (_menuItems[id] != null) {
+          if (_menuItems[id]?.action != null) {
+            _menuItems[id]?.action!(url, title);
           }
-          if (this._menuItems[id]?.onClick != null) {
-            this._menuItems[id]?.onClick!(WebUri(url), title);
+          if (_menuItems[id]?.onClick != null) {
+            _menuItems[id]?.onClick!(WebUri(url), title);
           }
         }
         break;
       case "onSecondaryItemActionPerform":
-        final clickableIDs = this._secondaryToolbar?.clickableIDs;
+        final clickableIDs = _secondaryToolbar?.clickableIDs;
         if (clickableIDs != null) {
           WebUri? url = call.arguments["url"] != null
               ? WebUri(call.arguments["url"])
@@ -293,7 +291,7 @@ class AndroidChromeSafariBrowser extends PlatformChromeSafariBrowser
 
   @override
   void setActionButton(ChromeSafariBrowserActionButton actionButton) {
-    this._actionButton = actionButton;
+    _actionButton = actionButton;
   }
 
   @override
@@ -313,7 +311,7 @@ class AndroidChromeSafariBrowser extends PlatformChromeSafariBrowser
   void setSecondaryToolbar(
     ChromeSafariBrowserSecondaryToolbar secondaryToolbar,
   ) {
-    this._secondaryToolbar = secondaryToolbar;
+    _secondaryToolbar = secondaryToolbar;
   }
 
   @override
@@ -323,19 +321,19 @@ class AndroidChromeSafariBrowser extends PlatformChromeSafariBrowser
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent('secondaryToolbar', () => secondaryToolbar.toMap());
     await channel?.invokeMethod("updateSecondaryToolbar", args);
-    this._secondaryToolbar = secondaryToolbar;
+    _secondaryToolbar = secondaryToolbar;
   }
 
   @override
   void addMenuItem(ChromeSafariBrowserMenuItem menuItem) {
-    this._menuItems[menuItem.id] = menuItem;
+    _menuItems[menuItem.id] = menuItem;
   }
 
   @override
   void addMenuItems(List<ChromeSafariBrowserMenuItem> menuItems) {
-    menuItems.forEach((menuItem) {
-      this._menuItems[menuItem.id] = menuItem;
-    });
+    for (var menuItem in menuItems) {
+      _menuItems[menuItem.id] = menuItem;
+    }
   }
 
   @override

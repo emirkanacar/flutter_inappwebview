@@ -21,8 +21,9 @@ class AndroidDownloadJobControllerCreationParams
 class AndroidDownloadJobController extends PlatformDownloadJobController
     with ChannelController {
   /// Creates an Android download job controller.
-  AndroidDownloadJobController(PlatformDownloadJobControllerCreationParams params)
-    : super.implementation(
+  AndroidDownloadJobController(
+    PlatformDownloadJobControllerCreationParams params,
+  ) : super.implementation(
         params is AndroidDownloadJobControllerCreationParams
             ? params
             : AndroidDownloadJobControllerCreationParams.fromPlatformDownloadJobControllerCreationParams(
@@ -69,9 +70,7 @@ class AndroidDownloadJobController extends PlatformDownloadJobController
   @override
   Future<DownloadJobInfo?> getInfo() async {
     final result = await channel?.invokeMethod('getInfo', <String, dynamic>{});
-    return DownloadJobInfo.fromMap(
-      (result as Map?)?.cast<String, dynamic>(),
-    );
+    return DownloadJobInfo.fromMap((result as Map?)?.cast<String, dynamic>());
   }
 
   @override

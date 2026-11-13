@@ -21,7 +21,7 @@ class HttpAuthResponseAction_ {
       EnumWindowsPlatform(),
     ],
   )
-  static const CANCEL = const HttpAuthResponseAction_._internal(0);
+  static const CANCEL = HttpAuthResponseAction_._internal(0);
 
   ///Instructs the WebView to proceed with the authentication with the given credentials.
   @EnumSupportedPlatforms(
@@ -32,12 +32,12 @@ class HttpAuthResponseAction_ {
       EnumWindowsPlatform(),
     ],
   )
-  static const PROCEED = const HttpAuthResponseAction_._internal(1);
+  static const PROCEED = HttpAuthResponseAction_._internal(1);
 
   ///Uses the credentials stored for the current host.
   @EnumSupportedPlatforms(
     platforms: [EnumAndroidPlatform(), EnumIOSPlatform(), EnumMacOSPlatform()],
   )
   static const USE_SAVED_HTTP_AUTH_CREDENTIALS =
-      const HttpAuthResponseAction_._internal(2);
+      HttpAuthResponseAction_._internal(2);
 }

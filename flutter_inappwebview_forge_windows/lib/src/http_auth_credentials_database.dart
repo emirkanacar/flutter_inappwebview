@@ -162,5 +162,5 @@ class WindowsHttpAuthCredentialDatabase
 
 extension InternalHttpAuthCredentialDatabase
     on WindowsHttpAuthCredentialDatabase {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'ajax_request_headers.dart';
 
 // **************************************************************************
@@ -8,8 +10,8 @@ part of 'ajax_request_headers.dart';
 
 ///Class that represents the HTTP headers of an [AjaxRequest].
 class AjaxRequestHeaders {
-  Map<String, dynamic> _headers;
-  Map<String, dynamic> _newHeaders = {};
+  final Map<String, dynamic> _headers;
+  final Map<String, dynamic> _newHeaders = {};
   AjaxRequestHeaders(this._headers);
 
   ///Gets a possible [AjaxRequestHeaders] instance from a [Map] value.
@@ -25,7 +27,7 @@ class AjaxRequestHeaders {
 
   ///Gets the HTTP headers of the [AjaxRequest].
   Map<String, dynamic> getHeaders() {
-    return this._headers;
+    return _headers;
   }
 
   ///Sets/updates an HTTP header of the [AjaxRequest]. If there is already an existing [header] with the same name, the values are merged into one single request header.

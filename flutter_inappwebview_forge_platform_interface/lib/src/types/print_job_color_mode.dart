@@ -18,7 +18,7 @@ class PrintJobColorMode_ {
   @EnumSupportedPlatforms(
     platforms: [EnumAndroidPlatform(value: 0), EnumWindowsPlatform(value: 0)],
   )
-  static const DEFAULT = const PrintJobColorMode_._internal(0);
+  static const DEFAULT = PrintJobColorMode_._internal(0);
 
   ///Monochrome color scheme, for example one color is used.
   @EnumSupportedPlatforms(
@@ -28,7 +28,7 @@ class PrintJobColorMode_ {
       EnumWindowsPlatform(value: 2),
     ],
   )
-  static const MONOCHROME = const PrintJobColorMode_._internal(1);
+  static const MONOCHROME = PrintJobColorMode_._internal(1);
 
   ///Color color scheme, for example many colors are used.
   @EnumSupportedPlatforms(
@@ -38,5 +38,5 @@ class PrintJobColorMode_ {
       EnumWindowsPlatform(value: 1),
     ],
   )
-  static const COLOR = const PrintJobColorMode_._internal(2);
+  static const COLOR = PrintJobColorMode_._internal(2);
 }

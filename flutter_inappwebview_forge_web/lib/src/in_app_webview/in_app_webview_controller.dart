@@ -47,12 +47,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
   // ignore: unused_field
   static final MethodChannel _staticChannel = IN_APP_WEBVIEW_STATIC_CHANNEL;
 
-  Map<UserScriptInjectionTime, List<UserScript>> _userScripts = {
+  final Map<UserScriptInjectionTime, List<UserScript>> _userScripts = {
     UserScriptInjectionTime.AT_DOCUMENT_START: <UserScript>[],
     UserScriptInjectionTime.AT_DOCUMENT_END: <UserScript>[],
   };
-  Map<String, Function> _javaScriptHandlersMap = HashMap<String, Function>();
-  Map<String, ScriptHtmlTagAttributes> _injectedScriptsFromURL = {};
+  final Map<String, Function> _javaScriptHandlersMap =
+      HashMap<String, Function>();
+  final Map<String, ScriptHtmlTagAttributes> _injectedScriptsFromURL = {};
 
   dynamic _controllerFromPlatform;
 
@@ -72,7 +73,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     handler = handleMethod;
     initMethodCallHandler();
 
-    this._init(params);
+    _init(params);
   }
 
   static final WebPlatformInAppWebViewController _staticValue =
@@ -98,9 +99,9 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     );
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       name: "WebView",
       id: getViewId().toString(),
       debugLoggingSettings: PlatformInAppWebViewController.debugLoggingSettings,
@@ -183,13 +184,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
           double oldScale = call.arguments["oldScale"];
           double newScale = call.arguments["newScale"];
 
-          if (webviewParams!.onZoomScaleChanged != null)
+          if (webviewParams!.onZoomScaleChanged != null) {
             webviewParams!.onZoomScaleChanged!(
               _controllerFromPlatform,
               oldScale,
               newScale,
             );
-          else {
+          } else {
             // ignore: deprecated_member_use_from_same_package
             webviewParams!.androidOnScaleChanged!(
               _controllerFromPlatform,
@@ -213,20 +214,24 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
         }
         break;
       case "onEnterFullscreen":
-        if (webviewParams != null && webviewParams!.onEnterFullscreen != null)
+        if (webviewParams != null && webviewParams!.onEnterFullscreen != null) {
           webviewParams!.onEnterFullscreen!(_controllerFromPlatform);
+        }
         break;
       case "onExitFullscreen":
-        if (webviewParams != null && webviewParams!.onExitFullscreen != null)
+        if (webviewParams != null && webviewParams!.onExitFullscreen != null) {
           webviewParams!.onExitFullscreen!(_controllerFromPlatform);
+        }
         break;
       case "onWindowFocus":
-        if (webviewParams != null && webviewParams!.onWindowFocus != null)
+        if (webviewParams != null && webviewParams!.onWindowFocus != null) {
           webviewParams!.onWindowFocus!(_controllerFromPlatform);
+        }
         break;
       case "onWindowBlur":
-        if (webviewParams != null && webviewParams!.onWindowBlur != null)
+        if (webviewParams != null && webviewParams!.onWindowBlur != null) {
           webviewParams!.onWindowBlur!(_controllerFromPlatform);
+        }
         break;
       case "onPrintRequest":
         if ((webviewParams != null &&
@@ -236,13 +241,13 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
           String? url = call.arguments["url"];
           WebUri? uri = url != null ? WebUri(url) : null;
 
-          if (webviewParams!.onPrintRequest != null)
+          if (webviewParams!.onPrintRequest != null) {
             return await webviewParams!.onPrintRequest!(
               _controllerFromPlatform,
               uri,
               null,
             );
-          else {
+          } else {
             // ignore: deprecated_member_use_from_same_package
             webviewParams!.onPrint!(_controllerFromPlatform, uri);
             return false;
@@ -278,7 +283,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
         if (_javaScriptHandlersMap.containsKey(handlerName)) {
           // convert result to json
           try {
-            var jsHandlerResult = null;
+            dynamic jsHandlerResult;
             if (_javaScriptHandlersMap[handlerName]
                 is JavaScriptHandlerCallback) {
               jsHandlerResult =
@@ -295,7 +300,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
             return jsonEncode(jsHandlerResult);
           } catch (error, stacktrace) {
             developer.log(
-              error.toString() + '\n' + stacktrace.toString(),
+              '$error\n$stacktrace',
               name: 'JavaScript Handler "$handlerName"',
             );
             throw Exception(error.toString().replaceFirst('Exception: ', ''));
@@ -344,7 +349,9 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       try {
         var bytes = await rootBundle.load(assetPath);
         html = utf8.decode(bytes.buffer.asUint8List());
-      } catch (e) {}
+      } catch (_) {
+        // Ignore errors (best effort).
+      }
     }
 
     return html;
@@ -366,11 +373,11 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
     if (html == null || html.isEmpty) {
       return favicons;
     }
-    var assetPathBase;
+    String? assetPathBase;
 
     if (webviewUrl.isScheme("file")) {
       var assetPathSplit = webviewUrl.toString().split("/flutter_assets/");
-      assetPathBase = assetPathSplit[0] + "/flutter_assets/";
+      assetPathBase = "${assetPathSplit[0]}/flutter_assets/";
     }
 
     InAppWebViewSettings? settings = await getSettings();
@@ -415,7 +422,7 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
             }
             manifestUrl =
                 ((assetPathBase == null)
-                    ? webviewUrl.scheme + "://" + webviewUrl.host + "/"
+                    ? "${webviewUrl.scheme}://${webviewUrl.host}/"
                     : assetPathBase) +
                 manifestUrl;
           }
@@ -458,14 +465,14 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       }
       urlIcon =
           ((assetPathBase == null)
-              ? url.scheme + "://" + url.host + "/"
+              ? "${url.scheme}://${url.host}/"
               : assetPathBase) +
           urlIcon;
     }
     if (isManifest) {
       rel = (sizes != null)
           ? urlSplit[urlSplit.length - 1]
-                .replaceFirst("-" + sizes, "")
+                .replaceFirst("-$sizes", "")
                 .split(" ")[0]
                 .split(".")[0]
           : null;
@@ -627,7 +634,9 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
         // try to json decode the data coming from JavaScript
         // otherwise return it as it is.
         data = json.decode(data);
-      } catch (e) {}
+      } catch (_) {
+        // Ignore errors (best effort).
+      }
     }
     return data;
   }
@@ -975,17 +984,17 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
       !kJavaScriptHandlerForbiddenNames.contains(handlerName),
       '"$handlerName" is a forbidden name!',
     );
-    this._javaScriptHandlersMap[handlerName] = (callback);
+    _javaScriptHandlersMap[handlerName] = (callback);
   }
 
   @override
   Function? removeJavaScriptHandler({required String handlerName}) {
-    return this._javaScriptHandlersMap.remove(handlerName);
+    return _javaScriptHandlersMap.remove(handlerName);
   }
 
   @override
   bool hasJavaScriptHandler({required String handlerName}) {
-    return this._javaScriptHandlersMap.containsKey(handlerName);
+    return _javaScriptHandlersMap.containsKey(handlerName);
   }
 
   @override
@@ -1133,5 +1142,5 @@ class WebPlatformInAppWebViewController extends PlatformInAppWebViewController
 }
 
 extension InternalInAppWebViewController on WebPlatformInAppWebViewController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

@@ -12,7 +12,7 @@ class AndroidWebMessageListenerCreationParams
     extends PlatformWebMessageListenerCreationParams {
   /// Creates a new [AndroidWebMessageListenerCreationParams] instance.
   const AndroidWebMessageListenerCreationParams({
-    required this.allowedOriginRules,
+    required Set<String> super.allowedOriginRules,
     required super.jsObjectName,
     super.onPostMessage,
   });
@@ -24,14 +24,14 @@ class AndroidWebMessageListenerCreationParams
     PlatformWebMessageListenerCreationParams params,
   ) {
     return AndroidWebMessageListenerCreationParams(
-      allowedOriginRules: params.allowedOriginRules ?? Set.from(["*"]),
+      allowedOriginRules: params.allowedOriginRules ?? {"*"},
       jsObjectName: params.jsObjectName,
       onPostMessage: params.onPostMessage,
     );
   }
 
   @override
-  final Set<String> allowedOriginRules;
+  Set<String> get allowedOriginRules => super.allowedOriginRules as Set<String>;
 
   @override
   String toString() {
@@ -52,7 +52,7 @@ class AndroidWebMessageListener extends PlatformWebMessageListener
               ),
       ) {
     assert(
-      !this._androidParams.allowedOriginRules.contains(""),
+      !_androidParams.allowedOriginRules.contains(""),
       "allowedOriginRules cannot contain empty strings",
     );
     channel = MethodChannel(
@@ -66,7 +66,7 @@ class AndroidWebMessageListener extends PlatformWebMessageListener
       AndroidWebMessageListener(
         AndroidWebMessageListenerCreationParams(
           jsObjectName: '',
-          allowedOriginRules: Set.from(["*"]),
+          allowedOriginRules: {"*"},
         ),
       );
 
@@ -86,13 +86,9 @@ class AndroidWebMessageListener extends PlatformWebMessageListener
   Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {
       case "onPostMessage":
-        if (_replyProxy == null) {
-          _replyProxy = AndroidJavaScriptReplyProxy(
-            PlatformJavaScriptReplyProxyCreationParams(
-              webMessageListener: this,
-            ),
-          );
-        }
+        _replyProxy ??= AndroidJavaScriptReplyProxy(
+          PlatformJavaScriptReplyProxyCreationParams(webMessageListener: this),
+        );
         if (onPostMessage != null) {
           WebMessage? message = call.arguments["message"] != null
               ? WebMessage.fromMap(
@@ -128,12 +124,12 @@ class AndroidWebMessageListener extends PlatformWebMessageListener
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
   String toString() {
-    return 'AndroidWebMessageListener{id: ${_id}, jsObjectName: ${params.jsObjectName}, allowedOriginRules: ${params.allowedOriginRules}, replyProxy: $_replyProxy}';
+    return 'AndroidWebMessageListener{id: $_id, jsObjectName: ${params.jsObjectName}, allowedOriginRules: ${params.allowedOriginRules}, replyProxy: $_replyProxy}';
   }
 }
 

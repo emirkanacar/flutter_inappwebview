@@ -51,6 +51,7 @@ class InAppBrowserClassSettings {
     return toMap();
   }
 
+  @override
   String toString() {
     return toMap().toString();
   }
@@ -60,9 +61,7 @@ class InAppBrowserClassSettings {
     InAppBrowserClassSettings? instance,
     EnumMethod? enumMethod,
   }) {
-    if (instance == null) {
-      instance = InAppBrowserClassSettings();
-    }
+    instance ??= InAppBrowserClassSettings();
     instance.browserSettings =
         InAppBrowserSettings.fromMap(options, enumMethod: enumMethod) ??
         InAppBrowserSettings();
@@ -87,11 +86,11 @@ class BrowserOptions {
   }
 
   BrowserOptions copy() {
-    return BrowserOptions.fromMap(this.toMap());
+    return BrowserOptions.fromMap(toMap());
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -385,21 +384,21 @@ class InAppBrowserClassOptions {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> options = {};
 
-    options.addAll(this.crossPlatform.toMap());
-    options.addAll(this.inAppWebViewGroupOptions.crossPlatform.toMap());
+    options.addAll(crossPlatform.toMap());
+    options.addAll(inAppWebViewGroupOptions.crossPlatform.toMap());
     if (Util.isAndroid) {
-      options.addAll(this.android.toMap());
-      options.addAll(this.inAppWebViewGroupOptions.android.toMap());
+      options.addAll(android.toMap());
+      options.addAll(inAppWebViewGroupOptions.android.toMap());
     } else if (Util.isIOS) {
-      options.addAll(this.ios.toMap());
-      options.addAll(this.inAppWebViewGroupOptions.ios.toMap());
+      options.addAll(ios.toMap());
+      options.addAll(inAppWebViewGroupOptions.ios.toMap());
     }
 
     return options;
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -437,7 +436,7 @@ class InAppBrowserClassOptions {
   }
 
   InAppBrowserClassOptions copy() {
-    return InAppBrowserClassOptions.fromMap(this.toMap());
+    return InAppBrowserClassOptions.fromMap(toMap());
   }
 }
 
@@ -495,7 +494,7 @@ class InAppBrowserOptions
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -505,6 +504,6 @@ class InAppBrowserOptions
 
   @override
   InAppBrowserOptions copy() {
-    return InAppBrowserOptions.fromMap(this.toMap());
+    return InAppBrowserOptions.fromMap(toMap());
   }
 }

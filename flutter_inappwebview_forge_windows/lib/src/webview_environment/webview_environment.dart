@@ -51,9 +51,9 @@ class WindowsWebViewEnvironment extends PlatformWebViewEnvironment
     return _staticValue;
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       id: id,
       debugLoggingSettings: PlatformWebViewEnvironment.debugLoggingSettings,
       method: method,
@@ -178,5 +178,5 @@ class WindowsWebViewEnvironment extends PlatformWebViewEnvironment
 }
 
 extension InternalWindowsWebViewEnvironment on WindowsWebViewEnvironment {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

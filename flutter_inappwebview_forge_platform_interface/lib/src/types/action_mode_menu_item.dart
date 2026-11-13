@@ -35,16 +35,14 @@ class AndroidActionModeMenuItem_ {
   const AndroidActionModeMenuItem_._internal(this._value);
 
   ///No menu items should be disabled.
-  static const MENU_ITEM_NONE = const AndroidActionModeMenuItem_._internal(0);
+  static const MENU_ITEM_NONE = AndroidActionModeMenuItem_._internal(0);
 
   ///Disable menu item "Share".
-  static const MENU_ITEM_SHARE = const AndroidActionModeMenuItem_._internal(1);
+  static const MENU_ITEM_SHARE = AndroidActionModeMenuItem_._internal(1);
 
   ///Disable menu item "Web Search".
-  static const MENU_ITEM_WEB_SEARCH =
-      const AndroidActionModeMenuItem_._internal(2);
+  static const MENU_ITEM_WEB_SEARCH = AndroidActionModeMenuItem_._internal(2);
 
   ///Disable all the action mode menu items for text processing.
-  static const MENU_ITEM_PROCESS_TEXT =
-      const AndroidActionModeMenuItem_._internal(4);
+  static const MENU_ITEM_PROCESS_TEXT = AndroidActionModeMenuItem_._internal(4);
 }

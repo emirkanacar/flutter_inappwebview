@@ -22,12 +22,12 @@ class ContentWorld {
   ContentWorld.world({required this.name}) {
     // WINDOW-ID- is used internally by the plugin!
     assert(
-      !this.name.startsWith("WINDOW-ID-") &&
-          !this.name.contains(_contentWorldNameRegExp),
+      !name.startsWith("WINDOW-ID-") && !name.contains(_contentWorldNameRegExp),
     );
   }
 
   ///The default world for clients.
+  // ignore: non_constant_identifier_names
   static final ContentWorld DEFAULT_CLIENT = ContentWorld.world(
     name: "defaultClient",
   );
@@ -36,6 +36,7 @@ class ContentWorld {
   ///This property contains the content world for scripts that the current webpage executes.
   ///Be careful when manipulating variables in this content world.
   ///If you modify a variable with the same name as one the webpage uses, you may unintentionally disrupt the normal operation of that page.
+  // ignore: non_constant_identifier_names
   static final ContentWorld PAGE = ContentWorld.world(name: "page");
 
   ///Gets a possible [ContentWorld] instance from a [Map] value.
@@ -56,7 +57,7 @@ class ContentWorld {
 
   ///Converts instance to a map.
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override

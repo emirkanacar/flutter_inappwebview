@@ -12,8 +12,8 @@ class JsBeforeUnloadResponseAction_ {
   const JsBeforeUnloadResponseAction_._internal(this._value);
 
   ///Confirm that the user hit confirm button.
-  static const CONFIRM = const JsBeforeUnloadResponseAction_._internal(0);
+  static const CONFIRM = JsBeforeUnloadResponseAction_._internal(0);
 
   ///Confirm that the user hit cancel button.
-  static const CANCEL = const JsBeforeUnloadResponseAction_._internal(1);
+  static const CANCEL = JsBeforeUnloadResponseAction_._internal(1);
 }

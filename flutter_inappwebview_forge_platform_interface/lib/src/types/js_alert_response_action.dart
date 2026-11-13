@@ -12,5 +12,5 @@ class JsAlertResponseAction_ {
   const JsAlertResponseAction_._internal(this._value);
 
   ///Confirm that the user hit confirm button.
-  static const CONFIRM = const JsAlertResponseAction_._internal(0);
+  static const CONFIRM = JsAlertResponseAction_._internal(0);
 }

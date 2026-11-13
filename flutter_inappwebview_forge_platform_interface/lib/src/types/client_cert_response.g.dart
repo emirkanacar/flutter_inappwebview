@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'client_cert_response.dart';
 
 // **************************************************************************
@@ -50,10 +52,11 @@ class ClientCertResponse {
     this.selectedCertificate = -1,
     this.action = ClientCertResponseAction.CANCEL,
   }) {
-    if (this.action == ClientCertResponseAction.PROCEED && !Util.isWindows)
+    if (action == ClientCertResponseAction.PROCEED && !Util.isWindows) {
       assert(certificatePath.isNotEmpty);
-    this.keyStoreType = this.keyStoreType ?? this.androidKeyStoreType;
-    if (Util.isAndroid) assert(this.keyStoreType != null);
+    }
+    keyStoreType = keyStoreType ?? androidKeyStoreType;
+    if (Util.isAndroid) assert(keyStoreType != null);
   }
 
   ///Gets a possible [ClientCertResponse] instance from a [Map] value.

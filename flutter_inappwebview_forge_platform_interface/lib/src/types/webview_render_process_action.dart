@@ -13,5 +13,5 @@ class WebViewRenderProcessAction_ {
 
   ///Cause this renderer to terminate.
   @EnumSupportedPlatforms(platforms: [EnumAndroidPlatform()])
-  static const TERMINATE = const WebViewRenderProcessAction_._internal(0);
+  static const TERMINATE = WebViewRenderProcessAction_._internal(0);
 }

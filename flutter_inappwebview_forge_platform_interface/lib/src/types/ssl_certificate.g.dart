@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'ssl_certificate.dart';
 
 // **************************************************************************
@@ -42,8 +44,8 @@ class SslCertificate {
     try {
       x509Certificate = X509Certificate.fromData(data: map["x509Certificate"]);
     } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
+      debugPrint('$e');
+      debugPrint('$stacktrace');
     }
     SslCertificateDName? issuedBy = SslCertificateDName.fromMap(
       map["issuedBy"]?.cast<String, dynamic>(),

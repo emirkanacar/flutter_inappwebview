@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'web_message.dart';
 
 // **************************************************************************
@@ -140,11 +142,10 @@ class WebMessage {
   WebMessageType type;
   WebMessage({this.data, this.type = WebMessageType.STRING, this.ports}) {
     assert(
-      ((this.data == null || this.data is String) &&
-              this.type == WebMessageType.STRING) ||
-          (this.data != null &&
-              this.data is Uint8List &&
-              this.type == WebMessageType.ARRAY_BUFFER),
+      ((data == null || data is String) && type == WebMessageType.STRING) ||
+          (data != null &&
+              data is Uint8List &&
+              type == WebMessageType.ARRAY_BUFFER),
     );
   }
 

@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'ui_image.dart';
 
 // **************************************************************************
@@ -28,7 +30,7 @@ class UIImage {
   ///- macOS WKWebView 11.0+
   String? systemName;
   UIImage({this.name, this.systemName, this.data}) {
-    assert(this.name != null || this.systemName != null || this.data != null);
+    assert(name != null || systemName != null || data != null);
   }
 
   ///Gets a possible [UIImage] instance from a [Map] value.

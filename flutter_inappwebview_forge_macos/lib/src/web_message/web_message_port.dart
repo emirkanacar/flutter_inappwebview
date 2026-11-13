@@ -52,7 +52,7 @@ class MacOSWebMessagePort extends PlatformWebMessagePort {
       'setWebMessageCallback',
       args,
     );
-    this._onMessage = onMessage;
+    _onMessage = onMessage;
   }
 
   @override
@@ -74,7 +74,7 @@ class MacOSWebMessagePort extends PlatformWebMessagePort {
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) {
     return {
       "index": params.index,
-      "webMessageChannelId": this._webMessageChannel.params.id,
+      "webMessageChannelId": _webMessageChannel.params.id,
     };
   }
 
@@ -91,9 +91,9 @@ class MacOSWebMessagePort extends PlatformWebMessagePort {
 
 extension InternalWebMessagePort on MacOSWebMessagePort {
   WebMessageCallback? get onMessage => _onMessage;
-  void set onMessage(WebMessageCallback? value) => _onMessage = value;
+  set onMessage(WebMessageCallback? value) => _onMessage = value;
 
   MacOSWebMessageChannel get webMessageChannel => _webMessageChannel;
-  void set webMessageChannel(MacOSWebMessageChannel value) =>
+  set webMessageChannel(MacOSWebMessageChannel value) =>
       _webMessageChannel = value;
 }

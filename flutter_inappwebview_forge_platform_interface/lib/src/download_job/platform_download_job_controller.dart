@@ -12,7 +12,12 @@ part 'platform_download_job_controller.g.dart';
 
 /// Object specifying creation parameters for creating a [PlatformDownloadJobController].
 @SupportedPlatforms(
-  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
+  platforms: [
+    AndroidPlatform(),
+    IOSPlatform(),
+    MacOSPlatform(),
+    WindowsPlatform(),
+  ],
 )
 @immutable
 class PlatformDownloadJobControllerCreationParams {
@@ -21,21 +26,30 @@ class PlatformDownloadJobControllerCreationParams {
 
   ///Download job ID.
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   final String id;
 
   ///Check if the current class is supported by the [defaultTargetPlatform] or a specific [platform].
   bool isClassSupported({TargetPlatform? platform}) =>
-      _PlatformDownloadJobControllerCreationParamsClassSupported
-          .isClassSupported(platform: platform);
+      _PlatformDownloadJobControllerCreationParamsClassSupported.isClassSupported(
+        platform: platform,
+      );
 
   ///Check if the given [property] is supported by the [defaultTargetPlatform] or a specific [platform].
   bool isPropertySupported(
     PlatformDownloadJobControllerCreationParamsProperty property, {
     TargetPlatform? platform,
-  }) => _PlatformDownloadJobControllerCreationParamsPropertySupported
-      .isPropertySupported(property, platform: platform);
+  }) =>
+      _PlatformDownloadJobControllerCreationParamsPropertySupported.isPropertySupported(
+        property,
+        platform: platform,
+      );
 }
 
 ///Completion handler for a [PlatformDownloadJobController].
@@ -51,7 +65,12 @@ typedef DownloadJobProgressHandler = Future<void> Function(double progress)?;
 ///from `onDownloadStarting` starts a native job. The previous notify-only
 ///default (a `null` response) is unchanged.
 @SupportedPlatforms(
-  platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform(), WindowsPlatform()],
+  platforms: [
+    AndroidPlatform(),
+    IOSPlatform(),
+    MacOSPlatform(),
+    WindowsPlatform(),
+  ],
 )
 abstract class PlatformDownloadJobController extends PlatformInterface
     implements Disposable {

@@ -18,7 +18,7 @@ class DownloadJobState_ {
       EnumMacOSPlatform(value: 0),
     ],
   )
-  static const QUEUED = const DownloadJobState_._internal(0);
+  static const QUEUED = DownloadJobState_._internal(0);
 
   ///The download is transferring bytes.
   @EnumSupportedPlatforms(
@@ -28,7 +28,7 @@ class DownloadJobState_ {
       EnumMacOSPlatform(value: 1),
     ],
   )
-  static const RUNNING = const DownloadJobState_._internal(1);
+  static const RUNNING = DownloadJobState_._internal(1);
 
   ///The download finished and the file is on disk.
   @EnumSupportedPlatforms(
@@ -38,7 +38,7 @@ class DownloadJobState_ {
       EnumMacOSPlatform(value: 2),
     ],
   )
-  static const COMPLETED = const DownloadJobState_._internal(2);
+  static const COMPLETED = DownloadJobState_._internal(2);
 
   ///The download failed.
   @EnumSupportedPlatforms(
@@ -48,7 +48,7 @@ class DownloadJobState_ {
       EnumMacOSPlatform(value: 3),
     ],
   )
-  static const FAILED = const DownloadJobState_._internal(3);
+  static const FAILED = DownloadJobState_._internal(3);
 
   ///The download was canceled.
   @EnumSupportedPlatforms(
@@ -58,5 +58,5 @@ class DownloadJobState_ {
       EnumMacOSPlatform(value: 4),
     ],
   )
-  static const CANCELED = const DownloadJobState_._internal(4);
+  static const CANCELED = DownloadJobState_._internal(4);
 }

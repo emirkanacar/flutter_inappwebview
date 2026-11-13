@@ -27,7 +27,7 @@ class X509PublicKey {
 
   Uint8List? get encoded {
     var oid = OID.fromValue(algOid);
-    var keyData = pkBlock?.subAtIndex(1)?.value ?? null;
+    var keyData = pkBlock?.subAtIndex(1)?.value;
 
     if (oid != null && algOid != null && keyData != null) {
       if (oid == OID.ecPublicKey) {
@@ -38,9 +38,11 @@ class X509PublicKey {
           publicKeyAsn1Objects = ASN1DERDecoder.decode(
             data: keyData.toList(growable: true),
           );
-        } catch (e) {}
+        } catch (_) {
+          // Ignore errors (best effort).
+        }
 
-        if (publicKeyAsn1Objects != null && publicKeyAsn1Objects.length > 0) {
+        if (publicKeyAsn1Objects != null && publicKeyAsn1Objects.isNotEmpty) {
           var publicKeyModulus = publicKeyAsn1Objects.first
               .subAtIndex(0)
               ?.value;

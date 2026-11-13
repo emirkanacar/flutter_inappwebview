@@ -1,3 +1,14 @@
+## Unreleased
+
+- Resolve the `flutter analyze` infos reported by the pub.dev static
+  analysis check (`this.` qualifiers, empty catches, `print` replaced by
+  `debugPrint`, overridden fields replaced by typed getters, super
+  parameters, collection literals). No public API or behavior change.
+- Fix `iframeSandbox: Sandbox.ALLOW_ALL`: the iframe received
+  `sandbox="null"` (the most restrictive sandbox) because the generated
+  `Sandbox` equality never matched `ALLOW_ALL`. The value is now
+  detected by its native value and the `sandbox` attribute is omitted.
+
 ## 1.0.4 - 2026-08-21
 
 - Convert JavaScript `nativeCommunication` view IDs and argument lists to

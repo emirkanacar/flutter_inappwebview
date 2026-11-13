@@ -101,5 +101,5 @@ class AndroidTracingController extends PlatformTracingController
 }
 
 extension InternalTracingController on AndroidTracingController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

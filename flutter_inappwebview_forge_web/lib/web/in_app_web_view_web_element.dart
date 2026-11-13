@@ -11,6 +11,7 @@ import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebvi
 import 'package:web/web.dart';
 
 import 'headless_inappwebview_manager.dart';
+import 'iframe_sandbox.dart';
 import 'in_app_webview_manager.dart';
 import 'js_bridge.dart';
 import 'web_view_lifecycle_coordinator.dart';
@@ -79,8 +80,8 @@ class InAppWebViewWebElement implements Disposable {
     required dynamic viewId,
     required BinaryMessenger messenger,
   }) {
-    this._viewId = viewId;
-    this._messenger = messenger;
+    _viewId = viewId;
+    _messenger = messenger;
     iframeContainer = HTMLDivElement()
       ..id = 'flutter_inappwebview-$_viewId-container'
       ..style.height = '100%'
@@ -353,12 +354,12 @@ class InAppWebViewWebElement implements Disposable {
       iframe.ariaHidden = settings!.iframeAriaHidden ?? iframe.ariaHidden;
 
       if (settings!.iframeSandbox != null &&
-          settings!.iframeSandbox != Sandbox.ALLOW_ALL) {
+          !isIframeSandboxAllowAll(settings!.iframeSandbox)) {
         iframe.setAttribute(
           "sandbox",
           settings!.iframeSandbox!.map((e) => e.toNativeValue()).join(" "),
         );
-      } else if (settings!.iframeSandbox == Sandbox.ALLOW_ALL) {
+      } else if (isIframeSandboxAllowAll(settings!.iframeSandbox)) {
         iframe.removeAttribute("sandbox");
       } else if (sandbox != Sandbox.values) {
         iframe.setAttribute(
@@ -414,7 +415,7 @@ class InAppWebViewWebElement implements Disposable {
     bool? withCredentials,
     String? responseType,
     String? mimeType,
-    void onProgress(ProgressEvent e)?,
+    void Function(ProgressEvent e)? onProgress,
   }) {
     return HttpRequest.request(
       urlRequest.url?.toString() ?? 'about:blank',
@@ -431,7 +432,7 @@ class InAppWebViewWebElement implements Disposable {
   String _convertHttpResponseToData(XMLHttpRequest httpRequest) {
     final String contentType =
         httpRequest.getResponseHeader('content-type') ?? 'text/html';
-    return 'data:$contentType,' + Uri.encodeComponent(httpRequest.responseText);
+    return 'data:$contentType,${Uri.encodeComponent(httpRequest.responseText)}';
   }
 
   String getIFrameId() {
@@ -467,7 +468,7 @@ class InAppWebViewWebElement implements Disposable {
     required String data,
     String mimeType = "text/html",
   }) async {
-    iframe.src = 'data:$mimeType,' + Uri.encodeComponent(data);
+    iframe.src = 'data:$mimeType,${Uri.encodeComponent(data)}';
   }
 
   Future<void> loadFile({required String assetFilePath}) async {
@@ -606,7 +607,7 @@ class InAppWebViewWebElement implements Disposable {
 
   Set<Sandbox> getSandbox() {
     var sandbox = iframe.sandbox;
-    Set<Sandbox> values = Set();
+    Set<Sandbox> values = {};
     for (int i = 0; i < sandbox.length; i++) {
       var token = Sandbox.fromNativeValue(sandbox.item(i));
       if (token != null) {
@@ -658,12 +659,12 @@ class InAppWebViewWebElement implements Disposable {
 
     if (settings!.iframeSandbox != newSettings.iframeSandbox) {
       var sandbox = newSettings.iframeSandbox;
-      if (sandbox != null && sandbox != Sandbox.ALLOW_ALL) {
+      if (sandbox != null && !isIframeSandboxAllowAll(sandbox)) {
         iframe.setAttribute(
           "sandbox",
           sandbox.map((e) => e.toNativeValue()).join(" "),
         );
-      } else if (sandbox == Sandbox.ALLOW_ALL) {
+      } else if (isIframeSandboxAllowAll(sandbox)) {
         iframe.removeAttribute("sandbox");
       }
     } else if (sandbox != Sandbox.values) {
@@ -932,8 +933,7 @@ class InAppWebViewWebElement implements Disposable {
     if (_expectedBridgeSecret != bridgeSecret) {
       if (kDebugMode) {
         print(
-          "Bridge access attempt with wrong secret token, possibly from malicious code from origin: " +
-              origin,
+          "Bridge access attempt with wrong secret token, possibly from malicious code from origin: $origin",
         );
       }
       return null;
@@ -955,7 +955,7 @@ class InAppWebViewWebElement implements Disposable {
     }
     if (!isOriginAllowed) {
       if (kDebugMode) {
-        print("Bridge access attempt from an origin not allowed: " + origin);
+        print("Bridge access attempt from an origin not allowed: $origin");
       }
       return null;
     }
@@ -1047,7 +1047,7 @@ class UserContentController implements Disposable {
     }
   }
 
-  removeAllUserOnlyScripts() {
+  void removeAllUserOnlyScripts() {
     _userOnlyScripts[UserScriptInjectionTime.AT_DOCUMENT_START]!.clear();
     _userOnlyScripts[UserScriptInjectionTime.AT_DOCUMENT_END]!.clear();
   }

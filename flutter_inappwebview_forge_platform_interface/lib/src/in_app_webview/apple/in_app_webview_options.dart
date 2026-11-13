@@ -270,11 +270,11 @@ class IOSInAppWebViewOptions
   @override
   Map<String, dynamic> toMap() {
     List<String> dataDetectorTypesList = [];
-    dataDetectorTypes.forEach((dataDetectorType) {
+    for (var dataDetectorType in dataDetectorTypes) {
       if (dataDetectorType.isSupported()) {
         dataDetectorTypesList.add(dataDetectorType.toNativeValue()!);
       }
-    });
+    }
 
     return {
       "disallowOverScroll": disallowOverScroll,
@@ -321,14 +321,14 @@ class IOSInAppWebViewOptions
     List<String> dataDetectorTypesList = List<String>.from(
       map["dataDetectorTypes"] ?? [],
     );
-    dataDetectorTypesList.forEach((dataDetectorTypeValue) {
+    for (var dataDetectorTypeValue in dataDetectorTypesList) {
       var dataDetectorType = IOSWKDataDetectorTypes.fromNativeValue(
         dataDetectorTypeValue,
       );
       if (dataDetectorType != null) {
         dataDetectorTypes.add(dataDetectorType);
       }
-    });
+    }
 
     var instance = IOSInAppWebViewOptions();
     instance.disallowOverScroll = map["disallowOverScroll"];
@@ -386,7 +386,7 @@ class IOSInAppWebViewOptions
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -396,6 +396,6 @@ class IOSInAppWebViewOptions
 
   @override
   IOSInAppWebViewOptions copy() {
-    return IOSInAppWebViewOptions.fromMap(this.toMap());
+    return IOSInAppWebViewOptions.fromMap(toMap());
   }
 }

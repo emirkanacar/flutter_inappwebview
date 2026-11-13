@@ -66,7 +66,9 @@ extension type FlutterInAppWebViewBridge._(JSObject _) implements JSObject {
 }
 
 @JS('Object.freeze')
+// ignore: non_constant_identifier_names
 external JSObject Object_freeze(JSObject obj);
 
 @JS('Object.isFrozen')
+// ignore: non_constant_identifier_names
 external JSBoolean Object_isFrozen(JSObject obj);

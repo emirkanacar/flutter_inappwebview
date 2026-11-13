@@ -10,17 +10,17 @@ class ConsoleMessageLevel_ {
   const ConsoleMessageLevel_._internal(this._value);
 
   ///Console TIP level
-  static const TIP = const ConsoleMessageLevel_._internal(0);
+  static const TIP = ConsoleMessageLevel_._internal(0);
 
   ///Console LOG level
-  static const LOG = const ConsoleMessageLevel_._internal(1);
+  static const LOG = ConsoleMessageLevel_._internal(1);
 
   ///Console WARNING level
-  static const WARNING = const ConsoleMessageLevel_._internal(2);
+  static const WARNING = ConsoleMessageLevel_._internal(2);
 
   ///Console ERROR level
-  static const ERROR = const ConsoleMessageLevel_._internal(3);
+  static const ERROR = ConsoleMessageLevel_._internal(3);
 
   ///Console DEBUG level
-  static const DEBUG = const ConsoleMessageLevel_._internal(4);
+  static const DEBUG = ConsoleMessageLevel_._internal(4);
 }

@@ -11,7 +11,7 @@ import '../in_app_webview/in_app_webview_controller.dart';
 /// more information.
 class IOSWebStorageCreationParams extends PlatformWebStorageCreationParams {
   /// Creates a new [IOSWebStorageCreationParams] instance.
-  IOSWebStorageCreationParams({
+  const IOSWebStorageCreationParams({
     required super.localStorage,
     required super.sessionStorage,
   });
@@ -61,7 +61,7 @@ class IOSWebStorage extends PlatformWebStorage {
 /// more information.
 class IOSStorageCreationParams extends PlatformStorageCreationParams {
   /// Creates a new [IOSStorageCreationParams] instance.
-  IOSStorageCreationParams({
+  const IOSStorageCreationParams({
     required super.controller,
     required super.webStorageType,
   });
@@ -121,7 +121,9 @@ abstract mixin class IOSStorage implements PlatformStorage {
 
     try {
       return json.decode(itemValue);
-    } catch (e) {}
+    } catch (_) {
+      // Ignore errors (best effort).
+    }
 
     return itemValue;
   }

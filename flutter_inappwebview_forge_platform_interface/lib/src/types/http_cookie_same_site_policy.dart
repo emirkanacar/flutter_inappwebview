@@ -15,16 +15,16 @@ class HTTPCookieSameSitePolicy_ {
   ///
   ///Cookies are allowed to be sent with top-level navigations and will be sent along with GET
   ///request initiated by third party website. This is the default value in modern browsers.
-  static const LAX = const HTTPCookieSameSitePolicy_._internal("Lax");
+  static const LAX = HTTPCookieSameSitePolicy_._internal("Lax");
 
   ///SameSite=Strict;
   ///
   ///Cookies will only be sent in a first-party context and not be sent along with requests initiated by third party websites.
-  static const STRICT = const HTTPCookieSameSitePolicy_._internal("Strict");
+  static const STRICT = HTTPCookieSameSitePolicy_._internal("Strict");
 
   ///SameSite=None;
   ///
   ///Cookies will be sent in all contexts, i.e sending cross-origin is allowed.
   ///`None` requires the `Secure` attribute in latest browser versions.
-  static const NONE = const HTTPCookieSameSitePolicy_._internal("None");
+  static const NONE = HTTPCookieSameSitePolicy_._internal("None");
 }

@@ -3455,8 +3455,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiName: 'WebViewCompat.setAudioMuted',
         apiUrl:
             'https://developer.android.com/reference/androidx/webkit/WebViewCompat#setAudioMuted(android.webkit.WebView,boolean)',
-        note:
-            'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
+        note: 'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
       ),
       IOSPlatform(
         apiName: 'WKWebView.setAllMediaPlaybackSuspended',
@@ -3489,8 +3488,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
         apiName: 'WebViewCompat.isAudioMuted',
         apiUrl:
             'https://developer.android.com/reference/androidx/webkit/WebViewCompat#isAudioMuted(android.webkit.WebView)',
-        note:
-            'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
+        note: 'Available only if [WebViewFeature.MUTE_AUDIO] is supported.',
       ),
       IOSPlatform(available: '15.0'),
       MacOSPlatform(available: '12.0'),
@@ -3597,7 +3595,9 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
       ),
     ],
   )
-  Future<Uint8List?> fetchWebViewData({required Set<WebViewDataType> dataTypes}) {
+  Future<Uint8List?> fetchWebViewData({
+    required Set<WebViewDataType> dataTypes,
+  }) {
     throw UnimplementedError(
       '${PlatformInAppWebViewControllerMethod.fetchWebViewData.name} is not implemented on the current platform',
     );
@@ -5014,6 +5014,7 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewController.dispose.supported_platforms}
+  @override
   @SupportedPlatforms(
     platforms: [
       AndroidPlatform(),

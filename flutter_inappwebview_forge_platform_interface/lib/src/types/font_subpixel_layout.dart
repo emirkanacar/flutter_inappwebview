@@ -13,17 +13,17 @@ class FontSubpixelLayout_ {
 
   ///RGB subpixel layout (horizontal RGB order).
   ///Used for most LCD displays with horizontal RGB subpixel arrangement.
-  static const RGB = const FontSubpixelLayout_._internal(0);
+  static const RGB = FontSubpixelLayout_._internal(0);
 
   ///BGR subpixel layout (horizontal BGR order).
   ///Used for LCD displays with horizontal BGR subpixel arrangement.
-  static const BGR = const FontSubpixelLayout_._internal(1);
+  static const BGR = FontSubpixelLayout_._internal(1);
 
   ///Vertical RGB subpixel layout.
   ///Used for displays with vertical RGB subpixel arrangement.
-  static const VRGB = const FontSubpixelLayout_._internal(2);
+  static const VRGB = FontSubpixelLayout_._internal(2);
 
   ///Vertical BGR subpixel layout.
   ///Used for displays with vertical BGR subpixel arrangement.
-  static const VBGR = const FontSubpixelLayout_._internal(3);
+  static const VBGR = FontSubpixelLayout_._internal(3);
 }

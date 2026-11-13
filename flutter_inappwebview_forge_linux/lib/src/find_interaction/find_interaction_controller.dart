@@ -49,9 +49,9 @@ class LinuxFindInteractionController extends PlatformFindInteractionController
     return _staticValue;
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       debugLoggingSettings:
           PlatformFindInteractionController.debugLoggingSettings,
       method: method,

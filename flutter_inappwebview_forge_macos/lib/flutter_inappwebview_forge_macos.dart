@@ -1,3 +1,3 @@
-library flutter_inappwebview_forge_macos;
+library;
 
 export 'src/main.dart';

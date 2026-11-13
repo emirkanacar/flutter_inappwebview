@@ -23,11 +23,10 @@ class WebMessage_ {
   @ExchangeableObjectConstructor()
   WebMessage_({this.data, this.type = WebMessageType_.STRING, this.ports}) {
     assert(
-      ((this.data == null || this.data is String) &&
-              this.type == WebMessageType_.STRING) ||
-          (this.data != null &&
-              this.data is Uint8List &&
-              this.type == WebMessageType_.ARRAY_BUFFER),
+      ((data == null || data is String) && type == WebMessageType_.STRING) ||
+          (data != null &&
+              data is Uint8List &&
+              type == WebMessageType_.ARRAY_BUFFER),
     );
   }
 }
@@ -41,10 +40,10 @@ class WebMessageType_ {
   const WebMessageType_._internal(this._value);
 
   ///Indicates the payload of WebMessageCompat is String.
-  static const STRING = const WebMessageType_._internal(0);
+  static const STRING = WebMessageType_._internal(0);
 
   ///Indicates the payload of WebMessageCompat is JavaScript ArrayBuffer.
   ///
   ///**NOTE**: available only if [WebViewFeature.WEB_MESSAGE_ARRAY_BUFFER] feature is supported.
-  static const ARRAY_BUFFER = const WebMessageType_._internal(1);
+  static const ARRAY_BUFFER = WebMessageType_._internal(1);
 }

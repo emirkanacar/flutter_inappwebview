@@ -171,5 +171,5 @@ class IOSHttpAuthCredentialDatabase extends PlatformHttpAuthCredentialDatabase
 }
 
 extension InternalHttpAuthCredentialDatabase on IOSHttpAuthCredentialDatabase {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

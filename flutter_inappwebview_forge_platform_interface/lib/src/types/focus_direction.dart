@@ -23,7 +23,7 @@ class FocusDirection_ {
       ),
     ],
   )
-  static const UP = const FocusDirection_._internal('UP');
+  static const UP = FocusDirection_._internal('UP');
 
   ///Move focus down.
   @EnumSupportedPlatforms(
@@ -36,7 +36,7 @@ class FocusDirection_ {
       ),
     ],
   )
-  static const DOWN = const FocusDirection_._internal('DOWN');
+  static const DOWN = FocusDirection_._internal('DOWN');
 
   ///Move focus to the left.
   @EnumSupportedPlatforms(
@@ -49,7 +49,7 @@ class FocusDirection_ {
       ),
     ],
   )
-  static const LEFT = const FocusDirection_._internal('LEFT');
+  static const LEFT = FocusDirection_._internal('LEFT');
 
   ///Move focus to the right.
   @EnumSupportedPlatforms(
@@ -62,5 +62,5 @@ class FocusDirection_ {
       ),
     ],
   )
-  static const RIGHT = const FocusDirection_._internal('RIGHT');
+  static const RIGHT = FocusDirection_._internal('RIGHT');
 }

@@ -95,5 +95,5 @@ class IOSProxyController extends PlatformProxyController
 }
 
 extension InternalProxyController on IOSProxyController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

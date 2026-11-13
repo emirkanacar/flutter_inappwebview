@@ -31,8 +31,8 @@ class PlatformUtil {
       try {
         return await _handleMethod(call);
       } on Error catch (e) {
-        print(e);
-        print(e.stackTrace);
+        debugPrint('$e');
+        debugPrint('${e.stackTrace}');
       }
     });
     _instance = PlatformUtil._();

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview_forge_internal_annotations/flutter_inappwebview_forge_internal_annotations.dart';
 
 import '../x509_certificate/x509_certificate.dart';
@@ -47,8 +48,8 @@ class SslCertificate_ {
     try {
       x509Certificate = X509Certificate.fromData(data: map["x509Certificate"]);
     } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
+      debugPrint('$e');
+      debugPrint('$stacktrace');
     }
 
     // Try to get issuedBy from map, otherwise fall back to x509Certificate

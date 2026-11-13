@@ -29,7 +29,7 @@ class PrintJobState_ {
       EnumMacOSPlatform(value: 1),
     ],
   )
-  static const CREATED = const PrintJobState_._internal(1);
+  static const CREATED = PrintJobState_._internal(1);
 
   ///Print job state: The print jobs is created, it is ready to be printed and should be processed.
   ///
@@ -44,7 +44,7 @@ class PrintJobState_ {
       ),
     ],
   )
-  static const QUEUED = const PrintJobState_._internal(2);
+  static const QUEUED = PrintJobState_._internal(2);
 
   ///Print job state: The print job is being printed.
   ///
@@ -61,7 +61,7 @@ class PrintJobState_ {
       EnumMacOSPlatform(value: 3),
     ],
   )
-  static const STARTED = const PrintJobState_._internal(3);
+  static const STARTED = PrintJobState_._internal(3);
 
   ///Print job state: The print job is blocked.
   ///
@@ -76,7 +76,7 @@ class PrintJobState_ {
       ),
     ],
   )
-  static const BLOCKED = const PrintJobState_._internal(4);
+  static const BLOCKED = PrintJobState_._internal(4);
 
   ///Print job state: The print job is successfully printed. This is a terminal state.
   ///
@@ -93,7 +93,7 @@ class PrintJobState_ {
       EnumMacOSPlatform(value: 5),
     ],
   )
-  static const COMPLETED = const PrintJobState_._internal(5);
+  static const COMPLETED = PrintJobState_._internal(5);
 
   ///Print job state: The print job was printing but printing failed.
   ///
@@ -109,7 +109,7 @@ class PrintJobState_ {
       EnumIOSPlatform(value: 6),
     ],
   )
-  static const FAILED = const PrintJobState_._internal(6);
+  static const FAILED = PrintJobState_._internal(6);
 
   ///Print job state: The print job is canceled. This is a terminal state.
   ///
@@ -126,5 +126,5 @@ class PrintJobState_ {
       EnumMacOSPlatform(value: 7),
     ],
   )
-  static const CANCELED = const PrintJobState_._internal(7);
+  static const CANCELED = PrintJobState_._internal(7);
 }

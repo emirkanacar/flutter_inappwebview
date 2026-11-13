@@ -72,14 +72,12 @@ class UserScript_ {
     Set<String>? allowedOriginRules,
     ContentWorld? contentWorld,
   }) {
-    this.allowedOriginRules = allowedOriginRules != null
-        ? allowedOriginRules
-        : Set.from(["*"]);
+    this.allowedOriginRules = allowedOriginRules ?? {"*"};
     this.contentWorld = contentWorld ?? ContentWorld.PAGE;
     // ignore: deprecated_member_use_from_same_package
-    this.forMainFrameOnly = this.iosForMainFrameOnly != null
+    forMainFrameOnly = iosForMainFrameOnly != null
         // ignore: deprecated_member_use_from_same_package
-        ? this.iosForMainFrameOnly!
-        : this.forMainFrameOnly;
+        ? iosForMainFrameOnly!
+        : forMainFrameOnly;
   }
 }

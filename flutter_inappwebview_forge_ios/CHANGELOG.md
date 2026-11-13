@@ -1,3 +1,10 @@
+## Unreleased
+
+- Resolve the `flutter analyze` infos reported by the pub.dev static
+  analysis check (`this.` qualifiers, empty catches, `print` replaced by
+  `debugPrint`, overridden fields replaced by typed getters, super
+  parameters, collection literals). No public API or behavior change.
+
 ## 2.1.36 - 2026-11-13
 
 - Fix the Xcode 27 / iOS 27 SDK build ([Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2)): assign

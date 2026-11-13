@@ -37,9 +37,9 @@ abstract mixin class AndroidPathHandler
   late final String path;
 
   void _init(PlatformPathHandlerCreationParams params) {
-    this.path = params.path;
+    path = params.path;
     channel = MethodChannel(
-      'com.emirkanacar/flutter_inappwebview_custompathhandler_${_id}',
+      'com.emirkanacar/flutter_inappwebview_custompathhandler_$_id',
     );
     handler = _handleMethod;
     initMethodCallHandler();
@@ -89,8 +89,8 @@ class AndroidAssetsPathHandlerCreationParams
   AndroidAssetsPathHandlerCreationParams(
     // This parameter prevents breaking changes later.
     // ignore: avoid_unused_constructor_parameters
-    PlatformAssetsPathHandlerCreationParams params,
-  ) : super(params);
+    PlatformAssetsPathHandlerCreationParams super.params,
+  );
 
   /// Creates a [AndroidAssetsPathHandlerCreationParams] instance based on [PlatformAssetsPathHandlerCreationParams].
   factory AndroidAssetsPathHandlerCreationParams.fromPlatformAssetsPathHandlerCreationParams(
@@ -139,8 +139,8 @@ class AndroidResourcesPathHandlerCreationParams
   AndroidResourcesPathHandlerCreationParams(
     // This parameter prevents breaking changes later.
     // ignore: avoid_unused_constructor_parameters
-    PlatformResourcesPathHandlerCreationParams params,
-  ) : super(params);
+    PlatformResourcesPathHandlerCreationParams super.params,
+  );
 
   /// Creates a [AndroidResourcesPathHandlerCreationParams] instance based on [PlatformResourcesPathHandlerCreationParams].
   factory AndroidResourcesPathHandlerCreationParams.fromPlatformResourcesPathHandlerCreationParams(
@@ -190,8 +190,8 @@ class AndroidInternalStoragePathHandlerCreationParams
   AndroidInternalStoragePathHandlerCreationParams(
     // This parameter prevents breaking changes later.
     // ignore: avoid_unused_constructor_parameters
-    PlatformInternalStoragePathHandlerCreationParams params,
-  ) : super(params, directory: params.directory);
+    PlatformInternalStoragePathHandlerCreationParams super.params,
+  ) : super(directory: params.directory);
 
   /// Creates a [AndroidInternalStoragePathHandlerCreationParams] instance based on [PlatformInternalStoragePathHandlerCreationParams].
   factory AndroidInternalStoragePathHandlerCreationParams.fromPlatformInternalStoragePathHandlerCreationParams(
@@ -255,8 +255,8 @@ class AndroidCustomPathHandlerCreationParams
   AndroidCustomPathHandlerCreationParams(
     // This parameter prevents breaking changes later.
     // ignore: avoid_unused_constructor_parameters
-    PlatformCustomPathHandlerCreationParams params,
-  ) : super(params);
+    PlatformCustomPathHandlerCreationParams super.params,
+  );
 
   /// Creates a [AndroidCustomPathHandlerCreationParams] instance based on [PlatformCustomPathHandlerCreationParams].
   factory AndroidCustomPathHandlerCreationParams.fromPlatformCustomPathHandlerCreationParams(

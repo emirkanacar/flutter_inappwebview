@@ -67,7 +67,7 @@ void main() {
 
     expect(source, contains('subscription.onDone'));
     expect(source, contains('subscription.onError'));
-    expect(source, contains('identical(this._server, server)'));
+    expect(source, contains('identical(_server, server)'));
     expect(source, contains('_clearServerReference'));
   });
 

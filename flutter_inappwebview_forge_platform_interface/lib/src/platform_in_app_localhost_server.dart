@@ -34,7 +34,7 @@ class PlatformInAppLocalhostServerCreationParams {
     this.directoryIndex = 'index.html',
     this.documentRoot = './',
     this.shared = false,
-    this.onData = null,
+    this.onData,
   });
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppLocalhostServer.port}

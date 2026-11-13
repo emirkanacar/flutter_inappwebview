@@ -14,10 +14,10 @@ class UserScriptInjectionTime_ {
   ///**NOTE for iOS**: A constant to inject the script after the creation of the webpage’s document element, but before loading any other content.
   ///
   ///**NOTE for Android**: A constant to try to inject the script as soon as the page starts loading.
-  static const AT_DOCUMENT_START = const UserScriptInjectionTime_._internal(0);
+  static const AT_DOCUMENT_START = UserScriptInjectionTime_._internal(0);
 
   ///**NOTE for iOS**: A constant to inject the script after the document finishes loading, but before loading any other subresources.
   ///
   ///**NOTE for Android**: A constant to inject the script as soon as the page finishes loading.
-  static const AT_DOCUMENT_END = const UserScriptInjectionTime_._internal(1);
+  static const AT_DOCUMENT_END = UserScriptInjectionTime_._internal(1);
 }

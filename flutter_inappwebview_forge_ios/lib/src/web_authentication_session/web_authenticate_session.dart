@@ -60,7 +60,7 @@ class IOSWebAuthenticationSession extends PlatformWebAuthenticationSession
   @override
   late final WebAuthenticationSessionCompletionHandler onComplete;
 
-  static const MethodChannel _staticChannel = const MethodChannel(
+  static const MethodChannel _staticChannel = MethodChannel(
     'com.emirkanacar/flutter_webauthenticationsession',
   );
 
@@ -109,9 +109,9 @@ class IOSWebAuthenticationSession extends PlatformWebAuthenticationSession
     initMethodCallHandler();
   }
 
-  _debugLog(String method, dynamic args) {
+  void _debugLog(String method, dynamic args) {
     debugLog(
-      className: this.runtimeType.toString(),
+      className: runtimeType.toString(),
       debugLoggingSettings:
           PlatformWebAuthenticationSession.debugLoggingSettings,
       id: id,

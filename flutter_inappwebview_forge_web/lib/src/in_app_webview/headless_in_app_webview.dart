@@ -14,7 +14,7 @@ import 'in_app_webview_controller.dart';
 class WebPlatformHeadlessInAppWebViewCreationParams
     extends PlatformHeadlessInAppWebViewCreationParams {
   /// Creates a new [WebPlatformHeadlessInAppWebViewCreationParams] instance.
-  WebPlatformHeadlessInAppWebViewCreationParams({
+  const WebPlatformHeadlessInAppWebViewCreationParams({
     super.controllerFromPlatform,
     super.initialSize,
     super.windowId,
@@ -249,7 +249,7 @@ class WebPlatformHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   bool _started = false;
   bool _running = false;
 
-  static const MethodChannel _sharedChannel = const MethodChannel(
+  static const MethodChannel _sharedChannel = MethodChannel(
     'com.emirkanacar/flutter_headless_inappwebview',
   );
 
@@ -286,7 +286,7 @@ class WebPlatformHeadlessInAppWebView extends PlatformHeadlessInAppWebView
   WebPlatformHeadlessInAppWebViewCreationParams get _macosParams =>
       params as WebPlatformHeadlessInAppWebViewCreationParams;
 
-  _init() {
+  void _init() {
     _webViewController = WebPlatformInAppWebViewController(
       WebPlatformInAppWebViewControllerCreationParams(
         id: id,
@@ -316,6 +316,7 @@ class WebPlatformHeadlessInAppWebView extends PlatformHeadlessInAppWebView
     return null;
   }
 
+  @override
   Future<void> run() async {
     if (_started) {
       return;

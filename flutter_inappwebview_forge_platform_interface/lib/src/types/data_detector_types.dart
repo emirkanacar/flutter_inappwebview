@@ -10,46 +10,40 @@ class DataDetectorTypes_ {
   const DataDetectorTypes_._internal(this._value);
 
   ///No detection is performed.
-  static const NONE = const DataDetectorTypes_._internal("NONE");
+  static const NONE = DataDetectorTypes_._internal("NONE");
 
   ///Phone numbers are detected and turned into links.
-  static const PHONE_NUMBER = const DataDetectorTypes_._internal(
-    "PHONE_NUMBER",
-  );
+  static const PHONE_NUMBER = DataDetectorTypes_._internal("PHONE_NUMBER");
 
   ///URLs in text are detected and turned into links.
-  static const LINK = const DataDetectorTypes_._internal("LINK");
+  static const LINK = DataDetectorTypes_._internal("LINK");
 
   ///Addresses are detected and turned into links.
-  static const ADDRESS = const DataDetectorTypes_._internal("ADDRESS");
+  static const ADDRESS = DataDetectorTypes_._internal("ADDRESS");
 
   ///Dates and times that are in the future are detected and turned into links.
-  static const CALENDAR_EVENT = const DataDetectorTypes_._internal(
-    "CALENDAR_EVENT",
-  );
+  static const CALENDAR_EVENT = DataDetectorTypes_._internal("CALENDAR_EVENT");
 
   ///Tracking numbers are detected and turned into links.
-  static const TRACKING_NUMBER = const DataDetectorTypes_._internal(
+  static const TRACKING_NUMBER = DataDetectorTypes_._internal(
     "TRACKING_NUMBER",
   );
 
   ///Flight numbers are detected and turned into links.
-  static const FLIGHT_NUMBER = const DataDetectorTypes_._internal(
-    "FLIGHT_NUMBER",
-  );
+  static const FLIGHT_NUMBER = DataDetectorTypes_._internal("FLIGHT_NUMBER");
 
   ///Lookup suggestions are detected and turned into links.
-  static const LOOKUP_SUGGESTION = const DataDetectorTypes_._internal(
+  static const LOOKUP_SUGGESTION = DataDetectorTypes_._internal(
     "LOOKUP_SUGGESTION",
   );
 
   ///Spotlight suggestions are detected and turned into links.
-  static const SPOTLIGHT_SUGGESTION = const DataDetectorTypes_._internal(
+  static const SPOTLIGHT_SUGGESTION = DataDetectorTypes_._internal(
     "SPOTLIGHT_SUGGESTION",
   );
 
   ///All of the above data types are turned into links when detected. Choosing this value will automatically include any new detection type that is added.
-  static const ALL = const DataDetectorTypes_._internal("ALL");
+  static const ALL = DataDetectorTypes_._internal("ALL");
 }
 
 ///An iOS-specific class used to specify a `dataDetectoryTypes` value that adds interactivity to web content that matches the value.
@@ -65,44 +59,42 @@ class IOSWKDataDetectorTypes_ {
   const IOSWKDataDetectorTypes_._internal(this._value);
 
   ///No detection is performed.
-  static const NONE = const IOSWKDataDetectorTypes_._internal("NONE");
+  static const NONE = IOSWKDataDetectorTypes_._internal("NONE");
 
   ///Phone numbers are detected and turned into links.
-  static const PHONE_NUMBER = const IOSWKDataDetectorTypes_._internal(
-    "PHONE_NUMBER",
-  );
+  static const PHONE_NUMBER = IOSWKDataDetectorTypes_._internal("PHONE_NUMBER");
 
   ///URLs in text are detected and turned into links.
-  static const LINK = const IOSWKDataDetectorTypes_._internal("LINK");
+  static const LINK = IOSWKDataDetectorTypes_._internal("LINK");
 
   ///Addresses are detected and turned into links.
-  static const ADDRESS = const IOSWKDataDetectorTypes_._internal("ADDRESS");
+  static const ADDRESS = IOSWKDataDetectorTypes_._internal("ADDRESS");
 
   ///Dates and times that are in the future are detected and turned into links.
-  static const CALENDAR_EVENT = const IOSWKDataDetectorTypes_._internal(
+  static const CALENDAR_EVENT = IOSWKDataDetectorTypes_._internal(
     "CALENDAR_EVENT",
   );
 
   ///Tracking numbers are detected and turned into links.
-  static const TRACKING_NUMBER = const IOSWKDataDetectorTypes_._internal(
+  static const TRACKING_NUMBER = IOSWKDataDetectorTypes_._internal(
     "TRACKING_NUMBER",
   );
 
   ///Flight numbers are detected and turned into links.
-  static const FLIGHT_NUMBER = const IOSWKDataDetectorTypes_._internal(
+  static const FLIGHT_NUMBER = IOSWKDataDetectorTypes_._internal(
     "FLIGHT_NUMBER",
   );
 
   ///Lookup suggestions are detected and turned into links.
-  static const LOOKUP_SUGGESTION = const IOSWKDataDetectorTypes_._internal(
+  static const LOOKUP_SUGGESTION = IOSWKDataDetectorTypes_._internal(
     "LOOKUP_SUGGESTION",
   );
 
   ///Spotlight suggestions are detected and turned into links.
-  static const SPOTLIGHT_SUGGESTION = const IOSWKDataDetectorTypes_._internal(
+  static const SPOTLIGHT_SUGGESTION = IOSWKDataDetectorTypes_._internal(
     "SPOTLIGHT_SUGGESTION",
   );
 
   ///All of the above data types are turned into links when detected. Choosing this value will automatically include any new detection type that is added.
-  static const ALL = const IOSWKDataDetectorTypes_._internal("ALL");
+  static const ALL = IOSWKDataDetectorTypes_._internal("ALL");
 }

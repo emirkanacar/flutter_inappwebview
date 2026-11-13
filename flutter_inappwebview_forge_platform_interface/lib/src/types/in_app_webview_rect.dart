@@ -26,6 +26,6 @@ class InAppWebViewRect_ {
     required this.width,
     required this.height,
   }) {
-    assert(this.width >= 0 && this.height >= 0);
+    assert(width >= 0 && height >= 0);
   }
 }

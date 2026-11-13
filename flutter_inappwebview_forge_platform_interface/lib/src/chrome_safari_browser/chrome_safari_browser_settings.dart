@@ -44,15 +44,15 @@ class ChromeSafariBrowserOptions {
   }
 
   static ChromeSafariBrowserOptions fromMap(Map<String, dynamic> map) {
-    return new ChromeSafariBrowserOptions();
+    return ChromeSafariBrowserOptions();
   }
 
   ChromeSafariBrowserOptions copy() {
-    return ChromeSafariBrowserOptions.fromMap(this.toMap());
+    return ChromeSafariBrowserOptions.fromMap(toMap());
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -312,22 +312,23 @@ class ChromeSafariBrowserClassOptions {
   IOSSafariOptions? ios;
 
   ChromeSafariBrowserClassOptions({this.android, this.ios}) {
-    this.android = this.android ?? AndroidChromeCustomTabsOptions();
-    this.ios = this.ios ?? IOSSafariOptions();
+    android = android ?? AndroidChromeCustomTabsOptions();
+    ios = ios ?? IOSSafariOptions();
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> options = {};
-    if (Util.isAndroid)
-      options.addAll(this.android?.toMap() ?? {});
-    else if (Util.isIOS)
-      options.addAll(this.ios?.toMap() ?? {});
+    if (Util.isAndroid) {
+      options.addAll(android?.toMap() ?? {});
+    } else if (Util.isIOS) {
+      options.addAll(ios?.toMap() ?? {});
+    }
 
     return options;
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override

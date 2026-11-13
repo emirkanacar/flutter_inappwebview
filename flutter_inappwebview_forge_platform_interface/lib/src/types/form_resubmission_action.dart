@@ -10,8 +10,8 @@ class FormResubmissionAction_ {
   const FormResubmissionAction_._internal(this._value);
 
   ///Resend data
-  static const RESEND = const FormResubmissionAction_._internal(0);
+  static const RESEND = FormResubmissionAction_._internal(0);
 
   ///Don't resend data
-  static const DONT_RESEND = const FormResubmissionAction_._internal(1);
+  static const DONT_RESEND = FormResubmissionAction_._internal(1);
 }

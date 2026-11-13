@@ -56,36 +56,23 @@ class CreateWindowAction_ extends NavigationAction_ {
     this.isDialog,
     @Deprecated('Use windowFeatures instead') this.iosWindowFeatures,
     this.windowFeatures,
-    required URLRequest_ request,
-    required bool isForMainFrame,
-    @Deprecated('Use hasGesture instead') bool? androidHasGesture,
-    @Deprecated('Use isRedirect instead') bool? androidIsRedirect,
-    bool? hasGesture,
-    bool? isRedirect,
+    required super.request,
+    required super.isForMainFrame,
+    @Deprecated('Use hasGesture instead') super.androidHasGesture,
+    @Deprecated('Use isRedirect instead') super.androidIsRedirect,
+    super.hasGesture,
+    super.isRedirect,
     @Deprecated('Use navigationType instead')
     // ignore: deprecated_member_use_from_same_package
-    IOSWKNavigationType_? iosWKNavigationType,
-    NavigationType_? navigationType,
+    super.iosWKNavigationType,
+    super.navigationType,
     @Deprecated('Use sourceFrame instead')
     // ignore: deprecated_member_use_from_same_package
-    IOSWKFrameInfo_? iosSourceFrame,
-    FrameInfo_? sourceFrame,
+    super.iosSourceFrame,
+    super.sourceFrame,
     @Deprecated('Use targetFrame instead')
     // ignore: deprecated_member_use_from_same_package
-    IOSWKFrameInfo_? iosTargetFrame,
-    FrameInfo_? targetFrame,
-  }) : super(
-         request: request,
-         isForMainFrame: isForMainFrame,
-         androidHasGesture: androidHasGesture,
-         hasGesture: hasGesture,
-         androidIsRedirect: androidIsRedirect,
-         isRedirect: isRedirect,
-         iosWKNavigationType: iosWKNavigationType,
-         navigationType: navigationType,
-         iosSourceFrame: iosSourceFrame,
-         sourceFrame: sourceFrame,
-         iosTargetFrame: iosTargetFrame,
-         targetFrame: targetFrame,
-       );
+    super.iosTargetFrame,
+    super.targetFrame,
+  });
 }

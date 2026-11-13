@@ -52,7 +52,7 @@ class AndroidWebMessagePort extends PlatformWebMessagePort {
       'setWebMessageCallback',
       args,
     );
-    this._onMessage = onMessage;
+    _onMessage = onMessage;
   }
 
   @override
@@ -74,7 +74,7 @@ class AndroidWebMessagePort extends PlatformWebMessagePort {
   Map<String, dynamic> toMap({EnumMethod? enumMethod}) {
     return {
       "index": params.index,
-      "webMessageChannelId": this._webMessageChannel.params.id,
+      "webMessageChannelId": _webMessageChannel.params.id,
     };
   }
 
@@ -91,9 +91,9 @@ class AndroidWebMessagePort extends PlatformWebMessagePort {
 
 extension InternalWebMessagePort on AndroidWebMessagePort {
   WebMessageCallback? get onMessage => _onMessage;
-  void set onMessage(WebMessageCallback? value) => _onMessage = value;
+  set onMessage(WebMessageCallback? value) => _onMessage = value;
 
   AndroidWebMessageChannel get webMessageChannel => _webMessageChannel;
-  void set webMessageChannel(AndroidWebMessageChannel value) =>
+  set webMessageChannel(AndroidWebMessageChannel value) =>
       _webMessageChannel = value;
 }

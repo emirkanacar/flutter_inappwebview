@@ -35,7 +35,7 @@ List<ContentBlocker> _deserializeContentBlockers(
 }) {
   List<ContentBlocker> contentBlockers = [];
   if (contentBlockersMapList != null) {
-    contentBlockersMapList.forEach((contentBlocker) {
+    for (var contentBlocker in contentBlockersMapList) {
       contentBlockers.add(
         ContentBlocker.fromMap(
           Map<dynamic, Map<dynamic, dynamic>>.from(
@@ -44,7 +44,7 @@ List<ContentBlocker> _deserializeContentBlockers(
           enumMethod: enumMethod,
         ),
       );
-    });
+    }
   }
   return contentBlockers;
 }
@@ -3826,13 +3826,12 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.webViewBuilderOriginAllowList,
     this.conversationContext,
   }) {
-    if (this.minimumFontSize == null)
-      this.minimumFontSize = Util.isAndroid ? 8 : 0;
+    minimumFontSize ??= Util.isAndroid ? 8 : 0;
     assert(
-      this.resourceCustomSchemes == null ||
-          (this.resourceCustomSchemes != null &&
-              !this.resourceCustomSchemes!.contains("http") &&
-              !this.resourceCustomSchemes!.contains("https")),
+      resourceCustomSchemes == null ||
+          (resourceCustomSchemes != null &&
+              !resourceCustomSchemes!.contains("http") &&
+              !resourceCustomSchemes!.contains("https")),
     );
     assert(
       allowingReadAccessTo == null || allowingReadAccessTo!.isScheme("file"),
@@ -3886,11 +3885,12 @@ class InAppWebViewGroupOptions {
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> options = {};
-    options.addAll(this.crossPlatform.toMap());
-    if (Util.isAndroid)
-      options.addAll(this.android.toMap());
-    else if (Util.isIOS)
-      options.addAll(this.ios.toMap());
+    options.addAll(crossPlatform.toMap());
+    if (Util.isAndroid) {
+      options.addAll(android.toMap());
+    } else if (Util.isIOS) {
+      options.addAll(ios.toMap());
+    }
 
     return options;
   }
@@ -3902,18 +3902,19 @@ class InAppWebViewGroupOptions {
     inAppWebViewGroupOptions.crossPlatform = InAppWebViewOptions.fromMap(
       options,
     );
-    if (Util.isAndroid)
+    if (Util.isAndroid) {
       inAppWebViewGroupOptions.android = AndroidInAppWebViewOptions.fromMap(
         options,
       );
-    else if (Util.isIOS)
+    } else if (Util.isIOS) {
       inAppWebViewGroupOptions.ios = IOSInAppWebViewOptions.fromMap(options);
+    }
 
     return inAppWebViewGroupOptions;
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -3922,7 +3923,7 @@ class InAppWebViewGroupOptions {
   }
 
   InAppWebViewGroupOptions copy() {
-    return InAppWebViewGroupOptions.fromMap(this.toMap());
+    return InAppWebViewGroupOptions.fromMap(toMap());
   }
 }
 
@@ -3936,11 +3937,11 @@ class WebViewOptions {
   }
 
   WebViewOptions copy() {
-    return WebViewOptions.fromMap(this.toMap());
+    return WebViewOptions.fromMap(toMap());
   }
 
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -4096,20 +4097,19 @@ class InAppWebViewOptions
     this.allowFileAccessFromFileURLs = false,
     this.allowUniversalAccessFromFileURLs = false,
   }) {
-    if (this.minimumFontSize == null)
-      this.minimumFontSize = Util.isAndroid ? 8 : 0;
+    minimumFontSize ??= Util.isAndroid ? 8 : 0;
     assert(
-      !this.resourceCustomSchemes.contains("http") &&
-          !this.resourceCustomSchemes.contains("https"),
+      !resourceCustomSchemes.contains("http") &&
+          !resourceCustomSchemes.contains("https"),
     );
   }
 
   @override
   Map<String, dynamic> toMap() {
     List<Map<String, Map<String, dynamic>>> contentBlockersMapList = [];
-    contentBlockers.forEach((contentBlocker) {
+    for (var contentBlocker in contentBlockers) {
       contentBlockersMapList.add(contentBlocker.toMap());
-    });
+    }
 
     return {
       "useShouldOverrideUrlLoading": useShouldOverrideUrlLoading,
@@ -4145,7 +4145,7 @@ class InAppWebViewOptions
     List<ContentBlocker> contentBlockers = [];
     List<dynamic>? contentBlockersMapList = map["contentBlockers"];
     if (contentBlockersMapList != null) {
-      contentBlockersMapList.forEach((contentBlocker) {
+      for (var contentBlocker in contentBlockersMapList) {
         contentBlockers.add(
           ContentBlocker.fromMap(
             Map<String, Map<String, dynamic>>.from(
@@ -4153,7 +4153,7 @@ class InAppWebViewOptions
             ),
           ),
         );
-      });
+      }
     }
 
     var instance = InAppWebViewOptions();
@@ -4196,7 +4196,7 @@ class InAppWebViewOptions
 
   @override
   Map<String, dynamic> toJson() {
-    return this.toMap();
+    return toMap();
   }
 
   @override
@@ -4206,6 +4206,6 @@ class InAppWebViewOptions
 
   @override
   InAppWebViewOptions copy() {
-    return InAppWebViewOptions.fromMap(this.toMap());
+    return InAppWebViewOptions.fromMap(toMap());
   }
 }

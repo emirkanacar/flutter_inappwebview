@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'in_app_webview_rect.dart';
 
 // **************************************************************************
@@ -25,7 +27,7 @@ class InAppWebViewRect {
     required this.width,
     required this.height,
   }) {
-    assert(this.width >= 0 && this.height >= 0);
+    assert(width >= 0 && height >= 0);
   }
 
   ///Gets a possible [InAppWebViewRect] instance from a [Map] value.

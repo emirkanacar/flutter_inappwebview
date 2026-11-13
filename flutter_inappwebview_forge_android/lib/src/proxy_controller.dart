@@ -95,5 +95,5 @@ class AndroidProxyController extends PlatformProxyController
 }
 
 extension InternalProxyController on AndroidProxyController {
-  get handleMethod => _handleMethod;
+  Future<dynamic> Function(MethodCall call) get handleMethod => _handleMethod;
 }

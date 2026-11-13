@@ -14,12 +14,11 @@ class WindowsPullToRefreshStateNotifier extends ValueNotifier<bool> {
 }
 
 class WindowsPullToRefreshController extends PlatformPullToRefreshController {
-  WindowsPullToRefreshController(
-    PlatformPullToRefreshControllerCreationParams params,
-  ) : _enabled = params.settings.enabled != false,
+  WindowsPullToRefreshController(super.params)
+    : _enabled = params.settings.enabled != false,
       _indicatorColor = params.settings.color,
       _backgroundColor = params.settings.backgroundColor,
-      super.implementation(params);
+      super.implementation();
 
   static final WindowsPullToRefreshController _staticValue =
       WindowsPullToRefreshController(

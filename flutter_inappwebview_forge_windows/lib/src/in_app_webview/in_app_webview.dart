@@ -24,7 +24,7 @@ class WindowsInAppWebViewWidgetCreationParams
     super.keepAlive,
     super.preventGestureDelay,
     super.windowId,
-    this.webViewEnvironment,
+    WindowsWebViewEnvironment? super.webViewEnvironment,
     super.onWebViewCreated,
     super.onLoadStart,
     super.onLoadStop,
@@ -141,7 +141,7 @@ class WindowsInAppWebViewWidgetCreationParams
     super.contextMenu,
     super.initialUserScripts,
     super.pullToRefreshController,
-    this.findInteractionController,
+    WindowsFindInteractionController? super.findInteractionController,
   });
 
   /// Constructs a [WindowsInAppWebViewWidgetCreationParams] using a
@@ -273,10 +273,12 @@ class WindowsInAppWebViewWidgetCreationParams
       );
 
   @override
-  final WindowsFindInteractionController? findInteractionController;
+  WindowsFindInteractionController? get findInteractionController =>
+      super.findInteractionController as WindowsFindInteractionController?;
 
   @override
-  final WindowsWebViewEnvironment? webViewEnvironment;
+  WindowsWebViewEnvironment? get webViewEnvironment =>
+      super.webViewEnvironment as WindowsWebViewEnvironment?;
 }
 
 ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppWebViewWidget}
@@ -409,9 +411,7 @@ class WindowsInAppWebViewWidget extends PlatformInAppWebViewWidget {
     if ((params.shouldInterceptAjaxRequest != null ||
         params.onAjaxProgress != null ||
         params.onAjaxReadyStateChange != null)) {
-      if (settings.useShouldInterceptAjaxRequest == null) {
-        settings.useShouldInterceptAjaxRequest = true;
-      }
+      settings.useShouldInterceptAjaxRequest ??= true;
       if (params.onAjaxReadyStateChange != null &&
           settings.useOnAjaxReadyStateChange == null) {
         settings.useOnAjaxReadyStateChange = true;

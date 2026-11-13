@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint
+
 part of 'custom_tabs_post_message_result_type.dart';
 
 // **************************************************************************

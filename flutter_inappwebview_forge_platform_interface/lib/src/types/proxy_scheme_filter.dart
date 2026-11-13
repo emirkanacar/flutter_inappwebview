@@ -12,11 +12,11 @@ class ProxySchemeFilter_ {
   const ProxySchemeFilter_._internal(this._value);
 
   ///Matches all schemes.
-  static const MATCH_ALL_SCHEMES = const ProxySchemeFilter_._internal("*");
+  static const MATCH_ALL_SCHEMES = ProxySchemeFilter_._internal("*");
 
   ///HTTP scheme.
-  static const MATCH_HTTP = const ProxySchemeFilter_._internal("http");
+  static const MATCH_HTTP = ProxySchemeFilter_._internal("http");
 
   ///HTTPS scheme.
-  static const MATCH_HTTPS = const ProxySchemeFilter_._internal("https");
+  static const MATCH_HTTPS = ProxySchemeFilter_._internal("https");
 }

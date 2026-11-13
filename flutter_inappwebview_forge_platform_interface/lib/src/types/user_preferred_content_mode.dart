@@ -10,11 +10,11 @@ class UserPreferredContentMode_ {
   const UserPreferredContentMode_._internal(this._value);
 
   ///The recommended content mode for the current platform.
-  static const RECOMMENDED = const UserPreferredContentMode_._internal(0);
+  static const RECOMMENDED = UserPreferredContentMode_._internal(0);
 
   ///Represents content targeting mobile browsers.
-  static const MOBILE = const UserPreferredContentMode_._internal(1);
+  static const MOBILE = UserPreferredContentMode_._internal(1);
 
   ///Represents content targeting desktop browsers.
-  static const DESKTOP = const UserPreferredContentMode_._internal(2);
+  static const DESKTOP = UserPreferredContentMode_._internal(2);
 }

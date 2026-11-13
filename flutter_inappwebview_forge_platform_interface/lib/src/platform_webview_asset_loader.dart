@@ -27,6 +27,7 @@ class WebViewAssetLoader_ {
   ///An unused domain reserved for Android applications to intercept requests for app assets.
   ///
   ///It is used by default unless the user specified a different domain.
+  // ignore: non_constant_identifier_names
   static final String DEFAULT_DOMAIN = "appassets.androidplatform.net";
 
   ///Set the domain under which app assets can be accessed. The default domain is `appassets.androidplatform.net`.

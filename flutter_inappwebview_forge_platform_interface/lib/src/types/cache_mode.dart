@@ -11,16 +11,16 @@ class CacheMode_ {
 
   ///Default cache usage mode. If the navigation type doesn't impose any specific behavior,
   ///use cached resources when they are available and not expired, otherwise load resources from the network.
-  static const LOAD_DEFAULT = const CacheMode_._internal(-1);
+  static const LOAD_DEFAULT = CacheMode_._internal(-1);
 
   ///Use cached resources when they are available, even if they have expired. Otherwise load resources from the network.
-  static const LOAD_CACHE_ELSE_NETWORK = const CacheMode_._internal(1);
+  static const LOAD_CACHE_ELSE_NETWORK = CacheMode_._internal(1);
 
   ///Don't use the cache, load from the network.
-  static const LOAD_NO_CACHE = const CacheMode_._internal(2);
+  static const LOAD_NO_CACHE = CacheMode_._internal(2);
 
   ///Don't use the network, load from the cache.
-  static const LOAD_CACHE_ONLY = const CacheMode_._internal(3);
+  static const LOAD_CACHE_ONLY = CacheMode_._internal(3);
 }
 
 ///An Android-specific class used to override the way the cache is used.
@@ -34,14 +34,14 @@ class AndroidCacheMode_ {
 
   ///Default cache usage mode. If the navigation type doesn't impose any specific behavior,
   ///use cached resources when they are available and not expired, otherwise load resources from the network.
-  static const LOAD_DEFAULT = const AndroidCacheMode_._internal(-1);
+  static const LOAD_DEFAULT = AndroidCacheMode_._internal(-1);
 
   ///Use cached resources when they are available, even if they have expired. Otherwise load resources from the network.
-  static const LOAD_CACHE_ELSE_NETWORK = const AndroidCacheMode_._internal(1);
+  static const LOAD_CACHE_ELSE_NETWORK = AndroidCacheMode_._internal(1);
 
   ///Don't use the cache, load from the network.
-  static const LOAD_NO_CACHE = const AndroidCacheMode_._internal(2);
+  static const LOAD_NO_CACHE = AndroidCacheMode_._internal(2);
 
   ///Don't use the network, load from the cache.
-  static const LOAD_CACHE_ONLY = const AndroidCacheMode_._internal(3);
+  static const LOAD_CACHE_ONLY = AndroidCacheMode_._internal(3);
 }
