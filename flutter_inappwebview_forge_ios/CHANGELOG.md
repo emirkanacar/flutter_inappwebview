@@ -1,3 +1,41 @@
+## 2.1.38 - 2026-11-14
+
+- Fix `writingToolsBehavior` never being applied. The native setting is an
+  `Int?`, which is not exposed to Objective-C, so the KVC-based settings
+  parser skipped it and WebViews always used WebKit's default Writing Tools
+  behavior. It is now parsed and reported explicitly, like `alpha`.
+- Support `isLockdownModeEnabled`. The value is written to the initial
+  `defaultWebpagePreferences` and to the `WKWebpagePreferences` of every
+  navigation decision, so `setSettings` changes apply from the next
+  navigation. A `nil` value leaves WebKit's (system) value untouched.
+- Add `setCookiePolicy` / `getCookiePolicy` to the cookie manager channel
+  using `WKHTTPCookieStore.CookiePolicy`, scoped to the WebView's data store
+  when `webViewId` is sent. Older OS versions reply `false` / `nil`; an
+  unknown policy value replies `invalid_arguments`
+  (iOS 16 / iOS 17 availability guards).
+- Fix `removeDataModifiedSince`: the native handler read the Dart
+  `millisecondsSinceEpoch` timestamp as seconds, which moved the cutoff
+  date thousands of years into the future so almost nothing was removed.
+  The channel payload is unchanged; the native side now divides by 1000.
+- Add `deleteBrowsingData` / `deleteBrowsingDataForSite` to the WebStorage
+  manager channel. They remove every `WKWebsiteDataStore.allWebsiteDataTypes()`
+  kind, either for all records or for the records whose `displayName` is the
+  site of the given host/URL (and its subdomains). Site matching lives in the
+  Foundation-only `WebsiteDataSiteMatcher`, covered by
+  `tool/run_apple_website_data_matcher_tests.sh`.
+- `removeDataFor` no longer force-casts a record's `displayName`; records
+  without a string `displayName` are skipped, matching macOS.
+- Method-channel handlers no longer force-cast required arguments
+  (`arguments!["key"] as! T`). A missing, `null`, or wrong-type required
+  argument now completes the call with a `FlutterError` whose code is
+  `invalid_arguments` (surfaced in Dart as a `PlatformException`) instead of
+  terminating the app. Channel names, method names, and payload keys are
+  unchanged; optional arguments keep their existing defaults. Native-side
+  counterpart of the Android payload hardening in
+  [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856).
+- Swift: `InAppBrowserManager.open(arguments:)` now takes `NSDictionary?` and
+  `throws`. It is only called from the plugin's own channel handler.
+
 ## 2.1.37 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback

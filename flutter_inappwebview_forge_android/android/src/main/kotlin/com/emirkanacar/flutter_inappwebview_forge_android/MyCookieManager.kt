@@ -2,10 +2,8 @@
 
 package com.emirkanacar.flutter_inappwebview_forge_android
 
-import android.os.Build
 import android.util.Log
 import android.webkit.CookieManager
-import android.webkit.CookieSyncManager
 import android.webkit.ValueCallback
 import androidx.webkit.CookieManagerCompat
 import androidx.webkit.ProfileStore
@@ -236,25 +234,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         if (sameSite != null) cookieValue += "; SameSite=$sameSite"
         cookieValue += ";"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // API 21+ applies this mutation asynchronously. Keep persistence
-            // explicit because flush() can block the WebView UI thread.
-            manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
-                result.success(successful)
-            })
-        } else {
-            val context = plugin?.applicationContext
-            if (context != null) {
-                val cookieSyncManager = CookieSyncManager.createInstance(context)
-                cookieSyncManager.startSync()
-                manager.setCookie(url, cookieValue)
-                cookieSyncManager.stopSync()
-                cookieSyncManager.sync()
-            } else {
-                manager.setCookie(url, cookieValue)
-            }
-            result.success(true)
-        }
+        // API 21+ applies this mutation asynchronously. Keep persistence
+        // explicit because flush() can block the WebView UI thread.
+        manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
+            result.success(successful)
+        })
     }
 
     fun getCookies(url: String, webViewId: Any?): MutableList<MutableMap<String, Any?>> {
@@ -344,25 +328,11 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         if (domain != null) cookieValue += "; Domain=$domain"
         cookieValue += ";"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // API 21+ applies this mutation asynchronously. Keep persistence
-            // explicit because flush() can block the WebView UI thread.
-            manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
-                result.success(successful)
-            })
-        } else {
-            val context = plugin?.applicationContext
-            if (context != null) {
-                val cookieSyncManager = CookieSyncManager.createInstance(context)
-                cookieSyncManager.startSync()
-                manager.setCookie(url, cookieValue)
-                cookieSyncManager.stopSync()
-                cookieSyncManager.sync()
-            } else {
-                manager.setCookie(url, cookieValue)
-            }
-            result.success(true)
-        }
+        // API 21+ applies this mutation asynchronously. Keep persistence
+        // explicit because flush() can block the WebView UI thread.
+        manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
+            result.success(successful)
+        })
     }
 
     @Suppress("DEPRECATION")
@@ -387,41 +357,21 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
         }
 
         val cookies = cookiesString.split(";")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // Wait for all asynchronous mutations instead of blocking the UI
-            // thread with flush().
-            val remaining = AtomicInteger(cookies.size)
-            val allSuccessful = AtomicBoolean(true)
-            for (cookie in cookies) {
-                val name = cookie.split("=", limit = 2)[0].trim()
-                var cookieValue = "$name=; Path=$path; Max-Age=-1"
-                if (domain != null) cookieValue += "; Domain=$domain"
-                cookieValue += ";"
-                manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
-                    if (successful != true) allSuccessful.set(false)
-                    if (remaining.decrementAndGet() == 0) {
-                        result.success(allSuccessful.get())
-                    }
-                })
-            }
-        } else {
-            var cookieSyncManager: CookieSyncManager? = null
-            plugin?.applicationContext?.let { context ->
-                cookieSyncManager = CookieSyncManager.createInstance(context)
-                cookieSyncManager?.startSync()
-            }
-            for (cookie in cookies) {
-                val name = cookie.split("=", limit = 2)[0].trim()
-                var cookieValue = "$name=; Path=$path; Max-Age=-1"
-                if (domain != null) cookieValue += "; Domain=$domain"
-                cookieValue += ";"
-                manager.setCookie(url, cookieValue)
-            }
-            if (cookieSyncManager != null) {
-                cookieSyncManager?.stopSync()
-                cookieSyncManager?.sync()
-            }
-            result.success(true)
+        // Wait for all asynchronous mutations instead of blocking the UI
+        // thread with flush().
+        val remaining = AtomicInteger(cookies.size)
+        val allSuccessful = AtomicBoolean(true)
+        for (cookie in cookies) {
+            val name = cookie.split("=", limit = 2)[0].trim()
+            var cookieValue = "$name=; Path=$path; Max-Age=-1"
+            if (domain != null) cookieValue += "; Domain=$domain"
+            cookieValue += ";"
+            manager.setCookie(url, cookieValue, ValueCallback<Boolean> { successful ->
+                if (successful != true) allSuccessful.set(false)
+                if (remaining.decrementAndGet() == 0) {
+                    result.success(allSuccessful.get())
+                }
+            })
         }
     }
 
@@ -434,21 +384,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
             return
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            manager.removeAllCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
-        } else {
-            val context = plugin?.applicationContext
-            if (context != null) {
-                val cookieSyncManager = CookieSyncManager.createInstance(context)
-                cookieSyncManager.startSync()
-                manager.removeAllCookie()
-                cookieSyncManager.stopSync()
-                cookieSyncManager.sync()
-            } else {
-                manager.removeAllCookie()
-            }
-            result.success(true)
-        }
+        manager.removeAllCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
     }
 
     @Suppress("DEPRECATION")
@@ -460,21 +396,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
             return
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            manager.removeSessionCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
-        } else {
-            val context = plugin?.applicationContext
-            if (context != null) {
-                val cookieSyncManager = CookieSyncManager.createInstance(context)
-                cookieSyncManager.startSync()
-                manager.removeSessionCookie()
-                cookieSyncManager.stopSync()
-                cookieSyncManager.sync()
-            } else {
-                manager.removeSessionCookie()
-            }
-            result.success(true)
-        }
+        manager.removeSessionCookies(ValueCallback<Boolean> { successful -> result.success(successful) })
     }
 
     @Suppress("DEPRECATION")
@@ -484,13 +406,7 @@ open class MyCookieManager(initialPlugin: InAppWebViewFlutterPlugin) :
             result.success(false)
             return
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            managers.forEach { it.flush() }
-        } else {
-            plugin?.applicationContext?.let { context ->
-                CookieSyncManager.createInstance(context).sync()
-            }
-        }
+        managers.forEach { it.flush() }
         result.success(true)
     }
 

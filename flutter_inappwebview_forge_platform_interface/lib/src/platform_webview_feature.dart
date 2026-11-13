@@ -421,6 +421,12 @@ class WebViewFeature_ {
   static const PRECONNECT = WebViewFeature_._internal("PRECONNECT");
 
   ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.warmUpRendererProcess].
+  static const WARM_UP_RENDERER_PROCESS = WebViewFeature_._internal(
+    "WARM_UP_RENDERER_PROCESS",
+  );
+
+  ///Feature for [isFeatureSupported]. This feature covers
   ///[InAppWebViewSettings.backForwardCacheEnabled].
   static const BACK_FORWARD_CACHE = WebViewFeature_._internal(
     "BACK_FORWARD_CACHE",
@@ -760,6 +766,12 @@ class AndroidWebViewFeature_ {
   ///Feature for [isFeatureSupported]. This feature covers
   ///[PlatformContainerController.preconnect].
   static const PRECONNECT = AndroidWebViewFeature_._internal("PRECONNECT");
+
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.warmUpRendererProcess].
+  static const WARM_UP_RENDERER_PROCESS = AndroidWebViewFeature_._internal(
+    "WARM_UP_RENDERER_PROCESS",
+  );
 
   ///Feature for [isFeatureSupported]. This feature covers
   ///[InAppWebViewSettings.backForwardCacheEnabled].

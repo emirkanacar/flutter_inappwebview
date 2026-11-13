@@ -87,6 +87,12 @@ class ContainerController {
   Future<bool> preconnect({required String containerId, required String url}) =>
       platform.preconnect(containerId: containerId, url: url);
 
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.warmUpRendererProcess}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformContainerController.warmUpRendererProcess.supported_platforms}
+  Future<bool> warmUpRendererProcess({required String containerId}) =>
+      platform.warmUpRendererProcess(containerId: containerId);
+
   /// Checks whether this API is available on [platform].
   static bool isClassSupported({TargetPlatform? platform}) =>
       PlatformContainerController.static().isClassSupported(platform: platform);

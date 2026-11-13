@@ -1,6 +1,5 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.content_blocker
 
-import android.os.Build
 import android.os.Handler
 import android.text.TextUtils
 import android.util.Log
@@ -185,11 +184,7 @@ open class ContentBlockerHandler {
 
                     val handler = Handler(webView.getWebViewLooper())
                     handler.postDelayed({
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            webView.evaluateJavascript(jsScript, null)
-                        } else {
-                            webView.loadUrl("javascript:$jsScript")
-                        }
+                        webView.evaluateJavascript(jsScript, null)
                     }, 800)
                 }
 
@@ -226,9 +221,7 @@ open class ContentBlockerHandler {
                                 }
 
                                 val reasonPhrase = urlConnection.responseMessage
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                                    reasonPhrase != null
-                                ) {
+                                if (reasonPhrase != null) {
                                     val responseHeaders = HashMap<String, String>()
                                     for (responseHeader in urlConnection.headerFields) {
                                         responseHeaders[responseHeader.key] =

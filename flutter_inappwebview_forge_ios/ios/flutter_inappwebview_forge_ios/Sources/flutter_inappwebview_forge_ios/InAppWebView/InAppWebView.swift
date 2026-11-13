@@ -760,6 +760,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             configuration.preferences.javaScriptEnabled = settings.javaScriptEnabled
             if #available(iOS 14.0, *) {
                 configuration.defaultWebpagePreferences.allowsContentJavaScript = settings.javaScriptEnabled
+                applyLockdownMode(to: configuration.defaultWebpagePreferences)
             }
             
             if #available(iOS 15.0, *) {
@@ -2541,9 +2542,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        applyLockdownMode(to: preferences)
         self.webView(webView, decidePolicyFor: navigationAction, decisionHandler: {(navigationActionPolicy) -> Void in
             decisionHandler(navigationActionPolicy, preferences)
         })
+    }
+
+    /// Applies the `isLockdownModeEnabled` setting to a navigation's webpage
+    /// preferences. A nil setting leaves WebKit's value (the system setting)
+    /// untouched.
+    func applyLockdownMode(to preferences: WKWebpagePreferences) {
+        if #available(iOS 16.0, *), let isLockdownModeEnabled = settings?.isLockdownModeEnabled {
+            preferences.isLockdownModeEnabled = isLockdownModeEnabled
+        }
     }
     
     @available(iOS 14.5, *)

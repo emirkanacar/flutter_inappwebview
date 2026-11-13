@@ -1,6 +1,6 @@
 # Open Work Plan
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-11-13
 
 This is the active implementation and reproduction backlog for work that is
 not yet resolved in the local Forge repository. Locally implemented records
@@ -59,7 +59,17 @@ wave (2.1.77) adds NavigationParameters, Profile `preconnect`, BFCache
 depth settings, opt-in WebViewBuilder, `saveStateWithOptions`,
 ProcessGlobalConfig UI-thread startup mode, Windows `DownloadJobController`
 parity, and iOS 26 `conversationContext`, and raises Android to
-**`minSdk 24` + `androidx.webkit:1.16.0`**. These are not upstream issue
+**`minSdk 24` + `androidx.webkit:1.16.0`**. The 2.1.80 release line adds
+`WebStorageManager.deleteBrowsingData` / `deleteBrowsingDataForSite` on
+Android (`DELETE_BROWSING_DATA`), iOS, macOS, and Linux, plus Windows
+`deleteBrowsingData` through `ICoreWebView2Profile2::ClearBrowsingDataAll`
+(Linux and Windows native code not yet built on a target host). iOS/macOS
+`isLockdownModeEnabled` and `CookieManager.setCookiePolicy` are also
+source-complete (2.1.80), as is the Android
+`ContainerController.warmUpRendererProcess`
+(`WARM_UP_RENDERER_PROCESS`). Windows `ContextMenu` support through WebView2
+`ContextMenuRequested` is source-complete as well, but not built on a
+Windows host yet. These are not upstream issue
 records and do not change the export counts. Physical-device validation
 remains in [`runtime-validation-pending.md`](runtime-validation-pending.md).
 
@@ -99,6 +109,19 @@ shims stay as public compatibility APIs. Root 2.1.75, platform-interface
 SDK-deprecated call sites in place until an explicit minSdk increase. The
 sequence is [`deprecated-api-migration-plan.md`](deprecated-api-migration-plan.md).
 This is not an exported issue record and does not change the 125-issue counts.
+
+The 2026-11-13 Forge-repository records (Web `Sandbox.ALLOW_ALL` iframe
+sandbox in Web 1.0.5, the Android example build directory from Forge PR #1,
+and the Xcode 27 / Swift 6.4 build failure from Forge #2) are not exported
+CSV records and do not change the 125-issue counts. Their source fixes are
+complete and their runtime gates are tracked in the runtime register.
+
+Android 1.0.56 raised `minSdkVersion` to 24, which removes the floor that
+blocked the native SDK-deprecated cleanup for #2641 / #2685. Phase 3 step 1
+(Android 1.0.58) removed the unreachable API <= 24 branches; step 2, the
+re-evaluation of `forceDark`, `saveFormData`, `WebView.clearCache`,
+AbsoluteLayout, and legacy print/fullscreen, is still open in
+[`deprecated-api-migration-plan.md`](deprecated-api-migration-plan.md).
 
 The 78 implementation or mitigation records awaiting real validation are
 listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
@@ -679,7 +702,8 @@ Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 
 ## Definition of done
 
-The 2026-08-13 status pass has 77 locally implemented or mitigated issue
+The counts in this paragraph are a dated 2026-08-13 snapshot; the current
+counts are in [Scope and counts](#scope-and-counts). The 2026-08-13 status pass had 77 locally implemented or mitigated issue
 records awaiting runtime validation, one source-validated issue (#2709) with
 no runtime gate, one issue (#2745) closed by source review, fifteen
 host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
@@ -687,7 +711,7 @@ host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
 records and host boundaries are
 deliberately not counted as active implementation work; their status notes
  live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
- [`known-issues.md`](known-issues.md). The active queue contains 24 bugs, 4
+ [`known-issues.md`](known-issues.md). The active queue then contained 24 bugs, 4
  enhancements, 0 unlabelled records, and 3 showcase records (28 active
 technical records after excluding showcases).
 

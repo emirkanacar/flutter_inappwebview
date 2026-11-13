@@ -371,6 +371,29 @@ abstract class PlatformContainerController extends PlatformInterface {
     );
   }
 
+  /// Starts the renderer process for the Android profile named
+  /// [containerId] ahead of the first WebView that uses it.
+  ///
+  /// The call is a hint: the WebView provider may ignore it, and an already
+  /// running renderer is reused. Returns `false` when the profile store, the
+  /// [WebViewFeature.WARM_UP_RENDERER_PROCESS] feature, or the provider method
+  /// is unavailable, or when the call throws.
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'Profile.warmUpRendererProcess',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/Profile#warmUpRendererProcess()',
+        note: 'Requires [WebViewFeature.WARM_UP_RENDERER_PROCESS].',
+      ),
+    ],
+  )
+  Future<bool> warmUpRendererProcess({required String containerId}) {
+    throw UnimplementedError(
+      'warmUpRendererProcess is not implemented on the current platform',
+    );
+  }
+
   /// Checks whether this controller is available on [platform].
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

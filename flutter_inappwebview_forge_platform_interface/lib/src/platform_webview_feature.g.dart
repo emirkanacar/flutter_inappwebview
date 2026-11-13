@@ -340,6 +340,13 @@ class WebViewFeature {
     'VISUAL_STATE_CALLBACK',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.warmUpRendererProcess].
+  static const WARM_UP_RENDERER_PROCESS = WebViewFeature._internal(
+    'WARM_UP_RENDERER_PROCESS',
+    'WARM_UP_RENDERER_PROCESS',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers opt-in
   ///[InAppWebViewSettings.useWebViewBuilder] configuration.
   static const WEBVIEW_BUILDER = WebViewFeature._internal(
@@ -473,6 +480,7 @@ class WebViewFeature {
     WebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
     WebViewFeature.USER_AGENT_METADATA,
     WebViewFeature.VISUAL_STATE_CALLBACK,
+    WebViewFeature.WARM_UP_RENDERER_PROCESS,
     WebViewFeature.WEBVIEW_BUILDER,
     WebViewFeature.WEB_AUTHENTICATION,
     WebViewFeature.WEB_MESSAGE_ARRAY_BUFFER,
@@ -667,6 +675,8 @@ class WebViewFeature {
         return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
+      case 'WARM_UP_RENDERER_PROCESS':
+        return 'WARM_UP_RENDERER_PROCESS';
       case 'WEBVIEW_BUILDER':
         return 'WEBVIEW_BUILDER';
       case 'WEB_AUTHENTICATION':
@@ -1018,6 +1028,13 @@ class AndroidWebViewFeature {
     'VISUAL_STATE_CALLBACK',
   );
 
+  ///Feature for [isFeatureSupported]. This feature covers
+  ///[PlatformContainerController.warmUpRendererProcess].
+  static const WARM_UP_RENDERER_PROCESS = AndroidWebViewFeature._internal(
+    'WARM_UP_RENDERER_PROCESS',
+    'WARM_UP_RENDERER_PROCESS',
+  );
+
   ///Feature for [isFeatureSupported]. This feature covers opt-in
   ///[InAppWebViewSettings.useWebViewBuilder] configuration.
   static const WEBVIEW_BUILDER = AndroidWebViewFeature._internal(
@@ -1144,6 +1161,7 @@ class AndroidWebViewFeature {
     AndroidWebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
     AndroidWebViewFeature.USER_AGENT_METADATA,
     AndroidWebViewFeature.VISUAL_STATE_CALLBACK,
+    AndroidWebViewFeature.WARM_UP_RENDERER_PROCESS,
     AndroidWebViewFeature.WEBVIEW_BUILDER,
     AndroidWebViewFeature.WEB_AUTHENTICATION,
     AndroidWebViewFeature.WEB_MESSAGE_CALLBACK_ON_MESSAGE,
@@ -1328,6 +1346,8 @@ class AndroidWebViewFeature {
         return 'USER_AGENT_METADATA';
       case 'VISUAL_STATE_CALLBACK':
         return 'VISUAL_STATE_CALLBACK';
+      case 'WARM_UP_RENDERER_PROCESS':
+        return 'WARM_UP_RENDERER_PROCESS';
       case 'WEBVIEW_BUILDER':
         return 'WEBVIEW_BUILDER';
       case 'WEB_AUTHENTICATION':

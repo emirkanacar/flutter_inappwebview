@@ -917,6 +917,34 @@ namespace flutter_inappwebview_plugin
     channel->InvokeMethod("onExitFullscreen", std::move(arguments));
   }
 
+  void WebViewChannelDelegate::onCreateContextMenu(const int64_t& type, const std::optional<std::string>& extra) const
+  {
+    if (!canDispatchCallbacks()) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{
+      {"type", make_fl_value(type)},
+      {"extra", make_fl_value(extra)},
+      });
+    channel->InvokeMethod("onCreateContextMenu", std::move(arguments));
+  }
+
+  void WebViewChannelDelegate::onContextMenuActionItemClicked(const flutter::EncodableValue& id, const std::string& title) const
+  {
+    if (!canDispatchCallbacks()) {
+      return;
+    }
+
+    auto arguments = std::make_unique<flutter::EncodableValue>(flutter::EncodableMap{
+      {"id", id},
+      {"title", make_fl_value(title)},
+      {"androidId", flutter::EncodableValue()},
+      {"iosId", flutter::EncodableValue()},
+      });
+    channel->InvokeMethod("onContextMenuActionItemClicked", std::move(arguments));
+  }
+
   void WebViewChannelDelegate::onFaviconChanged(std::shared_ptr<FaviconChangedRequest> request) const
   {
     if (!canDispatchCallbacks()) {

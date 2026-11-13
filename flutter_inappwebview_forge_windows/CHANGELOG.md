@@ -1,3 +1,36 @@
+## 1.0.17 - 2026-11-14
+
+- Add `WebStorageManager` on Windows with `deleteBrowsingData()`, which
+  clears the default WebView2 profile through
+  `ICoreWebView2Profile2::ClearBrowsingDataAll` and returns `false` when the
+  runtime does not expose the interface. `WindowsInAppWebViewPlatform` now
+  creates `WindowsWebStorageManager`; its `fetchDataRecords`,
+  `removeDataFor`, and `removeDataModifiedSince` overrides, which called
+  native methods that never existed, were removed, so they throw
+  `UnimplementedError` as the capability metadata already stated.
+  `deleteBrowsingDataForSite` is not supported (WebView2 has no site-scoped
+  clear API).
+- Add native `ContextMenu` support for `InAppWebView`,
+  `HeadlessInAppWebView`, and `InAppBrowser` through WebView2
+  `ContextMenuRequested` (`ICoreWebView2_11`). Custom `menuItems` are
+  appended as command items (requires `ICoreWebView2Environment9`) and
+  report clicks through `onContextMenuActionItemClicked` with the original
+  int or string id; `hideDefaultSystemContextMenuItems` removes the default
+  items; `onCreateContextMenu` receives the hit-test type (link, image,
+  image link, editable) and extra. The handler is registered only when a
+  `ContextMenu` is supplied, so default behavior is unchanged without one,
+  and no event is raised while `disableContextMenu` is `true`.
+  `onHideContextMenu` is not called because WebView2 has no menu-dismissed
+  event. Malformed menu items are skipped instead of throwing.
+- Method-channel dispatch now catches the `std::out_of_range` /
+  `std::bad_variant_access` thrown by `get_fl_map_value` (and any other C++
+  exception) for a missing or wrong-type argument. The call completes with
+  an `invalid_arguments` error (a `PlatformException` in Dart) instead of
+  terminating the process; a handler that already completed its result is not
+  completed twice. Channel names, method names, and payloads are unchanged.
+  Native-side counterpart of
+  [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856).
+
 ## 1.0.16 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback

@@ -104,6 +104,144 @@ Package Manager plugin integration) pass. Runtime gate: an iOS 26+ and macOS
 The compile failure itself is resolved by the build evidence above. This
 record does not change the 78 CSV runtime-pending count.
 
+### iOS, macOS, and Windows method-channel argument validation (local hardening)
+
+Not a CSV record; native-side counterpart of the Android payload hardening in
+[#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856).
+iOS and macOS read required channel arguments with `arguments!["key"] as! T`
+(about 170 sites), and Windows reads them with `get_fl_map_value`, which
+throws `std::out_of_range` / `std::bad_variant_access` with no handler. A
+missing, `null`, or wrong-type argument therefore terminated the app.
+iOS 2.1.38 / macOS 1.1.13 changes read required values through
+`requiredArgument` (`Types/ChannelArguments.swift`); each affected handler
+wraps a throwing body and completes the call with an `invalid_arguments`
+`FlutterError`. Windows `ChannelDelegate` wraps every `HandleMethodCall` in
+`HandleMethodCallGuarded`, which catches C++ exceptions and completes the
+call with `invalid_arguments` only if the handler has not already completed
+it. Channel names, method names, payload keys, and optional-argument defaults
+are unchanged; the Dart side was verified and left unchanged (it already
+surfaces a `FlutterError` as a `PlatformException`). Linux was verified and
+left unchanged: its typed getters in `linux/utils/flutter.h` return defaults
+instead of throwing.
+
+Evidence: source-contract regression tests
+(`test/channel_argument_source_test.dart` in the iOS, macOS, and Windows
+packages) failed before the change and pass after it; the iOS, macOS, and
+Windows package tests, `flutter analyze`, the iOS native lifecycle tests,
+and `flutter build ios --debug --no-codesign` / `flutter build macos --debug`
+for both examples (Flutter 3.50.0) pass. A `swiftc` check of the helper
+covers present, missing, `null`, wrong-type, and Swift-dictionary arguments.
+The Windows guard was compiled with `clang++ -std=c++17` against a stub
+Flutter wrapper on macOS; throw-before-result, throw-after-result (no double
+completion), non-`std::exception` throws, and the normal path behave as
+expected. Runtime gate: a Windows example build with MSVC and the real
+Flutter wrapper, and a run on each platform that sends a malformed call (for
+example `evaluateJavascript` without `source`) and receives a
+`PlatformException` with code `invalid_arguments` while the WebView keeps
+working. This record does not change the 78 CSV runtime-pending count.
+
+### Browsing data deletion (local feature)
+
+`WebStorageManager.deleteBrowsingData()` and
+`deleteBrowsingDataForSite(site:)` are source-complete in the
+platform-interface, Android, iOS, macOS, and root packages (root 2.1.80 release line).
+Android uses AndroidX WebKit 1.16.0 `WebStorageCompat` behind
+`WebViewFeature.DELETE_BROWSING_DATA` and replies exactly once; iOS and macOS
+use `WKWebsiteDataStore` with the shared `WebsiteDataSiteMatcher`. Dart
+channel tests, the swiftc matcher tests
+(`tool/run_apple_website_data_matcher_tests.sh`), the Android debug APK, the
+iOS Simulator build, and the macOS example `xcodebuild` (with
+`MACOSX_DEPLOYMENT_TARGET=12.0`) pass. Runtime validation requires a physical
+Android device with a provider that does and one that does not advertise
+`DELETE_BROWSING_DATA`, and iOS/macOS devices that confirm cookies, local
+storage, IndexedDB, and service workers for the site and its subdomains are
+removed while other sites remain. Linux (`WEBKIT_WEBSITE_DATA_ALL` clear
+plus the standard-library `WebsiteDataSiteMatcher`, tested by
+`tool/run_linux_website_data_matcher_tests.sh`) and Windows
+(`deleteBrowsingData` only, via `ICoreWebView2Profile2::ClearBrowsingDataAll`
+on a temp WebView of the default environment) are source-complete with Dart
+channel and source-contract tests, but neither native library was built on
+this (macOS) host. They need a Linux WPE build that confirms cookies,
+storage, and IndexedDB are removed for the site and its subdomains only, and
+a Windows WebView2 build that confirms the default profile is cleared and
+`false` is returned on a runtime without `ICoreWebView2Profile2`. Web is not
+implemented. This record is not a CSV issue and does not change the 78 CSV
+runtime-pending count.
+
+### `removeDataModifiedSince` timestamp unit (local fix)
+
+iOS and macOS read the Dart `millisecondsSinceEpoch` timestamp as seconds;
+Linux passed Unix seconds to `webkit_website_data_manager_clear` as a
+microsecond `GTimeSpan`. Both native sides are fixed without changing the
+channel payload, with Dart payload and native source-contract regression
+tests in the iOS, macOS, and Linux packages. The glib timespan arithmetic was
+checked in a standalone program on macOS; the iOS Simulator and macOS example
+builds pass. Runtime validation requires a Linux WPE build/run (not possible
+on the macOS host) and an Apple device check that data older than the date is
+kept while newer data is removed. This is not a CSV issue record.
+
+### Lockdown Mode and cookie policy (local feature)
+
+`InAppWebViewSettings.isLockdownModeEnabled` (iOS 16+, macOS 13+) and
+`CookieManager.setCookiePolicy` / `getCookiePolicy` with
+`HTTPCookieStorePolicy` (iOS 17+, macOS 14+) are source-complete in the
+platform-interface, iOS, macOS, and root packages (root 2.1.80 release line). The lockdown
+value is applied to the initial `defaultWebpagePreferences` and to every
+`decidePolicyFor:preferences:` navigation; `nil` leaves the system value.
+Settings serialization, enum mapping, channel payload, capability metadata,
+and native source-contract tests pass, and the iOS Simulator and macOS example
+builds pass. Runtime validation requires: an iOS 16+ / macOS 13+ device where
+`true` disables JIT/WebAssembly (for example `typeof WebAssembly`) and
+`false` re-enables them while system Lockdown Mode is on, `setSettings`
+taking effect on the next navigation, and an iOS 17+ / macOS 14+ device
+where `DISALLOW` blocks both `Set-Cookie` and cookie sending for the default
+and a container data store, and `ALLOW` restores the existing cookies. This
+is not a CSV issue record.
+
+### iOS `writingToolsBehavior` parsing (local fix)
+
+The iOS native `writingToolsBehavior` setting was declared `Int?`, which is
+not visible to Objective-C, so `ISettings.parse` (KVC) skipped it and the
+setting was never applied (confirmed with a standalone `responds(to:)`
+check). It is now parsed explicitly; a source-contract regression test and
+the iOS Simulator build pass. Runtime validation requires an iOS 18+ device
+with Apple Intelligence where `IOSWritingToolsBehavior.NONE` / `LIMITED`
+changes the Writing Tools UI. This is not a CSV issue record.
+
+### Android profile renderer warm-up (local feature)
+
+`ContainerController.warmUpRendererProcess(containerId:)` is source-complete
+in the platform-interface, Android, and root packages (root 2.1.80 release line). The
+Kotlin handler requires the profile store, a non-empty container id, and
+`WebViewFeature.WARM_UP_RENDERER_PROCESS`, then calls the experimental
+`Profile.warmUpRendererProcess()` reflectively and replies `false` on any
+missing piece or exception. Channel payload, null-reply mapping, capability
+metadata, and native source-contract tests pass, and the Android example
+debug build passes. Runtime validation requires a WebView provider that
+reports the feature, where calling it before the first WebView of a profile
+starts a sandboxed renderer (visible in `adb shell ps`) and shortens the
+first page load, and a provider without the feature where the call returns
+`false` without side effects. This is not a CSV issue record.
+
+### Windows context menu (local feature)
+
+`ContextMenu` is source-complete for Windows `InAppWebView`,
+`HeadlessInAppWebView`, and `InAppBrowser` (Windows 1.0.17): the creation
+params are parsed by `types/context_menu.cpp`, and
+`ICoreWebView2_11.add_ContextMenuRequested` is registered only when a menu
+is supplied. Custom items need `ICoreWebView2Environment9`; WebView2 has no
+menu-dismissed event, so `onHideContextMenu` is not raised. The capability
+metadata and source-contract tests pass and the menu parser compiles and
+passes a standalone C++ check, but the WebView2 C++ was not built on this
+(macOS) host. Validation requires a Windows build with a WebView2 runtime
+where: custom items appear after the default items (with a separator) and
+`onContextMenuActionItemClicked` reports the int or string id and title;
+`hideDefaultSystemContextMenuItems` leaves only the custom items;
+`onCreateContextMenu` reports type 7/5/8/9/0 for link, image, image link,
+editable, and plain page; the default menu is unchanged without a
+`ContextMenu`; and nothing is raised while `disableContextMenu` is `true`.
+This is not a CSV issue record.
+
 ### Native WebView API gaps follow-up (local feature)
 
 NavigationParameters, Profile `preconnect`, BFCache depth settings, opt-in
@@ -522,6 +660,13 @@ release path uses a stale configured Android Studio JDK location in this
 environment; clean JDK 17/21, AAB, provider, device, and publish validation
 remain required. The records therefore stay in this register and the count is
 now 68.
+
+Current state for #2641 / #2685: Android 1.0.56 raised the floor to API 24, and
+Phase 3 step 1 (Android 1.0.58) removed the unreachable API <= 24 branches, the `CookieSyncManager` paths, and the pre-API 21 file chooser path; the Android package suite (71 tests, including the new `min_sdk_dead_code_test.dart`) and the example debug APK build pass. The removed branches were never taken on API 24+, so
+the runtime gate is unchanged in scope: an API 24/29/35/36 device or provider
+pass covering cookies (`CookieManager` set/get/delete/flush), the file chooser
+(single, multiple, camera, and audio capture), printing, and fullscreen, plus
+the clean JDK 17/21 release, AAB, and publish dry-run listed above.
 
 Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
 and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)

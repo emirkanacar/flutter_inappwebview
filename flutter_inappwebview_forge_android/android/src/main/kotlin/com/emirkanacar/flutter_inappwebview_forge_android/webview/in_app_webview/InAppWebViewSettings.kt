@@ -420,9 +420,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             realSettings["safeBrowsingEnabled"] = settings.safeBrowsingEnabled
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            realSettings["mixedContentMode"] = settings.mixedContentMode
-        }
+        realSettings["mixedContentMode"] = settings.mixedContentMode
         realSettings["allowContentAccess"] = settings.allowContentAccess
         realSettings["allowFileAccess"] = settings.allowFileAccess
         realSettings["allowFileAccessFromFileURLs"] = settings.allowFileAccessFromFileURLs
@@ -437,9 +435,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS)) {
             realSettings["disabledActionModeMenuItems"] = WebSettingsCompat.getDisabledActionModeMenuItems(settings)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            realSettings["disabledActionModeMenuItems"] = settings.disabledActionModeMenuItems
-        }
+        realSettings["disabledActionModeMenuItems"] = settings.disabledActionModeMenuItems
         realSettings["fantasyFontFamily"] = settings.fantasyFontFamily
         realSettings["fixedFontFamily"] = settings.fixedFontFamily
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
@@ -464,7 +460,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         realSettings["minimumLogicalFontSize"] = settings.minimumLogicalFontSize
         if (WebViewFeature.isFeatureSupported(WebViewFeature.OFF_SCREEN_PRERASTER)) {
             realSettings["offscreenPreRaster"] = WebSettingsCompat.getOffscreenPreRaster(settings)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else {
             realSettings["offscreenPreRaster"] = settings.offscreenPreRaster
         }
         realSettings["sansSerifFontFamily"] = settings.sansSerifFontFamily
@@ -518,21 +514,13 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
             layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
         }
         if (value == "NARROW_COLUMNS" || value == "NORMAL" || value == "TEXT_AUTOSIZING") {
-            layoutAlgorithm = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
-            } else {
-                WebSettings.LayoutAlgorithm.NORMAL
-            }
+            layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
         }
     }
 
     private fun getLayoutAlgorithm(): String? = when (layoutAlgorithm) {
         WebSettings.LayoutAlgorithm.NORMAL -> "NORMAL"
-        WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            "TEXT_AUTOSIZING"
-        } else {
-            "NORMAL"
-        }
+        WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING -> "TEXT_AUTOSIZING"
         WebSettings.LayoutAlgorithm.NARROW_COLUMNS -> "NARROW_COLUMNS"
         null -> null
         else -> null

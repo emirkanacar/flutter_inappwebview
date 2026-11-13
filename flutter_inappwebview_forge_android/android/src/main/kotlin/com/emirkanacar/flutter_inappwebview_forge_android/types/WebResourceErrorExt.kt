@@ -1,8 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.webkit.WebResourceError
-import androidx.annotation.RequiresApi
 import androidx.webkit.WebResourceErrorCompat
 import androidx.webkit.WebViewFeature
 import java.util.HashMap
@@ -13,12 +11,10 @@ open class WebResourceErrorExt(
 ) {
     companion object {
         @JvmStatic
-        @RequiresApi(Build.VERSION_CODES.M)
         fun fromWebResourceError(error: WebResourceError): WebResourceErrorExt =
             WebResourceErrorExt(error.getErrorCode(), error.getDescription()?.toString() ?: "")
 
         @JvmStatic
-        @RequiresApi(Build.VERSION_CODES.M)
         fun fromWebResourceError(error: WebResourceErrorCompat): WebResourceErrorExt {
             val type = if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_RESOURCE_ERROR_GET_CODE)) {
                 error.getErrorCode()

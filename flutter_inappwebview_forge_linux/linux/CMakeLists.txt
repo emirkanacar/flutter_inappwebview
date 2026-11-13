@@ -186,6 +186,7 @@ list(APPEND PLUGIN_SOURCES
   "credential_database.cc"
   "proxy_manager.cc"
   "utils/software_rendering.cc"
+  "utils/website_data_site_matcher.cc"
   "web_storage_manager.cc"
   "webview_environment.cc"
   "content_blocker/content_blocker_handler.cc"

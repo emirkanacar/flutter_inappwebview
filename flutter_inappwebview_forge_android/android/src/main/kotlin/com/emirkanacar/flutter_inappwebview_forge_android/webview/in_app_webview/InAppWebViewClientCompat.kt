@@ -39,7 +39,6 @@ open class InAppWebViewClientCompat(
 
     private val delegate = InAppWebViewClient(inAppBrowserDelegate)
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
         delegate.shouldOverrideUrlLoading(view, request)
 
@@ -66,7 +65,6 @@ open class InAppWebViewClientCompat(
         delegate.doUpdateVisitedHistory(view, url, isReload)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(
         view: WebView,
         request: WebResourceRequest,
@@ -117,7 +115,6 @@ open class InAppWebViewClientCompat(
         delegate.onReceivedError(view, errorCode, description, failingUrl)
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedHttpError(
         view: WebView,
         request: WebResourceRequest,
@@ -143,7 +140,6 @@ open class InAppWebViewClientCompat(
         delegate.onReceivedSslError(view, handler, sslError)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onReceivedClientCertRequest(view: WebView, request: ClientCertRequest) {
         delegate.onReceivedClientCertRequest(view, request)
     }
@@ -232,7 +228,6 @@ open class InAppWebViewClientCompat(
     override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? =
         delegate.shouldInterceptRequest(view, url)
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldInterceptRequest(
         view: WebView,
         request: WebResourceRequest

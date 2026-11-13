@@ -133,4 +133,12 @@ class AndroidContainerController extends PlatformContainerController {
         'url': url,
       }) ??
       false;
+
+  @override
+  Future<bool> warmUpRendererProcess({required String containerId}) async =>
+      await _channel.invokeMethod<bool>(
+        'warmUpRendererProcess',
+        <String, dynamic>{'containerId': containerId},
+      ) ??
+      false;
 }

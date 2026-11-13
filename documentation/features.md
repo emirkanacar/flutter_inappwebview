@@ -19,8 +19,13 @@ common workflows are collected here.
 | Start an external authentication flow | `WebAuthenticationSession` | Supported Apple platforms |
 | Start an opt-in native file download | `onDownloadStarting` + `DownloadJobController` | Android, iOS, macOS, Windows |
 | Observe cookie store changes | `CookieManager.addCookieChangedListener` | iOS, macOS |
+| Block or allow all cookies for a store | `CookieManager.setCookiePolicy`, `getCookiePolicy` | iOS 17+, macOS 14+ |
+| Enable or opt out of Lockdown Mode | `isLockdownModeEnabled` | iOS 16+, macOS 13+ |
+| Delete all browsing data, or one site's | `WebStorageManager.deleteBrowsingData`, `deleteBrowsingDataForSite` | Android (provider-gated), iOS, macOS, Linux; Windows (`deleteBrowsingData` only) |
+| Add custom items to the native context menu | `ContextMenu` | Android, iOS, macOS, Windows |
 | Find text without the system UI | `FindInteractionController.findString` | iOS, macOS |
 | Warm a profile origin before navigation | `ContainerController.preconnect` | Android |
+| Start a profile renderer process early | `ContainerController.warmUpRendererProcess` | Android (provider-gated) |
 | Prefetch a profile URL | `ContainerController.prefetchUrl` | Android |
 | Add profile-scoped request headers | `ContainerController.addCustomHeader` | Android |
 | Restrict Android WebView construction | `useWebViewBuilder` | Android |
@@ -104,6 +109,65 @@ if (CookieManager.isMethodSupported(
 Call `removeCookieChangedListener` when the feature that owns the observer
 is disposed.
 
+On iOS 17+ and macOS 14+, `setCookiePolicy` stops a cookie store from storing
+and sending cookies without deleting the ones it already has. Pass
+`webViewController` to target that WebView's data store (for example a
+container); otherwise the default store is used:
+
+```dart
+final applied = await cookies.setCookiePolicy(
+  policy: HTTPCookieStorePolicy.DISALLOW,
+);
+if (!applied) {
+  // Older OS: the policy API is not available.
+}
+```
+
+## Lockdown Mode
+
+`isLockdownModeEnabled` controls Apple Lockdown Mode for a WebView on iOS 16+
+and macOS 13+. Leave it `null` (the default) to follow the system setting.
+Set it to `true` to harden a WebView that renders untrusted content, or to
+`false` to exempt a WebView that shows only trusted content and needs a
+feature Lockdown Mode disables. Changes made with `setSettings` apply from
+the next navigation.
+
+```dart
+InAppWebView(
+  initialSettings: InAppWebViewSettings(isLockdownModeEnabled: true),
+)
+```
+
+## Delete browsing data
+
+`WebStorageManager.deleteBrowsingData` removes cookies, cache, DOM storage,
+IndexedDB, and service workers for every site in the default data store.
+`deleteBrowsingDataForSite` removes the same data for one site and its
+subdomains and returns the site that was cleared:
+
+```dart
+final storage = WebStorageManager.instance();
+
+if (WebStorageManager.isMethodSupported(
+  PlatformWebStorageManagerMethod.deleteBrowsingDataForSite,
+)) {
+  final cleared = await storage.deleteBrowsingDataForSite(
+    site: 'https://login.example.com',
+  );
+  debugPrint('Cleared site: $cleared');
+}
+```
+
+On Android both calls need a WebView provider that advertises
+`DELETE_BROWSING_DATA`; otherwise `deleteBrowsingData` returns `false` and
+`deleteBrowsingDataForSite` returns `null`. On iOS, macOS, and Linux the
+site is matched against WebKit's website data record names, so the returned
+site is the registrable domain WebKit reports, or the host itself when no
+record exists. On Windows only `deleteBrowsingData` is available; it clears
+the default WebView2 profile and returns `false` on runtimes without
+`ICoreWebView2Profile2`. Neither call clears container (profile) stores; use
+`ContainerController.clearContainerData` for those.
+
 ## Isolate persistent container data
 
 Use a stable `containerId` when the application needs separate persistent
@@ -168,6 +232,14 @@ if (await WebViewFeature.isFeatureSupported(WebViewFeature.PRECONNECT)) {
     containerId: profileId,
     url: 'https://example.com/',
   );
+}
+
+// Start the profile's renderer process before the first WebView is shown.
+// The provider may ignore the hint; the call returns false when unsupported.
+if (await WebViewFeature.isFeatureSupported(
+  WebViewFeature.WARM_UP_RENDERER_PROCESS,
+)) {
+  await containers.warmUpRendererProcess(containerId: profileId);
 }
 ```
 

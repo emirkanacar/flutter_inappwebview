@@ -18,12 +18,20 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
         case "setEnabled":
             if let pullToRefreshView = pullToRefreshControl {
-                let enabled = arguments!["enabled"] as! Bool
+                let enabled = try requiredArgument(arguments, "enabled", as: Bool.self)
                 if enabled {
                     pullToRefreshView.delegate?.enablePullToRefresh()
                 } else {
@@ -43,7 +51,7 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
             break
         case "setRefreshing":
             if let pullToRefreshView = pullToRefreshControl {
-                let refreshing = arguments!["refreshing"] as! Bool
+                let refreshing = try requiredArgument(arguments, "refreshing", as: Bool.self)
                 if refreshing {
                     pullToRefreshView.beginRefreshing()
                 } else {
@@ -63,7 +71,7 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
             break
         case "setColor":
             if let pullToRefreshView = pullToRefreshControl {
-                let color = arguments!["color"] as! String
+                let color = try requiredArgument(arguments, "color", as: String.self)
                 pullToRefreshView.tintColor = UIColor(hexString: color)
                 result(true)
             } else {
@@ -72,7 +80,7 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
             break
         case "setBackgroundColor":
             if let pullToRefreshView = pullToRefreshControl {
-                let color = arguments!["color"] as! String
+                let color = try requiredArgument(arguments, "color", as: String.self)
                 pullToRefreshView.backgroundColor = UIColor(hexString: color)
                 result(true)
             } else {
@@ -81,7 +89,7 @@ public class PullToRefreshChannelDelegate: ChannelDelegate {
             break
         case "setStyledTitle":
             if let pullToRefreshView = pullToRefreshControl {
-                let attributedTitleMap = arguments!["attributedTitle"] as! [String: Any?]
+                let attributedTitleMap = try requiredArgument(arguments, "attributedTitle", as: [String: Any?].self)
                 pullToRefreshView.attributedTitle = NSAttributedString.fromMap(map: attributedTitleMap)
                 result(true)
             } else {

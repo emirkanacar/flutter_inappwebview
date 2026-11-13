@@ -247,6 +247,21 @@ enum PlatformCookieManagerMethod {
   ///{@endtemplate}
   getCookie,
 
+  ///Can be used to check if the [PlatformCookieManager.getCookiePolicy] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.getCookiePolicy.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 17.0+ ([Official API - WKHTTPCookieStore.getCookiePolicy](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183225-getcookiepolicy))
+  ///- macOS WKWebView 14.0+ ([Official API - WKHTTPCookieStore.getCookiePolicy](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183225-getcookiepolicy))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [webViewController]: all platforms
+  ///
+  ///Use the [PlatformCookieManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  getCookiePolicy,
+
   ///Can be used to check if the [PlatformCookieManager.getCookies] method is supported at runtime.
   ///
   ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.getCookies.supported_platforms}
@@ -334,6 +349,22 @@ enum PlatformCookieManagerMethod {
   ///Use the [PlatformCookieManager.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   setCookie,
+
+  ///Can be used to check if the [PlatformCookieManager.setCookiePolicy] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.setCookiePolicy.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- iOS WKWebView 17.0+ ([Official API - WKHTTPCookieStore.setCookiePolicy](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183226-setcookiepolicy))
+  ///- macOS WKWebView 14.0+ ([Official API - WKHTTPCookieStore.setCookiePolicy](https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183226-setcookiepolicy))
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [policy]: all platforms
+  ///- [webViewController]: all platforms
+  ///
+  ///Use the [PlatformCookieManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  setCookiePolicy,
 }
 
 extension _PlatformCookieManagerMethodSupported on PlatformCookieManager {
@@ -402,6 +433,12 @@ extension _PlatformCookieManagerMethodSupported on PlatformCookieManager {
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformCookieManagerMethod.getCookiePolicy:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
       case PlatformCookieManagerMethod.getCookies:
         return kIsWeb && platform == null
             ? true
@@ -435,6 +472,12 @@ extension _PlatformCookieManagerMethodSupported on PlatformCookieManager {
                     TargetPlatform.windows,
                     TargetPlatform.linux,
                   ].contains(platform ?? defaultTargetPlatform);
+      case PlatformCookieManagerMethod.setCookiePolicy:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+            ].contains(platform ?? defaultTargetPlatform);
     }
   }
 }

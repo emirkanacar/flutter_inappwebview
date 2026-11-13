@@ -1,3 +1,28 @@
+## 1.0.58 - 2026-11-14
+
+- Add `warmUpRendererProcess` to the container controller channel. It calls
+  AndroidX `Profile.warmUpRendererProcess()` (webkit 1.16.0) for the named
+  profile, gated on `WebViewFeature.WARM_UP_RENDERER_PROCESS`, and replies
+  `false` without a profile store, feature, or provider method. The
+  experimental opt-in API is invoked reflectively, like `preconnect`.
+- Add `deleteBrowsingData` / `deleteBrowsingDataForSite` to the WebStorage
+  manager channel through AndroidX `WebStorageCompat` (webkit 1.16.0). Both
+  are gated on `WebViewFeature.DELETE_BROWSING_DATA` and reply `false` /
+  `null` on providers without it; each reply is sent exactly once, after
+  the provider's completion callback. Unlike `deleteAllData`, this also
+  clears cookies, HTTP cache, and service workers.
+- Remove native code that is unreachable with `minSdk 24` (Phase 3 of the
+  deprecated API migration plan, #2641 / #2685): `SDK_INT` guards and
+  `@RequiresApi` / `@TargetApi` annotations for API 24 and below, the
+  `CookieSyncManager` / pre-Lollipop cookie branches, the pre-API 21
+  `openFileChooser` / `PICKER_LEGACY` file chooser path, and the unused
+  `FULLSCREEN_SYSTEM_UI_VISIBILITY` constant. The always-taken branch is kept
+  in every case, so behavior on API 24+ is unchanged; the Dart API and the
+  method-channel contract are unchanged.
+- The re-evaluation of `forceDark`, `saveFormData`, `WebView.clearCache`,
+  `AbsoluteLayout`, and legacy print/fullscreen paths is still open; those
+  call sites keep their file-level deprecation suppressions.
+
 ## 1.0.57 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback

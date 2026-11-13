@@ -1,13 +1,10 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.print_job
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
 import com.emirkanacar.flutter_inappwebview_forge_android.types.Disposable
 import com.emirkanacar.flutter_inappwebview_forge_android.types.PrintJobInfoExt
 import io.flutter.plugin.common.MethodChannel
 
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 open class PrintJobController(
     @JvmField var id: String,
     @JvmField var settings: PrintJobSettings?,

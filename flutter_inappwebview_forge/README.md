@@ -35,7 +35,7 @@ versions can still dispatch WebView gestures incorrectly on iOS.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.79
+  flutter_inappwebview_forge: ^2.1.80
 ```
 
 ```sh
@@ -134,7 +134,7 @@ Keep the preloader alive until the inline WebView takes ownership.
 
 ```yaml
 dependencies:
-  flutter_inappwebview_forge: ^2.1.79
+  flutter_inappwebview_forge: ^2.1.80
 ```
 
 ```dart

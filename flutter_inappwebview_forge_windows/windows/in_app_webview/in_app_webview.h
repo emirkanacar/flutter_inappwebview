@@ -13,6 +13,7 @@
 #include "../flutter_inappwebview_windows_plugin.h"
 #include "../plugin_scripts_js/plugin_scripts_util.h"
 #include "../types/content_world.h"
+#include "../types/context_menu.h"
 #include "../types/favicon_image_format.h"
 #include "../types/navigation_action.h"
 #include "../types/screenshot_configuration.h"
@@ -96,6 +97,7 @@ namespace flutter_inappwebview_plugin
     const std::variant<std::string, int64_t> id;
     const std::shared_ptr<InAppWebViewSettings> initialSettings;
     const std::optional<std::vector<std::shared_ptr<UserScript>>> initialUserScripts;
+    const std::shared_ptr<ContextMenu> contextMenu;
   };
 
   class InAppWebView
@@ -115,6 +117,7 @@ namespace flutter_inappwebview_plugin
     std::shared_ptr<InAppWebViewSettings> settings;
     InAppBrowser* inAppBrowser = nullptr;
     std::unique_ptr<UserContentController> userContentController;
+    std::shared_ptr<ContextMenu> contextMenu;
 
     InAppWebView(const FlutterInappwebviewWindowsPlugin* plugin, const InAppWebViewCreationParams& params, const HWND parentWindow,
       wil::com_ptr<ICoreWebView2Environment> webViewEnv,
@@ -162,6 +165,7 @@ namespace flutter_inappwebview_plugin
     void markReattached() { lifecycle_.markAttached(); lifecycle_.markReady(); }
     bool acceptsCallbacks() const { return lifecycle_.acceptsCallbacks(); }
     void prepare(const InAppWebViewCreationParams& params);
+    void onContextMenuRequested(ICoreWebView2ContextMenuRequestedEventArgs* args);
     std::optional<std::string> getUrl() const;
     std::optional<std::string> getTitle() const;
     std::optional<int64_t> getFrameId() const;

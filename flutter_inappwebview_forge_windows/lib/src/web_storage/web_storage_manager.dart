@@ -77,84 +77,10 @@ class WindowsWebStorageManager extends PlatformWebStorageManager
   Future<dynamic> _handleMethod(MethodCall call) async {}
 
   @override
-  Future<List<WebsiteDataRecord>> fetchDataRecords({
-    required Set<WebsiteDataType> dataTypes,
-  }) async {
-    List<WebsiteDataRecord> recordList = [];
-    List<String> dataTypesList = [];
-    for (var dataType in dataTypes) {
-      if (dataType.isSupported()) {
-        dataTypesList.add(dataType.toNativeValue()!);
-      }
-    }
+  Future<bool> deleteBrowsingData() async {
     Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("dataTypes", () => dataTypesList);
-    List<Map<dynamic, dynamic>> records =
-        (await channel?.invokeMethod<List>(
-          'fetchDataRecords',
-          args,
-        ))?.cast<Map<dynamic, dynamic>>() ??
-        [];
-    for (var record in records) {
-      List<String> dataTypesString = record["dataTypes"].cast<String>();
-      Set<WebsiteDataType> dataTypes = {};
-      for (var dataTypeValue in dataTypesString) {
-        var dataType = WebsiteDataType.fromNativeValue(dataTypeValue);
-        if (dataType != null) {
-          dataTypes.add(dataType);
-        }
-      }
-      recordList.add(
-        WebsiteDataRecord(
-          displayName: record["displayName"],
-          dataTypes: dataTypes,
-        ),
-      );
-    }
-    return recordList;
-  }
-
-  @override
-  Future<void> removeDataFor({
-    required Set<WebsiteDataType> dataTypes,
-    required List<WebsiteDataRecord> dataRecords,
-  }) async {
-    List<String> dataTypesList = [];
-    for (var dataType in dataTypes) {
-      if (dataType.isSupported()) {
-        dataTypesList.add(dataType.toNativeValue()!);
-      }
-    }
-
-    List<Map<String, dynamic>> recordList = [];
-    for (var record in dataRecords) {
-      recordList.add(record.toMap());
-    }
-
-    Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("dataTypes", () => dataTypesList);
-    args.putIfAbsent("recordList", () => recordList);
-    await channel?.invokeMethod('removeDataFor', args);
-  }
-
-  @override
-  Future<void> removeDataModifiedSince({
-    required Set<WebsiteDataType> dataTypes,
-    required DateTime date,
-  }) async {
-    List<String> dataTypesList = [];
-    for (var dataType in dataTypes) {
-      if (dataType.isSupported()) {
-        dataTypesList.add(dataType.toNativeValue()!);
-      }
-    }
-
-    var timestamp = date.millisecondsSinceEpoch;
-
-    Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("dataTypes", () => dataTypesList);
-    args.putIfAbsent("timestamp", () => timestamp);
-    await channel?.invokeMethod('removeDataModifiedSince', args);
+    return await channel?.invokeMethod<bool>('deleteBrowsingData', args) ??
+        false;
   }
 
   @override

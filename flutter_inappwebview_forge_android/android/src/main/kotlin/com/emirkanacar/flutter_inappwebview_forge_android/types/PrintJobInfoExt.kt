@@ -1,11 +1,8 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.print.PrintJobInfo
-import androidx.annotation.RequiresApi
 import java.util.HashMap
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
 open class PrintJobInfoExt {
     private var state: Int = 0
     private var copies: Int = 0

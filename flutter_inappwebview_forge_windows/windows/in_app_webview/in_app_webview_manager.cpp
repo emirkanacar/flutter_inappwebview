@@ -119,6 +119,7 @@ namespace flutter_inappwebview_plugin
     auto initialFile = get_optional_fl_map_value<std::string>(*arguments, "initialFile");
     auto initialDataMap = get_optional_fl_map_value<flutter::EncodableMap>(*arguments, "initialData");
     auto initialUserScriptList = get_optional_fl_map_value<flutter::EncodableList>(*arguments, "initialUserScripts");
+    auto contextMenu = ContextMenu::fromOptionalMap(get_optional_fl_map_value<flutter::EncodableMap>(*arguments, "contextMenu"));
     auto webViewEnvironmentId = get_optional_fl_map_value<std::string>(*arguments, "webViewEnvironmentId");
     auto keepAliveId = get_optional_fl_map_value<std::string>(*arguments, "keepAliveId");
     auto windowId = get_optional_fl_map_value<int64_t>(*arguments, "windowId");
@@ -175,7 +176,8 @@ namespace flutter_inappwebview_plugin
           InAppWebViewCreationParams params = {
             "",
             std::move(initialSettings),
-            initialUserScripts
+            initialUserScripts,
+            contextMenu
           };
 
           auto inAppWebView = std::make_unique<InAppWebView>(plugin, params, hwnd, std::move(webViewEnv), std::move(webViewController), std::move(webViewCompositionController));

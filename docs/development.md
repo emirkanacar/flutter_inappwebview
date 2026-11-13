@@ -77,6 +77,27 @@ fvm flutter test --no-pub
 
 The main example has extensive integration coverage under `flutter_inappwebview_forge/example/integration_test/`. Platform examples also have platform-specific integration tests. Integration tests require the target runtime and are not replaced by host-only unit tests.
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `master`, every pull
+request, and on manual dispatch. It reads the Flutter version from `.fvmrc`.
+
+| Job | Runner | Checks |
+| --- | --- | --- |
+| `dart` (one per package) | Ubuntu | `dart format --set-exit-if-changed lib`, `flutter analyze --no-pub --no-fatal-infos lib test`, `flutter test --no-pub` |
+| `generated-code` | Ubuntu | Reruns `build_runner` for the platform interface and fails if any generated file changes |
+| `apple-static` | macOS | `swift package dump-package` for the iOS and macOS packages, plus `tool/run_ios_native_lifecycle_tests.sh`, `tool/run_apple_website_data_matcher_tests.sh`, and `tool/run_linux_website_data_matcher_tests.sh` |
+| `android-build` | Ubuntu, JDK 17 | `flutter build apk --release` for the main example, then `tool/check_android_16k_alignment.sh` on the APK |
+
+Web and Linux do not commit a `pubspec_overrides.yaml`; CI creates one so
+they are tested against the platform interface in the same checkout.
+
+Known gaps: CI does not analyze the `example/` apps, does not run the main
+example's `example/test/` suite, does not build the iOS, macOS, Windows,
+Linux, or Web examples, and does not run integration tests. Analyzer infos
+are reported but are not fatal. These remain local or device validation
+steps.
+
 ## Native validation
 
 ### Android

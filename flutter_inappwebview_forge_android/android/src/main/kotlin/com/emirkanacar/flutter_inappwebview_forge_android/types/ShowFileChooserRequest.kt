@@ -1,7 +1,5 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.annotation.TargetApi
-import android.os.Build
 import android.webkit.WebChromeClient
 import java.util.HashMap
 
@@ -14,7 +12,6 @@ open class ShowFileChooserRequest(
 ) {
     companion object {
         @JvmStatic
-        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         fun fromFileChooserParams(fileChooserParams: WebChromeClient.FileChooserParams): ShowFileChooserRequest {
             val acceptTypes = fileChooserParams.getAcceptTypes()?.toMutableList() ?: mutableListOf()
             val title = fileChooserParams.getTitle()?.toString()

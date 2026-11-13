@@ -180,4 +180,16 @@ class LinuxWebStorageManager extends PlatformWebStorageManager {
       'timestamp': timestamp,
     });
   }
+
+  @override
+  Future<bool> deleteBrowsingData() async {
+    return await _channel.invokeMethod<bool>('deleteBrowsingData', {}) ?? false;
+  }
+
+  @override
+  Future<String?> deleteBrowsingDataForSite({required String site}) async {
+    return await _channel.invokeMethod<String>('deleteBrowsingDataForSite', {
+      'site': site,
+    });
+  }
 }

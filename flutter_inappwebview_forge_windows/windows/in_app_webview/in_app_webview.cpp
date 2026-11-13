@@ -106,7 +106,8 @@ namespace flutter_inappwebview_plugin
     wil::com_ptr<ICoreWebView2CompositionController> webViewCompositionController)
     : plugin(plugin), id(params.id),
     webViewEnv(std::move(webViewEnv)), webViewController(std::move(webViewController)), webViewCompositionController(std::move(webViewCompositionController)),
-    settings(params.initialSettings), userContentController(std::make_unique<UserContentController>(this))
+    settings(params.initialSettings), userContentController(std::make_unique<UserContentController>(this)),
+    contextMenu(params.contextMenu)
   {
     if (failedAndLog(this->webViewController->get_CoreWebView2(webView.put()))) {
       std::cerr << "Cannot create CoreWebView2." << std::endl;
@@ -302,6 +303,122 @@ namespace flutter_inappwebview_plugin
       std::make_unique<WebViewChannelDelegate>(this, plugin->registrar->messenger());
     findInteractionController = std::make_unique<FindInteractionController>(this, plugin->registrar->messenger());
     printJobManager = std::make_unique<PrintJobManager>(this, plugin->registrar->messenger());
+  }
+
+  void InAppWebView::onContextMenuRequested(ICoreWebView2ContextMenuRequestedEventArgs* args)
+  {
+    if (!args || !contextMenu || !lifecycle_.acceptsCallbacks()) {
+      return;
+    }
+
+    // Map the WebView2 target to the InAppWebViewHitTestResultType values used
+    // by Android: UNKNOWN 0, IMAGE 5, SRC_ANCHOR 7, SRC_IMAGE_ANCHOR 8,
+    // EDIT_TEXT 9.
+    wil::com_ptr<ICoreWebView2ContextMenuTarget> target;
+    if (channelDelegate && SUCCEEDED(args->get_ContextMenuTarget(&target)) && target) {
+      auto readUri = [](BOOL has, const std::function<HRESULT(LPWSTR*)>& getter) -> std::optional<std::string>
+        {
+          if (!has) {
+            return std::nullopt;
+          }
+          wil::unique_cotaskmem_string value;
+          if (FAILED(getter(&value)) || !value) {
+            return std::nullopt;
+          }
+          return wide_to_utf8(value.get());
+        };
+
+      COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND kind = COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_PAGE;
+      BOOL hasLink = FALSE;
+      BOOL hasSource = FALSE;
+      BOOL isEditable = FALSE;
+      failedLog(target->get_Kind(&kind));
+      failedLog(target->get_HasLinkUri(&hasLink));
+      failedLog(target->get_HasSourceUri(&hasSource));
+      failedLog(target->get_IsEditable(&isEditable));
+
+      auto linkUri = readUri(hasLink, [&target](LPWSTR* value) { return target->get_LinkUri(value); });
+      auto sourceUri = readUri(hasSource, [&target](LPWSTR* value) { return target->get_SourceUri(value); });
+      auto isImage = kind == COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_IMAGE;
+
+      int64_t type = 0;
+      std::optional<std::string> extra = std::nullopt;
+      if (isImage && linkUri.has_value()) {
+        type = 8;
+        extra = sourceUri.has_value() ? sourceUri : linkUri;
+      }
+      else if (linkUri.has_value()) {
+        type = 7;
+        extra = linkUri;
+      }
+      else if (isImage) {
+        type = 5;
+        extra = sourceUri;
+      }
+      else if (isEditable) {
+        type = 9;
+      }
+      channelDelegate->onCreateContextMenu(type, extra);
+    }
+
+    wil::com_ptr<ICoreWebView2ContextMenuItemCollection> items;
+    if (failedAndLog(args->get_MenuItems(&items)) || !items) {
+      return;
+    }
+
+    UINT32 count = 0;
+    if (contextMenu->hideDefaultSystemContextMenuItems && SUCCEEDED(items->get_Count(&count))) {
+      for (UINT32 index = count; index > 0; index--) {
+        failedLog(items->RemoveValueAtIndex(index - 1));
+      }
+    }
+
+    if (contextMenu->menuItems.empty()) {
+      return;
+    }
+
+    auto webViewEnv9 = webViewEnv.try_query<ICoreWebView2Environment9>();
+    if (!webViewEnv9) {
+      return;
+    }
+
+    count = 0;
+    if (FAILED(items->get_Count(&count))) {
+      return;
+    }
+
+    if (count > 0) {
+      wil::com_ptr<ICoreWebView2ContextMenuItem> separator;
+      if (SUCCEEDED(webViewEnv9->CreateContextMenuItem(L"", nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_SEPARATOR, &separator)) && separator &&
+        SUCCEEDED(items->InsertValueAtIndex(count, separator.get()))) {
+        count++;
+      }
+    }
+
+    for (const auto& menuItem : contextMenu->menuItems) {
+      wil::com_ptr<ICoreWebView2ContextMenuItem> item;
+      if (failedAndLog(webViewEnv9->CreateContextMenuItem(utf8_to_wide(menuItem.title).c_str(), nullptr, COREWEBVIEW2_CONTEXT_MENU_ITEM_KIND_COMMAND, &item)) || !item) {
+        continue;
+      }
+
+      auto itemId = menuItem.id;
+      auto itemTitle = menuItem.title;
+      auto add_CustomItemSelected_HResult = item->add_CustomItemSelected(
+        Callback<ICoreWebView2CustomItemSelectedEventHandler>(
+          [this, itemId, itemTitle](ICoreWebView2ContextMenuItem* sender, IUnknown* args)
+          {
+            if (channelDelegate && lifecycle_.acceptsCallbacks()) {
+              channelDelegate->onContextMenuActionItemClicked(itemId, itemTitle);
+            }
+            return S_OK;
+          }
+        ).Get(), nullptr);
+      failedLog(add_CustomItemSelected_HResult);
+
+      if (SUCCEEDED(items->InsertValueAtIndex(count, item.get()))) {
+        count++;
+      }
+    }
   }
 
   void InAppWebView::prepare(const InAppWebViewCreationParams& params)
@@ -1613,6 +1730,22 @@ namespace flutter_inappwebview_plugin
           }
         ).Get(), nullptr);
       failedLog(add_ServerCertificateErrorDetected_HResult);
+    }
+
+    // Only intercept the native menu when a ContextMenu was supplied, so the
+    // default WebView2 menu is untouched otherwise.
+    if (contextMenu) {
+      if (auto webView11 = webView.try_query<ICoreWebView2_11>()) {
+        auto add_ContextMenuRequested_HResult = webView11->add_ContextMenuRequested(
+          Callback<ICoreWebView2ContextMenuRequestedEventHandler>(
+            [this](ICoreWebView2* sender, ICoreWebView2ContextMenuRequestedEventArgs* args)
+            {
+              onContextMenuRequested(args);
+              return S_OK;
+            }
+          ).Get(), nullptr);
+        failedLog(add_ContextMenuRequested_HResult);
+      }
     }
 
     if (auto webView15 = webView.try_query<ICoreWebView2_15>()) {

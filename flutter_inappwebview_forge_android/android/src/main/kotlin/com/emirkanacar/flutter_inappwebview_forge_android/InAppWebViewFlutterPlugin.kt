@@ -151,18 +151,14 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
         inAppWebViewManager = InAppWebViewManager(this)
         myCookieManager = MyCookieManager(this)
         myWebStorage = MyWebStorage(this)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            serviceWorkerManager = ServiceWorkerManager(this)
-        }
+        serviceWorkerManager = ServiceWorkerManager(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             credentialDatabaseHandler = CredentialDatabaseHandler(this)
         }
         webViewFeatureManager = WebViewFeatureManager(this)
         proxyManager = ProxyManager(this)
         containerManager = ContainerManager(this)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            printJobManager = PrintJobManager(this)
-        }
+        printJobManager = PrintJobManager(this)
         downloadJobManager = DownloadJobManager(this)
         tracingControllerManager = TracingControllerManager(this)
         processGlobalConfigManager = ProcessGlobalConfigManager(this)
@@ -190,20 +186,16 @@ class InAppWebViewFlutterPlugin : FlutterPlugin, ActivityAware {
         }
         inAppWebViewManager?.dispose()
         inAppWebViewManager = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            serviceWorkerManager?.dispose()
-            serviceWorkerManager = null
-        }
+        serviceWorkerManager?.dispose()
+        serviceWorkerManager = null
         webViewFeatureManager?.dispose()
         webViewFeatureManager = null
         proxyManager?.dispose()
         proxyManager = null
         containerManager?.dispose()
         containerManager = null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            printJobManager?.dispose()
-            printJobManager = null
-        }
+        printJobManager?.dispose()
+        printJobManager = null
         downloadJobManager?.dispose()
         downloadJobManager = null
         tracingControllerManager?.dispose()

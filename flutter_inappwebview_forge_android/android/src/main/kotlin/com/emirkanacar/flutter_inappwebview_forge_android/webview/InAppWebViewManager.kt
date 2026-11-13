@@ -58,12 +58,8 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
             }
 
             "clearClientCertPreferences" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    WebView.clearClientCertPreferences {
-                        result.success(true)
-                    }
-                } else {
-                    result.success(false)
+                WebView.clearClientCertPreferences {
+                    result.success(true)
                 }
             }
 
@@ -100,9 +96,7 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
 
             "setWebContentsDebuggingEnabled" -> {
                 val debuggingEnabled = call.argument<Boolean>("debuggingEnabled") == true
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    WebView.setWebContentsDebuggingEnabled(debuggingEnabled)
-                }
+                WebView.setWebContentsDebuggingEnabled(debuggingEnabled)
                 result.success(true)
             }
 
@@ -146,9 +140,7 @@ class InAppWebViewManager(initialPlugin: InAppWebViewFlutterPlugin) :
             }
 
             "enableSlowWholeDocumentDraw" -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    WebView.enableSlowWholeDocumentDraw()
-                }
+                WebView.enableSlowWholeDocumentDraw()
                 result.success(true)
             }
 

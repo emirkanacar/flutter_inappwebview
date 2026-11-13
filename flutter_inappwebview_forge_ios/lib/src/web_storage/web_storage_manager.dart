@@ -158,6 +158,23 @@ class IOSWebStorageManager extends PlatformWebStorageManager
   }
 
   @override
+  Future<bool> deleteBrowsingData() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    return await channel?.invokeMethod<bool>('deleteBrowsingData', args) ??
+        false;
+  }
+
+  @override
+  Future<String?> deleteBrowsingDataForSite({required String site}) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("site", () => site);
+    return await channel?.invokeMethod<String>(
+      'deleteBrowsingDataForSite',
+      args,
+    );
+  }
+
+  @override
   void dispose() {
     // empty
   }

@@ -269,6 +269,7 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             configuration.preferences.javaScriptEnabled = settings.javaScriptEnabled
             if #available(macOS 11.0, *) {
                 configuration.defaultWebpagePreferences.allowsContentJavaScript = settings.javaScriptEnabled
+                applyLockdownMode(to: configuration.defaultWebpagePreferences)
             }
             if #available(macOS 11.3, *) {
                 configuration.preferences.isTextInteractionEnabled = settings.isTextInteractionEnabled
@@ -1312,9 +1313,19 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        applyLockdownMode(to: preferences)
         self.webView(webView, decidePolicyFor: navigationAction, decisionHandler: {(navigationActionPolicy) -> Void in
             decisionHandler(navigationActionPolicy, preferences)
         })
+    }
+
+    /// Applies the `isLockdownModeEnabled` setting to a navigation's webpage
+    /// preferences. A nil setting leaves WebKit's value (the system setting)
+    /// untouched.
+    func applyLockdownMode(to preferences: WKWebpagePreferences) {
+        if #available(macOS 13.0, *), let isLockdownModeEnabled = settings?.isLockdownModeEnabled {
+            preferences.isLockdownModeEnabled = isLockdownModeEnabled
+        }
     }
     
     @available(macOS 11.3, *)

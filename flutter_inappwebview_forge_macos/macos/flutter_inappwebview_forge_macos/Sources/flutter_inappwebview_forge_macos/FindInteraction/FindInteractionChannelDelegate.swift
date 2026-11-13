@@ -17,6 +17,14 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         guard canDispatchCallbacks() else {
             result(nil)
             return
@@ -26,10 +34,10 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
         switch call.method {
             case "findString":
                 if let findInteractionController = findInteractionController {
-                    let find = arguments!["find"] as! String
-                    let caseSensitive = arguments!["caseSensitive"] as? Bool ?? false
-                    let backwards = arguments!["backwards"] as? Bool ?? false
-                    let wraps = arguments!["wraps"] as? Bool ?? true
+                    let find = try requiredArgument(arguments, "find", as: String.self)
+                    let caseSensitive = arguments?["caseSensitive"] as? Bool ?? false
+                    let backwards = arguments?["backwards"] as? Bool ?? false
+                    let wraps = arguments?["wraps"] as? Bool ?? true
                     findInteractionController.findString(
                         find: find,
                         caseSensitive: caseSensitive,
@@ -49,7 +57,7 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
                 break
             case "findAll":
                 if let findInteractionController = findInteractionController {
-                    let find = arguments!["find"] as! String
+                    let find = try requiredArgument(arguments, "find", as: String.self)
                     findInteractionController.findAll(find: find, completionHandler: {(value, error) in
                         if error != nil {
                             result(FlutterError(code: "FindInteractionChannelDelegate", message: error?.localizedDescription, details: nil))
@@ -63,7 +71,7 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
                 break
             case "findNext":
                 if let findInteractionController = findInteractionController {
-                    let forward = arguments!["forward"] as! Bool
+                    let forward = try requiredArgument(arguments, "forward", as: Bool.self)
                     findInteractionController.findNext(forward: forward, completionHandler: {(value, error) in
                         if error != nil {
                             result(FlutterError(code: "FindInteractionChannelDelegate", message: error?.localizedDescription, details: nil))
@@ -90,7 +98,7 @@ public class FindInteractionChannelDelegate: ChannelDelegate {
                 break
             case "setSearchText":
                 if let findInteractionController = findInteractionController {
-                    let searchText = arguments!["searchText"] as? String
+                    let searchText = arguments?["searchText"] as? String
                     findInteractionController.searchText = searchText
                     result(true)
                 } else {

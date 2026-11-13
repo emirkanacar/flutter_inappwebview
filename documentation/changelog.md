@@ -6,6 +6,36 @@ complete, release-by-release record remains in the package source:
 - [Complete package changelog](https://github.com/emirkanacar/flutter_inappwebview/blob/master/flutter_inappwebview_forge/CHANGELOG.md)
 - [Platform package changelogs](https://github.com/emirkanacar/flutter_inappwebview/tree/master)
 
+## 2.1.80 - 2026-11-14
+
+- `WebStorageManager.deleteBrowsingData()` and
+  `deleteBrowsingDataForSite(site:)` delete the complete browsing data set
+  (cookies, cache, DOM storage, IndexedDB, service workers) for all sites or
+  for one site and its subdomains. Supported on Android
+  (`WebViewFeature.DELETE_BROWSING_DATA`), iOS, macOS, and Linux; Windows
+  supports `deleteBrowsingData` only. Check `isMethodSupported` first.
+- `WebStorageManager.removeDataModifiedSince` now removes the expected data
+  on iOS, macOS, and Linux (the timestamp unit was misread natively).
+- Windows: `ContextMenu` custom items, `hideDefaultSystemContextMenuItems`,
+  `onCreateContextMenu`, and `onContextMenuActionItemClicked` are supported.
+  `onHideContextMenu` is not called on Windows.
+- Android: `ContainerController.warmUpRendererProcess(containerId:)` starts
+  a profile's renderer process before its first WebView
+  (`WebViewFeature.WARM_UP_RENDERER_PROCESS`).
+- iOS 16+ / macOS 13+: `InAppWebViewSettings.isLockdownModeEnabled` enables
+  Lockdown Mode for one WebView or exempts it from the system setting.
+- iOS 17+ / macOS 14+: `CookieManager.setCookiePolicy` / `getCookiePolicy`
+  with `HTTPCookieStorePolicy` stop a cookie store from storing and sending
+  cookies without deleting them.
+- iOS: `InAppWebViewSettings.writingToolsBehavior` is applied again.
+- iOS, macOS, and Windows: a missing or wrong-type required channel argument
+  throws a `PlatformException` (code `invalid_arguments`) instead of crashing
+  the app (#2856).
+- Android: native code unreachable with `minSdk 24` was removed. No behavior
+  change.
+- Ships with platform-interface 1.1.24, Android 1.0.58, iOS 2.1.38,
+  macOS 1.1.13, Windows 1.0.17, Linux 1.0.10, and Web 1.0.5.
+
 ## 2.1.79 - 2026-11-13
 
 - Web: `iframeSandbox: Sandbox.ALLOW_ALL` no longer renders the most

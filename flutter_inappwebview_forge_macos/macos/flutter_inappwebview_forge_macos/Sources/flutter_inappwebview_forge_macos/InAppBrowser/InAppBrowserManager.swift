@@ -24,15 +24,23 @@ public class InAppBrowserManager: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
 
         switch call.method {
             case "open":
-                open(arguments: arguments!)
+                try open(arguments: arguments)
                 result(true)
                 break
             case "openWithSystemBrowser":
-                let url = arguments!["url"] as! String
+                let url = try requiredArgument(arguments, "url", as: String.self)
                 openWithSystemBrowser(url: url, result: result)
                 break
             default:
@@ -41,18 +49,18 @@ public class InAppBrowserManager: ChannelDelegate {
         }
     }
     
-    public func open(arguments: NSDictionary) {
-        let id = arguments["id"] as! String
-        let urlRequest = arguments["urlRequest"] as? [String:Any?]
-        let assetFilePath = arguments["assetFilePath"] as? String
-        let data = arguments["data"] as? String
-        let mimeType = arguments["mimeType"] as? String
-        let encoding = arguments["encoding"] as? String
-        let baseUrl = arguments["baseUrl"] as? String
-        let settings = arguments["settings"] as! [String: Any?]
-        let windowId = arguments["windowId"] as? Int64
-        let initialUserScripts = arguments["initialUserScripts"] as? [[String: Any]]
-        let menuItems = arguments["menuItems"] as! [[String: Any?]]
+    public func open(arguments: NSDictionary?) throws {
+        let id = try requiredArgument(arguments, "id", as: String.self)
+        let urlRequest = arguments?["urlRequest"] as? [String:Any?]
+        let assetFilePath = arguments?["assetFilePath"] as? String
+        let data = arguments?["data"] as? String
+        let mimeType = arguments?["mimeType"] as? String
+        let encoding = arguments?["encoding"] as? String
+        let baseUrl = arguments?["baseUrl"] as? String
+        let settings = try requiredArgument(arguments, "settings", as: [String: Any?].self)
+        let windowId = arguments?["windowId"] as? Int64
+        let initialUserScripts = arguments?["initialUserScripts"] as? [[String: Any]]
+        let menuItems = try requiredArgument(arguments, "menuItems", as: [[String: Any?]].self)
         
         let browserSettings = InAppBrowserSettings()
         let _ = browserSettings.parse(settings: settings)

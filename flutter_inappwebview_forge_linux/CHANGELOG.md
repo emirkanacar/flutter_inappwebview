@@ -1,3 +1,20 @@
+## 1.0.10 - 2026-11-14
+
+- Add `WebStorageManager.deleteBrowsingData()` and
+  `deleteBrowsingDataForSite(site:)`. The full variant clears
+  `WEBKIT_WEBSITE_DATA_ALL` from the default network session; the site
+  variant matches `webkit_website_data_get_name` against the host and its
+  parent domains (the same rule as iOS/macOS, in the standard-library-only
+  `utils/website_data_site_matcher.cc`) and removes those records. Missing or
+  invalid `site` and a missing data manager reply `null` / `false` instead of
+  erroring.
+- Fix `removeDataModifiedSince`: the native handler passed the since date's
+  Unix seconds to `webkit_website_data_manager_clear` as the `GTimeSpan`
+  (microseconds), so only roughly the last half hour of data was cleared.
+  It now passes the age of the date (`now - since`) in microseconds and
+  replies without clearing when the date is in the future, instead of
+  passing `0` (which means "all data"). The channel payload is unchanged.
+
 ## 1.0.9 - 2026-11-13
 
 - Resolve the `flutter analyze` infos reported by the pub.dev static

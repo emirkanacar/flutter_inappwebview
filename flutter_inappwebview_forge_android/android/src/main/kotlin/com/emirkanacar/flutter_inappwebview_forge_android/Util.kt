@@ -17,7 +17,6 @@ import android.util.Log
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowMetrics
-import androidx.annotation.RequiresApi
 import com.emirkanacar.flutter_inappwebview_forge_android.types.Size2D
 import com.emirkanacar.flutter_inappwebview_forge_android.types.SyncBaseCallbackResultImpl
 import io.flutter.plugin.common.MethodChannel
@@ -227,7 +226,6 @@ class Util private constructor() {
         }
 
         @JvmStatic
-        @RequiresApi(Build.VERSION_CODES.KITKAT)
         @Suppress("UNCHECKED_CAST")
         fun JSONStringify(value: Any?): String {
             return when (value) {
@@ -376,11 +374,7 @@ class Util private constructor() {
 
         @JvmStatic
         fun objEquals(a: Any?, b: Any?): Boolean {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                Objects.equals(a, b)
-            } else {
-                a === b || (a != null && a == b)
-            }
+            return Objects.equals(a, b)
         }
 
         @JvmStatic

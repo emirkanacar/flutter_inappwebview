@@ -23,14 +23,22 @@ public class WebAuthenticationSessionManager: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
 
         switch call.method {
             case "create":
-                let id = arguments!["id"] as! String
-                let url = arguments!["url"] as! String
-                let callbackURLScheme = arguments!["callbackURLScheme"] as? String
-                let initialSettings = arguments!["initialSettings"] as! [String: Any?]
+                let id = try requiredArgument(arguments, "id", as: String.self)
+                let url = try requiredArgument(arguments, "url", as: String.self)
+                let callbackURLScheme = arguments?["callbackURLScheme"] as? String
+                let initialSettings = try requiredArgument(arguments, "initialSettings", as: [String: Any?].self)
                 create(id: id, url: url, callbackURLScheme: callbackURLScheme, settings: initialSettings, result: result)
                 break
             case "isAvailable":

@@ -17,12 +17,20 @@ public class PrintJobChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
             case "dismiss":
                 if let job = printJobController?.job {
-                    let animated = arguments!["animated"] as! Bool
+                    let animated = try requiredArgument(arguments, "animated", as: Bool.self)
                     job.dismiss(animated: animated)
                     result(true)
                 } else {

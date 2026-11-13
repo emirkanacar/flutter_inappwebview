@@ -1,7 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview
 
 import android.net.Uri
-import android.os.Build
 import android.os.Handler
 import android.util.Log
 import android.webkit.JavascriptInterface
@@ -144,38 +143,36 @@ class JavaScriptBridgeInterface(
 
             when (handlerName) {
                 "onPrintRequest" -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        val settings = PrintJobSettings()
-                        settings.handledByClient = true
-                        val printJobId = currentWebView.printCurrentPage(settings)
-                        val channelDelegate = currentWebView.channelDelegate
-                        if (channelDelegate != null) {
-                            channelDelegate.onPrintRequest(
-                                currentWebView.url,
-                                printJobId,
-                                object : WebViewChannelDelegate.PrintRequestCallback() {
-                                    override fun nonNullSuccess(handledByClient: Boolean): Boolean =
-                                        !handledByClient
+                    val settings = PrintJobSettings()
+                    settings.handledByClient = true
+                    val printJobId = currentWebView.printCurrentPage(settings)
+                    val channelDelegate = currentWebView.channelDelegate
+                    if (channelDelegate != null) {
+                        channelDelegate.onPrintRequest(
+                            currentWebView.url,
+                            printJobId,
+                            object : WebViewChannelDelegate.PrintRequestCallback() {
+                                override fun nonNullSuccess(handledByClient: Boolean): Boolean =
+                                    !handledByClient
 
-                                    override fun defaultBehaviour(handledByClient: Boolean?) {
-                                        val plugin = inAppWebView?.plugin
-                                        val printJobManager = plugin?.printJobManager
-                                        val printJobController: PrintJobController? =
-                                            printJobManager?.jobs?.get(printJobId)
-                                        printJobController?.disposeNoCancel()
-                                    }
-
-                                    override fun error(
-                                        errorCode: String,
-                                        errorMessage: String?,
-                                        errorDetails: Any?
-                                    ) {
-                                        Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-                                        completeDefaultBehaviour(null)
-                                    }
+                                override fun defaultBehaviour(handledByClient: Boolean?) {
+                                    val plugin = inAppWebView?.plugin
+                                    val printJobManager = plugin?.printJobManager
+                                    val printJobController: PrintJobController? =
+                                        printJobManager?.jobs?.get(printJobId)
+                                    printJobController?.disposeNoCancel()
                                 }
-                            )
-                        }
+
+                                override fun error(
+                                    errorCode: String,
+                                    errorMessage: String?,
+                                    errorDetails: Any?
+                                ) {
+                                    Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
+                                    completeDefaultBehaviour(null)
+                                }
+                            }
+                        )
                     }
                 }
 

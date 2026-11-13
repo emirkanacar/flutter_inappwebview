@@ -41,6 +41,7 @@ enum PlatformInAppBrowserProperty {
   ///**Officially Supported Platforms/Implementations**:
   ///- Android WebView
   ///- iOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformInAppBrowser.isPropertySupported] method to check if this property is supported at runtime.
   ///{@endtemplate}
@@ -141,6 +142,7 @@ extension _PlatformInAppBrowserPropertySupported on PlatformInAppBrowser {
             [
               TargetPlatform.android,
               TargetPlatform.iOS,
+              TargetPlatform.windows,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformInAppBrowserProperty.findInteractionController:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

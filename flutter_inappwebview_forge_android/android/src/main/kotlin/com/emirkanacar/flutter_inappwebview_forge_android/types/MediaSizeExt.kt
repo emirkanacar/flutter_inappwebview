@@ -1,11 +1,8 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.print.PrintAttributes
-import androidx.annotation.RequiresApi
 import java.util.HashMap
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
 open class MediaSizeExt(
     open var id: String,
     open var label: String?,

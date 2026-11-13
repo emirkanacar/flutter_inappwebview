@@ -215,7 +215,7 @@ Test layers to add:
 - Integration tests for the bridge, JavaScript handlers, Custom Tabs, popup/window creation, KeepAlive, cookies, permissions, downloads, fullscreen/keyboard, and dispose/recreate.
 - Build smoke tests for debug APK, release APK, AAB, lint, unit tests, instrumentation tests, and dependency resolution.
 
-The Android performance plan retains the API 19/21/23/24/29/35/36 matrix. Release/profile builds must demonstrate that the Kotlin migration does not change startup, bridge readiness, channel pressure, or disposal measurements.
+The Android performance plan uses the API 24/29/35/36 matrix for the current `minSdk 24` line; API 19/21/23 coverage applies only to the 2.1.76 / Android 1.0.55 compatibility line. Release/profile builds must demonstrate that the Kotlin migration does not change startup, bridge readiness, channel pressure, or disposal measurements.
 
 Required static checks:
 
@@ -254,5 +254,5 @@ The full plan is complete only when all of the following are true:
 - The new namespace and the Flutter `pubspec` Android package value match.
 - Dart API, channel names, payloads, and bridge behavior pass compatibility tests.
 - Root and platform examples build as debug/release/AAB.
-- The API 19–36 Android matrix and WebView capture/FileProvider scenarios are verified.
+- The API 24–36 Android matrix (API 19–23 only for the 1.0.55 compatibility line) and WebView capture/FileProvider scenarios are verified.
 - Every implementation change is recorded in the Android changelog and the migration documentation is current.

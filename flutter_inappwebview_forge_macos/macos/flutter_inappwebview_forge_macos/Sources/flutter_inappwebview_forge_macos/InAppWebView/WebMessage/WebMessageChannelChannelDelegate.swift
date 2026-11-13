@@ -18,6 +18,14 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         guard canDispatchCallbacks() else {
             result(nil)
             return
@@ -27,7 +35,7 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
         switch call.method {
         case "setWebMessageCallback":
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                let index = try requiredArgument(arguments, "index", as: Int.self)
                 let port = ports[index]
                 let requestId = track(result)
                 do {
@@ -44,9 +52,9 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             break
         case "postMessage":
             if let webView = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                let index = try requiredArgument(arguments, "index", as: Int.self)
                 let port = ports[index]
-                var message = WebMessage.fromMap(map: arguments!["message"] as! [String: Any?])
+                var message = WebMessage.fromMap(map: try requiredArgument(arguments, "message", as: [String: Any?].self))
                 
                 var ports: [WebMessagePort] = []
                 if let notConnectedPorts = message.ports {
@@ -71,7 +79,7 @@ public class WebMessageChannelChannelDelegate: ChannelDelegate {
             break
         case "close":
             if let _ = webMessageChannel?.webView, let ports = webMessageChannel?.ports, ports.count > 0 {
-                let index = arguments!["index"] as! Int
+                let index = try requiredArgument(arguments, "index", as: Int.self)
                 let port = ports[index]
                 let requestId = track(result)
                 do {

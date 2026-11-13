@@ -27,7 +27,7 @@ Upstream package rename:
 | Public Dart `*Options`, prefixed callbacks, `IOS*` / `Android*` types | Present and `@Deprecated` | Intentional major version |
 | `saveFormData` | Present; message now names Android Autofill and no Dart replacement | Keep while minSdk is below 26 or the public setting remains |
 | Example / tests | Storage screen uses `onReceivedError`; focused source tests lock current names | Keep examples on current names |
-| Android SDK-deprecated WebView/cookie/print/forceDark paths | Isolated with `@file:Suppress("DEPRECATION")` | Explicit minSdk increase (21+ or 24+), tracked by #2641 / #2685 |
+| Android SDK-deprecated WebView/cookie/print/forceDark paths | Isolated with `@file:Suppress("DEPRECATION")` | minSdk 24 reached in Android 1.0.56; unreachable API <= 24 branches removed (Android 1.0.58); remaining SDK-deprecated paths still need a Phase 3 decision, tracked by #2641 / #2685 |
 | iOS `canOpenURL` | Removed from `openWithSystemBrowser` | Done in iOS 2.1.33 / root 2.1.74 |
 | Analyzer ignore of `deprecated_member_use` | Enabled in plugin packages | Keep while shims call each other |
 
@@ -94,14 +94,20 @@ internal shims can keep calling each other.
 - Do not count a host app as migrated until its own analyzer no longer reports
   `deprecated_member_use` from this plugin.
 
-### Phase 3 — Native SDK cleanup (blocked)
+### Phase 3 — Native SDK cleanup (step 1 done; step 2 open)
 
-- Android minSdk was raised to 24 in Android 1.0.56 / 2.1.77; remaining SDK-deprecated cleanup still needs its own release decision.
-- After minSdk 21, remove pre-Lollipop `CookieManager.removeSessionCookie` /
-  `removeAllCookie`.
-- After minSdk 24+, re-evaluate `forceDark`, `saveFormData`,
-  `WebView.clearCache`, AbsoluteLayout, and legacy print/fullscreen.
-- Keep file-level `@file:Suppress("DEPRECATION")` until that decision.
+- Android minSdk was raised to 24 in Android 1.0.56 / 2.1.77.
+- Step 1 (Android 1.0.58, source/build validated): the pre-Lollipop
+  `CookieSyncManager` / `removeSessionCookie` / `removeAllCookie` branches,
+  every `SDK_INT` guard and `@RequiresApi` / `@TargetApi` annotation for API
+  24 and below, and the pre-API 21 `openFileChooser` / `PICKER_LEGACY` file
+  chooser path were removed, keeping the branch that was always taken.
+  `flutter_inappwebview_forge_android/test/min_sdk_dead_code_test.dart`
+  fails if such a guard is reintroduced. Device/provider validation remains
+  in the runtime register under #2641 / #2685.
+- Step 2 (open): re-evaluate `forceDark`, `saveFormData`,
+  `WebView.clearCache`, AbsoluteLayout, and legacy print/fullscreen. Keep
+  file-level `@file:Suppress("DEPRECATION")` until that decision.
 
 ### Phase 4 — Public shim removal (major version only)
 
@@ -129,7 +135,7 @@ Do not describe this only as "compatibility shims" without the old names.
 - New application code can migrate using only
   [Deprecated APIs](../documentation/deprecated-api.md) and this plan.
 - 2.1.x still compiles existing 5.x Options and prefixed-callback call sites.
-- Native Android SDK-deprecated paths (originally kept for minSdk 19) remain until Phase 3, even though the floor is now minSdk 24.
+- Native Android SDK-deprecated paths that still have no behavior-preserving replacement (`forceDark`, `saveFormData`, AbsoluteLayout, legacy print/fullscreen) remain until Phase 3 step 2; the unreachable API <= 24 branches are already removed.
 - A major-version removal has an explicit changelog section listing every
   deleted public symbol.
 

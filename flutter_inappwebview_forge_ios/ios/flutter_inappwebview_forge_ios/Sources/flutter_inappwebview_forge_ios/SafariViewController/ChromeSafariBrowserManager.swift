@@ -24,14 +24,22 @@ public class ChromeSafariBrowserManager: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
 
         switch call.method {
             case "open":
-                let id = arguments!["id"] as! String
-                let url = arguments!["url"] as! String
-                let settings = arguments!["settings"] as! [String: Any?]
-                let menuItemList = arguments!["menuItemList"] as! [[String: Any]]
+                let id = try requiredArgument(arguments, "id", as: String.self)
+                let url = try requiredArgument(arguments, "url", as: String.self)
+                let settings = try requiredArgument(arguments, "settings", as: [String: Any?].self)
+                let menuItemList = try requiredArgument(arguments, "menuItemList", as: [[String: Any]].self)
                 open(id: id, url: url, settings: settings,  menuItemList: menuItemList, result: result)
                 break
             case "isAvailable":
@@ -51,7 +59,7 @@ public class ChromeSafariBrowserManager: ChannelDelegate {
                 }
             case "prewarmConnections":
                 if #available(iOS 15.0, *) {
-                    let stringURLs = arguments!["URLs"] as! [String]
+                    let stringURLs = try requiredArgument(arguments, "URLs", as: [String].self)
                     var URLs: [URL] = []
                     for stringURL in stringURLs {
                         if let url = URL(string: stringURL) {
@@ -69,7 +77,7 @@ public class ChromeSafariBrowserManager: ChannelDelegate {
                 }
             case "invalidatePrewarmingToken":
                 if #available(iOS 15.0, *) {
-                    let prewarmingToken = arguments!["prewarmingToken"] as! [String:Any?]
+                    let prewarmingToken = try requiredArgument(arguments, "prewarmingToken", as: [String:Any?].self)
                     if let prewarmingTokenId = prewarmingToken["id"] as? String,
                        let prewarmingToken = prewarmingTokens[prewarmingTokenId] as? SFSafariViewController.PrewarmingToken? {
                         prewarmingToken?.invalidate()

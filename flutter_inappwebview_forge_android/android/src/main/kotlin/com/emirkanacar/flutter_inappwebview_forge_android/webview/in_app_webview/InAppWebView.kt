@@ -5,7 +5,6 @@ package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webvie
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.Resources
 import android.content.pm.PackageInfo
@@ -24,7 +23,6 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import android.widget.*
 import android.widget.AbsoluteLayout
-import androidx.annotation.RequiresApi
 import androidx.webkit.*
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
 import com.emirkanacar.flutter_inappwebview_forge_android.WebViewStartupCoordinator
@@ -369,13 +367,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
     if (customSettings.userAgent.isNotEmpty()) {
       settings.userAgentString = customSettings.userAgent
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+    } else {
       settings.userAgentString = WebSettings.getDefaultUserAgent(context)
     }
 
-    if (customSettings.applicationNameForUserAgent.isNotEmpty() &&
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
-    ) {
+    if (customSettings.applicationNameForUserAgent.isNotEmpty()) {
       val userAgent = if (customSettings.userAgent.isNotEmpty()) {
         customSettings.userAgent
       } else {
@@ -426,12 +422,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       clearSessionCookies()
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      CookieManager.getInstance().setAcceptThirdPartyCookies(
-        this,
-        customSettings.thirdPartyCookiesEnabled == true
-      )
-    }
+    CookieManager.getInstance().setAcceptThirdPartyCookies(
+      this,
+      customSettings.thirdPartyCookiesEnabled == true
+    )
 
     settings.loadWithOverviewMode = customSettings.loadWithOverviewMode == true
     settings.useWideViewPort = customSettings.useWideViewPort == true
@@ -451,10 +445,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       setBackgroundColor(Color.TRANSPARENT)
     }
 
-    if (
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-      customSettings.mixedContentMode != null
-    ) {
+    if (customSettings.mixedContentMode != null) {
       settings.mixedContentMode =
         customSettings.mixedContentMode ?: WebSettings.MIXED_CONTENT_NEVER_ALLOW
     }
@@ -487,7 +478,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     customSettings.disabledActionModeMenuItems?.let {
       if (WebViewFeature.isFeatureSupported(WebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS)) {
         WebSettingsCompat.setDisabledActionModeMenuItems(settings, it)
-      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      } else {
         settings.disabledActionModeMenuItems = it
       }
     }
@@ -527,7 +518,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
     if (WebViewFeature.isFeatureSupported(WebViewFeature.OFF_SCREEN_PRERASTER)) {
       WebSettingsCompat.setOffscreenPreRaster(settings, customSettings.offscreenPreRaster == true)
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    } else {
       settings.offscreenPreRaster = customSettings.offscreenPreRaster == true
     }
 
@@ -723,10 +714,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       }
     }
 
-    if (
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT &&
-      customSettings.useHybridComposition != true
-    ) {
+    if (customSettings.useHybridComposition != true) {
       checkContextMenuShouldBeClosedTask = Runnable {
         if (!lifecycle.acceptsCallbacks()) return@Runnable
         if (floatingContextMenu != null) {
@@ -1012,11 +1000,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   fun setIncognito(enabled: Boolean) {
     val settings = getSettings()
     if (enabled) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        CookieManager.getInstance().removeAllCookies(null)
-      } else {
-        CookieManager.getInstance().removeAllCookie()
-      }
+      CookieManager.getInstance().removeAllCookies(null)
 
       settings.cacheMode = WebSettings.LOAD_NO_CACHE
       Util.invokeMethodIfExists(settings, "setAppCacheEnabled", false)
@@ -1072,27 +1056,15 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   override fun isLoading(): Boolean = isLoading
 
-  @Suppress("DEPRECATION")
   private fun clearSessionCookies() {
     val manager = CookieManager.getInstance()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      manager.removeSessionCookies(null)
-    } else {
-      manager.removeSessionCookie()
-    }
+    manager.removeSessionCookies(null)
   }
 
-  @Deprecated("CookieManager.removeAllCookie is deprecated in the Android SDK; used only below API 21.")
-  @Suppress("DEPRECATION")
   private fun clearCookies() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      CookieManager.getInstance().removeAllCookies(ValueCallback { })
-    } else {
-      CookieManager.getInstance().removeAllCookie()
-    }
+    CookieManager.getInstance().removeAllCookies(ValueCallback { })
   }
 
-  @Deprecated("Calls WebView.clearCache, which is deprecated in the Android SDK; retained for minSdk 19 compatibility.")
   override fun clearAllCache() {
     clearCache(true)
     clearCookies()
@@ -1357,8 +1329,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         "applicationNameForUserAgent",
         customSettings.applicationNameForUserAgent,
         newCustomSettings.applicationNameForUserAgent
-      ) && newCustomSettings.applicationNameForUserAgent.isNotEmpty() &&
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+      ) && newCustomSettings.applicationNameForUserAgent.isNotEmpty()
     ) {
       val userAgent = if (newCustomSettings.userAgent.isNotEmpty()) {
         newCustomSettings.userAgent
@@ -1382,7 +1353,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         "thirdPartyCookiesEnabled",
         customSettings.thirdPartyCookiesEnabled,
         newCustomSettings.thirdPartyCookiesEnabled
-      ) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+      )
     ) {
       CookieManager.getInstance().setAcceptThirdPartyCookies(
         this,
@@ -1428,10 +1399,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         }
       )
     }
-    if (
-      Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-      changed("mixedContentMode", customSettings.mixedContentMode, newCustomSettings.mixedContentMode)
-    ) {
+    if (changed("mixedContentMode", customSettings.mixedContentMode, newCustomSettings.mixedContentMode)) {
       newCustomSettings.mixedContentMode?.let { settings.mixedContentMode = it }
     }
     if (changed(
@@ -1520,7 +1488,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       newCustomSettings.disabledActionModeMenuItems?.let {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.DISABLED_ACTION_MODE_MENU_ITEMS)) {
           WebSettingsCompat.setDisabledActionModeMenuItems(settings, it)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        } else {
           settings.disabledActionModeMenuItems = it
         }
       }
@@ -1587,7 +1555,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     if (changed("offscreenPreRaster", customSettings.offscreenPreRaster, newCustomSettings.offscreenPreRaster)) {
       if (WebViewFeature.isFeatureSupported(WebViewFeature.OFF_SCREEN_PRERASTER)) {
         WebSettingsCompat.setOffscreenPreRaster(settings, newCustomSettings.offscreenPreRaster == true)
-      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      } else {
         settings.offscreenPreRaster = newCustomSettings.offscreenPreRaster == true
       }
     }
@@ -2200,7 +2168,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     webSettings.builtInZoomControls = enabled
   }
 
-  @RequiresApi(Build.VERSION_CODES.KITKAT)
   override fun printCurrentPage(settings: PrintJobSettings?): String? {
     val activity = plugin?.activity ?: return null
     val printManager = activity.getSystemService(Context.PRINT_SERVICE) as? PrintManager
@@ -2220,18 +2187,12 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       }
       settings.mediaSize?.let { builder.setMediaSize(it.toMediaSize()) }
       settings.colorMode?.let { builder.setColorMode(it) }
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        settings.duplexMode?.let { builder.setDuplexMode(it) }
-      }
+      settings.duplexMode?.let { builder.setDuplexMode(it) }
       settings.resolution?.let { builder.setResolution(it.toResolution()) }
     }
 
     var printAdapter: PrintDocumentAdapter =
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        createPrintDocumentAdapter(jobName)
-      } else {
-        createPrintDocumentAdapter()
-      }
+      createPrintDocumentAdapter(jobName)
 
     var printJobController: PrintJobController? = null
     var printJobId: String? = null
@@ -2370,7 +2331,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     return rebuildActionMode(startNativeActionMode(callback), callback)
   }
 
-  @RequiresApi(Build.VERSION_CODES.M)
   override fun startActionMode(callback: ActionMode.Callback, type: Int): ActionMode? {
     if (
       customSettings.useHybridComposition == true &&
@@ -2422,9 +2382,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     val currentActionMode = actionMode ?: return null
     val actionMenu = currentActionMode.menu
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      currentActionMode.hide(3000)
-    }
+    currentActionMode.hide(3000)
 
     val defaultMenuItems = ArrayList<MenuItem>()
     for (index in 0 until actionMenu.size()) {
@@ -2597,12 +2555,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   fun onScrollStopped() {
     if (!lifecycle.acceptsCallbacks()) return
-    if (floatingContextMenu != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+    if (floatingContextMenu != null) {
       adjustFloatingContextMenuPosition()
     }
   }
 
-  @RequiresApi(Build.VERSION_CODES.KITKAT)
   fun adjustFloatingContextMenuPosition() {
     if (!lifecycle.acceptsCallbacks()) return
     evaluateJavascript(
@@ -2640,7 +2597,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     )
   }
 
-  @RequiresApi(Build.VERSION_CODES.KITKAT)
   override fun getSelectedText(resultCallback: ValueCallback<String>) {
     evaluateJavascript(
       PluginScriptsUtil.GET_SELECTED_TEXT_JS_SOURCE,
@@ -2676,7 +2632,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
   }
 
-  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
   override fun callAsyncJavaScript(
     functionBody: String,
     arguments: MutableMap<String, Any?>,
@@ -2727,7 +2682,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   override fun isSecureContext(resultCallback: ValueCallback<Boolean>) {
     evaluateJavascript(
       "window.isSecureContext",
@@ -3019,9 +2973,6 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   fun postVisualStateReady(requestId: Long): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-      return false
-    }
     postVisualStateCallback(requestId, object : WebView.VisualStateCallback() {
       override fun onComplete(callbackId: Long) {
         if (!lifecycle.acceptsCallbacks()) return

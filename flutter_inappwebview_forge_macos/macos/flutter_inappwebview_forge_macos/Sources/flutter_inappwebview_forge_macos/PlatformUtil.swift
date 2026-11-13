@@ -18,6 +18,14 @@ public class PlatformUtil: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
@@ -26,10 +34,10 @@ public class PlatformUtil: ChannelDelegate {
                 result("\(version.majorVersion).\(version.minorVersion).\(version.patchVersion)")
                 break
             case "formatDate":
-                let date = arguments!["date"] as! Int64
-                let format = arguments!["format"] as! String
-                let locale = PlatformUtil.getLocaleFromString(locale: arguments!["locale"] as? String)
-                let timezone = TimeZone.init(abbreviation: arguments!["timezone"] as? String ?? "UTC")!
+                let date = try requiredArgument(arguments, "date", as: Int64.self)
+                let format = try requiredArgument(arguments, "format", as: String.self)
+                let locale = PlatformUtil.getLocaleFromString(locale: arguments?["locale"] as? String)
+                let timezone = TimeZone.init(abbreviation: arguments?["timezone"] as? String ?? "UTC")!
                 result(PlatformUtil.formatDate(date: date, format: format, locale: locale, timezone: timezone))
                 break
             default:

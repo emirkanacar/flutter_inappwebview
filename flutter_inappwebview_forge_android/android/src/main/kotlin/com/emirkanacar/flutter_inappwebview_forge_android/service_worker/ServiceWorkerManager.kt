@@ -1,10 +1,8 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.service_worker
 
-import android.os.Build
 import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
-import androidx.annotation.RequiresApi
 import androidx.webkit.ServiceWorkerClientCompat
 import androidx.webkit.ServiceWorkerControllerCompat
 import androidx.webkit.WebViewFeature
@@ -13,7 +11,6 @@ import com.emirkanacar.flutter_inappwebview_forge_android.types.Disposable
 import com.emirkanacar.flutter_inappwebview_forge_android.types.WebResourceRequestExt
 import com.emirkanacar.flutter_inappwebview_forge_android.types.WebResourceResponseExt
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 open class ServiceWorkerManager(initialPlugin: InAppWebViewFlutterPlugin) : Disposable {
     companion object {
         @JvmField

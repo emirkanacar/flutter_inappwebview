@@ -3,7 +3,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
@@ -13,7 +12,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.webkit.ClientCertRequest
 import android.webkit.CookieManager
-import android.webkit.CookieSyncManager
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SafeBrowsingResponse
@@ -77,7 +75,6 @@ open class InAppWebViewClient(
   private val synchronousInterceptRequestsInFlight = AtomicInteger(0)
   private val nativeNavigationSequence = AtomicLong(0)
 
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
     val webView = view as? InAppWebView
     if (webView == null) return false
@@ -94,7 +91,7 @@ open class InAppWebViewClient(
       var isRedirect = false
       if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_RESOURCE_REQUEST_IS_REDIRECT)) {
         isRedirect = WebResourceRequestCompat.isRedirect(request)
-      } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+      } else {
         isRedirect = request.isRedirect
       }
       onShouldOverrideUrlLoading(
@@ -177,7 +174,7 @@ open class InAppWebViewClient(
     if (isForMainFrame) {
       // There isn't any way to load an URL for a frame that is not the main frame,
       // so call this only on main frame.
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && headers != null) {
+      if (headers != null) {
         webView.loadUrl(url, headers)
       } else {
         webView.loadUrl(url)
@@ -281,18 +278,12 @@ open class InAppWebViewClient(
     inAppBrowserDelegate?.didFinishNavigation(url)
 
     // WebView does not reliably store cookies to local device storage.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      CookieManager.getInstance().flush()
-    } else {
-      CookieSyncManager.getInstance().sync()
-    }
+    CookieManager.getInstance().flush()
 
     val js = JavaScriptBridgeJS.PLATFORM_READY_JS_SOURCE()
     webView.evaluateJavascript(js, null)
     webView.channelDelegate?.onLoadStop(url)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      webView.postVisualStateReady(System.currentTimeMillis())
-    }
+    webView.postVisualStateReady(System.currentTimeMillis())
   }
 
   override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
@@ -306,7 +297,6 @@ open class InAppWebViewClient(
     webView.channelDelegate?.onUpdateVisitedHistory(currentUrl, isReload)
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   override fun onReceivedError(
     view: WebView,
     request: WebResourceRequest,
@@ -364,7 +354,6 @@ open class InAppWebViewClient(
     super.onReceivedError(view, errorCode, description, failingUrl)
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   override fun onReceivedHttpError(
     view: WebView,
     request: WebResourceRequest,
@@ -536,7 +525,6 @@ open class InAppWebViewClient(
     }
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
   override fun onReceivedClientCertRequest(view: WebView, request: ClientCertRequest) {
     val url = view.url
     val host = request.host
@@ -703,11 +691,7 @@ open class InAppWebViewClient(
 
       if (response != null) {
         val inputStream = response.data?.let { ByteArrayInputStream(it) }
-        if (
-          Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-          response.statusCode != null &&
-          response.reasonPhrase != null
-        ) {
+        if (response.statusCode != null && response.reasonPhrase != null) {
           return WebResourceResponse(
             response.contentType,
             response.contentEncoding,
@@ -781,7 +765,6 @@ open class InAppWebViewClient(
     return shouldInterceptRequest(view, requestExt)
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
   override fun shouldInterceptRequest(
     view: WebView,
     request: WebResourceRequest

@@ -44,6 +44,12 @@ class WebStorageManager {
   /// Remove data modified since a specific date.
   void removeDataModifiedSince(FlMethodCall* method_call);
 
+  /// Remove every website data kind for all sites.
+  void deleteBrowsingData(FlMethodCall* method_call);
+
+  /// Remove every website data kind for the site of a host or URL.
+  void deleteBrowsingDataForSite(FlMethodCall* method_call);
+
   /// Convert string list to WebKitWebsiteDataTypes bitmask.
   static WebKitWebsiteDataTypes parseDataTypes(FlValue* dataTypesValue);
 

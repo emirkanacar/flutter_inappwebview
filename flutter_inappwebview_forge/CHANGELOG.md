@@ -1,3 +1,37 @@
+## 2.1.80 - 2026-11-14
+
+- Support `ContextMenu` (custom items, `hideDefaultSystemContextMenuItems`,
+  `onCreateContextMenu`, `onContextMenuActionItemClicked`) on Windows.
+  `onHideContextMenu` is not called on Windows.
+- Add `ContainerController.warmUpRendererProcess(containerId:)` to start an
+  Android profile's renderer process before its first WebView is created
+  (`WebViewFeature.WARM_UP_RENDERER_PROCESS`).
+- Fix `InAppWebViewSettings.writingToolsBehavior` being ignored on iOS.
+- Add `InAppWebViewSettings.isLockdownModeEnabled` (iOS 16+, macOS 13+) to
+  enable Lockdown Mode for a WebView or exempt it from the system setting.
+- Add `CookieManager.setCookiePolicy` / `getCookiePolicy` with
+  `HTTPCookieStorePolicy` (iOS 17+, macOS 14+) to stop a cookie store from
+  storing and sending cookies without deleting them.
+- Add `WebStorageManager.deleteBrowsingData()` and
+  `deleteBrowsingDataForSite(site:)` to delete the complete browsing data
+  set (cookies, cache, DOM storage, IndexedDB, service workers) for all
+  sites or for one site (eTLD+1 and its subdomains). Supported on Android
+  (`WebViewFeature.DELETE_BROWSING_DATA`), iOS, macOS, and Linux; Windows
+  supports `deleteBrowsingData` only. Check `isMethodSupported` on other
+  platforms.
+- Fix `WebStorageManager.removeDataModifiedSince` on iOS, macOS, and Linux.
+  The native side misread the timestamp unit and removed almost nothing
+  (iOS/macOS) or only about the last half hour of data (Linux).
+- Harden the iOS, macOS, and Windows native channel handlers against
+  missing or mistyped arguments
+  ([#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)):
+  a missing or wrong-type required argument now throws a
+  `PlatformException` (code `invalid_arguments`) instead of crashing the app.
+- Remove Android native code that is unreachable with `minSdk 24`. No
+  public API or behavior change.
+- Ships with platform-interface 1.1.24, Android 1.0.58, iOS 2.1.38,
+  macOS 1.1.13, Windows 1.0.17, Linux 1.0.10, and Web 1.0.5.
+
 ## 2.1.79 - 2026-11-13
 
 - Resolve all `flutter analyze` infos reported by the pub.dev static

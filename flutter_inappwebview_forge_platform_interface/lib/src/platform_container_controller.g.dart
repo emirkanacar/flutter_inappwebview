@@ -194,6 +194,21 @@ enum PlatformContainerControllerMethod {
   ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   removeCustomHeader,
+
+  ///Can be used to check if the [PlatformContainerController.warmUpRendererProcess] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformContainerController.warmUpRendererProcess.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - Profile.warmUpRendererProcess](https://developer.android.com/reference/androidx/webkit/Profile#warmUpRendererProcess())):
+  ///    - Requires [WebViewFeature.WARM_UP_RENDERER_PROCESS].
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [containerId]: all platforms
+  ///
+  ///Use the [PlatformContainerController.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  warmUpRendererProcess,
 }
 
 extension _PlatformContainerControllerMethodSupported
@@ -255,6 +270,11 @@ extension _PlatformContainerControllerMethodSupported
               TargetPlatform.android,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformContainerControllerMethod.removeCustomHeader:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformContainerControllerMethod.warmUpRendererProcess:
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,

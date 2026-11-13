@@ -1,0 +1,167 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dart:
+    name: Dart (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - flutter_inappwebview_forge_platform_interface
+          - flutter_inappwebview_forge_android
+          - flutter_inappwebview_forge_ios
+          - flutter_inappwebview_forge_macos
+          - flutter_inappwebview_forge_windows
+          - flutter_inappwebview_forge_linux
+          - flutter_inappwebview_forge_web
+          - flutter_inappwebview_forge
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        working-directory: .
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      # Web and Linux do not commit a pubspec_overrides.yaml. Test them against
+      # the platform interface in this checkout, like the other packages.
+      - name: Use the local platform interface
+        if: matrix.package == 'flutter_inappwebview_forge_web' || matrix.package == 'flutter_inappwebview_forge_linux'
+        run: |
+          if [ ! -f pubspec_overrides.yaml ]; then
+            printf 'dependency_overrides:\n  flutter_inappwebview_forge_platform_interface:\n    path: ../flutter_inappwebview_forge_platform_interface\n' > pubspec_overrides.yaml
+          fi
+
+      - name: Fetch Dart packages
+        run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib
+
+      # Warnings and errors fail the job; infos are reported but not fatal.
+      # example/ apps are not analyzed yet (they need their own pub get and
+      # still carry warnings).
+      - name: Analyze
+        run: flutter analyze --no-pub --no-fatal-infos lib test
+
+      - name: Test
+        run: flutter test --no-pub
+
+  generated-code:
+    name: Generated code is up to date
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Regenerate platform interface sources
+        working-directory: flutter_inappwebview_forge_platform_interface
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+
+      - name: Fail on generated-file drift
+        run: |
+          if [ -n "$(git status --porcelain -- flutter_inappwebview_forge_platform_interface)" ]; then
+            git status --short -- flutter_inappwebview_forge_platform_interface
+            git diff --stat -- flutter_inappwebview_forge_platform_interface
+            echo "::error::Generated files are stale. Run 'npm run build' and commit the result."
+            exit 1
+          fi
+
+  apple-static:
+    name: Apple static checks
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Validate iOS Swift package manifest
+        working-directory: flutter_inappwebview_forge_ios/ios/flutter_inappwebview_forge_ios
+        run: swift package dump-package > /dev/null
+
+      - name: Validate macOS Swift package manifest
+        working-directory: flutter_inappwebview_forge_macos/macos/flutter_inappwebview_forge_macos
+        run: swift package dump-package > /dev/null
+
+      - name: Run iOS native lifecycle tests
+        run: sh tool/run_ios_native_lifecycle_tests.sh
+
+      - name: Run Apple website data site matcher tests
+        run: sh tool/run_apple_website_data_matcher_tests.sh
+
+      - name: Run Linux website data site matcher tests
+        run: sh tool/run_linux_website_data_matcher_tests.sh
+
+  android-build:
+    name: Android example build and 16 KB check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Build release APK
+        working-directory: flutter_inappwebview_forge/example
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Check 16 KB native library alignment
+        run: bash tool/check_android_16k_alignment.sh flutter_inappwebview_forge/example/build/app/outputs/flutter-apk/app-release.apk

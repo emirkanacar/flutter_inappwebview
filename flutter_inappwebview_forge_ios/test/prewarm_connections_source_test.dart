@@ -23,6 +23,6 @@ void main() {
 
     expect(dartSource, contains('prewarmConnections(List<WebUri> urls)'));
     expect(dartSource, contains("putIfAbsent('URLs'"));
-    expect(nativeSource, contains('arguments!["URLs"]'));
+    expect(nativeSource, contains('requiredArgument(arguments, "URLs"'));
   });
 }

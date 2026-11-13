@@ -20,9 +20,14 @@ void main() {
     final source = sourceFile.readAsStringSync();
 
     expect(
-      RegExp(r'settings\.allowUniversalAccessFromFileURLs\s*=').hasMatch(source),
+      RegExp(
+        r'settings\.allowUniversalAccessFromFileURLs\s*=',
+      ).hasMatch(source),
       isFalse,
     );
-    expect(source, contains('Ignoring allowUniversalAccessFromFileURLs on Android'));
+    expect(
+      source,
+      contains('Ignoring allowUniversalAccessFromFileURLs on Android'),
+    );
   });
 }

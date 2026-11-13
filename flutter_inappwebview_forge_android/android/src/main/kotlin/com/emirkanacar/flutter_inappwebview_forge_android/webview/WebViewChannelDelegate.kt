@@ -4,7 +4,6 @@ package com.emirkanacar.flutter_inappwebview_forge_android.webview
 
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.webkit.ValueCallback
 import android.webkit.WebView
 
@@ -318,15 +317,11 @@ open class WebViewChannelDelegate(
         handleLifecycleMethod(method, call, result)
 
       WebViewChannelDelegateMethods.printCurrentPage -> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          result.success(webView?.printCurrentPage(
-            PrintJobSettings().apply {
-              mutableMapArgument(call, "settings")?.let(::parse)
-            }
-          ))
-        } else {
-          result.success(null)
-        }
+        result.success(webView?.printCurrentPage(
+          PrintJobSettings().apply {
+            mutableMapArgument(call, "settings")?.let(::parse)
+          }
+        ))
       }
 
       WebViewChannelDelegateMethods.getContentHeight -> {
@@ -339,9 +334,7 @@ open class WebViewChannelDelegate(
       }
 
       WebViewChannelDelegateMethods.zoomBy -> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          webView?.zoomBy(call.argument<Number>("zoomFactor")?.toFloat() ?: 0f)
-        }
+        webView?.zoomBy(call.argument<Number>("zoomFactor")?.toFloat() ?: 0f)
         result.success(true)
       }
 
@@ -352,12 +345,8 @@ open class WebViewChannelDelegate(
       }
 
       WebViewChannelDelegateMethods.getSelectedText -> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-          webView?.getSelectedText(ValueCallback { value -> result.success(value) })
-            ?: result.success(null)
-        } else {
-          result.success(null)
-        }
+        webView?.getSelectedText(ValueCallback { value -> result.success(value) })
+          ?: result.success(null)
       }
 
       WebViewChannelDelegateMethods.getHitTestResult -> {
@@ -549,25 +538,17 @@ open class WebViewChannelDelegate(
       }
 
       WebViewChannelDelegateMethods.callAsyncJavaScript -> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          webView?.callAsyncJavaScript(
-            call.argument<String>("functionBody") ?: "",
-            mutableMapArgument(call, "arguments") ?: mutableMapOf(),
-            ContentWorld.fromMap(mutableMapArgument(call, "contentWorld")),
-            ValueCallback { value -> result.success(value) }
-          ) ?: result.success(null)
-        } else {
-          result.success(null)
-        }
+        webView?.callAsyncJavaScript(
+          call.argument<String>("functionBody") ?: "",
+          mutableMapArgument(call, "arguments") ?: mutableMapOf(),
+          ContentWorld.fromMap(mutableMapArgument(call, "contentWorld")),
+          ValueCallback { value -> result.success(value) }
+        ) ?: result.success(null)
       }
 
       WebViewChannelDelegateMethods.isSecureContext -> {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          webView?.isSecureContext(ValueCallback { value -> result.success(value) })
-            ?: result.success(false)
-        } else {
-          result.success(false)
-        }
+        webView?.isSecureContext(ValueCallback { value -> result.success(value) })
+          ?: result.success(false)
       }
 
       else -> result.notImplemented()

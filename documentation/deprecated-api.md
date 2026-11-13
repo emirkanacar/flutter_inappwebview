@@ -154,11 +154,13 @@ enums) map 1:1 to the unprefixed type. Use the unprefixed name in new code.
 
 ## Native SDK deprecations that stay on purpose
 
-Android still declares `minSdkVersion 24` (raised from 19 in 2.1.77). Legacy WebView, cookie, print,
-fullscreen, `forceDark`, and `saveFormData` call sites are isolated with
-file-level deprecation suppressions because there is no behavior-preserving
-replacement for that API range. Those native paths are not removed until an
-explicit minSdk increase. See the `#2641` and `#2685` record in
+Android declares `minSdkVersion 24` (raised from 19 in 2.1.77). The native
+branches that only ran below API 24 (for example `CookieSyncManager` and the
+pre-Lollipop file chooser) have been removed in the next Android release; this
+does not change the Dart API, the channel contract, or behavior on API 24+.
+The remaining WebView, print, fullscreen, `forceDark`, and `saveFormData` call
+sites are still isolated with file-level deprecation suppressions until a
+behavior-preserving replacement is chosen. See the `#2641` and `#2685` record in
 [`docs/known-issues.md`](https://github.com/emirkanacar/flutter_inappwebview/blob/master/docs/known-issues.md)
 in the repository engineering docs.
 

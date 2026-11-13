@@ -137,6 +137,8 @@ list(APPEND PLUGIN_SOURCES
   "types/favicon_changed_request.cpp"
   "types/favicon_changed_request.h"
   "types/favicon_image_format.h"
+  "types/context_menu.cpp"
+  "types/context_menu.h"
   "types/launching_external_uri_scheme_request.cpp"
   "types/launching_external_uri_scheme_request.h"
   "types/launching_external_uri_scheme_response.cpp"
@@ -255,6 +257,8 @@ list(APPEND PLUGIN_SOURCES
   "cookie_manager.h"
   "platform_util.cpp"
   "platform_util.h"
+  "web_storage_manager.cpp"
+  "web_storage_manager.h"
 )
 
 # Define the plugin library target. Its name must not be changed (see comment

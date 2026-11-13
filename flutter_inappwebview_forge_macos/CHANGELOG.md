@@ -1,3 +1,33 @@
+## 1.1.13 - 2026-11-14
+
+- Support `isLockdownModeEnabled`. The value is written to the initial
+  `defaultWebpagePreferences` and to the `WKWebpagePreferences` of every
+  navigation decision, so `setSettings` changes apply from the next
+  navigation. A `nil` value leaves WebKit's (system) value untouched.
+- Add `setCookiePolicy` / `getCookiePolicy` to the cookie manager channel
+  using `WKHTTPCookieStore.CookiePolicy`, scoped to the WebView's data store
+  when `webViewId` is sent. Older OS versions reply `false` / `nil`; an
+  unknown policy value replies `invalid_arguments`
+  (macOS 13 / macOS 14 availability guards).
+- Fix `removeDataModifiedSince`: the native handler read the Dart
+  `millisecondsSinceEpoch` timestamp as seconds, which moved the cutoff
+  date thousands of years into the future so almost nothing was removed.
+  The channel payload is unchanged; the native side now divides by 1000.
+- Add `deleteBrowsingData` / `deleteBrowsingDataForSite` to the WebStorage
+  manager channel, sharing the iOS `WebsiteDataSiteMatcher` implementation
+  (the two copies are checked to be identical by
+  `tool/run_apple_website_data_matcher_tests.sh`).
+- Method-channel handlers no longer force-cast required arguments
+  (`arguments!["key"] as! T`). A missing, `null`, or wrong-type required
+  argument now completes the call with a `FlutterError` whose code is
+  `invalid_arguments` (surfaced in Dart as a `PlatformException`) instead of
+  terminating the app. Channel names, method names, and payload keys are
+  unchanged; optional arguments keep their existing defaults. Native-side
+  counterpart of the Android payload hardening in
+  [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856).
+- Swift: `InAppBrowserManager.open(arguments:)` now takes `NSDictionary?` and
+  `throws`. It is only called from the plugin's own channel handler.
+
 ## 1.1.12 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback

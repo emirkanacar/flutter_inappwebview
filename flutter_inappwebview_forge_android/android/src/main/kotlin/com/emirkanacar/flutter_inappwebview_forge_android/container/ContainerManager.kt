@@ -186,6 +186,33 @@ open class ContainerManager(initialPlugin: InAppWebViewFlutterPlugin) :
                     result.success(false)
                 }
             }
+            "warmUpRendererProcess" -> {
+                val containerId = call.argument<String>("containerId")
+                if (profileStore == null ||
+                    containerId.isNullOrEmpty() ||
+                    !WebViewFeature.isFeatureSupported("WARM_UP_RENDERER_PROCESS")
+                ) {
+                    result.success(false)
+                    return
+                }
+                try {
+                    // Profile.warmUpRendererProcess is an opt-in experimental
+                    // API; call it reflectively like preconnect so the plugin
+                    // does not require the opt-in annotation.
+                    val profile = profileStore.getOrCreateProfile(containerId)
+                    val method = profile.javaClass.methods.firstOrNull {
+                        it.name == "warmUpRendererProcess" && it.parameterTypes.isEmpty()
+                    }
+                    if (method == null) {
+                        result.success(false)
+                        return
+                    }
+                    method.invoke(profile)
+                    result.success(true)
+                } catch (_: Exception) {
+                    result.success(false)
+                }
+            }
             else -> result.notImplemented()
         }
     }

@@ -125,7 +125,9 @@ abstract class PlatformInAppBrowser extends PlatformInterface
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.contextMenu}
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformInAppBrowser.contextMenu.supported_platforms}
-  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  @SupportedPlatforms(
+    platforms: [AndroidPlatform(), IOSPlatform(), WindowsPlatform()],
+  )
   ContextMenu? get contextMenu => params.contextMenu;
 
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.pullToRefreshController}

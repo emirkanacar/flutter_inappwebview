@@ -17,6 +17,7 @@ extension _PlatformWebStorageManagerCreationParamsClassSupported
   ///- iOS WKWebView 9.0+
   ///- Linux WPE WebKit
   ///- macOS WKWebView
+  ///- Windows WebView2
   ///
   ///Use the [PlatformWebStorageManagerCreationParams.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -27,6 +28,7 @@ extension _PlatformWebStorageManagerCreationParamsClassSupported
           TargetPlatform.iOS,
           TargetPlatform.linux,
           TargetPlatform.macOS,
+          TargetPlatform.windows,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -40,6 +42,8 @@ extension _PlatformWebStorageManagerClassSupported
   ///- iOS WKWebView 9.0+ ([Official API - WKWebsiteDataStore](https://developer.apple.com/documentation/webkit/wkwebsitedatastore))
   ///- Linux WPE WebKit ([Official API - WebKitWebsiteDataManager](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/class.WebsiteDataManager.html))
   ///- macOS WKWebView ([Official API - WKWebsiteDataStore](https://developer.apple.com/documentation/webkit/wkwebsitedatastore))
+  ///- Windows WebView2 ([Official API - ICoreWebView2Profile2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile2)):
+  ///    - Only deleteBrowsingData is supported on Windows.
   ///
   ///Use the [PlatformWebStorageManager.isClassSupported] method to check if this class is supported at runtime.
   ///{@endtemplate}
@@ -50,6 +54,7 @@ extension _PlatformWebStorageManagerClassSupported
           TargetPlatform.iOS,
           TargetPlatform.linux,
           TargetPlatform.macOS,
+          TargetPlatform.windows,
         ].contains(platform ?? defaultTargetPlatform);
   }
 }
@@ -66,6 +71,47 @@ enum PlatformWebStorageManagerMethod {
   ///Use the [PlatformWebStorageManager.isMethodSupported] method to check if this method is supported at runtime.
   ///{@endtemplate}
   deleteAllData,
+
+  ///Can be used to check if the [PlatformWebStorageManager.deleteBrowsingData] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingData.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebStorageCompat.deleteBrowsingData](https://developer.android.com/reference/androidx/webkit/WebStorageCompat#deleteBrowsingData(android.webkit.WebStorage,java.lang.Runnable))):
+  ///    - Requires an Android System WebView provider that supports WebViewFeature.DELETE_BROWSING_DATA; returns false otherwise.
+  ///- iOS WKWebView 9.0+ ([Official API - WKWebsiteDataStore.removeData](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata)):
+  ///    - Removes every WKWebsiteDataStore.allWebsiteDataTypes() kind.
+  ///- macOS WKWebView ([Official API - WKWebsiteDataStore.removeData](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata)):
+  ///    - Removes every WKWebsiteDataStore.allWebsiteDataTypes() kind.
+  ///- Linux WPE WebKit ([Official API - webkit_website_data_manager_clear](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebsiteDataManager.clear.html)):
+  ///    - Clears WEBKIT_WEBSITE_DATA_ALL from the default network session.
+  ///- Windows WebView2 ([Official API - ICoreWebView2Profile2.ClearBrowsingDataAll](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile2#clearbrowsingdataall)):
+  ///    - Clears the profile of the default WebViewEnvironment. Returns false when the WebView2 runtime does not expose ICoreWebView2Profile2.
+  ///
+  ///Use the [PlatformWebStorageManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  deleteBrowsingData,
+
+  ///Can be used to check if the [PlatformWebStorageManager.deleteBrowsingDataForSite] method is supported at runtime.
+  ///
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingDataForSite.supported_platforms}
+  ///
+  ///**Officially Supported Platforms/Implementations**:
+  ///- Android WebView ([Official API - WebStorageCompat.deleteBrowsingDataForSite](https://developer.android.com/reference/androidx/webkit/WebStorageCompat#deleteBrowsingDataForSite(android.webkit.WebStorage,java.lang.String,java.lang.Runnable))):
+  ///    - Requires an Android System WebView provider that supports WebViewFeature.DELETE_BROWSING_DATA; returns null otherwise. The returned value is the site computed by WebView.
+  ///- iOS WKWebView 9.0+ ([Official API - WKWebsiteDataStore.removeData](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532936-removedata)):
+  ///    - Matches WKWebsiteDataRecord.displayName against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.
+  ///- macOS WKWebView ([Official API - WKWebsiteDataStore.removeData](https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532936-removedata)):
+  ///    - Matches WKWebsiteDataRecord.displayName against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.
+  ///- Linux WPE WebKit ([Official API - webkit_website_data_manager_remove](https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebsiteDataManager.remove.html)):
+  ///    - Matches webkit_website_data_get_name against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.
+  ///
+  ///**Parameters - Officially Supported Platforms/Implementations**:
+  ///- [site]: all platforms
+  ///
+  ///Use the [PlatformWebStorageManager.isMethodSupported] method to check if this method is supported at runtime.
+  ///{@endtemplate}
+  deleteBrowsingDataForSite,
 
   ///Can be used to check if the [PlatformWebStorageManager.deleteOrigin] method is supported at runtime.
   ///
@@ -182,6 +228,23 @@ extension _PlatformWebStorageManagerMethodSupported
         return ((kIsWeb && platform != null) || !kIsWeb) &&
             [
               TargetPlatform.android,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebStorageManagerMethod.deleteBrowsingData:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.linux,
+              TargetPlatform.windows,
+            ].contains(platform ?? defaultTargetPlatform);
+      case PlatformWebStorageManagerMethod.deleteBrowsingDataForSite:
+        return ((kIsWeb && platform != null) || !kIsWeb) &&
+            [
+              TargetPlatform.android,
+              TargetPlatform.iOS,
+              TargetPlatform.macOS,
+              TargetPlatform.linux,
             ].contains(platform ?? defaultTargetPlatform);
       case PlatformWebStorageManagerMethod.deleteOrigin:
         return ((kIsWeb && platform != null) || !kIsWeb) &&

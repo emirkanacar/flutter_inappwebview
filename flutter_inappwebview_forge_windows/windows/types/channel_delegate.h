@@ -21,6 +21,11 @@ namespace flutter_inappwebview_plugin
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
 
     void UnregisterMethodCallHandler() const;
+
+  private:
+    void HandleMethodCallGuarded(
+      const flutter::MethodCall<flutter::EncodableValue>& method_call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
   };
 }
 

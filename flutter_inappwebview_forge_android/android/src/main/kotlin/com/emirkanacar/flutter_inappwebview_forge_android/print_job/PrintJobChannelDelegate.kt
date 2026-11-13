@@ -1,13 +1,10 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.print_job
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.HashMap
 
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 open class PrintJobChannelDelegate(
     private var printJobController: PrintJobController?,
     channel: MethodChannel

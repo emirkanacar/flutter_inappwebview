@@ -23,6 +23,7 @@ part 'platform_web_storage_manager.g.dart';
     IOSPlatform(available: '9.0'),
     LinuxPlatform(),
     MacOSPlatform(),
+    WindowsPlatform(),
   ],
 )
 @immutable
@@ -66,6 +67,12 @@ class PlatformWebStorageManagerCreationParams {
       apiName: 'WKWebsiteDataStore',
       apiUrl:
           'https://developer.apple.com/documentation/webkit/wkwebsitedatastore',
+    ),
+    WindowsPlatform(
+      apiName: 'ICoreWebView2Profile2',
+      apiUrl:
+          'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile2',
+      note: 'Only deleteBrowsingData is supported on Windows.',
     ),
   ],
 )
@@ -329,6 +336,119 @@ abstract class PlatformWebStorageManager extends PlatformInterface {
   }) {
     throw UnimplementedError(
       'removeDataModifiedSince is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingData}
+  ///Deletes all browsing data stored by WebView instances that use the
+  ///default profile or data store: cookies, HTTP cache, DOM storage,
+  ///IndexedDB, service workers, and the other website data kinds the
+  ///platform manages.
+  ///
+  ///Unlike [deleteAllData], which on Android only clears the JavaScript
+  ///storage APIs, this method clears the complete browsing data set.
+  ///
+  ///Returns `true` when the deletion completed, or `false` when the
+  ///installed WebView provider does not support the operation (on Android
+  ///this is `WebViewFeature.DELETE_BROWSING_DATA`).
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingData.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebStorageCompat.deleteBrowsingData',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebStorageCompat#deleteBrowsingData(android.webkit.WebStorage,java.lang.Runnable)',
+        note:
+            'Requires an Android System WebView provider that supports WebViewFeature.DELETE_BROWSING_DATA; returns false otherwise.',
+      ),
+      IOSPlatform(
+        available: '9.0',
+        apiName: 'WKWebsiteDataStore.removeData',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata',
+        note: 'Removes every WKWebsiteDataStore.allWebsiteDataTypes() kind.',
+      ),
+      MacOSPlatform(
+        apiName: 'WKWebsiteDataStore.removeData',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532938-removedata',
+        note: 'Removes every WKWebsiteDataStore.allWebsiteDataTypes() kind.',
+      ),
+      LinuxPlatform(
+        apiName: 'webkit_website_data_manager_clear',
+        apiUrl:
+            'https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebsiteDataManager.clear.html',
+        note:
+            'Clears WEBKIT_WEBSITE_DATA_ALL from the default network session.',
+      ),
+      WindowsPlatform(
+        apiName: 'ICoreWebView2Profile2.ClearBrowsingDataAll',
+        apiUrl:
+            'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2profile2#clearbrowsingdataall',
+        note:
+            'Clears the profile of the default WebViewEnvironment. Returns false when the WebView2 runtime does not expose ICoreWebView2Profile2.',
+      ),
+    ],
+  )
+  Future<bool> deleteBrowsingData() {
+    throw UnimplementedError(
+      'deleteBrowsingData is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingDataForSite}
+  ///Deletes all browsing data for the site that [site] belongs to.
+  ///
+  ///[site] is a host (`www.example.com`) or a URL
+  ///(`https://www.example.com/path`). The data of the registrable domain
+  ///(eTLD+1, for example `example.com`) and all of its subdomains is
+  ///deleted, including cookies, cache, and storage.
+  ///
+  ///Returns the site whose data was deleted, as computed by the platform, or
+  ///`null` when [site] has no host or the installed WebView provider does
+  ///not support the operation (on Android this is
+  ///`WebViewFeature.DELETE_BROWSING_DATA`).
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingDataForSite.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      AndroidPlatform(
+        apiName: 'WebStorageCompat.deleteBrowsingDataForSite',
+        apiUrl:
+            'https://developer.android.com/reference/androidx/webkit/WebStorageCompat#deleteBrowsingDataForSite(android.webkit.WebStorage,java.lang.String,java.lang.Runnable)',
+        note:
+            'Requires an Android System WebView provider that supports WebViewFeature.DELETE_BROWSING_DATA; returns null otherwise. The returned value is the site computed by WebView.',
+      ),
+      IOSPlatform(
+        available: '9.0',
+        apiName: 'WKWebsiteDataStore.removeData',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532936-removedata',
+        note:
+            'Matches WKWebsiteDataRecord.displayName against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.',
+      ),
+      MacOSPlatform(
+        apiName: 'WKWebsiteDataStore.removeData',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkwebsitedatastore/1532936-removedata',
+        note:
+            'Matches WKWebsiteDataRecord.displayName against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.',
+      ),
+      LinuxPlatform(
+        apiName: 'webkit_website_data_manager_remove',
+        apiUrl:
+            'https://wpewebkit.org/reference/stable/wpe-webkit-2.0/method.WebsiteDataManager.remove.html',
+        note:
+            'Matches webkit_website_data_get_name against the host and its parent domains. Returns the matched record name, or the normalized host when no data exists for the site.',
+      ),
+    ],
+  )
+  Future<String?> deleteBrowsingDataForSite({required String site}) {
+    throw UnimplementedError(
+      'deleteBrowsingDataForSite is not implemented on the current platform',
     );
   }
 

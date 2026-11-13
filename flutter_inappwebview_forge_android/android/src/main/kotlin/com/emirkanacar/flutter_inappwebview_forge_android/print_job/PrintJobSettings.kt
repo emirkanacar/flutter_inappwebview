@@ -1,13 +1,10 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.print_job
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.emirkanacar.flutter_inappwebview_forge_android.ISettings
 import com.emirkanacar.flutter_inappwebview_forge_android.types.MediaSizeExt
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ResolutionExt
 import java.util.HashMap
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
 class PrintJobSettings : ISettings<PrintJobController> {
     @JvmField
     var handledByClient: Boolean? = false

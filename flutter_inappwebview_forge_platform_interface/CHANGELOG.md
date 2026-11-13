@@ -1,3 +1,28 @@
+## 1.1.24 - 2026-11-14
+
+- `ContextMenu`, the `PlatformWebViewCreationParams.contextMenu` property,
+  and `PlatformInAppBrowser.contextMenu` capability metadata now list Windows
+  (`ICoreWebView2_11.add_ContextMenuRequested`). Regenerated; no API change.
+- Add `PlatformContainerController.warmUpRendererProcess({required String
+  containerId})` and `WebViewFeature.WARM_UP_RENDERER_PROCESS` /
+  `AndroidWebViewFeature.WARM_UP_RENDERER_PROCESS`, with generated
+  capability metadata (Android only).
+- Add the `InAppWebViewSettings.isLockdownModeEnabled` setting (iOS 16+,
+  macOS 13+). It defaults to `null`, which keeps the system Lockdown Mode
+  setting; `true` enables it for the WebView and `false` exempts the WebView.
+- Add `PlatformCookieManager.setCookiePolicy` / `getCookiePolicy` and the
+  `HTTPCookieStorePolicy` enum (`ALLOW`, `DISALLOW`) for
+  `WKHTTPCookieStore.CookiePolicy` (iOS 17+, macOS 14+), with generated
+  capability metadata.
+- Add `PlatformWebStorageManager.deleteBrowsingData()` and
+  `deleteBrowsingDataForSite({required String site})`, with generated
+  `PlatformWebStorageManagerMethod` capability metadata (Android, iOS,
+  macOS, Linux; Windows for `deleteBrowsingData` only). `deleteBrowsingData`
+  returns `false` and `deleteBrowsingDataForSite` returns `null` when the
+  WebView provider does not support the operation. Web is not listed.
+- `PlatformWebStorageManager` and its creation params now list Windows
+  (`ICoreWebView2Profile2`); only `deleteBrowsingData` is supported there.
+
 ## 1.1.23 - 2026-11-13
 
 - Add `example/README.md` showing how a platform implementation registers

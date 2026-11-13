@@ -45,6 +45,16 @@ public class MyWebStorageManager: ChannelDelegate {
                 }
                 MyWebStorageManager.removeDataModifiedSince(dataTypes: Set(dataTypes), timestamp: timestamp, result: result)
                 break
+            case "deleteBrowsingData":
+                MyWebStorageManager.deleteBrowsingData(result: result)
+                break
+            case "deleteBrowsingDataForSite":
+                guard let site = arguments?["site"] as? String else {
+                    result(FlutterError(code: "invalid_arguments", message: "site is required.", details: nil))
+                    return
+                }
+                MyWebStorageManager.deleteBrowsingDataForSite(site: site, result: result)
+                break
             default:
                 result(FlutterMethodNotImplemented)
                 break
@@ -89,9 +99,39 @@ public class MyWebStorageManager: ChannelDelegate {
     }
     
     public static func removeDataModifiedSince(dataTypes: Set<String>, timestamp: Int64, result: @escaping FlutterResult) {
-        let date = NSDate(timeIntervalSince1970: TimeInterval(timestamp))
-        MyWebStorageManager.websiteDataStore.removeData(ofTypes: dataTypes, modifiedSince: date as Date) {
+        // The Dart side sends DateTime.millisecondsSinceEpoch.
+        let date = Date(timeIntervalSince1970: TimeInterval(timestamp) / 1000.0)
+        MyWebStorageManager.websiteDataStore.removeData(ofTypes: dataTypes, modifiedSince: date) {
             result(true)
+        }
+    }
+
+    public static func deleteBrowsingData(result: @escaping FlutterResult) {
+        MyWebStorageManager.websiteDataStore.removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            modifiedSince: Date(timeIntervalSince1970: 0)
+        ) {
+            result(true)
+        }
+    }
+
+    public static func deleteBrowsingDataForSite(site: String, result: @escaping FlutterResult) {
+        guard let host = WebsiteDataSiteMatcher.normalizedHost(site) else {
+            result(nil)
+            return
+        }
+        let dataTypes = WKWebsiteDataStore.allWebsiteDataTypes()
+        MyWebStorageManager.websiteDataStore.fetchDataRecords(ofTypes: dataTypes) { records in
+            let names = records.map { $0.displayName }
+            let matched = WebsiteDataSiteMatcher.matchingNames(host: host, recordNames: names)
+            let toRemove = records.filter { matched.names.contains($0.displayName.lowercased()) }
+            guard !toRemove.isEmpty else {
+                result(matched.site)
+                return
+            }
+            MyWebStorageManager.websiteDataStore.removeData(ofTypes: dataTypes, for: toRemove) {
+                result(matched.site)
+            }
         }
     }
     

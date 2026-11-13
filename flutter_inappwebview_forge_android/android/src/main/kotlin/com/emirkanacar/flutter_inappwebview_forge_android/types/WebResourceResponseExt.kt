@@ -1,8 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.webkit.WebResourceResponse
-import androidx.annotation.RequiresApi
 import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import java.util.HashMap
 
@@ -35,11 +33,9 @@ open class WebResourceResponseExt(
             var statusCode: Int? = null
             var reasonPhrase: String? = null
             var headers: MutableMap<String, String>? = null
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                statusCode = response.getStatusCode()
-                reasonPhrase = response.getReasonPhrase()
-                headers = response.getResponseHeaders()
-            }
+            statusCode = response.getStatusCode()
+            reasonPhrase = response.getReasonPhrase()
+            headers = response.getResponseHeaders()
             return WebResourceResponseExt(
                 response.getMimeType(),
                 response.getEncoding(),

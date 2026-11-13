@@ -7,17 +7,17 @@ working rules, toolchain baseline, test selection, issue workflow, and
 documentation index). Keep project rules there so every agent reads the same
 contract; this file only adds Claude Code specifics.
 
-## Current release line (2026-11-13)
+## Current release line (2026-11-14)
 
 | Package | Version |
 | --- | ---: |
-| `flutter_inappwebview_forge` | 2.1.79 |
-| `flutter_inappwebview_forge_platform_interface` | 1.1.23 |
-| `flutter_inappwebview_forge_android` | 1.0.57 |
-| `flutter_inappwebview_forge_ios` | 2.1.37 |
-| `flutter_inappwebview_forge_macos` | 1.1.12 |
-| `flutter_inappwebview_forge_windows` | 1.0.16 |
-| `flutter_inappwebview_forge_linux` | 1.0.9 |
+| `flutter_inappwebview_forge` | 2.1.80 |
+| `flutter_inappwebview_forge_platform_interface` | 1.1.24 |
+| `flutter_inappwebview_forge_android` | 1.0.58 |
+| `flutter_inappwebview_forge_ios` | 2.1.38 |
+| `flutter_inappwebview_forge_macos` | 1.1.13 |
+| `flutter_inappwebview_forge_windows` | 1.0.17 |
+| `flutter_inappwebview_forge_linux` | 1.0.10 |
 | `flutter_inappwebview_forge_web` | 1.0.5 |
 
 Read versions from each `pubspec.yaml` before writing release notes; this

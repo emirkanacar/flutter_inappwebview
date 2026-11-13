@@ -17,6 +17,13 @@ part 'context_menu.g.dart';
     ),
     IOSPlatform(),
     MacOSPlatform(),
+    WindowsPlatform(
+      apiName: 'ICoreWebView2_11.add_ContextMenuRequested',
+      apiUrl:
+          'https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested',
+      note:
+          'Uses WebView2 `ContextMenuRequested` (`ICoreWebView2_11`). Custom items require `ICoreWebView2Environment9`. `onHideContextMenu` is not called because WebView2 has no menu-dismissed event. No event is raised when `disableContextMenu` is `true`.',
+    ),
   ],
 )
 @ExchangeableObject()

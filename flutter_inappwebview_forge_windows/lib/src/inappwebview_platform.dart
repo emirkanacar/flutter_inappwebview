@@ -13,7 +13,7 @@ import 'web_message/web_message_channel.dart';
 import 'web_message/web_message_listener.dart';
 import 'web_message/web_message_port.dart';
 import 'web_notification/web_notification_controller.dart';
-import 'web_storage/web_storage.dart';
+import 'web_storage/main.dart';
 import 'webview_environment/webview_environment.dart';
 
 /// Implementation of [InAppWebViewPlatform] using the WebView2 API.
@@ -53,6 +53,26 @@ class WindowsInAppWebViewPlatform extends InAppWebViewPlatform {
   @override
   WindowsCookieManager createPlatformCookieManagerStatic() {
     return WindowsCookieManager.static();
+  }
+
+  /// Creates a new [WindowsWebStorageManager].
+  ///
+  /// This function should only be called by the app-facing package.
+  /// Look at using [WebStorageManager] in `flutter_inappwebview_forge` instead.
+  @override
+  WindowsWebStorageManager createPlatformWebStorageManager(
+    PlatformWebStorageManagerCreationParams params,
+  ) {
+    return WindowsWebStorageManager(params);
+  }
+
+  /// Creates a new empty [WindowsWebStorageManager] to access static methods.
+  ///
+  /// This function should only be called by the app-facing package.
+  /// Look at using [WebStorageManager] in `flutter_inappwebview_forge` instead.
+  @override
+  WindowsWebStorageManager createPlatformWebStorageManagerStatic() {
+    return WindowsWebStorageManager.static();
   }
 
   /// Creates a new [WindowsInAppWebViewController].
@@ -331,15 +351,6 @@ class WindowsInAppWebViewPlatform extends InAppWebViewPlatform {
   // exception.                                                               //
   // ************************************************************************ //
 
-  /// Creates a new empty [PlatformWebStorageManager] to access static methods.
-  ///
-  /// This function should only be called by the app-facing package.
-  /// Look at using [WebStorageManager] in `flutter_inappwebview_forge` instead.
-  @override
-  PlatformWebStorageManager createPlatformWebStorageManagerStatic() {
-    return _PlatformWebStorageManager.static();
-  }
-
   /// Creates a new empty [PlatformChromeSafariBrowser] to access static methods.
   ///
   /// This function should only be called by the app-facing package.
@@ -595,17 +606,6 @@ class _PlatformWebAuthenticationSession
       );
 
   factory _PlatformWebAuthenticationSession.static() => _staticValue;
-}
-
-class _PlatformWebStorageManager extends PlatformWebStorageManager {
-  _PlatformWebStorageManager(super.params) : super.implementation();
-
-  static final _PlatformWebStorageManager _staticValue =
-      _PlatformWebStorageManager(
-        const PlatformWebStorageManagerCreationParams(),
-      );
-
-  factory _PlatformWebStorageManager.static() => _staticValue;
 }
 
 class _PlatformWebViewFeature extends PlatformWebViewFeature {

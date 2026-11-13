@@ -1,10 +1,13 @@
 #include "web_storage_manager.h"
 
+#include <algorithm>
+#include <cctype>
 #include <cstring>
 
 #include "plugin_instance.h"
 #include "utils/flutter.h"
 #include "utils/log.h"
+#include "utils/website_data_site_matcher.h"
 
 namespace flutter_inappwebview_plugin {
 
@@ -61,6 +64,10 @@ void WebStorageManager::HandleMethodCall(FlMethodChannel* channel,
     self->removeDataFor(method_call);
   } else if (string_equals(method, "removeDataModifiedSince")) {
     self->removeDataModifiedSince(method_call);
+  } else if (string_equals(method, "deleteBrowsingData")) {
+    self->deleteBrowsingData(method_call);
+  } else if (string_equals(method, "deleteBrowsingDataForSite")) {
+    self->deleteBrowsingDataForSite(method_call);
   } else {
     fl_method_call_respond_not_implemented(method_call, nullptr);
   }
@@ -336,10 +343,15 @@ void WebStorageManager::removeDataModifiedSince(FlMethodCall* method_call) {
     timestamp = fl_value_get_int(timestampValue);
   }
 
-  // Convert to GDateTime
-  GDateTime* datetime = g_date_time_new_from_unix_utc(timestamp);
-  GTimeSpan timespan = g_date_time_to_unix(datetime);
-  g_date_time_unref(datetime);
+  // webkit_website_data_manager_clear() takes the age of the data to remove
+  // as a GTimeSpan (microseconds before now), where 0 means "all data".
+  // A since date at or after now matches nothing, so reply without clearing
+  // instead of passing 0 and wiping everything.
+  GTimeSpan timespan = g_get_real_time() - timestamp * G_USEC_PER_SEC;
+  if (timespan <= 0) {
+    fl_method_call_respond_success(method_call, fl_value_new_bool(TRUE), nullptr);
+    return;
+  }
 
   g_object_ref(method_call);
 
@@ -368,6 +380,160 @@ void WebStorageManager::removeDataModifiedSince(FlMethodCall* method_call) {
         g_object_unref(method_call);
       },
       method_call);
+}
+
+void WebStorageManager::deleteBrowsingData(FlMethodCall* method_call) {
+  if (data_manager_ == nullptr) {
+    fl_method_call_respond_success(method_call, fl_value_new_bool(FALSE), nullptr);
+    return;
+  }
+
+  g_object_ref(method_call);
+
+  // A timespan of 0 clears the data regardless of when it was modified.
+  webkit_website_data_manager_clear(
+      data_manager_,
+      WEBKIT_WEBSITE_DATA_ALL,
+      0,
+      nullptr,  // GCancellable
+      [](GObject* source_object, GAsyncResult* res, gpointer user_data) {
+        auto* method_call = static_cast<FlMethodCall*>(user_data);
+        auto* data_manager = WEBKIT_WEBSITE_DATA_MANAGER(source_object);
+
+        GError* error = nullptr;
+        gboolean success = webkit_website_data_manager_clear_finish(
+            data_manager, res, &error);
+
+        if (error != nullptr) {
+          fl_method_call_respond_error(
+              method_call, "CLEAR_ERROR", error->message, nullptr, nullptr);
+          g_error_free(error);
+        } else {
+          fl_method_call_respond_success(method_call,
+                                         fl_value_new_bool(success), nullptr);
+        }
+
+        g_object_unref(method_call);
+      },
+      method_call);
+}
+
+void WebStorageManager::deleteBrowsingDataForSite(FlMethodCall* method_call) {
+  FlValue* args = fl_method_call_get_args(method_call);
+  FlValue* siteValue = (args != nullptr && fl_value_get_type(args) == FL_VALUE_TYPE_MAP)
+      ? fl_value_lookup_string(args, "site")
+      : nullptr;
+
+  std::optional<std::string> host;
+  if (siteValue != nullptr && fl_value_get_type(siteValue) == FL_VALUE_TYPE_STRING) {
+    host = WebsiteDataSiteMatcher::normalizedHost(fl_value_get_string(siteValue));
+  }
+
+  if (!host.has_value() || data_manager_ == nullptr) {
+    fl_method_call_respond_success(method_call, fl_value_new_null(), nullptr);
+    return;
+  }
+
+  struct SiteContext {
+    FlMethodCall* method_call;
+    WebKitWebsiteDataManager* data_manager;
+    std::string host;
+    std::string site;
+  };
+
+  auto* ctx = new SiteContext{method_call, data_manager_, host.value(), host.value()};
+  g_object_ref(method_call);
+
+  webkit_website_data_manager_fetch(
+      data_manager_,
+      WEBKIT_WEBSITE_DATA_ALL,
+      nullptr,
+      [](GObject* source_object, GAsyncResult* res, gpointer user_data) {
+        auto* ctx = static_cast<SiteContext*>(user_data);
+        auto* data_manager = WEBKIT_WEBSITE_DATA_MANAGER(source_object);
+
+        GError* error = nullptr;
+        GList* all_records = webkit_website_data_manager_fetch_finish(
+            data_manager, res, &error);
+
+        if (error != nullptr) {
+          fl_method_call_respond_error(
+              ctx->method_call, "FETCH_ERROR", error->message, nullptr, nullptr);
+          g_error_free(error);
+          g_object_unref(ctx->method_call);
+          delete ctx;
+          return;
+        }
+
+        std::vector<std::string> recordNames;
+        for (GList* l = all_records; l != nullptr; l = l->next) {
+          const char* name =
+              webkit_website_data_get_name(static_cast<WebKitWebsiteData*>(l->data));
+          if (name != nullptr) {
+            recordNames.emplace_back(name);
+          }
+        }
+
+        auto match = WebsiteDataSiteMatcher::matchingNames(ctx->host, recordNames);
+        ctx->site = match.site;
+
+        GList* matching_records = nullptr;
+        for (GList* l = all_records; l != nullptr; l = l->next) {
+          auto* data = static_cast<WebKitWebsiteData*>(l->data);
+          const char* name = webkit_website_data_get_name(data);
+          if (name == nullptr) {
+            continue;
+          }
+          std::string lowerName(name);
+          std::transform(lowerName.begin(), lowerName.end(), lowerName.begin(),
+                         [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+          if (match.names.count(lowerName) > 0) {
+            matching_records = g_list_prepend(matching_records, webkit_website_data_ref(data));
+          }
+        }
+
+        g_list_free_full(all_records,
+                         reinterpret_cast<GDestroyNotify>(webkit_website_data_unref));
+
+        if (matching_records == nullptr) {
+          // No data is stored for the site: nothing to delete.
+          g_autoptr(FlValue) result = fl_value_new_string(ctx->site.c_str());
+          fl_method_call_respond_success(ctx->method_call, result, nullptr);
+          g_object_unref(ctx->method_call);
+          delete ctx;
+          return;
+        }
+
+        webkit_website_data_manager_remove(
+            ctx->data_manager,
+            WEBKIT_WEBSITE_DATA_ALL,
+            matching_records,
+            nullptr,
+            [](GObject* source_object, GAsyncResult* res, gpointer user_data) {
+              auto* ctx = static_cast<SiteContext*>(user_data);
+              auto* data_manager = WEBKIT_WEBSITE_DATA_MANAGER(source_object);
+
+              GError* error = nullptr;
+              webkit_website_data_manager_remove_finish(data_manager, res, &error);
+
+              if (error != nullptr) {
+                fl_method_call_respond_error(
+                    ctx->method_call, "REMOVE_ERROR", error->message, nullptr, nullptr);
+                g_error_free(error);
+              } else {
+                g_autoptr(FlValue) result = fl_value_new_string(ctx->site.c_str());
+                fl_method_call_respond_success(ctx->method_call, result, nullptr);
+              }
+
+              g_object_unref(ctx->method_call);
+              delete ctx;
+            },
+            ctx);
+
+        g_list_free_full(matching_records,
+                         reinterpret_cast<GDestroyNotify>(webkit_website_data_unref));
+      },
+      ctx);
 }
 
 }  // namespace flutter_inappwebview_plugin

@@ -6,7 +6,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
-import android.os.Build
 import android.text.TextUtils
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsService
@@ -56,9 +55,7 @@ open class CustomTabsHelper private constructor() {
                 defaultViewHandlerInfo?.activityInfo?.packageName
 
             var flags = 0
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                flags = flags or PackageManager.MATCH_ALL
-            }
+            flags = flags or PackageManager.MATCH_ALL
             val resolvedActivityList = packageManager.queryIntentActivities(activityIntent, flags)
             val packagesSupportingCustomTabs = ArrayList<String>()
             for (info in resolvedActivityList) {

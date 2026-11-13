@@ -20,6 +20,18 @@ void main() {
     'Linux native source contracts remain guarded',
     _runSourceContractAssertions,
   );
+
+  test('removeDataModifiedSince converts the date to a WebKit timespan', () {
+    final source = _sourceFile(
+      'linux/web_storage_manager.cc',
+    ).readAsStringSync();
+    _expectContains(
+      source,
+      'g_get_real_time() - timestamp * G_USEC_PER_SEC',
+      'microsecond timespan computed from the since date',
+    );
+    expect(source.contains('g_date_time_to_unix(datetime)'), isFalse);
+  });
 }
 
 void _runSourceContractAssertions() {

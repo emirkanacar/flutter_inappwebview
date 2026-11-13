@@ -211,15 +211,13 @@ void main() {
       source.indexOf('private fun getSelectedFiles('),
     );
 
-    expect(
-      callbackSource,
-      contains(
-        'if (filePathCallback == null && filePathCallbackLegacy == null) {',
-      ),
-    );
+    expect(callbackSource, contains('if (filePathCallback == null) {'));
     expect(callbackSource, contains('return false'));
-    expect(callbackSource, contains('requestCode != PICKER'));
-    expect(callbackSource, contains('requestCode != PICKER_LEGACY'));
+    expect(callbackSource, contains('if (requestCode != PICKER) {'));
+    // The pre-API 21 openFileChooser path is unreachable with minSdk 24.
+    expect(source, isNot(contains('PICKER_LEGACY')));
+    expect(source, isNot(contains('filePathCallbackLegacy')));
+    expect(source, isNot(contains('fun openFileChooser(')));
   });
 
   test('Android file chooser supports audio capture independently of camera', () {
@@ -229,7 +227,6 @@ void main() {
     ).readAsStringSync();
 
     expect(source, contains('MediaStore.Audio.Media.RECORD_SOUND_ACTION'));
-    expect(source, contains('private fun acceptsAudio(types: String)'));
     expect(source, contains('private fun acceptsAudio(types: Array<String>)'));
     expect(
       source,
@@ -478,7 +475,6 @@ void main() {
     expect(chooserSource, contains('applicationInfo?.dataDir'));
     expect(chooserSource, contains('normalizedPath.startsWith("/data/")'));
     expect(chooserSource, contains('data?.clipData'));
-    expect(chooserSource, contains('if (isPrivateSandboxFileUri(candidate))'));
     expect(chooserSource, contains('filterSandboxFileUris('));
   });
 
@@ -633,8 +629,11 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'webview/in_app_webview/InAppWebViewChromeClient.kt',
     ).readAsStringSync();
-    expect(source, contains('filePathsCallback as? ValueCallback'));
+    // The pre-API 21 ValueCallback<Uri> path is gone, so the file chooser
+    // callback is typed and needs no cast at all.
+    expect(source, contains('filePathsCallback: ValueCallback<Array<Uri>>'));
     expect(source, isNot(contains('filePathsCallback as ValueCallback')));
+    expect(source, isNot(contains('filePathsCallback as? ValueCallback')));
   });
 
   test('Android renderer callbacks ignore non-plugin WebView instances', () {
@@ -860,16 +859,12 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'webview/in_app_webview/InAppWebViewClient.kt',
     ).readAsStringSync();
-    final delegateSource = _sourceFile(
-      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
-      'webview/WebViewChannelDelegate.kt',
-    ).readAsStringSync();
 
-    expect(cookieSource, contains('@Suppress("DEPRECATION")'));
-    expect(
-      cookieSource,
-      contains('if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)'),
-    );
+    // minSdk 24: CookieSyncManager and the pre-Lollipop cookie branches are
+    // unreachable and removed; only the API 21+ CookieManager calls remain.
+    expect(cookieSource, isNot(contains('CookieSyncManager')));
+    expect(clientSource, isNot(contains('CookieSyncManager')));
+    expect(cookieSource, isNot(contains('VERSION_CODES.LOLLIPOP')));
     expect(cookieSource, contains('manager.removeSessionCookies'));
     expect(webViewSource, contains('private fun clearSessionCookies()'));
     expect(webViewSource, contains('manager.removeSessionCookies(null)'));
@@ -877,7 +872,6 @@ void main() {
       webViewSource,
       isNot(contains('CookieManager.getInstance().removeSessionCookie()')),
     );
-    expect(clientSource, contains('@Suppress("DEPRECATION")'));
   });
 
   test('Android cache helpers document SDK-deprecated call sites', () {
@@ -891,16 +885,14 @@ void main() {
     ).readAsStringSync();
 
     expect(webViewSource, isNot(contains('@Deprecated("")')));
+    // clearCookies and clearAllCache only call API 21+ methods now, so the
+    // minSdk 19 deprecation annotations were removed.
+    expect(webViewSource, isNot(contains('used only below API 21')));
+    expect(webViewSource, isNot(contains('retained for minSdk 19')));
     expect(
       webViewSource,
       contains(
-        'CookieManager.removeAllCookie is deprecated in the Android SDK; used only below API 21.',
-      ),
-    );
-    expect(
-      webViewSource,
-      contains(
-        'Calls WebView.clearCache, which is deprecated in the Android SDK; retained for minSdk 19 compatibility.',
+        'CookieManager.getInstance().removeAllCookies(ValueCallback { })',
       ),
     );
     expect(
@@ -1403,7 +1395,9 @@ void main() {
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'container/ContainerManager.kt',
     ).readAsStringSync();
-    final gradleSource = _sourceFile('android/build.gradle.kts').readAsStringSync();
+    final gradleSource = _sourceFile(
+      'android/build.gradle.kts',
+    ).readAsStringSync();
     final startupSource = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
       'WebViewStartupCoordinator.kt',
@@ -1412,7 +1406,10 @@ void main() {
     expect(webViewSource, contains('WebViewFeature.MUTE_AUDIO'));
     expect(webViewSource, contains('WebViewCompat.setAudioMuted'));
     expect(webViewSource, contains('postVisualStateCallback'));
-    expect(webViewSource, contains('if (!response.handled || destination.isNullOrEmpty()) return'));
+    expect(
+      webViewSource,
+      contains('if (!response.handled || destination.isNullOrEmpty()) return'),
+    );
     expect(downloadSource, contains('DownloadManager.Request'));
     expect(containerSource, contains('addCustomHeader'));
     expect(containerSource, contains('prefetchUrlAsync'));

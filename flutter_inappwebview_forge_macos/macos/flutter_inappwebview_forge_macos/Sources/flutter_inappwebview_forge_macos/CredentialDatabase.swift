@@ -19,6 +19,14 @@ public class CredentialDatabase: ChannelDelegate {
     }
 
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         switch call.method {
             case "getAllAuthCredentials":
@@ -43,10 +51,10 @@ public class CredentialDatabase: ChannelDelegate {
             case "getHttpAuthCredentials":
                 var crendentials: [[String: Any?]] = []
 
-                let host = arguments!["host"] as! String
-                let urlProtocol = arguments!["protocol"] as? String
-                let urlPort = arguments!["port"] as? Int ?? 0
-                var realm = arguments!["realm"] as? String;
+                let host = try requiredArgument(arguments, "host", as: String.self)
+                let urlProtocol = arguments?["protocol"] as? String
+                let urlPort = arguments?["port"] as? Int ?? 0
+                var realm = arguments?["realm"] as? String;
                 if let r = realm, r.isEmpty {
                     realm = nil
                 }
@@ -63,15 +71,15 @@ public class CredentialDatabase: ChannelDelegate {
                 result(crendentials)
                 break
             case "setHttpAuthCredential":
-                let host = arguments!["host"] as! String
-                let urlProtocol = arguments!["protocol"] as? String
-                let urlPort = arguments!["port"] as? Int ?? 0
-                var realm = arguments!["realm"] as? String;
+                let host = try requiredArgument(arguments, "host", as: String.self)
+                let urlProtocol = arguments?["protocol"] as? String
+                let urlPort = arguments?["port"] as? Int ?? 0
+                var realm = arguments?["realm"] as? String;
                 if let r = realm, r.isEmpty {
                     realm = nil
                 }
-                let username = arguments!["username"] as! String
-                let password = arguments!["password"] as! String
+                let username = try requiredArgument(arguments, "username", as: String.self)
+                let password = try requiredArgument(arguments, "password", as: String.self)
                 let credential = URLCredential(user: username, password: password, persistence: .permanent)
                 CredentialDatabase.credentialStore.set(credential,
                                     for: URLProtectionSpace(host: host, port: urlPort, protocol: urlProtocol,
@@ -79,15 +87,15 @@ public class CredentialDatabase: ChannelDelegate {
                 result(true)
                 break
             case "removeHttpAuthCredential":
-                let host = arguments!["host"] as! String
-                let urlProtocol = arguments!["protocol"] as? String
-                let urlPort = arguments!["port"] as? Int ?? 0
-                var realm = arguments!["realm"] as? String;
+                let host = try requiredArgument(arguments, "host", as: String.self)
+                let urlProtocol = arguments?["protocol"] as? String
+                let urlPort = arguments?["port"] as? Int ?? 0
+                var realm = arguments?["realm"] as? String;
                 if let r = realm, r.isEmpty {
                     realm = nil
                 }
-                let username = arguments!["username"] as! String
-                let password = arguments!["password"] as! String
+                let username = try requiredArgument(arguments, "username", as: String.self)
+                let password = try requiredArgument(arguments, "password", as: String.self)
                 
                 var credential: URLCredential? = nil;
                 var protectionSpaceCredential: URLProtectionSpace? = nil
@@ -115,10 +123,10 @@ public class CredentialDatabase: ChannelDelegate {
                 result(true)
                 break
             case "removeHttpAuthCredentials":
-                let host = arguments!["host"] as! String
-                let urlProtocol = arguments!["protocol"] as? String
-                let urlPort = arguments!["port"] as? Int ?? 0
-                var realm = arguments!["realm"] as? String;
+                let host = try requiredArgument(arguments, "host", as: String.self)
+                let urlProtocol = arguments?["protocol"] as? String
+                let urlPort = arguments?["port"] as? Int ?? 0
+                var realm = arguments?["realm"] as? String;
                 if let r = realm, r.isEmpty {
                     realm = nil
                 }

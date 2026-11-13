@@ -2190,6 +2190,39 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   )
   bool? isSiteSpecificQuirksModeEnabled;
 
+  ///Sets whether Lockdown Mode is enabled for content loaded in the WebView.
+  ///
+  ///Lockdown Mode disables or restricts web technologies that are commonly
+  ///used in attacks (for example JIT JavaScript compilation, WebAssembly,
+  ///and some web fonts and media formats). When the user has turned on
+  ///Lockdown Mode in system settings, WebKit applies it to app WebViews too.
+  ///
+  ///- `null` (the default) keeps the system setting.
+  ///- `true` enables Lockdown Mode for this WebView even when the system
+  ///  setting is off.
+  ///- `false` exempts this WebView from a system-wide Lockdown Mode. Only use
+  ///  it for trusted content; the user turned Lockdown Mode on deliberately.
+  ///
+  ///The value is applied to every main-frame and subframe navigation, so a
+  ///change made with `setSettings` takes effect from the next navigation.
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        available: "16.0",
+        apiName: "WKWebpagePreferences.isLockdownModeEnabled",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebpagepreferences/4013616-islockdownmodeenabled",
+      ),
+      MacOSPlatform(
+        available: "13.0",
+        apiName: "WKWebpagePreferences.isLockdownModeEnabled",
+        apiUrl:
+            "https://developer.apple.com/documentation/webkit/wkwebpagepreferences/4013616-islockdownmodeenabled",
+      ),
+    ],
+  )
+  bool? isLockdownModeEnabled;
+
   ///A Boolean value indicating whether HTTP requests to servers known to support HTTPS should be automatically upgraded to HTTPS requests.
   ///The default value is `true`.
   @SupportedPlatforms(
@@ -3743,6 +3776,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.isTextInteractionEnabled = true,
     this.writingToolsBehavior,
     this.isSiteSpecificQuirksModeEnabled = true,
+    this.isLockdownModeEnabled,
     this.upgradeKnownHostsToHTTPS = true,
     this.isElementFullscreenEnabled = true,
     this.useNativeFullscreenContainer = true,

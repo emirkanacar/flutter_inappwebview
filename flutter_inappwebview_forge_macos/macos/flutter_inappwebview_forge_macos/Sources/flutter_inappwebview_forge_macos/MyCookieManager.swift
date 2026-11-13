@@ -30,25 +30,33 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         let cookieStore = self.cookieStore(for: arguments?["webViewId"] as? String)
         switch call.method {
             case "setCookie":
-                let url = arguments!["url"] as! String
-                let name = arguments!["name"] as! String
-                let value = arguments!["value"] as! String
-                let path = arguments!["path"] as! String
+                let url = try requiredArgument(arguments, "url", as: String.self)
+                let name = try requiredArgument(arguments, "name", as: String.self)
+                let value = try requiredArgument(arguments, "value", as: String.self)
+                let path = try requiredArgument(arguments, "path", as: String.self)
                 
                 var expiresDate: Int64?
-                if let expiresDateString = arguments!["expiresDate"] as? String {
+                if let expiresDateString = arguments?["expiresDate"] as? String {
                     expiresDate = Int64(expiresDateString)
                 }
                 
-                let maxAge = arguments!["maxAge"] as? Int64
-                let isSecure = arguments!["isSecure"] as? Bool
-                let isHttpOnly = arguments!["isHttpOnly"] as? Bool
-                let sameSite = arguments!["sameSite"] as? String
-                let domain = arguments!["domain"] as? String
+                let maxAge = arguments?["maxAge"] as? Int64
+                let isSecure = arguments?["isSecure"] as? Bool
+                let isHttpOnly = arguments?["isHttpOnly"] as? Bool
+                let sameSite = arguments?["sameSite"] as? String
+                let domain = arguments?["domain"] as? String
                 
                 MyCookieManager.setCookie(url: url,
                                           name: name,
@@ -64,23 +72,23 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
                                           result: result)
                 break
             case "getCookies":
-                let url = arguments!["url"] as! String
+                let url = try requiredArgument(arguments, "url", as: String.self)
                 MyCookieManager.getCookies(url: url, cookieStore: cookieStore, result: result)
                 break
             case "getAllCookies":
                 MyCookieManager.getAllCookies(result: result)
                 break
             case "deleteCookie":
-                let url = arguments!["url"] as! String
-                let name = arguments!["name"] as! String
-                let path = arguments!["path"] as! String
-                let domain = arguments!["domain"] as? String
+                let url = try requiredArgument(arguments, "url", as: String.self)
+                let name = try requiredArgument(arguments, "name", as: String.self)
+                let path = try requiredArgument(arguments, "path", as: String.self)
+                let domain = arguments?["domain"] as? String
                 MyCookieManager.deleteCookie(url: url, name: name, path: path, domain: domain, cookieStore: cookieStore, result: result)
                 break;
             case "deleteCookies":
-                let url = arguments!["url"] as! String
-                let path = arguments!["path"] as! String
-                let domain = arguments!["domain"] as? String
+                let url = try requiredArgument(arguments, "url", as: String.self)
+                let path = try requiredArgument(arguments, "path", as: String.self)
+                let domain = arguments?["domain"] as? String
                 MyCookieManager.deleteCookies(url: url, path: path, domain: domain, cookieStore: cookieStore, result: result)
                 break;
             case "deleteAllCookies":
@@ -99,6 +107,13 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
                     observingCookieStore = false
                 }
                 result(true)
+                break
+            case "setCookiePolicy":
+                let policy = try requiredArgument(arguments, "policy", as: String.self)
+                MyCookieManager.setCookiePolicy(policy: policy, cookieStore: cookieStore, result: result)
+                break
+            case "getCookiePolicy":
+                MyCookieManager.getCookiePolicy(cookieStore: cookieStore, result: result)
                 break
             default:
                 result(FlutterMethodNotImplemented)
@@ -337,6 +352,47 @@ public class MyCookieManager: ChannelDelegate, WKHTTPCookieStoreObserver {
         })
     }
     
+    /// Applies a `HTTPCookieStorePolicy` native value ("allow" / "disallow").
+    /// Replies `false` on OS versions without `WKHTTPCookieStore.CookiePolicy`.
+    public static func setCookiePolicy(policy: String, cookieStore: WKHTTPCookieStore, result: @escaping FlutterResult) {
+        guard #available(macOS 14.0, *) else {
+            result(false)
+            return
+        }
+        let cookiePolicy: WKHTTPCookieStore.CookiePolicy
+        switch policy {
+            case "allow":
+                cookiePolicy = .allow
+            case "disallow":
+                cookiePolicy = .disallow
+            default:
+                result(FlutterError(code: "invalid_arguments", message: "Unknown cookie policy: \(policy)", details: nil))
+                return
+        }
+        cookieStore.setCookiePolicy(cookiePolicy) {
+            result(true)
+        }
+    }
+
+    /// Replies with the `HTTPCookieStorePolicy` native value, or nil when the OS
+    /// version does not support it or WebKit reports an unknown policy.
+    public static func getCookiePolicy(cookieStore: WKHTTPCookieStore, result: @escaping FlutterResult) {
+        guard #available(macOS 14.0, *) else {
+            result(nil)
+            return
+        }
+        cookieStore.getCookiePolicy { cookiePolicy in
+            switch cookiePolicy {
+                case .allow:
+                    result("allow")
+                case .disallow:
+                    result("disallow")
+                @unknown default:
+                    result(nil)
+            }
+        }
+    }
+
     public override func dispose() {
         if observingCookieStore {
             MyCookieManager.httpCookieStore.remove(self)

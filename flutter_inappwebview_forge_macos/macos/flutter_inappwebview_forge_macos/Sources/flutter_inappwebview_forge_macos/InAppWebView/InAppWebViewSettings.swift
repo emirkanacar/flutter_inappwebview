@@ -68,6 +68,9 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var pluginScriptsOriginAllowList: [String]? = nil
     var pluginScriptsForMainFrameOnly = false
     var alpha: Double? = nil
+    /// nil keeps the system Lockdown Mode setting. Not visible to KVC, so it is
+    /// parsed and serialized explicitly below.
+    var isLockdownModeEnabled: Bool? = nil
     
     override init(){
         super.init()
@@ -85,12 +88,17 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
             alpha = alphaValue
             settings.removeValue(forKey: "alpha")
         }
+        if settings.keys.contains("isLockdownModeEnabled") {
+            isLockdownModeEnabled = settings["isLockdownModeEnabled"] as? Bool
+            settings.removeValue(forKey: "isLockdownModeEnabled")
+        }
         let _ = super.parse(settings: settings)
         return self
     }
     
     override func getRealSettings(obj: InAppWebView?) -> [String: Any?] {
         var realSettings: [String: Any?] = toMap()
+        realSettings["isLockdownModeEnabled"] = isLockdownModeEnabled
         if let webView = obj {
             let configuration = webView.configuration
             realSettings["userAgent"] = webView.customUserAgent

@@ -26,6 +26,14 @@ public class InAppWebViewManager: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
         
         switch call.method {
@@ -35,7 +43,7 @@ public class InAppWebViewManager: ChannelDelegate {
                 })
                 break
             case "handlesURLScheme":
-                let urlScheme = arguments!["urlScheme"] as! String
+                let urlScheme = try requiredArgument(arguments, "urlScheme", as: String.self)
                 if #available(iOS 11.0, *) {
                     result(WKWebView.handlesURLScheme(urlScheme))
                 } else {
@@ -43,17 +51,17 @@ public class InAppWebViewManager: ChannelDelegate {
                 }
                 break
             case "disposeKeepAlive":
-                let keepAliveId = arguments!["keepAliveId"] as! String
+                let keepAliveId = try requiredArgument(arguments, "keepAliveId", as: String.self)
                 disposeKeepAlive(keepAliveId: keepAliveId)
                 result(true)
                 break
             case "clearAllCache":
-                let includeDiskFiles = arguments!["includeDiskFiles"] as! Bool
+                let includeDiskFiles = try requiredArgument(arguments, "includeDiskFiles", as: Bool.self)
                 clearAllCache(includeDiskFiles: includeDiskFiles, completionHandler: {
                     result(true)
                 })
             case "setJavaScriptBridgeName":
-                let bridgeName = arguments!["bridgeName"] as! String
+                let bridgeName = try requiredArgument(arguments, "bridgeName", as: String.self)
                 JavaScriptBridgeJS.set_JAVASCRIPT_BRIDGE_NAME(bridgeName: bridgeName)
                 result(true)
                 break

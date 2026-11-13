@@ -9,6 +9,7 @@
 #include "in_app_browser/in_app_browser_manager.h"
 #include "in_app_webview/in_app_webview_manager.h"
 #include "platform_util.h"
+#include "web_storage_manager.h"
 #include "webview_environment/webview_environment_manager.h"
 
 
@@ -39,6 +40,7 @@ namespace flutter_inappwebview_plugin
     platformUtil = std::make_unique<PlatformUtil>(this);
     containerManager = std::make_unique<ContainerManager>(this);
     downloadJobManager = std::make_unique<DownloadJobManager>(this);
+    webStorageManager = std::make_unique<WebStorageManager>(this);
 
     window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
       [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -59,6 +61,7 @@ namespace flutter_inappwebview_plugin
     cookieManager = nullptr;
     platformUtil = nullptr;
     containerManager = nullptr;
+    webStorageManager = nullptr;
     if (downloadJobManager) {
       downloadJobManager->dispose();
       downloadJobManager = nullptr;

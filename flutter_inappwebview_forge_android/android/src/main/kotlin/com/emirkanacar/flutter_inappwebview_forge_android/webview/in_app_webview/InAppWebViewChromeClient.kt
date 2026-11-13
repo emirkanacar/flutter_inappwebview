@@ -3,7 +3,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview
 
 import android.Manifest
-import android.annotation.TargetApi
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
@@ -13,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Message
@@ -37,7 +35,6 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -76,7 +73,6 @@ open class InAppWebViewChromeClient(
     protected val LOG_TAG = "IABWebChromeClient"
 
     private const val PICKER = 1
-    private const val PICKER_LEGACY = 3
     private const val CAPTURE_DIRECTORY = "Captures"
 
     @JvmField
@@ -86,7 +82,6 @@ open class InAppWebViewChromeClient(
       Gravity.CENTER
     )
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     @JvmField
     protected val FULLSCREEN_SYSTEM_UI_VISIBILITY_KITKAT =
       View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
@@ -96,14 +91,6 @@ open class InAppWebViewChromeClient(
         View.SYSTEM_UI_FLAG_FULLSCREEN or
         View.SYSTEM_UI_FLAG_IMMERSIVE or
         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
-    @JvmField
-    protected val FULLSCREEN_SYSTEM_UI_VISIBILITY =
-      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-        View.SYSTEM_UI_FLAG_FULLSCREEN
   }
 
   val DEFAULT_MIME_TYPES = "*/*"
@@ -115,7 +102,6 @@ open class InAppWebViewChromeClient(
   private var mOriginalOrientation = 0
   private var mOriginalSystemUiVisibility = 0
 
-  private var filePathCallbackLegacy: ValueCallback<Uri>? = null
   private var filePathCallback: ValueCallback<Array<Uri>>? = null
   private var videoOutputFileUri: Uri? = null
   private var imageOutputFileUri: Uri? = null
@@ -169,11 +155,7 @@ open class InAppWebViewChromeClient(
     mCustomViewCallback = paramCustomViewCallback
     paramView.setBackgroundColor(Color.BLACK)
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      decorView.systemUiVisibility = FULLSCREEN_SYSTEM_UI_VISIBILITY_KITKAT
-    } else {
-      decorView.systemUiVisibility = FULLSCREEN_SYSTEM_UI_VISIBILITY
-    }
+    decorView.systemUiVisibility = FULLSCREEN_SYSTEM_UI_VISIBILITY_KITKAT
     activity.window.setFlags(
       WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
       WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
@@ -659,14 +641,13 @@ open class InAppWebViewChromeClient(
 
   private fun onShowFileChooser(
     request: ShowFileChooserRequest,
-    filePathsCallback: ValueCallback<*>
+    filePathsCallback: ValueCallback<Array<Uri>>
   ): Boolean {
     val callback = object : WebViewChannelDelegate.ShowFileChooserCallback() {
       override fun nonNullSuccess(response: ShowFileChooserResponse): Boolean {
         if (response.isHandledByClient) {
           val uriArray = response.filePaths?.map(Uri::parse)?.toTypedArray()
-          @Suppress("UNCHECKED_CAST")
-          (filePathsCallback as? ValueCallback<Array<Uri>>)?.onReceiveValue(uriArray)
+          filePathsCallback.onReceiveValue(uriArray)
           return false
         }
         return true
@@ -674,21 +655,13 @@ open class InAppWebViewChromeClient(
 
       override fun defaultBehaviour(response: ShowFileChooserResponse?) {
         val acceptTypes = request.acceptTypes.toTypedArray()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          val allowMultiple = request.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
-          startPickerIntent(
-            filePathsCallback as? ValueCallback<Array<Uri>> ?: return,
-            acceptTypes,
-            allowMultiple,
-            request.isCaptureEnabled
-          )
-        } else {
-          startPickerIntent(
-            filePathsCallback as? ValueCallback<Uri> ?: return,
-            acceptTypes.firstOrNull() ?: "",
-            request.isCaptureEnabled
-          )
-        }
+        val allowMultiple = request.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE
+        startPickerIntent(
+          filePathsCallback,
+          acceptTypes,
+          allowMultiple,
+          request.isCaptureEnabled
+        )
       }
 
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
@@ -708,32 +681,6 @@ open class InAppWebViewChromeClient(
     return true
   }
 
-  protected fun openFileChooser(filePathCallback: ValueCallback<Uri>, acceptType: String) {
-    onShowFileChooser(
-      ShowFileChooserRequest(0, mutableListOf(acceptType), false, null, null),
-      filePathCallback
-    )
-  }
-
-  protected fun openFileChooser(filePathCallback: ValueCallback<Uri>) {
-    onShowFileChooser(
-      ShowFileChooserRequest(0, mutableListOf(""), false, null, null),
-      filePathCallback
-    )
-  }
-
-  protected fun openFileChooser(
-    filePathCallback: ValueCallback<Uri>,
-    acceptType: String,
-    capture: String
-  ) {
-    onShowFileChooser(
-      ShowFileChooserRequest(0, mutableListOf(acceptType), true, null, null),
-      filePathCallback
-    )
-  }
-
-  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
   override fun onShowFileChooser(
     webView: WebView,
     filePathCallback: ValueCallback<Array<Uri>>,
@@ -746,39 +693,25 @@ open class InAppWebViewChromeClient(
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-    if (filePathCallback == null && filePathCallbackLegacy == null) {
+    if (filePathCallback == null) {
       // Do not consume results owned by another Flutter plugin.
       return false
     }
 
-    if (requestCode != PICKER && requestCode != PICKER_LEGACY) {
+    if (requestCode != PICKER) {
       // Keep a pending file chooser alive while another activity result is routed.
       return false
     }
 
     // Use the captured output URI when the camera activity does not return a filename.
-    when (requestCode) {
-      PICKER -> {
-        val results = if (resultCode == Activity.RESULT_OK) {
-          getSelectedFiles(data, resultCode)
-        } else {
-          null
-        }
-        filePathCallback?.onReceiveValue(results)
-      }
-      PICKER_LEGACY -> {
-        val result = if (resultCode == Activity.RESULT_OK) {
-          val candidate = data?.data ?: getCapturedMediaFile()
-          if (isPrivateSandboxFileUri(candidate)) null else candidate
-        } else {
-          null
-        }
-        filePathCallbackLegacy?.onReceiveValue(result)
-      }
+    val results = if (resultCode == Activity.RESULT_OK) {
+      getSelectedFiles(data, resultCode)
+    } else {
+      null
     }
+    filePathCallback?.onReceiveValue(results)
 
     filePathCallback = null
-    filePathCallbackLegacy = null
     imageOutputFileUri = null
     videoOutputFileUri = null
 
@@ -788,7 +721,7 @@ open class InAppWebViewChromeClient(
   private fun getSelectedFiles(data: Intent?, resultCode: Int): Array<Uri>? {
     // we have one file selected
     if (data?.data != null) {
-      if (resultCode == Activity.RESULT_OK && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      if (resultCode == Activity.RESULT_OK) {
         return filterSandboxFileUris(
           WebChromeClient.FileChooserParams.parseResult(resultCode, data)
         )
@@ -867,45 +800,6 @@ open class InAppWebViewChromeClient(
     return null
   }
 
-  fun startPickerIntent(
-    filePathCallback: ValueCallback<Uri>,
-    acceptType: String,
-    captureEnabled: Boolean
-  ) {
-    filePathCallbackLegacy = filePathCallback
-    val images = acceptsImages(acceptType)
-    val video = acceptsVideo(acceptType)
-    val audio = acceptsAudio(acceptType)
-    var pickerIntent: Intent? = null
-
-    if (captureEnabled) {
-      pickerIntent = when {
-        images && !needsCameraPermission() -> getPhotoIntent()
-        video && !needsCameraPermission() -> getVideoIntent()
-        audio && !images && !video -> getAudioIntent().takeIf(::canResolveIntent)
-        else -> null
-      }
-    }
-    if (pickerIntent == null) {
-      pickerIntent = Intent.createChooser(getFileChooserIntent(acceptType), "")
-      val extraIntents = ArrayList<Parcelable>()
-      if (!needsCameraPermission()) {
-        if (images) extraIntents.add(getPhotoIntent())
-        if (video) extraIntents.add(getVideoIntent())
-      }
-      getAudioIntent().takeIf { audio && canResolveIntent(it) }?.let(extraIntents::add)
-      pickerIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, extraIntents.toTypedArray())
-    }
-
-    val activity = getActivity()
-    if (activity != null && pickerIntent.resolveActivity(activity.packageManager) != null) {
-      activity.startActivityForResult(pickerIntent, PICKER_LEGACY)
-    } else {
-      Log.d(LOG_TAG, "there is no Activity to handle this Intent")
-    }
-  }
-
-  @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
   fun startPickerIntent(
     callback: ValueCallback<Array<Uri>>,
     acceptTypes: Array<String>,
@@ -988,21 +882,6 @@ open class InAppWebViewChromeClient(
     return intent.resolveActivity(activity.packageManager) != null
   }
 
-  private fun getFileChooserIntent(acceptTypes: String): Intent {
-    var acceptedType = acceptTypes
-    if (acceptedType.isEmpty()) {
-      acceptedType = DEFAULT_MIME_TYPES
-    }
-    if (Regex("\\.\\w+").matches(acceptedType)) {
-      acceptedType = getMimeTypeFromExtension(acceptedType.replace(".", "")) ?: DEFAULT_MIME_TYPES
-    }
-    return Intent(Intent.ACTION_GET_CONTENT).apply {
-      addCategory(Intent.CATEGORY_OPENABLE)
-      type = acceptedType
-    }
-  }
-
-  @RequiresApi(Build.VERSION_CODES.KITKAT)
   private fun getFileChooserIntent(acceptTypes: Array<String>, allowMultiple: Boolean): Intent {
     return Intent(Intent.ACTION_GET_CONTENT).apply {
       addCategory(Intent.CATEGORY_OPENABLE)
@@ -1026,38 +905,14 @@ open class InAppWebViewChromeClient(
     return false
   }
 
-  private fun acceptsImages(types: String): Boolean {
-    var mimeType = types
-    if (Regex("\\.\\w+").matches(types)) {
-      mimeType = getMimeTypeFromExtension(types.replace(".", "")) ?: ""
-    }
-    return mimeType.isEmpty() || mimeType.lowercase().contains("image")
-  }
-
   private fun acceptsImages(types: Array<String>): Boolean {
     val mimeTypes = getAcceptedMimeType(types)
     return acceptsAny(types) || arrayContainsString(mimeTypes, "image")
   }
 
-  private fun acceptsVideo(types: String): Boolean {
-    var mimeType = types
-    if (Regex("\\.\\w+").matches(types)) {
-      mimeType = getMimeTypeFromExtension(types.replace(".", "")) ?: ""
-    }
-    return mimeType.isEmpty() || mimeType.lowercase().contains("video")
-  }
-
   private fun acceptsVideo(types: Array<String>): Boolean {
     val mimeTypes = getAcceptedMimeType(types)
     return acceptsAny(types) || arrayContainsString(mimeTypes, "video")
-  }
-
-  private fun acceptsAudio(types: String): Boolean {
-    var mimeType = types
-    if (Regex("\\.\\w+").matches(types)) {
-      mimeType = getMimeTypeFromExtension(types.replace(".", "")) ?: ""
-    }
-    return mimeType.isEmpty() || mimeType.lowercase().contains("audio")
   }
 
   private fun acceptsAudio(types: Array<String>): Boolean {
@@ -1101,16 +956,11 @@ open class InAppWebViewChromeClient(
       null
     } ?: return null
 
-    // For versions below 6.0 (23), use the old File creation and permissions model.
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-      return Uri.fromFile(capturedFile)
-    }
-
     val activity = getActivity() ?: return null
     val fileProviderAuthority = "${activity.applicationContext.packageName}." +
       InAppWebViewFileProvider.fileProviderAuthorityExtension
     try {
-      // For versions 6.0+ (23), use the FileProvider to avoid runtime permissions.
+      // Use the FileProvider to avoid runtime storage permissions.
       return FileProvider.getUriForFile(activity.applicationContext, fileProviderAuthority, capturedFile)
     } catch (e: Exception) {
       Log.e(LOG_TAG, "", e)
@@ -1134,13 +984,6 @@ open class InAppWebViewChromeClient(
       dir = Environment.DIRECTORY_MOVIES
     }
 
-    // For versions below 6.0 (23), use the old File creation and permissions model.
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-      val storageDir = Environment.getExternalStoragePublicDirectory(dir)
-      val filename = String.format("%s-%d%s", prefix, System.currentTimeMillis(), suffix)
-      return File(storageDir, filename)
-    }
-
     val activity = getActivity() ?: return null
     val externalFilesDir = activity.applicationContext.getExternalFilesDir(null) ?: return null
     val storageDir = File(externalFilesDir, CAPTURE_DIRECTORY)
@@ -1156,37 +999,35 @@ open class InAppWebViewChromeClient(
   }
 
   override fun onPermissionRequest(request: PermissionRequest) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      val callback = object : WebViewChannelDelegate.PermissionRequestCallback() {
-        override fun nonNullSuccess(response: PermissionResponse): Boolean {
-          when (response.action) {
-            1 -> request.grant(response.resources.toTypedArray())
-            else -> request.deny()
-          }
-          return false
+    val callback = object : WebViewChannelDelegate.PermissionRequestCallback() {
+      override fun nonNullSuccess(response: PermissionResponse): Boolean {
+        when (response.action) {
+          1 -> request.grant(response.resources.toTypedArray())
+          else -> request.deny()
         }
-
-        override fun defaultBehaviour(response: PermissionResponse?) {
-          request.deny()
-        }
-
-        override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
-          Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-          completeDefaultBehaviour(null)
-        }
+        return false
       }
 
-      val channelDelegate = inAppWebView?.channelDelegate
-      if (channelDelegate != null) {
-        channelDelegate.onPermissionRequest(
-          request.origin.toString(),
-          request.resources.toList().map { it },
-          null,
-          callback
-        )
-      } else {
-        callback.completeDefaultBehaviour(null)
+      override fun defaultBehaviour(response: PermissionResponse?) {
+        request.deny()
       }
+
+      override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
+        Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
+        completeDefaultBehaviour(null)
+      }
+    }
+
+    val channelDelegate = inAppWebView?.channelDelegate
+    if (channelDelegate != null) {
+      channelDelegate.onPermissionRequest(
+        request.origin.toString(),
+        request.resources.toList().map { it },
+        null,
+        callback
+      )
+    } else {
+      callback.completeDefaultBehaviour(null)
     }
   }
 
@@ -1195,12 +1036,10 @@ open class InAppWebViewChromeClient(
   }
 
   override fun onPermissionRequestCanceled(request: PermissionRequest) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      inAppWebView?.channelDelegate?.onPermissionRequestCanceled(
-        request.origin.toString(),
-        request.resources.toList().map { it }
-      )
-    }
+    inAppWebView?.channelDelegate?.onPermissionRequestCanceled(
+      request.origin.toString(),
+      request.resources.toList().map { it }
+    )
   }
 
   private fun getActivity(): Activity? {
@@ -1218,7 +1057,6 @@ open class InAppWebViewChromeClient(
       delegate.getActivityResultListeners().clear()
       inAppBrowserDelegate = null
     }
-    filePathCallbackLegacy = null
     filePathCallback = null
     videoOutputFileUri = null
     imageOutputFileUri = null

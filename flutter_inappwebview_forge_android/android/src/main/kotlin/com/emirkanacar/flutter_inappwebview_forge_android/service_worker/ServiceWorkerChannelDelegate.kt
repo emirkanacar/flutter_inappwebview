@@ -1,10 +1,8 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.service_worker
 
-import android.os.Build
 import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
-import androidx.annotation.RequiresApi
 import androidx.webkit.ServiceWorkerControllerCompat
 import androidx.webkit.ServiceWorkerWebSettingsCompat
 import androidx.webkit.WebViewFeature
@@ -27,7 +25,6 @@ private fun stringKeyedMap(value: Any?): MutableMap<String, Any?>? {
     return result
 }
 
-@RequiresApi(api = Build.VERSION_CODES.N)
 open class ServiceWorkerChannelDelegate(
     private var serviceWorkerManager: ServiceWorkerManager?,
     channel: MethodChannel

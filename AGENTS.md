@@ -21,7 +21,7 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 | `scripts/` | Legacy test/publish helper scripts (emulator wait, test runners) |
 | `test_node_server/` | Local Node test server and TLS/client certificates used by integration tests |
 | `web_support/` | TypeScript source for the Web iframe helper; `npm run build` there bundles it into `flutter_inappwebview_forge_web/lib/assets/web/web_support.js` (do not hand-edit the bundle) |
-| `.github/workflows/` | Docs site deployment plus issue lock/stale/no-response automation |
+| `.github/workflows/` | CI (`ci.yml`: per-package format/analyze/test, generated-code drift, Apple static checks, Android example build and 16 KB check), docs site deployment, and issue lock/stale/no-response automation |
 
 ## Working rules
 
@@ -95,6 +95,7 @@ cd flutter_inappwebview_forge_ios && fvm flutter test
 cd flutter_inappwebview_forge_web && fvm flutter test
 tool/check_android_16k_alignment.sh <release.apk-or-aab>
 tool/run_ios_native_lifecycle_tests.sh   # swiftc-based WebViewLifecycleCoordinator tests
+tool/run_linux_website_data_matcher_tests.sh   # C++17 WebsiteDataSiteMatcher tests (no WPE needed)
 ```
 
 For Apple package validation, use `swift package dump-package` in each native package and build with the full Xcode installation. For Linux, verify the required `pkg-config` modules before running Flutter.

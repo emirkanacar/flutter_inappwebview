@@ -59,6 +59,7 @@ export 'http_auth_response.dart' show HttpAuthResponse;
 export 'http_auth_response_action.dart' show HttpAuthResponseAction;
 export 'http_authentication_challenge.dart' show HttpAuthenticationChallenge;
 export 'http_cookie_same_site_policy.dart' show HTTPCookieSameSitePolicy;
+export 'http_cookie_store_policy.dart' show HTTPCookieStorePolicy;
 export 'in_app_webview_hit_test_result.dart' show InAppWebViewHitTestResult;
 export 'in_app_webview_hit_test_result_type.dart'
     show InAppWebViewHitTestResultType;

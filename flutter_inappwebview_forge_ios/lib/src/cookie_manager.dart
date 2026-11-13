@@ -116,6 +116,28 @@ class IOSCookieManager extends PlatformCookieManager with ChannelController {
     );
   }
 
+  @override
+  Future<bool> setCookiePolicy({
+    required HTTPCookieStorePolicy policy,
+    PlatformInAppWebViewController? webViewController,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('policy', () => policy.toNativeValue());
+    _addWebViewId(args, webViewController);
+    return await channel?.invokeMethod<bool>('setCookiePolicy', args) ?? false;
+  }
+
+  @override
+  Future<HTTPCookieStorePolicy?> getCookiePolicy({
+    PlatformInAppWebViewController? webViewController,
+  }) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    _addWebViewId(args, webViewController);
+    return HTTPCookieStorePolicy.fromNativeValue(
+      await channel?.invokeMethod<String>('getCookiePolicy', args),
+    );
+  }
+
   void _addWebViewId(
     Map<String, dynamic> args,
     PlatformInAppWebViewController? webViewController,

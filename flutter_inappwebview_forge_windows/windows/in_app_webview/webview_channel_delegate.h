@@ -177,6 +177,8 @@ namespace flutter_inappwebview_plugin
     void onZoomScaleChanged(const double& oldScale, const double& newScale) const;
     void onEnterFullscreen() const;
     void onExitFullscreen() const;
+    void onCreateContextMenu(const int64_t& type, const std::optional<std::string>& extra) const;
+    void onContextMenuActionItemClicked(const flutter::EncodableValue& id, const std::string& title) const;
     void onFaviconChanged(std::shared_ptr<FaviconChangedRequest> request) const;
     void onLaunchingExternalUriScheme(std::shared_ptr<LaunchingExternalUriSchemeRequest> request, std::unique_ptr<LaunchingExternalUriSchemeCallback> callback) const;
     void onNotificationReceived(std::shared_ptr<NotificationReceivedRequest> request, std::unique_ptr<NotificationReceivedCallback> callback) const;

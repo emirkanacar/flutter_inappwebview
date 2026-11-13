@@ -108,4 +108,15 @@ class WebStorageManager {
     required Set<WebsiteDataType> dataTypes,
     required DateTime date,
   }) => platform.removeDataModifiedSince(dataTypes: dataTypes, date: date);
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingData}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingData.supported_platforms}
+  Future<bool> deleteBrowsingData() => platform.deleteBrowsingData();
+
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingDataForSite}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebStorageManager.deleteBrowsingDataForSite.supported_platforms}
+  Future<String?> deleteBrowsingDataForSite({required String site}) =>
+      platform.deleteBrowsingDataForSite(site: site);
 }

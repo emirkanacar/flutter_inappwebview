@@ -35,7 +35,7 @@ public class HeadlessWebViewChannelDelegate: ChannelDelegate {
             break
         case "setSize":
             if let headlessWebView = headlessWebView {
-                let sizeMap = arguments!["size"] as? [String: Any?]
+                let sizeMap = arguments?["size"] as? [String: Any?]
                 if let size = Size2D.fromMap(map: sizeMap) {
                     headlessWebView.setSize(size: size)
                 }

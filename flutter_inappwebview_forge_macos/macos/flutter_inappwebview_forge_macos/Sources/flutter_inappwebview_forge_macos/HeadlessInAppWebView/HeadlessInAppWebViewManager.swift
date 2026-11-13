@@ -24,12 +24,20 @@ public class HeadlessInAppWebViewManager: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         let arguments = call.arguments as? NSDictionary
-        let id: String = arguments!["id"] as! String
+        let id: String = try requiredArgument(arguments, "id", as: String.self)
 
         switch call.method {
             case "run":
-                let params = arguments!["params"] as! [String: Any?]
+                let params = try requiredArgument(arguments, "params", as: [String: Any?].self)
                 run(id: id, params: params)
                 result(true)
                 break

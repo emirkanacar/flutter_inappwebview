@@ -1,6 +1,5 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webview
 
-import android.annotation.TargetApi
 import android.hardware.display.DisplayManager
 import android.os.Build
 import android.util.Log
@@ -10,7 +9,6 @@ import java.util.ArrayList
 private const val TAG = "DisplayListenerProxy"
 
 /** Works around an Android WebView bug by filtering some DisplayListener invocations. */
-@TargetApi(Build.VERSION_CODES.KITKAT)
 open class DisplayListenerProxy {
     private var listenersBeforeWebView: ArrayList<DisplayManager.DisplayListener> = arrayListOf()
 

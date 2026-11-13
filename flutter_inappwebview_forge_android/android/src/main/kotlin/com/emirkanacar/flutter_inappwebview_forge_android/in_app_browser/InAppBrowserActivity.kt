@@ -338,7 +338,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
         is ByteArray -> item.setIcon(Util.drawableFromBytes(this, icon))
       }
       menuItem.iconColor?.takeIf {
-        it.isNotEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+        it.isNotEmpty()
       }?.let { iconColor ->
         item.icon?.setTint(Color.parseColor(iconColor))
       }
@@ -550,11 +550,7 @@ open class InAppBrowserActivity : AppCompatActivity(), InAppBrowserDelegate, Dis
   override fun didChangeProgress(progress: Int) {
     progressBar?.let { currentProgressBar ->
       currentProgressBar.visibility = View.VISIBLE
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        currentProgressBar.setProgress(progress, true)
-      } else {
-        currentProgressBar.progress = progress
-      }
+      currentProgressBar.setProgress(progress, true)
       if (progress == 100) {
         currentProgressBar.visibility = View.GONE
       }

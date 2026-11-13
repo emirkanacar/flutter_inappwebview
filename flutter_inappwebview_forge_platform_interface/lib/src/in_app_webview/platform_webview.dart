@@ -2635,7 +2635,12 @@ In that case, after the `window.addEventListener("flutterInAppWebViewPlatformRea
   ///
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformWebViewCreationParams.contextMenu.supported_platforms}
   @SupportedPlatforms(
-    platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
+    platforms: [
+      AndroidPlatform(),
+      IOSPlatform(),
+      MacOSPlatform(),
+      WindowsPlatform(),
+    ],
   )
   final ContextMenu? contextMenu;
 

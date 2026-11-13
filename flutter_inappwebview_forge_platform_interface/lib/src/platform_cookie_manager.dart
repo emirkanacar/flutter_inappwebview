@@ -725,6 +725,81 @@ In this case, this method will return always `true`.""",
     );
   }
 
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.setCookiePolicy}
+  ///Sets whether the cookie store accepts cookies.
+  ///
+  ///With [HTTPCookieStorePolicy.DISALLOW] the store neither saves new cookies
+  ///nor sends existing ones; existing cookies are kept and become available
+  ///again after the policy is set back to [HTTPCookieStorePolicy.ALLOW].
+  ///
+  ///[webViewController] selects the cookie store of that WebView's data store
+  ///(for example a container); otherwise the default data store is used.
+  ///
+  ///Returns `true` when the policy was applied, or `false` when the OS
+  ///version does not support it.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.setCookiePolicy.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        apiName: 'WKHTTPCookieStore.setCookiePolicy',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183226-setcookiepolicy',
+        available: '17.0',
+      ),
+      MacOSPlatform(
+        apiName: 'WKHTTPCookieStore.setCookiePolicy',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183226-setcookiepolicy',
+        available: '14.0',
+      ),
+    ],
+  )
+  Future<bool> setCookiePolicy({
+    required HTTPCookieStorePolicy policy,
+    PlatformInAppWebViewController? webViewController,
+  }) {
+    throw UnimplementedError(
+      'setCookiePolicy is not implemented on the current platform',
+    );
+  }
+
+  ///{@template flutter_inappwebview_forge_platform_interface.PlatformCookieManager.getCookiePolicy}
+  ///Gets whether the cookie store accepts cookies.
+  ///
+  ///[webViewController] selects the cookie store of that WebView's data store;
+  ///otherwise the default data store is used.
+  ///
+  ///Returns `null` when the OS version does not support it or the native
+  ///policy is unknown.
+  ///{@endtemplate}
+  ///
+  ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManager.getCookiePolicy.supported_platforms}
+  @SupportedPlatforms(
+    platforms: [
+      IOSPlatform(
+        apiName: 'WKHTTPCookieStore.getCookiePolicy',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183225-getcookiepolicy',
+        available: '17.0',
+      ),
+      MacOSPlatform(
+        apiName: 'WKHTTPCookieStore.getCookiePolicy',
+        apiUrl:
+            'https://developer.apple.com/documentation/webkit/wkhttpcookiestore/4183225-getcookiepolicy',
+        available: '14.0',
+      ),
+    ],
+  )
+  Future<HTTPCookieStorePolicy?> getCookiePolicy({
+    PlatformInAppWebViewController? webViewController,
+  }) {
+    throw UnimplementedError(
+      'getCookiePolicy is not implemented on the current platform',
+    );
+  }
+
   ///{@macro flutter_inappwebview_forge_platform_interface.PlatformCookieManagerCreationParams.isClassSupported}
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);

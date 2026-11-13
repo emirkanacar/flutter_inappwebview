@@ -15,6 +15,8 @@ part of 'context_menu.dart';
 ///    - To make it work properly on Android, JavaScript should be enabled!
 ///- iOS WKWebView
 ///- macOS WKWebView
+///- Windows WebView2 ([Official API - ICoreWebView2_11.add_ContextMenuRequested](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested)):
+///    - Uses WebView2 `ContextMenuRequested` (`ICoreWebView2_11`). Custom items require `ICoreWebView2Environment9`. `onHideContextMenu` is not called because WebView2 has no menu-dismissed event. No event is raised when `disableContextMenu` is `true`.
 class ContextMenu {
   ///List of the custom [ContextMenuItem].
   final List<ContextMenuItem> menuItems;
@@ -45,6 +47,8 @@ class ContextMenu {
   ///    - To make it work properly on Android, JavaScript should be enabled!
   ///- iOS WKWebView
   ///- macOS WKWebView
+  ///- Windows WebView2 ([Official API - ICoreWebView2_11.add_ContextMenuRequested](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_11#add_contextmenurequested)):
+  ///    - Uses WebView2 `ContextMenuRequested` (`ICoreWebView2_11`). Custom items require `ICoreWebView2Environment9`. `onHideContextMenu` is not called because WebView2 has no menu-dismissed event. No event is raised when `disableContextMenu` is `true`.
   ContextMenu({
     this.menuItems = const [],
     this.onCreateContextMenu,

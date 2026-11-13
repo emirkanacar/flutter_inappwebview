@@ -1,7 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.webkit.WebResourceResponse
 import androidx.webkit.WebViewAssetLoader
@@ -113,9 +112,7 @@ open class WebViewAssetLoaderExt(
             val inputStream = response.data?.let { ByteArrayInputStream(it) }
             val statusCode = response.statusCode
             val reasonPhrase = response.reasonPhrase
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP &&
-                statusCode != null && reasonPhrase != null
-            ) {
+            return if (statusCode != null && reasonPhrase != null) {
                 WebResourceResponse(
                     response.contentType,
                     response.contentEncoding,

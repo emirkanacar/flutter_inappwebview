@@ -1,8 +1,6 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.webkit.WebResourceRequest
-import androidx.annotation.RequiresApi
 import androidx.webkit.WebResourceRequestCompat
 import androidx.webkit.WebViewFeature
 import java.util.HashMap
@@ -17,13 +15,11 @@ open class WebResourceRequestExt(
 ) {
     companion object {
         @JvmStatic
-        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
         fun fromWebResourceRequest(request: WebResourceRequest): WebResourceRequestExt {
             val isRedirect = when {
                 WebViewFeature.isFeatureSupported(WebViewFeature.WEB_RESOURCE_REQUEST_IS_REDIRECT) ->
                     WebResourceRequestCompat.isRedirect(request)
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> request.isRedirect()
-                else -> false
+                else -> request.isRedirect()
             }
             return WebResourceRequestExt(
                 request.getUrl().toString(),

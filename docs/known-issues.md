@@ -117,8 +117,11 @@ empty `@Deprecated` message.
 
 Native Android SDK-deprecated call sites (`forceDark`, `saveFormData`,
 `WebView.clearCache`, pre-Lollipop cookie APIs, AbsoluteLayout, legacy print)
-stay behind `@file:Suppress("DEPRECATION")` while `minSdkVersion` remains 19.
-That cleanup is blocked on an explicit minSdk increase; see
+stay behind `@file:Suppress("DEPRECATION")`. They were retained for the
+original `minSdkVersion 19` floor; Android 1.0.56 / root 2.1.77 raised the
+floor to 24, and the unreachable pre-API-24 branches were removed in the
+Android 1.0.58 line (Phase 3 step 1). The remaining SDK-deprecated paths
+are re-evaluated in Phase 3 step 2 of the deprecated API migration plan; see
 [#2641 and #2685](#2641-and-2685--android-javawebview-deprecation-warning-backlog).
 The example storage screen now uses `onReceivedError` instead of `onLoadError`.
 
@@ -487,6 +490,8 @@ The same ownership guard now covers page-started, page-finished, document-start,
 #### #2856 - Android nullable and malformed callback payloads
 
 **Local status:** Hardened in Android 1.0.37 (root 2.1.40); device/provider validation pending. **Affected package:** Android Dart controller. **Environment:** Flutter 3.44.8/Dart 3.12.2 development baseline; published package compatibility minimum remains Flutter 3.38.6. **User impact:** malformed or nullable WebView provider fields could cause a Dart type error while converting request results or dispatching normal callbacks. **Hypothesis:** dynamic channel values were passed directly to `WebUri`, nullable public fields, non-null `String` locals, or an unchecked `List` cast. **Fix:** optional URL, title, source, origin, callback ID, touch-icon, safe-browsing, print-job, and context-menu values are accepted only when they are strings; permission request and cancellation payloads now also reject a non-map payload, non-string origin, or non-list resources container before decoding, while filtering unknown resource entries. Invalid values return the existing native default behavior or empty-title behavior; the public channel and result contracts are unchanged. **Regression evidence:** the Android nullability test reproduces the prior `String`-to-`List` cast failure with a valid origin and malformed resources container, and passes after the guard; null/malformed cancellation payloads are also ignored safely. **Required evidence:** Android API/provider matrix covering null, empty, malformed, and wrong-type callback fields.
+
+**iOS/macOS/Windows counterpart (unreleased):** required method-channel arguments are no longer force-cast on iOS/macOS or read with throwing lookups on Windows; malformed calls complete with `invalid_arguments`. Evidence and runtime gate: [runtime-validation-pending.md](runtime-validation-pending.md#ios-macos-and-windows-method-channel-argument-validation-local-hardening).
 
 #### #2737 - Web iframe URL tracking
 
@@ -1287,7 +1292,7 @@ The published 2.1.72 Pana report scores static analysis 40/50 for three `lints_c
 
 **Local status:** Implemented in Android 1.0.40; release/provider/publish validation pending. **Affected scope:** Android Kotlin/WebView compatibility and package release tooling. **Impact:** Android/Flutter upgrades exposed deprecated API warnings and obscured package-owned compatibility problems in analysis or publish output. **Confidence:** Confirmed warning paths; the compatibility boundaries are now explicit and validated at source/build level.
 
-GitHub CLI review of upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) maps the current implementation to the maintained Kotlin package: the shared callback handler uses `Looper.getMainLooper()`, session-cookie clearing uses `removeSessionCookies(null)` on API 21+ and the legacy synchronous method only below API 21, and legacy cookie, WebView, print, fullscreen, and API-level compatibility paths are isolated with file-level deprecation boundaries. The public method-channel contract and API 19 fallback are unchanged; `forceDark`, `saveFormData`, `AbsoluteLayout`, legacy print, and deprecated WebView callbacks are retained where no behavior-preserving replacement exists for the supported API range. Do not remove those native SDK-deprecated paths until `minSdkVersion` is raised in an explicit release decision. Application-facing Dart shims are listed in [Deprecated APIs](../documentation/deprecated-api.md).
+GitHub CLI review of upstream PR [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817) maps the current implementation to the maintained Kotlin package: the shared callback handler uses `Looper.getMainLooper()`, session-cookie clearing uses `removeSessionCookies(null)` on API 21+ and the legacy synchronous method only below API 21, and legacy cookie, WebView, print, fullscreen, and API-level compatibility paths are isolated with file-level deprecation boundaries. The public method-channel contract and API 19 fallback were unchanged in Android 1.0.40; `forceDark`, `saveFormData`, `AbsoluteLayout`, legacy print, and deprecated WebView callbacks were retained where no behavior-preserving replacement existed for the then-supported API range. Current state: Android 1.0.56 raised `minSdkVersion` to 24, so the API 19-23 fallback branches are unreachable on the current release line. Phase 3 step 1 (Android 1.0.58) removed them: every `SDK_INT` guard and `@RequiresApi` / `@TargetApi` annotation for API 24 and below, the `CookieSyncManager` / pre-Lollipop cookie branches, and the pre-API 21 `openFileChooser` / `PICKER_LEGACY` file chooser path. The always-taken branch was kept, so API 24+ behavior and the channel contract are unchanged; `test/min_sdk_dead_code_test.dart` guards against reintroduction, and the 71-test Android suite and example debug APK build pass. Re-evaluating the remaining SDK-deprecated paths (`forceDark`, `saveFormData`, `WebView.clearCache`, AbsoluteLayout, legacy print/fullscreen) is Phase 3 step 2 of the [deprecated API migration plan](deprecated-api-migration-plan.md). Application-facing Dart shims are listed in [Deprecated APIs](../documentation/deprecated-api.md).
 
 The Android package suite passes 47/47 tests. `compileDebugKotlin` and the example debug APK build pass without package-owned Java/Android deprecation diagnostics. A direct release compile is still blocked by the generated dev-only `integration_test` registrant, and the normal Flutter release command is blocked in this environment by Flutter's stale configured Android Studio JDK path; these are release/toolchain gates rather than new plugin source failures.
 
@@ -1411,7 +1416,7 @@ records already listed in [runtime-validation-pending.md](runtime-validation-pen
 have a documented local implementation or mitigation boundary; their next
 action is target validation, not speculative code change. The remaining
 active examples that still need a reproducible matrix before implementation
-are [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732),
+are [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732)
 and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)

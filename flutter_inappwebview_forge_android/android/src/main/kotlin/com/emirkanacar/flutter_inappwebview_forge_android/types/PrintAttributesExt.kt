@@ -1,11 +1,8 @@
 package com.emirkanacar.flutter_inappwebview_forge_android.types
 
-import android.os.Build
 import android.print.PrintAttributes
-import androidx.annotation.RequiresApi
 import java.util.HashMap
 
-@RequiresApi(Build.VERSION_CODES.KITKAT)
 open class PrintAttributesExt {
     private var colorMode: Int = 0
     private var duplex: Int? = null
@@ -21,9 +18,7 @@ open class PrintAttributesExt {
 
             val attributesExt = PrintAttributesExt()
             attributesExt.colorMode = attributes.getColorMode()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                attributesExt.duplex = attributes.getDuplexMode()
-            }
+            attributesExt.duplex = attributes.getDuplexMode()
             val mediaSize = attributes.getMediaSize()
             if (mediaSize != null) {
                 attributesExt.mediaSize = MediaSizeExt.fromMediaSize(mediaSize)

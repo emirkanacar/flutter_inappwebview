@@ -18,6 +18,14 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
     }
     
     public override func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        do {
+            try handleThrowing(call, result: result)
+        } catch {
+            result(invalidArgumentsError(error, method: call.method))
+        }
+    }
+
+    private func handleThrowing(_ call: FlutterMethodCall, result: @escaping FlutterResult) throws {
         guard canDispatchCallbacks() else {
             result(nil)
             return
@@ -28,7 +36,7 @@ public class WebMessageListenerChannelDelegate: ChannelDelegate {
         case "postMessage":
             if let webView = webMessageListener?.webView, let jsObjectName = webMessageListener?.jsObjectName {
                 let jsObjectNameEscaped = jsObjectName.replacingOccurrences(of: "\'", with: "\\'")
-                let message = WebMessage.fromMap(map: arguments!["message"] as! [String: Any?])
+                let message = WebMessage.fromMap(map: try requiredArgument(arguments, "message", as: [String: Any?].self))
                 
                 let source = """
                 (function() {

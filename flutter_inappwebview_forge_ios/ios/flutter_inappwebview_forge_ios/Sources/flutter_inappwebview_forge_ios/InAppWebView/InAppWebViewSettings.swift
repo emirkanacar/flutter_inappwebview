@@ -101,6 +101,9 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var pluginScriptsForMainFrameOnly = false
     var isUserInteractionEnabled = true
     var alpha: Double? = nil
+    /// nil keeps the system Lockdown Mode setting. Not visible to KVC, so it is
+    /// parsed and serialized explicitly below.
+    var isLockdownModeEnabled: Bool? = nil
     
     override init(){
         super.init()
@@ -134,6 +137,14 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
             alpha = alphaValue
             settings.removeValue(forKey: "alpha")
         }
+        if settings.keys.contains("writingToolsBehavior") {
+            writingToolsBehavior = settings["writingToolsBehavior"] as? Int
+            settings.removeValue(forKey: "writingToolsBehavior")
+        }
+        if settings.keys.contains("isLockdownModeEnabled") {
+            isLockdownModeEnabled = settings["isLockdownModeEnabled"] as? Bool
+            settings.removeValue(forKey: "isLockdownModeEnabled")
+        }
         let _ = super.parse(settings: settings)
         if #available(iOS 13.0, *) {} else {
             applePayAPIEnabled = false
@@ -143,6 +154,8 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     
     override func getRealSettings(obj: InAppWebView?) -> [String: Any?] {
         var realSettings: [String: Any?] = toMap()
+        realSettings["isLockdownModeEnabled"] = isLockdownModeEnabled
+        realSettings["writingToolsBehavior"] = writingToolsBehavior
         if let webView = obj {
             realSettings["isUserInteractionEnabled"] = webView.isUserInteractionEnabled
             realSettings["alpha"] = Double(webView.alpha)
