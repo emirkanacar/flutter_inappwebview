@@ -107,7 +107,7 @@ while IFS= read -r entry; do
   output_file="$temporary_dir/$(printf '%s' "$entry" | tr '/:' '__')"
   unzip -p "$artifact" "$entry" > "$output_file"
 
-  alignments="$($readelf_bin -l "$output_file" | awk '$1 == "LOAD" { print $NF }')"
+  alignments="$($readelf_bin -lW "$output_file" | awk '$1 == "LOAD" { print $NF }')"
   if [[ -z "$alignments" ]]; then
     echo "Unable to find ELF PT_LOAD alignment for $entry" >&2
     failed=1
