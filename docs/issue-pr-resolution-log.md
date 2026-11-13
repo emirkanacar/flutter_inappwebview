@@ -15,6 +15,14 @@ This document records the issue and pull-request exports supplied for the Forge 
 
 The detailed root-cause notes are in [known-issues.md](known-issues.md). Package release notes are in the root and platform `CHANGELOG.md` files.
 
+## 2026-11-13 Android example build directory (Forge PR #1)
+
+[Forge PR #1](https://github.com/emirkanacar/flutter_inappwebview/pull/1)
+reported two build gates. The iOS `obscuredContentInsets` type was already
+fixed by Forge #2. The Android example build-directory fix was implemented
+independently on master; the PR branch was not merged. Not a CSV record;
+CSV counts are unchanged. Details are in [known-issues.md](known-issues.md).
+
 ## 2026-11-13 Xcode 27 iOS/macOS build fix (Forge #2)
 
 Root 2.1.78, iOS 2.1.36, and macOS 1.1.11 fix the Xcode 27 / Swift 6.4

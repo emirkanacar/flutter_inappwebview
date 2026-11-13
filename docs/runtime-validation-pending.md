@@ -56,6 +56,19 @@ Simulator or device, plus a malformed or unopenable URL that still returns
 `cannot be opened!`. This record does not change the 78 CSV runtime-pending
 count.
 
+### Android example build directory (Forge PR #1)
+
+Android platform example (Forge PR #1, not a CSV record):
+`example/android/build.gradle.kts` resolved `../build` from
+`rootProject.layout.buildDirectory`, so outputs landed in
+`example/android/build` and `flutter build apk` could not find the APK. The
+example now resolves it from `rootProject.layout.projectDirectory`, matching
+the root example. Example-only; no package release or channel change. A
+source regression test failed before the fix and passes after it; the
+Android package tests pass. Runtime gate: `flutter build apk --debug` in the
+Android example on the pinned Flutter 3.44.8 (the local Flutter 3.50 requires
+Gradle 9.3.1 and could not run the 8.13 example build).
+
 ### Xcode 27 / Swift 6.4 iOS and macOS build failure (Forge #2)
 
 Forge-repository issue [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2), not a CSV record. iOS 2.1.35 and macOS

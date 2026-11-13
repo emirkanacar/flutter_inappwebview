@@ -15,6 +15,19 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-11-13 Android example build directory (Forge PR #1)
+
+Android platform example (Forge PR #1, not a CSV record):
+`example/android/build.gradle.kts` resolved `../build` from
+`rootProject.layout.buildDirectory`, so outputs landed in
+`example/android/build` and `flutter build apk` could not find the APK. The
+example now resolves it from `rootProject.layout.projectDirectory`, matching
+the root example. Example-only; no package release or channel change. A
+source regression test failed before the fix and passes after it; the
+Android package tests pass. Runtime gate: `flutter build apk --debug` in the
+Android example on the pinned Flutter 3.44.8 (the local Flutter 3.50 requires
+Gradle 9.3.1 and could not run the 8.13 example build).
+
 ## 2026-11-13 Xcode 27 / Swift 6.4 iOS and macOS build failure (Forge #2)
 
 Forge-repository issue [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2), not a CSV record. iOS 2.1.35 and macOS

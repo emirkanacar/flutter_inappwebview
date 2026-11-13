@@ -74,6 +74,23 @@ void main() {
     expect(source, isNot(contains('proguard-android.txt')));
   });
 
+  test('Android example writes build outputs where Flutter looks for APKs', () {
+    final buildFile = File('example/android/build.gradle.kts').existsSync()
+        ? File('example/android/build.gradle.kts')
+        : File(
+            'flutter_inappwebview_forge_android/example/android/build.gradle.kts',
+          );
+    final source = buildFile.readAsStringSync();
+
+    // `../build` must resolve from the Gradle project directory (example/),
+    // not from the default build directory (example/android/build).
+    expect(
+      source,
+      contains('rootProject.layout.projectDirectory.dir("../build")'),
+    );
+    expect(source, isNot(contains('buildDirectory.dir("../build")')));
+  });
+
   test('Android allow-list parsing filters malformed channel values', () {
     final source =
         File(

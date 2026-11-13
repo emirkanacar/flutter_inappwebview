@@ -1,3 +1,9 @@
+## Unreleased
+
+- Example: resolve the Gradle build directory from
+  `rootProject.layout.projectDirectory` so `flutter build apk` writes the
+  APK to `example/build`, where Flutter looks for it (Forge PR #1).
+
 ## 1.0.56 - 2026-08-21
 
 - **Breaking compatibility floor:** raise Android `minSdk` from 19 to
