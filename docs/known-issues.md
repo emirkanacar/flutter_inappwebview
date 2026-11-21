@@ -198,9 +198,29 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-macOS SwiftPM 10.15 (#2891) and webkitgtk support (#2890). The closed
+webkitgtk support (#2890). macOS SwiftPM 10.15 (#2891) is already covered (see
+[below](#2026-11-22-macos-swiftpm-1015-conformance-2891)). The closed
 hardening PRs #2914-#2934 are triaged in
 [Upstream hardening PRs #2914-#2934](#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds).
+
+## 2026-11-22 macOS SwiftPM 10.15 conformance (#2891)
+
+Upstream issue [#2891](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2891): the macOS `Package.swift` declares
+`.macOS("10.14")`, and a type conforming to
+`ASWebAuthenticationPresentationContextProviding` (macOS 10.15) must be
+available from the package minimum, so upstream SwiftPM builds fail.
+
+Forge status: already covered, no source change. The conformance is on the
+private `WebAuthenticationPresentationContextProviding` class marked
+`@available(macOS 10.15, *)`, not on `WebAuthenticationSession`, so the
+package compiles with the 10.14 minimum. The CocoaPods podspec also stays
+at 10.14.
+
+Evidence: `flutter_inappwebview_forge_macos/test/swiftpm_deployment_target_source_test.dart`
+checks the manifest minimum, the single conformance, and its availability
+attribute. A local build at the 10.14 minimum is not possible with Xcode 27,
+which supports macOS 12.0 and later (the macOS example is built with
+`MACOSX_DEPLOYMENT_TARGET=12.0`).
 
 ## 2026-11-22 Upstream hardening PRs #2914-#2934 and popup content worlds
 
