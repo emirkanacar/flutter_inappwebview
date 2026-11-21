@@ -66,6 +66,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    # Device diagnostic for takeScreenshot of a playing video (#2732).
+    - test_assets/screenshot_video.mp4
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

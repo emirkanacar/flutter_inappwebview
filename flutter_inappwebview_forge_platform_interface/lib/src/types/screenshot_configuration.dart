@@ -92,6 +92,8 @@ class ScreenshotConfiguration_ {
   ///It only works while the WebView is attached, visible, and the requested area is fully on
   ///screen (so it cannot capture outside the viewport); in every other case, and whenever the
   ///copy fails, the WebView is drawn as if this were `false`.
+  ///On Android, only the copy captures hardware-decoded `<video>` frames; drawing shows the
+  ///page without them. With texture composition the copy reads Flutter's render surface.
   ///The default value is `false`.
   @SupportedPlatforms(
     platforms: [
