@@ -1,4 +1,4 @@
-#include "include/flutter_inappwebview_windows/flutter_inappwebview_windows_plugin_c_api.h"
+#include "include/flutter_inappwebview_forge_windows/flutter_inappwebview_windows_plugin_c_api.h"
 
 #include <flutter/plugin_registrar_windows.h>
 

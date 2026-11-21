@@ -42,6 +42,13 @@ void main() {
       source,
       contains('set(flutter_inappwebview_forge_linux_bundled_libraries'),
     );
+    // generated_plugin_registrant.cc includes `<package>/<pluginClass>.h`.
+    expect(
+      _sourceFile(
+        'linux/include/flutter_inappwebview_forge_linux/flutter_inappwebview_linux_plugin.h',
+      ).existsSync(),
+      isTrue,
+    );
   });
   test(
     'Linux native source contracts remain guarded',

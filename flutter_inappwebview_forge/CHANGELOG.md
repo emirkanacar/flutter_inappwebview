@@ -1,6 +1,6 @@
 ## Unreleased
 
-- Linux, Windows: fix app builds failing at CMake generation because of a stale plugin target name.
+- Linux, Windows: fix app builds failing at CMake generation (stale plugin target name) and native compile errors in containers, autocorrection, and proxy settings.
 - Android: a provider that throws from algorithmic darkening no longer crashes WebView creation ([#2893](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2893)).
 - Android: a renderer crash during `dispose()` no longer kills the app ([#2945](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2945)).
 - Android: `dispose()` no longer leaves intercepted resource requests waiting for the timeout ([#2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).

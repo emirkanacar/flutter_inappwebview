@@ -1,4 +1,4 @@
-#include "include/flutter_inappwebview_linux/flutter_inappwebview_linux_plugin.h"
+#include "include/flutter_inappwebview_forge_linux/flutter_inappwebview_linux_plugin.h"
 
 #include "flutter_inappwebview_linux_plugin_private.h"
 #include "plugin_instance.h"

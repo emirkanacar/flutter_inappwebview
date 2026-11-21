@@ -28,6 +28,13 @@ void main() {
       source,
       contains('set(flutter_inappwebview_forge_windows_bundled_libraries'),
     );
+    // generated_plugin_registrant.cc includes `<package>/<pluginClass>.h`.
+    expect(
+      _sourceFile(
+        'windows/include/flutter_inappwebview_forge_windows/flutter_inappwebview_windows_plugin_c_api.h',
+      ).existsSync(),
+      isTrue,
+    );
   });
   test(
     'Windows native source contracts remain guarded',
