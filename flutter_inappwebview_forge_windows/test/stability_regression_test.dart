@@ -20,6 +20,20 @@ void main() {
     'Windows native source contracts remain guarded',
     _runSourceContractAssertions,
   );
+  test('Windows cursor moves are coalesced and flushed before input', () {
+    // Upstream PR #2938: native button and wheel input reuse the last cursor
+    // position, so a pending coalesced move must be sent first.
+    final source = _sourceFile(
+      'lib/src/in_app_webview/custom_platform_view.dart',
+    ).readAsStringSync();
+    expect(source, contains('_cursorMoves.move(position);'));
+    expect(source, contains('_cursorMoves.discard();'));
+    expect(
+      RegExp(r'_cursorMoves\.flush\(\);').allMatches(source).length,
+      3,
+      reason: 'pointer update, button state and scroll must flush',
+    );
+  });
   test('Windows texture resources outlive asynchronous unregistration', () {
     // Upstream #2896: UnregisterTexture completes on the raster thread, so the
     // texture callback and bridge must stay alive until its callback runs.

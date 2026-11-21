@@ -12,7 +12,6 @@ import androidx.webkit.WebMessagePortCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 
-import com.emirkanacar.flutter_inappwebview_forge_android.Util;
 import com.emirkanacar.flutter_inappwebview_forge_android.find_interaction.FindInteractionChannelDelegate;
 import com.emirkanacar.flutter_inappwebview_forge_android.in_app_browser.InAppBrowserActivity;
 import com.emirkanacar.flutter_inappwebview_forge_android.in_app_browser.InAppBrowserSettings;
@@ -1193,10 +1192,8 @@ open class WebViewChannelDelegate(
     request: WebResourceRequestExt
   ): CustomSchemeResponse? {
     if (!canDispatchCallbacks()) return null
-    val channel = getChannel() ?: return null
     val callback = SyncLoadResourceWithCustomSchemeCallback()
-    return Util.invokeMethodAndWaitResult(
-      channel,
+    return invokeMethodAndWaitResult(
       "onLoadResourceWithCustomScheme",
       HashMap<String, Any?>().apply { put("request", request.toMap()) },
       callback
@@ -1227,15 +1224,13 @@ open class WebViewChannelDelegate(
     request: WebResourceRequestExt
   ): WebResourceResponseExt? {
     if (!canDispatchCallbacks()) return null
-    val channel = getChannel() ?: return null
     val callback = SyncShouldInterceptRequestCallback()
-    return Util.invokeMethodAndWaitResult(
-      channel,
+    return invokeMethodAndWaitResult(
       "shouldInterceptRequest",
       request.toMap(),
       callback,
-      SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,
-      true
+      timeoutMillis = SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,
+      priority = true
     )
   }
 

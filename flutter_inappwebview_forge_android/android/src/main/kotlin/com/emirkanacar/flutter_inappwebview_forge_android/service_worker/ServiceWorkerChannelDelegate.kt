@@ -6,7 +6,6 @@ import android.webkit.WebResourceResponse
 import androidx.webkit.ServiceWorkerControllerCompat
 import androidx.webkit.ServiceWorkerWebSettingsCompat
 import androidx.webkit.WebViewFeature
-import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import com.emirkanacar.flutter_inappwebview_forge_android.types.BaseCallbackResultImpl
 import com.emirkanacar.flutter_inappwebview_forge_android.types.ChannelDelegateImpl
 import com.emirkanacar.flutter_inappwebview_forge_android.types.SyncBaseCallbackResultImpl
@@ -158,10 +157,8 @@ open class ServiceWorkerChannelDelegate(
 
     @Throws(InterruptedException::class)
     fun shouldInterceptRequest(request: WebResourceRequestExt): WebResourceResponseExt? {
-        val channel = getChannel() ?: return null
         val callback = SyncShouldInterceptRequestCallback()
-        return Util.invokeMethodAndWaitResult(
-            channel,
+        return invokeMethodAndWaitResult(
             "shouldInterceptRequest",
             request.toMap(),
             callback,

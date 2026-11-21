@@ -687,7 +687,9 @@ void main() {
     expect(delegateSource, contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS'));
     expect(
       delegateSource,
-      contains('SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,\n      true'),
+      contains(
+        'timeoutMillis = SYNC_INTERCEPT_REQUEST_TIMEOUT_MILLIS,\n      priority = true',
+      ),
     );
     expect(serviceWorkerSource, contains('priority = true'));
     expect(
@@ -1474,5 +1476,35 @@ void main() {
       isTrue,
     );
     expect(disposeSource, contains('if (destroyRequested) return'));
+  });
+
+  test('Android dispose releases pending synchronous resource callbacks', () {
+    // Upstream PR #2954: dispose() must cancel callbacks still waiting for a
+    // Dart reply instead of letting the WebView thread wait for the timeout,
+    // and a dispatch queued before dispose must not reach the old channel.
+    const base =
+        'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/';
+    final delegateSource = _sourceFile(
+      '${base}types/ChannelDelegateImpl.kt',
+    ).readAsStringSync();
+    final utilSource = _sourceFile('${base}Util.kt').readAsStringSync();
+
+    expect(delegateSource, contains('pendingSyncCallbacks.add(callback)'));
+    expect(delegateSource, contains('pendingSyncCallbacks.remove(callback)'));
+    expect(delegateSource, contains('pending.forEach { it.cancel() }'));
+    expect(utilSource, contains('if (!callback.isCancelled) {'));
+
+    for (final path in [
+      'webview/WebViewChannelDelegate.kt',
+      'service_worker/ServiceWorkerChannelDelegate.kt',
+      'types/WebViewAssetLoaderExt.kt',
+    ]) {
+      final source = _sourceFile('$base$path').readAsStringSync();
+      expect(
+        source,
+        isNot(contains('Util.invokeMethodAndWaitResult(')),
+        reason: '$path must use the dispose-aware delegate helper',
+      );
+    }
   });
 }

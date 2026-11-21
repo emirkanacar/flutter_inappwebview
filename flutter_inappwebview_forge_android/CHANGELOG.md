@@ -9,6 +9,12 @@
   returns `true`. Before, a renderer that died while loading `about:blank`
   during disposal fell through to the default handler, which kills the app
   ([#2945](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2945)).
+- `dispose()` now releases WebView threads still waiting for a synchronous
+  Dart reply (`shouldInterceptRequest`, `onLoadResourceWithCustomScheme`,
+  service-worker interception, asset-loader handlers) instead of letting them
+  wait for the timeout; a dispatch queued before dispose is dropped and the
+  request gets the default handling (from upstream PR
+  [#2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).
 
 - Support `InAppWebViewSettings.shouldInterceptRequestUrlFilter`. Patterns are
   compiled once per settings update (`UrlRegexFilter`) and matched with a

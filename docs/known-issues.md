@@ -81,6 +81,26 @@ fork promotion or showcase posts with no engineering action.
   `std::get<std::string>` on a non-string reply or a null pointer threw inside
   the channel reply. `std::get_if` plus a null check resolve the promise with
   `null`. Gate: MSVC build.
+- **Windows cursor move coalescing (from [PR #2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).** Every hover
+  sample sent one `setCursorPos` platform message. `CursorMoveCoalescer` now
+  sends only the last move of each frame. The native button, touch and wheel
+  handlers reuse `lastCursorPos_`, so those calls flush a pending move first
+  (upstream's version did not, so a click could land at an older position).
+  Dispose drops a pending move. The upstream mouse `Leave` part was already
+  present: `MouseRegion.onExit` sends `COREWEBVIEW2_MOUSE_EVENT_KIND_LEAVE`
+  through `setPointerButton`. Gate: Windows hover, `:hover` exit, and
+  click-after-fast-move check.
+- **Android pending resource callbacks on dispose ([PR #2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).**
+  `shouldInterceptRequest`, `onLoadResourceWithCustomScheme`, service-worker
+  interception and asset-loader `handle` block a WebView thread for a Dart
+  reply. After `dispose()` that reply can never arrive, so the thread waited for
+  the full timeout. `ChannelDelegateImpl.invokeMethodAndWaitResult` now
+  registers each waiting callback; `dispose()` cancels them, `Util` skips a
+  dispatch that was queued before dispose, and a cancelled call returns `null`.
+  Unlike upstream, which returns an empty blocking response, `null` keeps the
+  existing timeout behavior (default WebView handling). Late replies are
+  ignored because cancelled callbacks drop `success`/`error`. Gate: dispose a
+  WebView with in-flight intercepted requests on a device.
 - **Web sourcemap ([#2955](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2955)).** The published `web_support.js` embedded
   an inline development sourcemap. The build script no longer passes
   `--sourcemap=inline`. The checked-in bundle also contained hand edits
@@ -97,8 +117,6 @@ Each fix has a source-level regression test that fails on the previous source.
   `LAYER_TYPE_HARDWARE` with hybrid composition can stop repainting. The
   proposed fix (`LAYER_TYPE_NONE`) changes rendering for every Android user and
   needs device evidence first.
-- **Android pending resource callbacks on dispose ([PR #2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).**
-  Pending `shouldInterceptRequest` latches should complete on dispose.
 - **Linux dispose crash ([#2904](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2904)).** Needs a Linux reproduction.
 - **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [PR #2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956),
   [PR #2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).** Shutdown ordering of WebView2 controller, environment,
@@ -112,8 +130,7 @@ Each fix has a source-level regression test that fails on the previous source.
 iOS JavaScript panels always answered ([PR #2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)), native prompt
 control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
 ([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
-options (#2908-#2911), Windows mouse leave and cursor event coalescing
-([PR #2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938), remainder), MSVC 18 (#2936, #2937), macOS SwiftPM 10.15
+options (#2908-#2911), MSVC 18 (#2936, #2937), macOS SwiftPM 10.15
 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
 

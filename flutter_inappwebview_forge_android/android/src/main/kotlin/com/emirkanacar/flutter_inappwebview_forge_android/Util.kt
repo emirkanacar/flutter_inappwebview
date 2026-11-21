@@ -111,7 +111,10 @@ class Util private constructor() {
             }
 
             val dispatchRunnable = Runnable {
-                channel.invokeMethod(method, arguments, callback)
+                // The owner may have been disposed while this was queued.
+                if (!callback.isCancelled) {
+                    channel.invokeMethod(method, arguments, callback)
+                }
             }
             try {
                 val dispatched = if (priority) {
@@ -134,6 +137,10 @@ class Util private constructor() {
                     callback.cancel()
                     mainLooperHandler.removeCallbacks(dispatchRunnable)
                     Log.w(LOG_TAG, "Timed out waiting for synchronous method channel callback: $method")
+                }
+                // Cancelled by the owner's dispose(): never use a partial result.
+                if (callback.isCancelled) {
+                    return null
                 }
                 return callback.result
             } finally {

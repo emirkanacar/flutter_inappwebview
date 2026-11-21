@@ -13,6 +13,9 @@ open class SyncBaseCallbackResultImpl<T> : BaseCallbackResultImpl<T>() {
     @Volatile
     private var cancelled = false
 
+    val isCancelled: Boolean
+        get() = cancelled
+
     fun cancel() {
         cancelled = true
         latch.countDown()
