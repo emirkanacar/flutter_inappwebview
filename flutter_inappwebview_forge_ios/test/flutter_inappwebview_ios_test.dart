@@ -826,6 +826,48 @@ void _runSourceContractAssertions() {
     !evaluateBody.contains('Frame is nil'),
     'evaluateJavaScript rejects a nil (main) frame for regular WebViews',
   );
+  // Upstream PR #2932: a popup never runs a named content world or a subframe
+  // in the page world; those requests fail closed.
+  final popupGuard = evaluateBody.indexOf(
+    'guard contentWorld == WKContentWorld.page, frame == nil else',
+  );
+  _assert(
+    popupGuard > popupBranch &&
+        popupGuard < evaluateBody.indexOf('evaluateJavaScriptInPageWorld('),
+    'popup evaluateJavaScript runs a named content world in the page world',
+  );
+  final injectStart = source.indexOf(
+    'public func injectDeferredObject(source: String, contentWorld: WKContentWorld',
+  );
+  final injectBody = source.substring(
+    injectStart,
+    source.indexOf('generateCodeForScriptEvaluation(', injectStart),
+  );
+  _assert(
+    injectBody.contains(
+      'if windowId != nil, contentWorld != WKContentWorld.page {',
+    ),
+    'popup evaluateJavascript(contentWorld:) does not fail closed',
+  );
+  _assert(
+    'guard contentWorld == WKContentWorld.page, frame == nil else'
+                .allMatches(source)
+                .length ==
+            2 &&
+        source.contains('in: nil, in: WKContentWorld.page'),
+    'popup callAsyncJavaScript runs a named content world in the page world',
+  );
+  // Upstream PR #2931: the legacy async wrapper closes its parameter list.
+  final legacyWrapper = _sourceFile(
+    'ios/flutter_inappwebview_forge_ios/Sources/flutter_inappwebview_forge_ios/'
+    'PluginScriptsJS/CallAsyncJavaScriptBelowIOS14WrapperJS.swift',
+  ).readAsStringSync();
+  _assert(
+    legacyWrapper.contains(
+      r'(async function(\(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_NAMES)) {',
+    ),
+    'legacy callAsyncJavaScript wrapper has an unclosed parameter list',
+  );
 
   final asyncWrapper = _sourceFile(
     'ios/flutter_inappwebview_forge_ios/Sources/'

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('FileProvider paths expose only capture and legacy media directories', () {
+  test('FileProvider paths expose only the app-scoped capture directory', () {
     final providerPaths =
         [
           File('android/src/main/res/xml/provider_paths.xml'),
@@ -22,15 +22,9 @@ void main() {
       content,
       contains('<external-files-path name="app_captures" path="Captures/"/>'),
     );
-    expect(
-      content,
-      contains('<external-path name="pictures" path="Pictures/"/>'),
-    );
-    expect(content, contains('<external-path name="movies" path="Movies/"/>'));
-    expect(
-      RegExp(r'<external-path\b[^>]*path="\."\s*/>').hasMatch(content),
-      isFalse,
-    );
+    // minSdk 24: captures always use the app-scoped directory, so no public
+    // external-storage path is mapped (upstream PR #2931).
+    expect(content, isNot(contains('<external-path')));
   });
 
   test('native WebView background color uses a dedicated channel method', () {

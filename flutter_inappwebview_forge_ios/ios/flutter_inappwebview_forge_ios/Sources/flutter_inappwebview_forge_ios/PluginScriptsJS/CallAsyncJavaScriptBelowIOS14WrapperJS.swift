@@ -38,7 +38,7 @@ public class CallAsyncJavaScriptBelowIOS14WrapperJS {
                 }
                 messageHandler.postMessage(message);
             };
-            (async function(\(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_NAMES) {
+            (async function(\(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_NAMES)) {
                 \(PluginScriptsUtil.VAR_FUNCTION_BODY)
             })(\(PluginScriptsUtil.VAR_FUNCTION_ARGUMENT_VALUES)).then(function(value) {
                 sendResult(value, null);

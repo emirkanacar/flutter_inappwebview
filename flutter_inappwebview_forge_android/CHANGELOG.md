@@ -1,5 +1,7 @@
 ## Unreleased
 
+- The `FileProvider` no longer maps the public `Pictures/` and `Movies/`
+  directories; captures use the app-scoped `Captures/` directory ([#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - JavaScript handler results are resolved with `JSON.parse` of a string
   literal instead of being spliced into JavaScript source; invalid JSON
   rejects the `callHandler` promise. Supports `JavaScriptHandlerJsonResult`

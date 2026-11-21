@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Fix `callAsyncJavaScript` with arguments below macOS 11 (unclosed parameter
+  list in the legacy wrapper, [#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - With `enableAccessibilityFocus: true`, Tab and Shift+Tab move AppKit
   keyboard focus into the page (first or last focusable element) and back to
   the next or previous Flutter widget, a click into the page moves Flutter
