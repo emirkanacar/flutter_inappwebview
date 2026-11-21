@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-21 | `JavaScriptHandlerJsonResult`; handler results parsed with `JSON.parse` instead of run as code ([details](known-issues.md#2026-11-21-pre-encoded-json-handler-results-2948)) | PR #2948 | Unreleased (runtime pending) |
 | 2026-11-21 | JavaScript dialogs always answered on Android; `enableNativePromptDialog` setting ([details](known-issues.md#2026-11-21-javascript-dialog-answers-and-native-prompt-control-2901)) | PR #2901 | Unreleased (runtime pending) |
 | 2026-11-21 | Android `takeScreenshot` off the UI thread, `cancellationSignal`, `drawScaled`, `usePixelCopy` ([details](known-issues.md#2026-11-21-android-screenshot-encoder-cancellation-and-pixelcopy-2909-2911)) | PR #2909, #2910, #2911 | Unreleased (runtime pending) |
 | 2026-11-21 | JavaScript panels always answered (iOS, macOS) and Android `takeScreenshot` compress/bitmap fixes ([details](known-issues.md#2026-11-21-javascript-panel-answers-and-android-screenshot-robustness-2943-2908)) | PR #2943, #2908 | Unreleased (runtime pending) |

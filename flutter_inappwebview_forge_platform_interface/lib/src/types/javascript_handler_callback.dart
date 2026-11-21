@@ -22,6 +22,32 @@ typedef JavaScriptHandlerCallback = dynamic Function(List<dynamic> arguments);
 typedef JavaScriptHandlerFunction =
     dynamic Function(JavaScriptHandlerFunctionData data);
 
+///A [JavaScriptHandlerFunction] result that is already JSON-encoded.
+///
+///Return it from a handler to send [json] to JavaScript as-is, without
+///decoding it and encoding it again on the Dart side. This avoids blocking the
+///UI isolate when a large value is already stored as JSON text.
+///
+///[json] must be valid JSON. The text is never run as JavaScript code: the
+///platform parses it with `JSON.parse` (or the native JSON parser on Linux),
+///and invalid JSON rejects the `callHandler` promise in JavaScript with an
+///error.
+class JavaScriptHandlerJsonResult {
+  ///The JSON text sent to JavaScript.
+  final String json;
+
+  const JavaScriptHandlerJsonResult(this.json);
+
+  ///Encodes a handler [result] for JavaScript, passing a
+  ///[JavaScriptHandlerJsonResult] through unchanged.
+  static String encode(dynamic result) =>
+      result is JavaScriptHandlerJsonResult ? result.json : jsonEncode(result);
+
+  ///Keeps [jsonEncode] correct when the result is nested in another value or
+  ///an implementation does not use [encode].
+  dynamic toJson() => jsonDecode(json);
+}
+
 ///A class that represents the data passed to a [JavaScriptHandlerFunction] added with [PlatformInAppWebViewController.addJavaScriptHandler].
 @ExchangeableObject()
 class JavaScriptHandlerFunctionData_ {

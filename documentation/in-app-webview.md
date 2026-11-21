@@ -104,6 +104,20 @@ Call it from the page:
 window.flutter_inappwebview.callHandler('appBridge', {action: 'refresh'});
 ```
 
+The return value is encoded with `jsonEncode`. If you already have JSON text,
+return `JavaScriptHandlerJsonResult` to pass it through without decoding and
+encoding it again:
+
+```dart
+controller.addJavaScriptHandler(
+  handlerName: 'cachedConfig',
+  callback: (arguments) => JavaScriptHandlerJsonResult(cachedConfigJson),
+);
+```
+
+The text is parsed as JSON, never run as code. If it is
+not valid JSON, the `callHandler` promise rejects.
+
 Only expose handlers that the page is allowed to call. For untrusted or
 multi-tenant content, use the bridge origin allowlist and validate every
 argument in Dart.
