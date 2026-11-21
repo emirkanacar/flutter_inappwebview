@@ -4349,11 +4349,19 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
                     json = r
                 }
                 
+                // The result is JSON text from Dart, possibly passed through
+                // unchanged (JavaScriptHandlerJsonResult). Parse it from a string
+                // literal so it never runs as code; invalid JSON rejects.
                 webView.evaluateJavaScript("""
-if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] != null) {
-    window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)].resolve(\(json));
+(function() {
+    var handler = window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)];
+    if (handler == null) { return; }
     delete window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)];
-}
+    var value;
+    try { value = JSON.parse(\(Util.javaScriptStringLiteral(json))); }
+    catch (e) { handler.reject(e); return; }
+    handler.resolve(value);
+})();
 """, completionHandler: nil)
             }
             callback.error = { (code: String, message: String?, details: Any?) in
@@ -4362,7 +4370,7 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
                 
                 webView.evaluateJavaScript("""
 if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] != null) {
-    window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)].reject(new Error('\(errorMessage.replacingOccurrences(of: "\'", with: "\\'"))'));
+    window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)].reject(new Error(\(Util.javaScriptStringLiteral(errorMessage))));
     delete window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)];
 }
 """, completionHandler: nil)

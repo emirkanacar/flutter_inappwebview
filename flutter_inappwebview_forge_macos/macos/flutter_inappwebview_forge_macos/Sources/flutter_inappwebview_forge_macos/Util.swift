@@ -39,6 +39,17 @@ public class Util {
         return nil
     }
 
+    /// Encodes `value` as a JavaScript string literal (a JSON string), so it can
+    /// be embedded in JavaScript source without ever running as code. Text that
+    /// cannot be encoded becomes the empty string literal.
+    public static func javaScriptStringLiteral(_ value: String) -> String {
+        if let data = try? JSONSerialization.data(withJSONObject: value, options: [.fragmentsAllowed]),
+           let literal = String(data: data, encoding: .utf8) {
+            return literal
+        }
+        return "\"\""
+    }
+
     public static func JSONStringify(value: Any, prettyPrinted: Bool = false) -> String {
         let options: JSONSerialization.WritingOptions = prettyPrinted ? .prettyPrinted : .init(rawValue: 0)
         if JSONSerialization.isValidJSONObject(value) {

@@ -5612,25 +5612,29 @@ void InAppWebView::ResolveInternalHandlerWithReply(WebKitScriptMessageReply* rep
     return;
   }
   
-  // Parse the JSON result and create a JSCValue
+  // The result is JSON text from Dart, possibly passed through unchanged
+  // (JavaScriptHandlerJsonResult). Parse it with the JSON parser instead of
+  // evaluating it, so it never runs as code; invalid JSON rejects the call.
+  // An embedded NUL would truncate the text, so it is rejected too.
   JSCValue* replyValue = nullptr;
-  
-  if (jsonResult == "null" || jsonResult.empty()) {
+  if (jsonResult.empty()) {
     replyValue = jsc_value_new_null(context);
-  } else if (jsonResult[0] == '"') {
-    // It's a quoted string - evaluate it to get the actual string value
-    replyValue = jsc_context_evaluate(context, jsonResult.c_str(), -1);
-  } else {
-    // Parse as JSON
-    std::string parseScript = "(" + jsonResult + ")";
-    replyValue = jsc_context_evaluate(context, parseScript.c_str(), -1);
+  } else if (jsonResult.find('\0') == std::string::npos) {
+    replyValue = jsc_value_new_from_json(context, jsonResult.c_str());
   }
-  
-  if (replyValue == nullptr) {
-    // Fallback: return the raw string
-    replyValue = jsc_value_new_string(context, jsonResult.c_str());
+
+  if (replyValue == nullptr || jsc_context_get_exception(context) != nullptr) {
+    if (replyValue != nullptr) {
+      g_object_unref(replyValue);
+    }
+    jsc_context_clear_exception(context);
+    g_object_unref(context);
+    webkit_script_message_reply_return_error_message(
+        reply, "JavaScript handler result is not valid JSON");
+    webkit_script_message_reply_unref(reply);
+    return;
   }
-  
+
   // Send the reply back to JavaScript
   webkit_script_message_reply_return_value(reply, replyValue);
   
