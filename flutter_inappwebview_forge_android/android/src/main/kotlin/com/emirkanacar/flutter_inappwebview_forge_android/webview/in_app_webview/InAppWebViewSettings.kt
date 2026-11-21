@@ -119,6 +119,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var shouldInterceptRequestUrlMatcher: UrlRegexFilter = UrlRegexFilter.NONE
     @JvmField var useOnRenderProcessGone: Boolean? = false
     @JvmField var disableDefaultErrorPage: Boolean? = false
+    @JvmField var enableNativePromptDialog: Boolean? = true
     @JvmField var useHybridComposition: Boolean? = true
     @JvmField var verticalScrollbarThumbColor: String? = null
     @JvmField var verticalScrollbarTrackColor: String? = null
@@ -250,6 +251,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 }
                 "useOnRenderProcessGone" -> useOnRenderProcessGone = value as Boolean
                 "disableDefaultErrorPage" -> disableDefaultErrorPage = value as Boolean
+                "enableNativePromptDialog" -> enableNativePromptDialog = value as Boolean
                 "useHybridComposition" -> useHybridComposition = value as Boolean
                 "verticalScrollbarThumbColor" -> verticalScrollbarThumbColor = value as String
                 "verticalScrollbarTrackColor" -> verticalScrollbarTrackColor = value as String
@@ -381,6 +383,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("shouldInterceptRequestUrlFilter", shouldInterceptRequestUrlFilter)
         put("useOnRenderProcessGone", useOnRenderProcessGone)
         put("disableDefaultErrorPage", disableDefaultErrorPage)
+        put("enableNativePromptDialog", enableNativePromptDialog)
         put("useHybridComposition", useHybridComposition)
         put("verticalScrollbarThumbColor", verticalScrollbarThumbColor)
         put("verticalScrollbarTrackColor", verticalScrollbarTrackColor)

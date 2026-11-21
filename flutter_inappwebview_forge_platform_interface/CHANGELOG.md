@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Add `InAppWebViewSettings.enableNativePromptDialog` (Android, iOS, default
+  `true`). When `false`, a prompt that `onJsPrompt` does not handle is
+  cancelled ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)). Regenerated serializers.
 - Add `ScreenshotCancellationSignal` and the `cancellationSignal` parameter of
   `PlatformInAppWebViewController.takeScreenshot`
   ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).

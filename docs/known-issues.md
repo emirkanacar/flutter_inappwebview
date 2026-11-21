@@ -198,10 +198,69 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-Native prompt
-control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
+Pre-encoded JSON handler results
 ([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-21 JavaScript dialog answers and native prompt control (#2901)
+
+Upstream PR [#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901), implemented with a `true` default and a Forge-side
+Android dialog hardening.
+
+Root cause:
+
+- The Android dialog creators (`createAlertDialog`, `createConfirmDialog`,
+  `createPromptDialog`, `createBeforeUnloadDialog`) returned on a missing
+  activity without answering the `JsResult`. A Dart reply that arrived after
+  `dispose()` (the chrome client clears `plugin`, so no activity) hit that
+  path, and page JavaScript stayed blocked in `alert()`, `confirm()`,
+  `prompt()`, or the before-unload prompt.
+- `dispose()` cancelled only dialogs that were already shown. A result that
+  was still waiting for the Dart reply was never answered.
+- With no channel delegate, the handlers returned `false`, and the disposal
+  chrome client was a plain `WebChromeClient`. Both let Android WebView open
+  its own system dialog on a WebView that was being torn down.
+- Apps could only suppress the native prompt by answering every `onJsPrompt`
+  call with `handledByClient: true`.
+
+Fix:
+
+- `JsDialogResult` answers a `JsResult` at most once (`AtomicBoolean`). Every
+  path (Dart reply, dialog buttons, channel error, missing activity, dispose)
+  may answer; the first wins and late answers are ignored.
+- The chrome client tracks unanswered results in `pendingJsResults`;
+  `dispose()` cancels them. The dialog creators cancel when there is no
+  activity, and a missing channel delegate cancels instead of returning
+  `false`.
+- `DisposedWebChromeClient` cancels all four JavaScript dialogs during
+  teardown.
+- New `InAppWebViewSettings.enableNativePromptDialog` (Android, iOS; default
+  `true`, so existing behavior is unchanged). When `false`, a prompt that
+  `onJsPrompt` does not handle (no callback, `null`, or
+  `handledByClient: false`) is cancelled and `prompt()` returns `null`;
+  `handledByClient: true` responses still apply. Upstream documented a `true`
+  default but set `false` in code; Forge uses `true`.
+
+Regression coverage: three source-contract tests in
+`flutter_inappwebview_forge_android/test/stability_regression_test.dart` and
+one in `flutter_inappwebview_forge_ios/test/javascript_panel_source_test.dart`.
+
+Evidence, 2026-11-21, Samsung SM-A165F, Android 17, WebView 157 (release
+build):
+
+- `enableNativePromptDialog: false` with no callback and with
+  `handledByClient: false`: `prompt()` returned `null` (14 ms, 6 ms);
+  `handledByClient: true` with `CONFIRM` returned the value; turning the
+  setting off with `setSettings` took effect on the next prompt;
+- default setting: the native prompt dialog was shown and was removed 31 ms
+  after the WebView was disposed;
+- dispose while `onJsPrompt` was still waiting for Dart, then a reply 2.2 s
+  later: no crash or error in logcat;
+- the iOS example builds for the simulator.
+
+Remaining gaps: the iOS setting was not run on a simulator or device; the
+missing-activity path (late reply after dispose) was exercised only through
+dispose, not with a detached activity.
 
 ## 2026-11-21 Android screenshot encoder, cancellation, and PixelCopy (#2909-#2911)
 
