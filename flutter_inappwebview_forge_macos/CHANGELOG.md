@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Content blockers fail closed: a rule change adds the new list before removing
+  the old one, a failed compile keeps the previous rules, and the initial load
+  and navigations wait for the requested rules and are cancelled if they fail
+  ([#2928](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2928)).
 - Fix `callAsyncJavaScript` with arguments below macOS 11 (unclosed parameter
   list in the legacy wrapper, [#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - With `enableAccessibilityFocus: true`, Tab and Shift+Tab move AppKit

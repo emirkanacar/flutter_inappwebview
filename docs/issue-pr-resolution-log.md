@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-22 | Content blockers fail closed and swap add-first on iOS, macOS, Linux ([details](known-issues.md#2026-11-22-content-blockers-fail-closed-2928)) | PR #2928 | Unreleased (runtime pending) |
 | 2026-11-22 | Android `usePixelCopy` captures playing video in texture composition; draw path documented as not capturing video ([details](known-issues.md#2026-11-22-android-screenshot-of-a-playing-video-2732)) | [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732) | Unreleased (device-validated) |
 | 2026-11-22 | macOS SwiftPM 10.15 conformance already covered; source test added ([details](known-issues.md#2026-11-22-macos-swiftpm-1015-conformance-2891)) | [#2891](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2891) | - |
 | 2026-11-22 | iOS popups fail closed for named content worlds; legacy async wrapper fix; Android public `FileProvider` paths removed; #2914-#2934 triaged ([details](known-issues.md#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds)) | PR #2931, #2932 | Unreleased (runtime pending) |

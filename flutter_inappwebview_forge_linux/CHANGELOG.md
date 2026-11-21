@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Content blockers fail closed: a rule change adds the new filter before
+  removing the old one, a failed compile keeps the previous rules, and the
+  initial load and navigations wait for the requested rules and do not run if
+  they fail ([#2928](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2928)).
 - JavaScript handler results are parsed with `jsc_value_new_from_json`
   instead of `jsc_context_evaluate`; invalid JSON rejects the `callHandler`
   promise. Supports `JavaScriptHandlerJsonResult` ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).

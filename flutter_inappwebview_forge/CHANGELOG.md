@@ -1,5 +1,6 @@
 ## Unreleased
 
+- iOS, macOS, Linux: content blockers fail closed; invalid rules stop loading instead of running the page unblocked, and rule changes leave no unblocked gap ([#2928](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2928)).
 - Android: `takeScreenshot` with `usePixelCopy` captures playing video in texture composition instead of a black image ([#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732)).
 - iOS: popup WebViews fail closed for named-content-world JavaScript instead of running it in the page world ([#2932](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2932)); macOS legacy `callAsyncJavaScript` and Android `FileProvider` paths fixed ([#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - Windows: quitting the app with mounted WebViews no longer closes WebView2 after its window is gone or calls into a disconnected messenger ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [#2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).
