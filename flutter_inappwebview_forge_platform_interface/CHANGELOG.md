@@ -1,3 +1,12 @@
+## Unreleased
+
+- Add opt-in `ChannelCallStats` / `ChannelCallStat` for measuring
+  native-to-Dart platform channel traffic (call count, rate, optional encoded
+  payload size, and Dart handler time per `<controller>.<method>`). Disabled
+  by default; when disabled it adds one boolean check per call. Recorded in
+  every `ChannelController` handler, so it covers all platforms without native
+  changes. See `docs/performance-and-webview-upgrade-plan.md`.
+
 ## 1.1.24 - 2026-11-14
 
 - `ContextMenu`, the `PlatformWebViewCreationParams.contextMenu` property,

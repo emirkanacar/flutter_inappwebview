@@ -1,3 +1,9 @@
+## Unreleased
+
+- Add opt-in `ChannelCallStats` for measuring native-to-Dart platform channel
+  traffic (count, rate, optional payload bytes, Dart handler time) on every
+  platform. Disabled by default.
+
 ## 2.1.80 - 2026-11-14
 
 - Support `ContextMenu` (custom items, `hideDefaultSystemContextMenuItems`,

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'channel_call_stats.dart';
 import 'debug_logging_settings.dart';
 import 'types/disposable.dart';
 
@@ -641,7 +642,7 @@ extension InternalChannelController on ChannelController {
     channel?.setMethodCallHandler((call) async {
       if (disposed) return null;
       try {
-        return await handler!(call);
+        return await ChannelCallStats.track(this, call, handler!);
       } on Error catch (e) {
         debugPrint('$e');
         debugPrint('${e.stackTrace}');

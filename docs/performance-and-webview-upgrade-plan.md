@@ -160,6 +160,7 @@ All performance decisions require release/profile measurements. Debug-only measu
 
 ### Measurement implementation
 
+- Dart (implemented, unreleased): `ChannelCallStats` counts every native-to-Dart call that reaches a `ChannelController` handler, per `<controller>.<method>`, with rate, optional encoded payload bytes (`measurePayloadSize`), and Dart handler time. It is disabled by default and is the before/after gate for the A3 event-pressure work and for native-side event filtering. Dart-to-native calls are not counted.
 - Dart: add opt-in `Timeline` spans around platform-view creation, platform-view readiness, first load callbacks, JavaScript completion, and disposal. Do not add a continuously enabled public telemetry stream for the first milestone.
 - Android: use `android.os.Trace` spans and Perfetto/Android Studio profiling for provider startup, platform-view attach, bridge registration, request interception, event dispatch, and composition. Include `WebViewCompat.getCurrentWebViewPackage()` in captured samples.
 - iOS: use `os_signpost` and Instruments Points of Interest/Time Profiler for WebView creation, navigation, KVO scheduling, keyboard transitions, JavaScript fallback, popup teardown, and disposal.

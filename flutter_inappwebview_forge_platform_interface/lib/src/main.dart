@@ -19,6 +19,7 @@ export 'find_interaction/main.dart';
 export 'web_notification/main.dart';
 export 'web_uri.dart';
 export 'debug_logging_settings.dart';
+export 'channel_call_stats.dart';
 export 'util.dart';
 export 'platform_service_worker_controller.dart';
 export 'platform_webview_feature.dart'
