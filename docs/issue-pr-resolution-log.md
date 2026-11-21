@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-21 | iOS fullscreen video after seek moved back to the open plan (failed physical iOS run) | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | - |
 | 2026-11-13 | Xcode 27 / Swift 6.4 iOS and macOS build fix | [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2) | root 2.1.78, iOS 2.1.36, macOS 1.1.11 |
 | 2026-11-13 | Android example build directory | [Forge PR #1](https://github.com/emirkanacar/flutter_inappwebview/pull/1) (not merged; fixed on master) | example only |
 | 2026-11-13 | Web `Sandbox.ALLOW_ALL` iframe sandbox | - | Web 1.0.5 |

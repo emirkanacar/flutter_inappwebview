@@ -13,11 +13,11 @@ the remaining gate.
 
 | Local status | Issue records | Count |
 | --- | --- | ---: |
-| Implemented or mitigated; runtime validation pending | [Issue register](#issue-register) | 78 |
+| Implemented or mitigated; runtime validation pending | [Issue register](#issue-register) | 77 |
 | Resolved locally; no runtime gate (pure Dart serialization) | [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709) | 1 |
 | Closed by source review (no plugin-owned sink) | [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745) | 1 |
 | Host/platform boundary (Apple/WebKit Simulator or callback limits, Android framework/provider/dependency, host app/site/Firebase config, Flutter engine/platform view) | #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, #2831 | 15 |
-| Open implementation or reproduction | [open work plan](open-work-plan.md) | 30 |
+| Open implementation or reproduction | [open work plan](open-work-plan.md) | 31 |
 | **Issue export total** (upstream `OPEN` state unchanged) | | **125** |
 
 Outside the 125-issue count:
@@ -32,14 +32,14 @@ Outside the 125-issue count:
 
 `#2536`, `#2555`, `#2568`, `#2580`, `#2594`, `#2600`, `#2619`, `#2641`,
 `#2654`, `#2660`, `#2673`, `#2685`, `#2687`, `#2690`, `#2697`, `#2700`,
-`#2703`, `#2707`, `#2710`, `#2711`, `#2717`, `#2718`, `#2720`, `#2721`,
+`#2703`, `#2707`, `#2711`, `#2717`, `#2718`, `#2720`, `#2721`,
 `#2725`, `#2728`, `#2733`, `#2736`, `#2737`, `#2741`, `#2752`, `#2757`,
 `#2760`, `#2762`, `#2763`, `#2778`, `#2780`, `#2782`, `#2783`, `#2787`,
 `#2789`, `#2791`, `#2793`, `#2797`, `#2805`, `#2811`, `#2812`, `#2813`,
 `#2814`, `#2819`, `#2826`, `#2830`, `#2834`, `#2835`, `#2837`, `#2839`,
 `#2840`, `#2841`, `#2842`, `#2843`, `#2846`, `#2848`, `#2849`, `#2850`,
 `#2852`, `#2855`, `#2856`, `#2859`, `#2861`, `#2862`, `#2863`, `#2867`,
-`#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880` (78).
+`#2868`, `#2872`, `#2873`, `#2875`, `#2878`, `#2880` (77).
 
 The per-issue gate is the "Required evidence" or "Remaining validation" line
 of the issue's record in `known-issues.md`.
@@ -59,7 +59,6 @@ Short status only; the full device logs are in `known-issues.md`.
 | #2660 | Physical API 36 reports `PAYMENT_REQUEST=true`. | Android 12-16/OEM Google Pay flows, merchant config. |
 | #2687 | JDK 21 release APK installs and launches on API 35. | Clean JDK 17, provider, AAB, publish. |
 | #2690 | Platform-interface and iOS source tests. | iOS 18+ Writing Tools UI, capability fallback, `getSettings()`. |
-| #2710 | iOS 26.2 Simulator 3 cycles. **The 2026-08-12 physical iOS run failed the first cycle** (`request=null` after seek, no `onEnterFullscreen`). | Physical iOS 26/GPU, HLS/iframe, orientation, media controls. |
 | #2711 | iOS 26.2 Simulator 4 cycles, no missing-plugin failure. | Physical scene reattachment, stale-controller sequence. |
 | #2718 | A16: 10/10 mutation and flush cycles. | Android 10/provider, Play Console cookie clear. |
 | #2721 | None: display-size override restarts the AVD/A16 activity before the geometry assertion. | Android 16 display-size change with hybrid composition, OEM providers. |

@@ -15,15 +15,15 @@ is `OPEN`; that is historical metadata, not the local status.
 
 | Category | Export | Runtime pending | No runtime gate | Source-review closed | Host/platform boundary | Active open |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Bugs | 98 | 57 | 1 | 1 | 15 | 24 |
+| Bugs | 98 | 56 | 1 | 1 | 15 | 25 |
 | Enhancements | 16 | 13 | 0 | 0 | 0 | 3 |
 | Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 |
 | Showcase | 3 | 0 | 0 | 0 | 0 | 3 |
-| **Total** | **125** | **78** | **1** | **1** | **15** | **30** |
+| **Total** | **125** | **77** | **1** | **1** | **15** | **31** |
 
 The status lists behind these columns are in the
 [runtime register](runtime-validation-pending.md#current-counts). Showcase
-records are excluded from engineering metrics (27 active technical records).
+records are excluded from engineering metrics (28 active technical records).
 
 ## Status rules
 
@@ -47,6 +47,7 @@ None open.
 | --- | --- | --- |
 | [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2807](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2807) | Linux/Windows startup and renderer failures | Reproduce on Arch Linux/WPE and affected Windows machines with native logs. Test create/destroy/recreate, graphics-context loss, bundled/system WPE, and WebView2 runtime versions. |
 | [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Windows focus, transparency, hit testing, release behavior | Windows smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Check child-window state after every async callback. |
+| [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | iOS fullscreen video after seek | Back from the runtime register: the 2026-08-12 physical iOS run got `request=null` after seek and no `onEnterFullscreen`, failing the first cycle (Simulator passes 3/3). Reproduce on a physical iOS 26 device with native logs, then fix or classify as a WebKit/GPU boundary. |
 | [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot of video, missing plugin | Reproduce with hardware video frames and generated registrants. Capture video surfaces or return a documented unsupported result. |
 
 ### P1: Build and release gates
