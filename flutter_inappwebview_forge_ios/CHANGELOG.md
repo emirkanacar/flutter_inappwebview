@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Always answer JavaScript `alert`, `confirm`, and `prompt` panels: present
+  them from the topmost view controller, answer with the default value when
+  UIKit cannot present them or the web view was released, and do not drop a
+  held paused-timers alert ([#2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)).
 - Require Flutter 3.41.0 or newer. The Swift Package Manager manifest depends
   on the `FlutterFramework` package, which Flutter creates from 3.41.0; on
   older Flutter versions SwiftPM builds could not resolve it

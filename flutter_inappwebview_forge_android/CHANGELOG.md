@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` replies `null` when `Bitmap.compress` fails instead of
+  sending a partial buffer, and recycles the full-size bitmap when
+  `snapshotWidth` scales it ([#2908](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2908)).
 - Catch exceptions from `WebSettingsCompat.setAlgorithmicDarkeningAllowed`
   in `prepare()` and `setSettings()`. Some WebView providers report the
   feature as supported and then throw, which crashed WebView creation; the

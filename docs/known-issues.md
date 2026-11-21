@@ -188,11 +188,44 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-iOS JavaScript panels always answered ([PR #2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)), native prompt
+Native prompt
 control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
 ([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
-options (#2908-#2911), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+options (#2909-#2911), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-21 JavaScript panel answers and Android screenshot robustness (#2943, #2908)
+
+iOS and macOS (upstream [PR #2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)): WebKit raises
+`NSInternalInconsistencyException` ("Completion handler passed to ... was not
+called") when a JavaScript panel handler is released unanswered. Paths that
+could do so:
+
+- iOS presented the panel from `window.rootViewController`. When another
+  controller was already presented (a link menu, a modal), `present` failed
+  silently and the handler was never called. `presentJavaScriptPanel` now
+  walks to the topmost controller that is not being dismissed and answers the
+  panel with its default value when the view is off-screen or UIKit rejects
+  the presentation (`presentingViewController` stays nil).
+- While timers were paused, a second `alert()` replaced the held handler
+  without calling it, and `dispose()` released the held handler. Both now call
+  it first (iOS and macOS).
+- When the web view was released before the Dart callback returned,
+  `self?.create...Dialog` did nothing. The panel is now answered with its
+  default value (`()`, `false`, `nil`) on iOS and macOS.
+
+Android (upstream [PR #2908](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2908)): Forge already answered queued
+screenshots on dispose, caught `OutOfMemoryError`, and defaulted a missing
+`quality`. Remaining: a failed `Bitmap.compress` still replied with the
+partial buffer (now `null`), and `snapshotWidth` overwrote the only reference
+to the full-size bitmap, which was never recycled. Both bitmaps and the stream
+are now released in `finally`; the scaled bitmap is recycled only when
+`createScaledBitmap` returned a distinct object. The reply is sent once.
+
+Evidence: `test/javascript_panel_source_test.dart` (iOS, macOS) and the
+`takeScreenshot` test in the Android `stability_regression_test.dart` failed
+before the fix. Example builds for Android, iOS Simulator, and macOS compile.
+Remaining gap: device runs (see runtime-validation-pending).
 
 ## 2026-11-21 Apple SwiftPM Flutter 3.41 baseline (#2951)
 

@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-21 | JavaScript panels always answered (iOS, macOS) and Android `takeScreenshot` compress/bitmap fixes ([details](known-issues.md#2026-11-21-javascript-panel-answers-and-android-screenshot-robustness-2943-2908)) | PR #2943, #2908 | Unreleased (runtime pending) |
 | 2026-11-21 | iOS, macOS, and root package require Flutter 3.41.0 for the SwiftPM `FlutterFramework` dependency ([details](known-issues.md#2026-11-21-apple-swiftpm-flutter-341-baseline-2951)) | [#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951) | Unreleased |
 | 2026-11-21 | Windows MSVC 18 conformance fixes ([details](known-issues.md#2026-11-21-windows-msvc-18-conformance-2936-2937)) | PR #2936, #2937 | Unreleased |
 | 2026-11-21 | Linux and Windows CMake plugin target name fix ([details](known-issues.md#2026-11-21-linux-and-windows-cmake-plugin-target-name)) | Forge-only | Unreleased |

@@ -1990,7 +1990,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
         if (isPausedTimers) {
+            // WebKit requires every panel handler to be called; answer the
+            // one that was held before replacing it.
+            let previousPausedTimersCompletionHandler = isPausedTimersCompletionHandler
             isPausedTimersCompletionHandler = completionHandler
+            previousPausedTimersCompletionHandler?()
             return
         }
         
@@ -2017,7 +2021,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 completionHandlerCalled = true
                 let responseMessage = response?.message
                 let confirmButtonTitle = response?.confirmButtonTitle
-                self?.createAlertDialog(message: message, responseMessage: responseMessage,
+                guard let self = self else {
+                    completionHandler()
+                    return
+                }
+                self.createAlertDialog(message: message, responseMessage: responseMessage,
                                        confirmButtonTitle: confirmButtonTitle, completionHandler: completionHandler)
             }
         }
@@ -2079,7 +2087,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 let responseMessage = response?.message
                 let confirmButtonTitle = response?.confirmButtonTitle
                 let cancelButtonTitle = response?.cancelButtonTitle
-                self?.createConfirmDialog(message: message, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle, cancelButtonTitle: cancelButtonTitle, completionHandler: completionHandler)
+                guard let self = self else {
+                    completionHandler(false)
+                    return
+                }
+                self.createConfirmDialog(message: message, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle, cancelButtonTitle: cancelButtonTitle, completionHandler: completionHandler)
             }
         }
         callback.error = { (code: String, message: String?, details: Any?) in
@@ -2146,7 +2158,11 @@ public class InAppWebView: WKWebView, WKUIDelegate,
                 let confirmButtonTitle = response?.confirmButtonTitle
                 let cancelButtonTitle = response?.cancelButtonTitle
                 let value = response?.value
-                self?.createPromptDialog(message: message, defaultValue: defaultValue, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle,
+                guard let self = self else {
+                    completionHandler(nil)
+                    return
+                }
+                self.createPromptDialog(message: message, defaultValue: defaultValue, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle,
                                         cancelButtonTitle: cancelButtonTitle, value: value, completionHandler: completionHandler)
             }
         }
@@ -3194,7 +3210,9 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         findInteractionController = nil
         uiDelegate = nil
         navigationDelegate = nil
+        let pausedTimersCompletionHandler = isPausedTimersCompletionHandler
         isPausedTimersCompletionHandler = nil
+        pausedTimersCompletionHandler?()
         finishPendingAsyncJavaScriptCallsOnDispose()
         plugin = nil
     }
