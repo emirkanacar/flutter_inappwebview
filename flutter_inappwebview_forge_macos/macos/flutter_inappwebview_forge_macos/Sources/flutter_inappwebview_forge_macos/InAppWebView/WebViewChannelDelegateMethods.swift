@@ -60,6 +60,8 @@ public enum WebViewChannelDelegateMethods: String {
     case getScrollX = "getScrollX"
     case getScrollY = "getScrollY"
     case clearFocus = "clearFocus"
+    case focusPage = "_focusPage"
+    case releasePage = "_releasePage"
     case requestFocus = "requestFocus"
     case getCertificate = "getCertificate"
     case addUserScript = "addUserScript"

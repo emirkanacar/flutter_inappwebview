@@ -2117,6 +2117,27 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
   bool? enableNativePromptDialog;
 
+  ///Set to `true` to move native keyboard and screen reader focus into and out
+  ///of the page together with Flutter focus.
+  ///
+  ///When enabled, Tab moves from the previous Flutter widget to the first
+  ///focusable element of the page, Shift+Tab to the last one, and Tab past the
+  ///page's last element (Shift+Tab before its first) continues in Flutter's
+  ///focus order. When the page takes the keyboard by itself (a click,
+  ///`autofocus`), Flutter focus moves onto the web view too.
+  ///
+  ///- macOS: the web view becomes AppKit's first responder, so VoiceOver can
+  ///  read the page. Handing focus back to Flutter at the page edge uses
+  ///  WebKit's private `WKUIDelegate` method `_webView:takeFocus:`.
+  ///- Windows: the WebView2 UI Automation provider is exposed to screen
+  ///  readers (Narrator, NVDA, JAWS), and Tab moves WebView2 focus with
+  ///  `MoveFocus`. Element bounds are reported at the hidden host window's
+  ///  position, so screen reader highlights may be drawn in the wrong place.
+  ///
+  ///The default value is `false`: focus behaves as in earlier versions.
+  @SupportedPlatforms(platforms: [MacOSPlatform(), WindowsPlatform()])
+  bool? enableAccessibilityFocus;
+
   ///Set to `true` to disable autocorrection and spelling suggestions for editable HTML elements in the WebView.
   ///This applies the HTML `autocorrect="off"` and `spellcheck="false"` hints at document start,
   ///including editable elements added later by the page.
@@ -3801,6 +3822,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.disableLongPressContextMenuOnLinks = false,
     this.disableInputAccessoryView = false,
     this.enableNativePromptDialog = true,
+    this.enableAccessibilityFocus = false,
     this.disableAutocorrection = false,
     this.underPageBackgroundColor,
     this.isTextInteractionEnabled = true,

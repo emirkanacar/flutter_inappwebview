@@ -48,6 +48,8 @@ namespace flutter_inappwebview_plugin
   typedef std::function<void(size_t width, size_t height)>
     SurfaceSizeChangedCallback;
   typedef std::function<void(const HCURSOR)> CursorChangedCallback;
+  // true when keyboard focus leaves the page forward (Tab), false backward (Shift+Tab)
+  typedef std::function<void(bool next)> MoveFocusRequestedCallback;
   struct VirtualKeyState {
   public:
     inline void setIsLeftButtonDown(bool is_down)
@@ -155,6 +157,19 @@ namespace flutter_inappwebview_plugin
     {
       cursorChangedCallback_ = std::move(callback);
     }
+    // InAppWebViewSettings.enableAccessibilityFocus (default false).
+    // With visual hosting the page is only a texture to Flutter, so keyboard
+    // focus has to be moved into and out of it explicitly.
+    bool isAccessibilityFocusEnabled() const;
+    void moveFocus(bool next);
+    void onMoveFocusRequested(MoveFocusRequestedCallback callback)
+    {
+      moveFocusRequestedCallback_ = std::move(callback);
+    }
+    // Window procedure of the hidden parent window: answers UI Automation
+    // requests with the accessibility tree of the visually hosted WebView2
+    // while enableAccessibilityFocus is true.
+    static LRESULT CALLBACK hostWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
     bool createSurface(const HWND parentWindow,
       winrt::com_ptr<ABI::Windows::UI::Composition::ICompositor> compositor);
 
@@ -262,6 +277,10 @@ namespace flutter_inappwebview_plugin
     winrt::com_ptr<ABI::Windows::UI::Composition::IVisual> surface_;
     SurfaceSizeChangedCallback surfaceSizeChangedCallback_;
     CursorChangedCallback cursorChangedCallback_;
+    MoveFocusRequestedCallback moveFocusRequestedCallback_;
+    // Hidden parent window carrying the kHostWindowViewProp property.
+    HWND hostWindow_ = nullptr;
+    void detachHostWindow();
     float scaleFactor_ = 1.0;
     POINT lastCursorPos_ = { 0, 0 };
     VirtualKeyState virtualKeys_;
