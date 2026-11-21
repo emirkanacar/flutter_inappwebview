@@ -798,13 +798,33 @@ void _runSourceContractAssertions() {
         source.contains('completionHandler: wrappedCompletionHandler'),
     'popup async JavaScript does not use the page content world fallback',
   );
-  _assert(
-    source.contains('if frame == nil'),
-    'evaluateJavaScript does not guard a nil frame',
+  // #2771: a popup never reaches the content-world overload, and a nil-frame
+  // page-world call uses the frame-less API. A nil frame is the main frame, so
+  // it must not be rejected for regular WebViews.
+  final evaluateStart = source.indexOf(
+    'public func evaluateJavaScript(_ javaScript: String, frame: WKFrameInfo?',
+  );
+  final evaluateBody = source.substring(
+    evaluateStart,
+    source.indexOf('private func evaluateJavaScriptInPageWorld', evaluateStart),
+  );
+  final popupBranch = evaluateBody.indexOf('if windowId != nil');
+  final nilFrameBranch = evaluateBody.indexOf(
+    'if frame == nil, contentWorld == WKContentWorld.page',
+  );
+  final contentWorldCall = evaluateBody.indexOf(
+    'super.evaluateJavaScript(javaScript, in: frame, in: contentWorld',
   );
   _assert(
-    source.contains('Frame is nil'),
-    'nil-frame evaluateJavaScript does not return a structured error',
+    popupBranch >= 0 &&
+        nilFrameBranch > popupBranch &&
+        contentWorldCall > nilFrameBranch,
+    'nil-frame evaluateJavaScript does not route popups and the page world '
+    'away from the content-world overload',
+  );
+  _assert(
+    !evaluateBody.contains('Frame is nil'),
+    'evaluateJavaScript rejects a nil (main) frame for regular WebViews',
   );
 
   final asyncWrapper = _sourceFile(

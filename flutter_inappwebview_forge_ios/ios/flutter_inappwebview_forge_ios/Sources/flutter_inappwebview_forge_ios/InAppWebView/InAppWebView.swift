@@ -2090,25 +2090,29 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 completionHandler?(.failure(error))
                 return
             }
-            super.evaluateJavaScript(javaScript) { result, error in
-                if let error = error {
-                    completionHandler?(.failure(error))
-                } else {
-                    completionHandler?(.success(result as Any))
-                }
-            }
+            evaluateJavaScriptInPageWorld(javaScript, completionHandler: completionHandler)
             return
         }
-        if frame == nil {
-            let error = NSError(
-                domain: "flutter_inappwebview_forge",
-                code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "Frame is nil"]
-            )
-            completionHandler?(.failure(error))
+        // A nil frame means the main frame. Popups, where WebKit could crash on a
+        // nil frame (#2771), already returned above. The page world keeps using
+        // the frame-less API so it never reaches the content-world overload with
+        // a nil frame; a custom world needs that overload and targets the main
+        // frame of this fully created WebView.
+        if frame == nil, contentWorld == WKContentWorld.page {
+            evaluateJavaScriptInPageWorld(javaScript, completionHandler: completionHandler)
             return
         }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
+    }
+
+    private func evaluateJavaScriptInPageWorld(_ javaScript: String, completionHandler: ((Result<Any, Error>) -> Void)?) {
+        super.evaluateJavaScript(javaScript) { result, error in
+            if let error = error {
+                completionHandler?(.failure(error))
+            } else {
+                completionHandler?(.success(result as Any))
+            }
+        }
     }
     
     public func evaluateJavascript(source: String, completionHandler: ((Any?) -> Void)? = nil) {

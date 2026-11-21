@@ -1,5 +1,14 @@
 ## Unreleased
 
+- Fix `evaluateJavascript` with an explicit `contentWorld` (page or custom
+  world) always completing with `null` on regular WebViews. The nil-frame
+  guard added for #2771 rejected every content-world evaluation, because a nil
+  frame is WebKit's main frame and Forge never passes one; this also disabled
+  runtime enabling of all-world plugin scripts. Popups keep the page-world
+  fallback, nil-frame page-world calls use the frame-less API, and only
+  custom-world calls on regular WebViews reach the content-world overload
+  ([#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771)).
+
 - Stop injecting the RSVP Promise polyfill document-start plugin script when
   the JavaScript bridge is enabled. WebKit on iOS 15+ has a native `Promise`
   in every content world, so the guarded polyfill never ran and only added a
