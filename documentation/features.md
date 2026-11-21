@@ -245,129 +245,39 @@ if (await WebViewFeature.isFeatureSupported(
 
 ## Opt-in native downloads
 
-`onDownloadStarting` is notify-only when the callback returns `null`. To start
-a native Android `DownloadManager`, Apple `WKDownload`, or Windows WebView2
-download job, return a handled response with an absolute destination path:
+`onDownloadStarting` is notify-only when the callback returns `null`. Return a
+handled `DOWNLOAD` response with an absolute `resultFilePath` to start a native
+Android `DownloadManager`, Apple `WKDownload`, or Windows WebView2 job; track it
+with `DownloadJobController` when `request.downloadId` is set. Returning
+`handled: true` without a path, or `CANCEL`, starts nothing. Linux and Web have
+no `DownloadJobController`. Code: [Start a native download](examples.md#start-a-native-download).
 
-```dart
-InAppWebView(
-  onDownloadStarting: (controller, request) async {
-    return DownloadStartResponse(
-      handled: true,
-      action: DownloadStartResponseAction.DOWNLOAD,
-      resultFilePath: '/tmp/${request.suggestedFilename ?? 'download.bin'}',
-    );
-  },
-)
-```
+## Android navigation, prerender, BFCache, and WebViewBuilder
 
-Returning `handled: true` without a path, or returning `CANCEL`, does not
-start a plugin download. Progress and completion stay on
-`DownloadJobController` when a job ID is available.
+These need the matching `WebViewFeature`; check it first.
 
-```dart
-DownloadJobController? job;
-
-InAppWebView(
-  onDownloadStarting: (controller, request) async {
-    final path = '/tmp/${request.suggestedFilename ?? 'download.bin'}';
-    final downloadId = request.downloadId;
-
-    if (downloadId != null && DownloadJobController.isClassSupported()) {
-      job?.dispose();
-      job = DownloadJobController(id: downloadId)
-        ..onProgressChanged = (progress) async {
-          debugPrint('progress: ${(progress * 100).toStringAsFixed(0)}%');
-        }
-        ..onComplete = (completed, error) async {
-          debugPrint(completed ? 'done' : 'error: $error');
-        };
-    }
-
-    return DownloadStartResponse(
-      handled: true,
-      action: DownloadStartResponseAction.DOWNLOAD,
-      resultFilePath: path,
-    );
-  },
-)
-```
-
-Windows WebView2 follows the same contract as Android and Apple platforms.
-Linux and Web do not expose `DownloadJobController`; handle downloads in Dart
-or cancel explicitly.
-
-## Android navigation, prerender, and BFCache
-
-`navigate` accepts `replaceHistory` and optional request headers when
-AndroidX NavigationParameters is available:
-
-```dart
-await controller.navigate(
-  url: WebUri('https://example.com/next'),
-  replaceHistory: true,
-  headers: {'Authorization': 'Bearer token'},
-);
-```
-
-`prerenderUrl` starts provider-side speculative loading when
-`WebViewFeature.PRERENDER_URL` is supported.
-
-BFCache depth is configured at WebView creation:
-
-```dart
-InAppWebViewSettings(
-  backForwardCacheEnabled: true,
-  backForwardCacheTimeoutSeconds: 120,
-  backForwardCacheMaxPagesInCache: 6,
-)
-```
-
-## Android WebViewBuilder
-
-Enable immutable WebView construction only for trusted origins:
-
-```dart
-InAppWebViewSettings(
-  useWebViewBuilder: true,
-  webViewBuilderOriginAllowList: {'https://example.com'},
-)
-```
-
-## Save state with options
-
-`saveStateWithOptions` forwards AndroidX bundle size and forward-history
-controls when supported; otherwise it delegates to `saveState`:
-
-```dart
-final bytes = await controller.saveStateWithOptions(
-  maxSizeBytes: 1024 * 1024,
-  includeForwardHistory: false,
-);
-if (bytes != null) {
-  await controller.restoreState(bytes);
-}
-```
-
-## Visual state and first paint
-
-On Android, subscribe to `onVisualStateReady` and optionally call
-`postVisualStateCallback` when you need an explicit request ID for overlay
-timing. Do not equate `onLoadStop` with a painted frame.
+- `navigate` forwards `replaceHistory` and headers through AndroidX
+  NavigationParameters and falls back to `loadUrl`
+  ([example](examples.md#navigate-with-android-navigationparameters)).
+- `prerenderUrl` starts provider-side speculative loading
+  ([example](examples.md#prerender-a-likely-next-page)).
+- `backForwardCacheTimeoutSeconds` and `backForwardCacheMaxPagesInCache` set
+  BFCache depth at creation ([example](examples.md#enable-android-back-forward-cache-depth)).
+- `useWebViewBuilder` with `webViewBuilderOriginAllowList` builds an
+  immutable WebView for trusted origins only
+  ([example](examples.md#opt-in-to-android-webviewbuilder)).
+- `saveStateWithOptions` caps the bundle size and can drop forward history;
+  without support it delegates to `saveState`
+  ([example](examples.md#save-and-restore-webview-state-with-size-limits)).
+- `onVisualStateReady` and `postVisualStateCallback` report a painted frame;
+  `onLoadStop` does not ([example](examples.md#wait-for-android-first-paint)).
 
 ## Find text in the page
 
-Use `FindInteractionController.findString` on iOS 14+ and macOS 11+ to select
-and scroll to a match without presenting the system find UI:
-
-```dart
-final find = FindInteractionController();
-final found = await find.findString(find: 'invoice');
-```
-
-Keep the same controller instance for the WebView that owns it.
-
-On other platforms, use `findAll` and `findNext` from the same controller.
+`FindInteractionController.findString` (iOS 14+, macOS 11+) selects and
+scrolls to a match without the system find UI; other platforms use `findAll`
+and `findNext`. Keep one controller per WebView.
+Code: [Find text without the system UI](examples.md#find-text-without-the-system-ui).
 
 ## iOS 26 conversation context
 
@@ -406,14 +316,10 @@ await ProcessGlobalConfig.instance().apply(
 
 ## Mute APIs by platform
 
-| Platform | Preferred API |
-| --- | --- |
-| Android | `setAudioMuted` / `isAudioMuted` + `WebViewFeature.MUTE_AUDIO` |
-| iOS / macOS | `setAudioMuted` / `isAudioMuted` |
-| Linux | `setMuted` / `isMuted` |
-
-These are parallel APIs, not deprecated aliases. Pick the supported method for
-the current platform.
+Android and iOS/macOS use `setAudioMuted` / `isAudioMuted` (Android also needs
+`WebViewFeature.MUTE_AUDIO`); Linux uses `setMuted` / `isMuted`. They are
+parallel APIs, not deprecated aliases
+([example](examples.md#mute-webview-audio)).
 
 ## Inspect Web Storage
 

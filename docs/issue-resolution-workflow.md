@@ -170,8 +170,6 @@ Use these documents for planning:
 - docs/known-issues.md for issue root cause, mitigation, and validation gaps.
 - docs/performance-and-webview-upgrade-plan.md for performance and dependency
   work.
-- docs/android-kotlin-kts-migration-plan.md for Android build/native migration.
-- docs/ios-uiscene-spm-migration-plan.md for Apple lifecycle/package migration.
 
 Do not treat an upstream PR as an implementation plan. Re-implement the
 necessary behavior against the current fork, preserve the fork package names,

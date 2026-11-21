@@ -143,115 +143,44 @@ whole handoff and must not create it inside `build()`.
 
 ## 2026-08-13 Android/iOS lifecycle and settings refactor checkpoint
 
-The first lifecycle refactor wave is implemented and source-validated in the
-Android and iOS packages. Keep-alive and headless manager ownership is now
-non-null and removed before disposal; duplicate IDs dispose the previous
-native owner; headless disposal is idempotent; and both packages use an
-internal lifecycle coordinator for teardown and tracked async JavaScript
-completion. Android skips unchanged content-blocker and asset-loader work.
-iOS skips unchanged content-blocker compilation and honors partial settings
-maps for `mediaType` and the two scroll-disable axes. Public Dart and
-MethodChannel contracts are unchanged. Android and iOS channel dispatch now
-keep JavaScript, settings, WebMessage, and lifecycle operations behind internal
-feature handlers.
+Source-validated lifecycle wave (Android 1.0.53, iOS 2.1.31, plus the
+desktop/Web ownership slice). Public Dart and MethodChannel contracts are
+unchanged.
 
-The iOS Simulator now passes the expanded 100-cycle disposal/recreate
-diagnostic and 50 keep-alive plus 50 headless-to-normal transfer cycles. The
-connected Android API 36 device passed the same matrix with `--no-uninstall`
-before the final Android headless guaranteed-cleanup path was added; the final
-code then passed 100 disposal/recreate cycles and 50 keep-alive plus 50
-headless-to-normal transfer cycles on the API 35 `Medium_Phone` emulator with
-`--no-uninstall`; physical API 36/OEM/provider coverage remains pending.
-Android
-source/build validation passes. These
-results do not close physical renderer-loss, fullscreen/IME, scene/popup,
-keyboard, or provider gates. The desktop/Web ownership slice is now also
-source-validated: Web tests and example build pass; macOS source tests and
-SwiftPM manifest pass; Windows/Linux source tests pass. Target runtime gates
-remain pending because this host cannot run Windows WebView2 or Linux WPE, and
-the macOS example still has the existing 10.15 deployment target rejected by
-the installed Xcode beta's 12.0 SDK floor. Web create, retained-transfer,
-reattach, and disposal now share one internal lifecycle coordinator; the Web
-MethodChannel contract remains unchanged. Linux now applies settings through a
-previous-snapshot diff and avoids recompiling unchanged content blockers.
-Linux and Windows retained ownership also uses internal lifecycle coordinators
-for detach/reattach and disposal.
-Their channel delegates now gate both incoming method calls and outgoing native
-events/callbacks through the same lifecycle state; Android likewise no longer
-maintains a second `isDisposed` source of truth for startup, renderer, scroll,
-and geometry callbacks.
-The Android JavaScript bridge rejects queued work after disposal begins, while
-iOS tracks evaluateJavascript completions and drains them exactly once during
-navigation or teardown.
-Native Android/iOS callback results, including default decisions, use the same
-exactly-once completion boundary, so a stale channel response cannot repeat a
-callback or fallback action. The boundary also rejects a later fallback after
-a handled success/error has completed, while preserving the fallback invoked
-by that completion handler itself.
-Android channel events and decision callbacks now use this boundary too, while
-default native decisions still complete when teardown races Dart dispatch. The
-Android headless wrapper is also coordinator-backed rather than flag-backed.
-Android JavaScript UI (`alert`, `confirm`, `prompt`, and `beforeunload`) error
-paths and bridge handler errors also claim the same completion gate before
-calling the native cancel/reject fallback, so a late duplicate error cannot
-repeat that action.
-Delayed Android IME, scroll-stop, and context-menu work, and delayed iOS
-keyboard, gesture, scroll, content-size, and context-menu work, now re-check
-lifecycle admission before touching native UI. Runtime provider/keyboard
-matrices remain pending.
-The follow-up source audit also gates Android floating-menu repositioning and
-runtime plugin-script callbacks, plus iOS delayed focus/image-reference
-lookups. iOS `isPagingEnabled` incremental settings updates now target the
-matching scroll-view property. Physical device/provider validation remains
-pending.
-Native archive/screenshot/PDF completion callbacks are lifecycle-tracked and
-return their existing null-result fallback if disposal wins; target provider
-and WebKit runtime validation remains pending.
-Android screenshot and initial platform-view loading callbacks are additionally
-gated at their posted execution boundary; device validation remains pending.
-Deferred iOS popup initialization and fullscreen-container presentation are
-also gated at their main-queue execution boundary.
-The Web adapter caches its last settings snapshot and skips unchanged
-JavaScript interop updates while preserving the existing JS-side property diff.
-Outgoing load, popup, window, fullscreen, bridge, and injected-script events
-are rejected after disposal, including a second lifecycle check after an
-awaited channel response. Internal operation IDs make async completion
-idempotent. Web package tests and the example build pass; browser runtime
-validation remains pending.
-The iOS and macOS delegates apply the same outgoing callback gate, including
-WebMessage and FindInteraction sub-delegates; their pending MethodChannel
-results are drained exactly once during teardown. macOS completes both native
-`callAsyncJavaScript` and pre-macOS-11 bridge callbacks exactly once during
-disposal.
-Android and iOS pull-to-refresh delegates use the same hosted-WebView gate and
-reset the refresh indicator instead of dispatching stale callbacks during
-teardown.
-Headless-to-normal transfer also removes the native WebView from its previous
-active ownership map before the headless wrapper is disposed, preventing a
-stale duplicate owner. The Android and iOS factories now detach the headless
-map entry before handoff, dispose entries that cannot provide a native view,
-and use identity-checked cleanup so a late old wrapper cannot remove a newer
-owner. Duplicate headless IDs also replace an active owner in the shared
-namespace. Android, iOS, and macOS managers now snapshot and clear
-active/retained ownership before disposing every remaining native WebView when
-the plugin itself is torn down. Accepted disposal now reaches the terminal
-coordinator state through guaranteed cleanup paths on Android, iOS, and macOS.
-Auxiliary Android print-job/Custom Tabs and iOS print-job,
-authentication-session/in-app-browser managers also detach non-null ownership
-entries before disposing their children, so disposal cannot leave a nullable
-placeholder or mutate the live map during iteration.
-Android async JavaScript operations now consume their pending callback when
-script preparation or queue submission fails. iOS screenshot compression
-options use PNG/quality defaults for malformed channel values. Runtime provider
-and keyboard validation remains pending.
-The Android and iOS lifecycle coordinators also serialize state transitions and
-debug-trace reads; this is source/host validated, while provider runtime races
-remain pending.
-iOS KVO observer registration is tracked per object/key path, preventing
-partial-setup teardown from removing an unregistered observer.
-Headless-to-normal transfer now re-registers the transferred native WebView in
-the active manager map after removing the old headless owner; lookup and plugin
-teardown therefore retain one authoritative owner.
+- Ownership: KeepAlive and headless entries are non-null and removed before
+  disposal; duplicate IDs dispose the previous owner; headless-to-normal
+  transfer detaches the old map entry, re-registers the native WebView in the
+  active map, and uses identity-checked cleanup so a late old wrapper cannot
+  remove a newer owner. Plugin teardown snapshots and clears active/retained
+  maps before disposing every WebView (Android, iOS, macOS). Print-job,
+  Custom Tabs, authentication-session, and in-app-browser managers detach
+  entries before disposing children.
+- Coordinators: Android, iOS, macOS, Web, Windows, and Linux use an internal
+  lifecycle coordinator for create, detach/reattach, and disposal; state
+  transitions are serialized and disposal reaches the terminal state through
+  guaranteed cleanup. Android no longer keeps a second `isDisposed` flag.
+- Exactly-once completion: native callback results and default decisions,
+  JavaScript UI (`alert`/`confirm`/`prompt`/`beforeunload`) error paths,
+  bridge handler errors, archive/screenshot/PDF callbacks, async JavaScript
+  (iOS/macOS drain pending results once during teardown), and Web async
+  operations (operation IDs) complete once; a stale response cannot repeat a
+  callback or fallback.
+- Admission gates: incoming calls and outgoing events (including WebMessage,
+  FindInteraction, and pull-to-refresh delegates) are rejected after disposal.
+  Delayed Android IME, scroll-stop, context-menu, floating-menu, screenshot,
+  and initial-load work, and delayed iOS keyboard, gesture, scroll,
+  content-size, context-menu, focus, popup, and fullscreen work re-check the
+  lifecycle before touching UI.
+- Settings: Android skips unchanged content-blocker and asset-loader work; iOS
+  skips unchanged content-blocker compilation, honors partial maps for
+  `mediaType` and the scroll-disable axes, and maps `isPagingEnabled`
+  correctly; Linux diffs against the previous snapshot; Web skips unchanged
+  interop updates. iOS KVO registration is tracked per object/key path, and
+  malformed screenshot options fall back to PNG defaults.
+
+Runtime results and remaining gates are in the
+[runtime register](runtime-validation-pending.md#runtime-results-recorded-so-far)
+("Lifecycle wave" row).
 
 ## Local feature and hardening records (not CSV issues)
 
@@ -1144,7 +1073,7 @@ Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/281
 
 Issue [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880) calls out legacy `UIApplication.shared.delegate?.window` access. The Forge implementation now replaces those lookups with an active-scene key-window helper, registers the plugin with Flutter's scene lifecycle delegate, and raises the iOS minimum to 15.0. Flutter’s [UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) documents the same plugin migration contract.
 
-**Remaining validation:** run the scene-aware example on multiple active/inactive iOS scenes and confirm browser presentation and authentication-session anchoring on physical devices.
+**Remaining validation:** run the scene-aware example on iOS 15 and newer scene-based devices; exercise headless rendering, Web Authentication, and InAppBrowser presentation/dismissal while scenes move between active and inactive; validate the published CocoaPods source from a tagged release (the local podspec uses a path source).
 
 ### #2762 — Flutter engine gesture conflict on older Flutter versions
 
