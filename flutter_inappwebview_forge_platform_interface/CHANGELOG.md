@@ -1,5 +1,11 @@
 ## Unreleased
 
+- Add `ScreenshotCancellationSignal` and the `cancellationSignal` parameter of
+  `PlatformInAppWebViewController.takeScreenshot`
+  ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
+- Add `ScreenshotConfiguration.drawScaled` and `usePixelCopy` (Android), and
+  document that Android `snapshotWidth` is multiplied by the display density
+  ([#2911](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2911)). Regenerated serializers.
 - `WebResourceError.fromMap` maps an unknown or missing native error type to
   `WebResourceErrorType.UNKNOWN` instead of returning `null` for the
   non-nullable `type` field ([#2900](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2900)).

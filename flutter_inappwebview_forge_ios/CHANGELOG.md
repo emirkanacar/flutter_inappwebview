@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
+  `null` and discards a late result; the native snapshot is not interrupted
+  ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
 - Always answer JavaScript `alert`, `confirm`, and `prompt` panels: present
   them from the topmost view controller, answer with the default value when
   UIKit cannot present them or the web view was released, and do not drop a

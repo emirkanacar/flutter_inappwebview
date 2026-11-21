@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
+  `null` and discards a late result; the native snapshot is not interrupted
+  ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
 - Always answer JavaScript `alert`, `confirm`, and `prompt` panels when the
   web view was released before the Dart callback returned, and do not drop a
   held paused-timers alert on a second alert or on dispose

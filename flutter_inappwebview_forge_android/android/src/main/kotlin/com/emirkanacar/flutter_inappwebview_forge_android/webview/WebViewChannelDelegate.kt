@@ -190,8 +190,16 @@ open class WebViewChannelDelegate(
       WebViewChannelDelegateMethods.takeScreenshot -> {
         webView?.takeScreenshot(
           mutableMapArgument(call, "screenshotConfiguration") ?: mutableMapOf(),
+          (call.argument<Any?>("requestId") as? Number)?.toLong(),
           result
         ) ?: result.success(null)
+      }
+
+      WebViewChannelDelegateMethods.cancelScreenshot -> {
+        val requestId = (call.argument<Any?>("requestId") as? Number)?.toLong()
+        result.success(
+          if (requestId != null) webView?.cancelScreenshot(requestId) ?: false else false
+        )
       }
 
       WebViewChannelDelegateMethods.setSettings -> handleSettingsMethod(method, call, result)

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
@@ -2476,16 +2477,39 @@ class AndroidInAppWebViewController extends PlatformInAppWebViewController
     return _javaScriptHandlersMap.containsKey(handlerName);
   }
 
+  // Per-controller ids for native screenshot request tracking; the native
+  // registry is scoped to the WebView, so a plain counter is enough.
+  int _lastScreenshotRequestId = 0;
+
   @override
   Future<Uint8List?> takeScreenshot({
     ScreenshotConfiguration? screenshotConfiguration,
+    ScreenshotCancellationSignal? cancellationSignal,
   }) async {
+    final requestId = ++_lastScreenshotRequestId;
     Map<String, dynamic> args = <String, dynamic>{};
     args.putIfAbsent(
       'screenshotConfiguration',
       () => screenshotConfiguration?.toMap(),
     );
-    return await channel?.invokeMethod<Uint8List?>('takeScreenshot', args);
+    args.putIfAbsent('requestId', () => requestId);
+    if (cancellationSignal == null) {
+      return await channel?.invokeMethod<Uint8List?>('takeScreenshot', args);
+    }
+    return await cancellationSignal.guard<Uint8List>(
+      () => channel?.invokeMethod<Uint8List?>('takeScreenshot', args),
+      onCancel: (_) {
+        // Best effort: the Dart future has already completed with null. A
+        // disposed controller has no channel and nothing left to cancel.
+        final cancelFuture = channel?.invokeMethod<bool>(
+          'cancelScreenshot',
+          <String, dynamic>{'requestId': requestId},
+        );
+        if (cancelFuture != null) {
+          unawaited(cancelFuture.catchError((Object _) => false));
+        }
+      },
+    );
   }
 
   @override

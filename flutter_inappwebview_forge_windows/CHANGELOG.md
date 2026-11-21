@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
+  `null` and discards a late result; the native snapshot is not interrupted
+  ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
 - Make the native code conform to Visual Studio 18 (MSVC 14.51): define
   `always_false_v`, fix the `to_uppercase`/`to_lowercase` in-place helpers,
   and drop class self-qualification from 18 member declarations (C4596)
