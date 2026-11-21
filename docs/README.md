@@ -28,7 +28,7 @@ for engineering records and repository maintenance notes.
 
 ## Documentation rules
 
-- Record behavior and support changes in the affected package changelog as well as here when the change affects contributors or integrators.
+- Record behavior and support changes in the affected package changelog as well as here when the change affects contributors or integrators. Keep the detailed issue record in `known-issues.md` and link to it from the other registers instead of copying it.
 - Use exact package paths and version requirements from `pubspec.yaml`, podspecs, Gradle files, and native manifests.
 - Mark device, browser, WebView, WebKit, WPE, and Xcode validation separately from source-level or static-test validation.
 - Treat upstream issue/PR state in an export as historical metadata. Local implementation status is documented from repository evidence.
