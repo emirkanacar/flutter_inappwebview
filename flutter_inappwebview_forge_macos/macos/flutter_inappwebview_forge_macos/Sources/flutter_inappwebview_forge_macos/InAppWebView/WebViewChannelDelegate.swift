@@ -416,6 +416,14 @@ public class WebViewChannelDelegate: ChannelDelegate {
         case .clearFocus:
             result(webView?.clearFocus())
             break
+        case .focusPage:
+            webView?.focusPage(direction: arguments?["direction"] as? String)
+            result(true)
+            break
+        case .releasePage:
+            webView?.releasePage()
+            result(true)
+            break
         case .requestFocus:
             result(webView?.requestFocus())
             break
@@ -1310,16 +1318,27 @@ public class WebViewChannelDelegate: ChannelDelegate {
         invokeMethod("onPrintRequest", arguments: arguments, callback: callback)
     }
     
-    internal func _onMouseDown(callback: @escaping () -> Void) {
+    internal func _onMouseDown(accessibilityFocus: Bool, callback: @escaping () -> Void) {
         if !canDispatchCallbacks() {
             return
         }
-        let arguments: [String:Any] = [:];
+        let arguments: [String:Any] = ["accessibilityFocus": accessibilityFocus]
         invokeMethod("_onMouseDown", arguments: arguments) {(result) -> Void in
             callback()
         }
     }
     
+    /// Tab went past the page's last focusable element (`forward`) or Shift+Tab before
+    /// its first one (enableAccessibilityFocus).
+    internal func _onTakeFocus(forward: Bool) {
+        invokeMethod("_onTakeFocus", arguments: ["forward": forward])
+    }
+
+    /// The web view became AppKit's first responder (enableAccessibilityFocus).
+    internal func _onBecomeFirstResponder() {
+        invokeMethod("_onBecomeFirstResponder", arguments: [:] as [String: Any])
+    }
+
     public override func dispose() {
         super.dispose()
         webView = nil

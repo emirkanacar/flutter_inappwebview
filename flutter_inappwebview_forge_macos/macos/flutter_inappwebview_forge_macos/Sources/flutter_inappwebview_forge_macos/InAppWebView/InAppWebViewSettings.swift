@@ -54,6 +54,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var underPageBackgroundColor: String?
     var isTextInteractionEnabled = true
     var disableAutocorrection = false
+    var enableAccessibilityFocus = false
     var isSiteSpecificQuirksModeEnabled = true
     var upgradeKnownHostsToHTTPS = true
     var isElementFullscreenEnabled = true

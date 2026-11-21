@@ -223,9 +223,29 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
 
   Future<dynamic> _handleMethod(MethodCall call) async {
     if (call.method == "_onMouseDown") {
+      final arguments = call.arguments;
+      if (arguments is Map &&
+          arguments["accessibilityFocus"] == true &&
+          (internalHasFocus?.call() ?? false)) {
+        // enableAccessibilityFocus: Flutter focus is already on the web view,
+        // so no Flutter text field holds the keyboard, and unfocusing would
+        // take the keys from the page on every click.
+        return;
+      }
       // Workaround for https://github.com/pichillilorenzo/flutter_inappwebview/issues/2380
       // TODO: remove when Flutter fixes this
       FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    if (call.method == "_onTakeFocus") {
+      final arguments = call.arguments;
+      internalOnTakeFocus?.call(
+        arguments is Map && arguments["forward"] == true,
+      );
+      return;
+    }
+    if (call.method == "_onBecomeFirstResponder") {
+      internalOnBecomeFirstResponder?.call();
       return;
     }
 
@@ -2648,6 +2668,38 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
     return await channel?.invokeMethod('clearFocus', args);
   }
 
+  ///Used internally by [MacOSInAppWebViewWidget] for
+  ///[InAppWebViewSettings.enableAccessibilityFocus]: Tab went past the last
+  ///focusable element of the page (`forward`) or Shift+Tab before the first.
+  void Function(bool forward)? internalOnTakeFocus;
+
+  ///Used internally by [MacOSInAppWebViewWidget]: the web view became AppKit's
+  ///first responder.
+  void Function()? internalOnBecomeFirstResponder;
+
+  ///Used internally by [MacOSInAppWebViewWidget]: whether Flutter focus is on
+  ///the web view.
+  bool Function()? internalHasFocus;
+
+  ///Used internally by [MacOSInAppWebViewWidget]: gives the page AppKit's
+  ///keyboard focus. [direction] `next` starts at the first focusable element
+  ///of the page, `previous` at the last one, `null` at the page itself. A
+  ///no-op natively unless [InAppWebViewSettings.enableAccessibilityFocus] is
+  ///`true`.
+  Future<void> internalFocusPage(String? direction) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent('direction', () => direction);
+    await channel?.invokeMethod('_focusPage', args);
+  }
+
+  ///Used internally by [MacOSInAppWebViewWidget]: gives the keyboard focus
+  ///back to Flutter. A no-op natively unless
+  ///[InAppWebViewSettings.enableAccessibilityFocus] is `true`.
+  Future<void> internalReleasePage() async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    await channel?.invokeMethod('_releasePage', args);
+  }
+
   @override
   Future<List<MetaTag>> getMetaTags() async {
     List<MetaTag> metaTags = [];
@@ -3210,6 +3262,9 @@ class MacOSInAppWebViewController extends PlatformInAppWebViewController
 
   @override
   void dispose({bool isKeepAlive = false}) {
+    internalOnTakeFocus = null;
+    internalOnBecomeFirstResponder = null;
+    internalHasFocus = null;
     disposeChannel(removeMethodCallHandler: !isKeepAlive);
     _inAppBrowser = null;
     webStorage.dispose();
