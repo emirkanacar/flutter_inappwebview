@@ -10,6 +10,15 @@ File _sourceFile(String relativePath) {
 }
 
 void main() {
+  test('macOS no longer injects the Promise polyfill plugin script', () {
+    final webViewSource = _sourceFile(
+      'macos/flutter_inappwebview_forge_macos/Sources/'
+      'flutter_inappwebview_forge_macos/InAppWebView/InAppWebView.swift',
+    ).readAsStringSync();
+
+    expect(webViewSource, isNot(contains('PROMISE_POLYFILL_JS_PLUGIN_SCRIPT')));
+    expect(webViewSource, contains('JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT'));
+  });
   test(
     'macOS native source contracts remain guarded',
     _runSourceContractAssertions,
@@ -24,12 +33,15 @@ void _runXcode27CompatibilityAssertions() {
   const base =
       'macos/flutter_inappwebview_forge_macos/Sources/'
       'flutter_inappwebview_forge_macos/';
-  final cookieSource =
-      _sourceFile('${base}MyCookieManager.swift').readAsStringSync();
-  final pluginSource =
-      _sourceFile('${base}InAppWebViewFlutterPlugin.swift').readAsStringSync();
-  final webViewSource =
-      _sourceFile('${base}InAppWebView/InAppWebView.swift').readAsStringSync();
+  final cookieSource = _sourceFile(
+    '${base}MyCookieManager.swift',
+  ).readAsStringSync();
+  final pluginSource = _sourceFile(
+    '${base}InAppWebViewFlutterPlugin.swift',
+  ).readAsStringSync();
+  final webViewSource = _sourceFile(
+    '${base}InAppWebView/InAppWebView.swift',
+  ).readAsStringSync();
   final settingsSource = _sourceFile(
     '${base}InAppWebView/InAppWebViewSettings.swift',
   ).readAsStringSync();
@@ -42,7 +54,9 @@ void _runXcode27CompatibilityAssertions() {
   }
   if (pluginSource.contains('var containerManager: ContainerManager?') ||
       !pluginSource.contains('var containerManager: Any?') ||
-      !pluginSource.contains('(containerManager as? ContainerManager)?.dispose()')) {
+      !pluginSource.contains(
+        '(containerManager as? ContainerManager)?.dispose()',
+      )) {
     throw StateError(
       'macOS 14-only ContainerManager must be stored type-erased on the plugin',
     );
@@ -296,8 +310,12 @@ void _runSourceContractAssertions() {
       'macOS headless ownership must use non-null entries and controlled duplicate cleanup',
     );
   }
-  if (!headlessSource.contains('private let lifecycle = WebViewLifecycleCoordinator()') ||
-      !headlessSource.contains('guard lifecycle.beginDisposal() else { return }') ||
+  if (!headlessSource.contains(
+        'private let lifecycle = WebViewLifecycleCoordinator()',
+      ) ||
+      !headlessSource.contains(
+        'guard lifecycle.beginDisposal() else { return }',
+      ) ||
       !headlessSource.contains('defer { lifecycle.finishDisposal() }') ||
       !headlessSource.contains('lifecycle.finishDisposal()') ||
       !headlessSource.contains('webViews[id] === self')) {
@@ -307,16 +325,26 @@ void _runSourceContractAssertions() {
         'var keepAliveWebViews: [String:FlutterWebViewController] = [:]',
       ) ||
       !managerSource.contains('func registerKeepAlive') ||
-      !managerSource.contains('keepAliveWebViews.removeValue(forKey: keepAliveId)') ||
-      !managerSource.contains('let activeWebViewValues = Array(webViews.values)') ||
+      !managerSource.contains(
+        'keepAliveWebViews.removeValue(forKey: keepAliveId)',
+      ) ||
+      !managerSource.contains(
+        'let activeWebViewValues = Array(webViews.values)',
+      ) ||
       !managerSource.contains('webView.dispose()')) {
     throw StateError(
       'macOS keep-alive ownership must not use nullable placeholders',
     );
   }
-  if (!ownershipFactorySource.contains('removeValue(forKey: headlessWebViewId)') ||
-      !ownershipFactorySource.contains('takeKeepAlive(keepAliveId: keepAliveId)') ||
-      !ownershipFactorySource.contains('registerKeepAlive(keepAliveId: keepAliveId')) {
+  if (!ownershipFactorySource.contains(
+        'removeValue(forKey: headlessWebViewId)',
+      ) ||
+      !ownershipFactorySource.contains(
+        'takeKeepAlive(keepAliveId: keepAliveId)',
+      ) ||
+      !ownershipFactorySource.contains(
+        'registerKeepAlive(keepAliveId: keepAliveId',
+      )) {
     throw StateError(
       'macOS platform-view creation does not transfer ownership atomically',
     );
@@ -339,7 +367,9 @@ void _runSourceContractAssertions() {
       !lifecycleSource.contains('.disposed') ||
       !lifecycleSource.contains('callbackCompletionCount') ||
       !lifecycleSource.contains('activeOperationIDs') ||
-      !lifecycleSource.contains('completeAsyncOperation(_ operationID: UInt64)')) {
+      !lifecycleSource.contains(
+        'completeAsyncOperation(_ operationID: UInt64)',
+      )) {
     throw StateError(
       'macOS lifecycle coordinator does not track async completion state',
     );
@@ -356,7 +386,9 @@ void _runSourceContractAssertions() {
       !delegateSource.contains('callback.success(nil)') ||
       !delegateSource.contains('result(nil)') ||
       delegateSource.contains('channel?.invokeMethod')) {
-    throw StateError('macOS channel callbacks are not routed through the lifecycle gate');
+    throw StateError(
+      'macOS channel callbacks are not routed through the lifecycle gate',
+    );
   }
   final webMessageChannelDelegateSource = _sourceFile(
     'macos/flutter_inappwebview_forge_macos/Sources/'
@@ -373,13 +405,23 @@ void _runSourceContractAssertions() {
     'flutter_inappwebview_forge_macos/FindInteraction/'
     'FindInteractionChannelDelegate.swift',
   ).readAsStringSync();
-  if (!webMessageChannelDelegateSource.contains('private func canDispatchCallbacks()') ||
+  if (!webMessageChannelDelegateSource.contains(
+        'private func canDispatchCallbacks()',
+      ) ||
       !webMessageChannelDelegateSource.contains('pendingResults') ||
-      !webMessageChannelDelegateSource.contains(r'results.forEach { $0(nil) }') ||
-      !webMessageListenerDelegateSource.contains('private func canDispatchCallbacks()') ||
+      !webMessageChannelDelegateSource.contains(
+        r'results.forEach { $0(nil) }',
+      ) ||
+      !webMessageListenerDelegateSource.contains(
+        'private func canDispatchCallbacks()',
+      ) ||
       !webMessageListenerDelegateSource.contains('pendingResults') ||
-      !findInteractionDelegateSource.contains('private func canDispatchCallbacks()') ||
-      !findInteractionDelegateSource.contains('guard canDispatchCallbacks() else { return }')) {
+      !findInteractionDelegateSource.contains(
+        'private func canDispatchCallbacks()',
+      ) ||
+      !findInteractionDelegateSource.contains(
+        'guard canDispatchCallbacks() else { return }',
+      )) {
     throw StateError(
       'macOS WebMessage/FindInteraction delegates can dispatch stale callbacks after disposal',
     );

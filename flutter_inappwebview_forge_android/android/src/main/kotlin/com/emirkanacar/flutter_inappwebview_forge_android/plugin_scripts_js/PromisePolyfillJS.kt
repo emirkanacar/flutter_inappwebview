@@ -4,6 +4,11 @@ import com.emirkanacar.flutter_inappwebview_forge_android.types.PluginScript
 import com.emirkanacar.flutter_inappwebview_forge_android.types.UserScriptInjectionTime
 import java.util.Set
 
+@Deprecated(
+  "No longer injected: every supported Android System WebView (minSdk 24) " +
+    "has a native Promise. Kept for source compatibility and will be removed " +
+    "in a future major release."
+)
 class PromisePolyfillJS private constructor() {
     companion object {
         @JvmField

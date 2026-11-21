@@ -907,13 +907,9 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     }
 
     if (javaScriptBridgeEnabled) {
-      userContentController.addPluginScript(
-        PromisePolyfillJS.PROMISE_POLYFILL_JS_PLUGIN_SCRIPT(
-          customSettings.pluginScriptsOriginAllowList,
-          customSettings.pluginScriptsForMainFrameOnly == true
-        )
-      )
-
+      // No Promise polyfill: every supported WebView (minSdk 24, Chromium)
+      // ships a native Promise, so the guarded polyfill never ran and only
+      // cost a document-start parse in every document and frame.
       val javaScriptBridgeOriginAllowList =
         customSettings.javaScriptBridgeOriginAllowList
           ?: customSettings.pluginScriptsOriginAllowList

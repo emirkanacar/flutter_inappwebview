@@ -1,3 +1,11 @@
+## Unreleased
+
+- Stop injecting the RSVP Promise polyfill document-start plugin script when
+  the JavaScript bridge is enabled. Every supported Android System WebView
+  (minSdk 24) has a native `Promise`, so the guarded polyfill never ran and
+  only added a ~16 KB parse to every document and frame. `PromisePolyfillJS`
+  is kept for source compatibility and marked `@Deprecated`.
+
 ## 1.0.58 - 2026-11-14
 
 - Add `warmUpRendererProcess` to the container controller channel. It calls

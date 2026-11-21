@@ -160,7 +160,7 @@ android/src/main/java/com/.../flutter_inappwebview_android/
 │   ├── OnWindowFocusEventJS.java        # Window focus event
 │   ├── PluginScriptsUtil.java           # Script utilities
 │   ├── PrintJS.java                     # Print handling script
-│   └── PromisePolyfillJS.java           # Promise polyfill
+│   └── PromisePolyfillJS.kt             # Deprecated, not injected
 │
 └── types/                               # Type definitions and models
 ```
@@ -341,7 +341,7 @@ JavaScript files injected into WebViews for native-web communication:
 | **InterceptFetchRequestJS** | `InterceptFetchRequestJS.java` | Wraps `window.fetch()` to intercept Fetch API requests. Enables `shouldInterceptFetchRequest` callback. |
 | **OnLoadResourceJS** | `OnLoadResourceJS.java` | Uses `PerformanceObserver` to track resource loading (images, scripts, etc.). Enables `onLoadResource` callback. |
 | **PrintJS** | `PrintJS.java` | Overrides `window.print()` to trigger `onPrintRequest` callback instead of native print dialog. |
-| **PromisePolyfillJS** | `PromisePolyfillJS.java` | Polyfill for `Promise` API on older Android WebView versions using RSVP.js library. |
+| **PromisePolyfillJS** | `PromisePolyfillJS.kt` | Deprecated and no longer injected; every supported WebView (minSdk 24) has a native `Promise`. |
 | **OnWindowBlurEventJS** | `OnWindowBlurEventJS.java` | Listens for `blur` event on window and triggers `onWindowBlur` callback. |
 | **OnWindowFocusEventJS** | `OnWindowFocusEventJS.java` | Listens for `focus` event on window and triggers `onWindowFocus` callback. |
 

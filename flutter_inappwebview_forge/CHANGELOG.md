@@ -4,6 +4,10 @@
   traffic (count, rate, optional payload bytes, Dart handler time) on every
   platform. Disabled by default.
 
+- Android, iOS, macOS: stop injecting the unused RSVP Promise polyfill script
+  (~16 KB per document and frame) when the JavaScript bridge is enabled; all
+  supported WebViews ship a native `Promise`.
+
 ## 2.1.80 - 2026-11-14
 
 - Support `ContextMenu` (custom items, `hideDefaultSystemContextMenuItems`,

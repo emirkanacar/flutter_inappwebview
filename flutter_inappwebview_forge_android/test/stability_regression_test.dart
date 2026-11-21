@@ -1421,4 +1421,14 @@ void main() {
     expect(gradleSource, contains('androidx.webkit:webkit:1.16.0'));
     expect(gradleSource, contains('minSdk = 24'));
   });
+
+  test('Android no longer injects the Promise polyfill plugin script', () {
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(webViewSource, isNot(contains('PROMISE_POLYFILL_JS_PLUGIN_SCRIPT')));
+    expect(webViewSource, contains('JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT'));
+  });
 }

@@ -105,7 +105,7 @@ macos/Classes/
 │   ├── OriginalViewPortMetaTagContentJS.swift # Viewport meta capture
 │   ├── PluginScriptsUtil.swift          # Script utilities
 │   ├── PrintJS.swift                    # Print handling
-│   ├── PromisePolyfillJS.swift          # Promise polyfill
+│   ├── PromisePolyfillJS.swift          # Deprecated, not injected
 │   ├── SupportZoomJS.swift              # Zoom control
 │   ├── WebMessageChannelJS.swift        # WebMessage channel variables
 │   ├── WebMessageListenerJS.swift       # PostMessage API
@@ -280,7 +280,7 @@ JavaScript files injected into WebViews for native-web communication:
 | **OnLoadResourceJS** | `OnLoadResourceJS.swift` | Uses `PerformanceObserver` to track resource loading. |
 | **OnScrollChangedJS** | `OnScrollChangedJS.swift` | Listens for scroll events and triggers `onScrollChanged` callback (macOS-specific). |
 | **PrintJS** | `PrintJS.swift` | Overrides `window.print()` to trigger `onPrintRequest` callback. |
-| **PromisePolyfillJS** | `PromisePolyfillJS.swift` | Polyfill for `Promise` API on older WebKit versions. |
+| **PromisePolyfillJS** | `PromisePolyfillJS.swift` | Deprecated and no longer injected; WebKit on macOS 10.14+ has a native `Promise`. |
 | **FindTextHighlightJS** | `FindTextHighlightJS.swift` | JavaScript-based text search and highlighting. |
 | **WebMessageListenerJS** | `WebMessageListenerJS.swift` | Implements `FlutterInAppWebViewWebMessageListener` for `postMessage` API. |
 | **WebMessageChannelJS** | `WebMessageChannelJS.swift` | Variable definitions for `WebMessageChannel` ports. |

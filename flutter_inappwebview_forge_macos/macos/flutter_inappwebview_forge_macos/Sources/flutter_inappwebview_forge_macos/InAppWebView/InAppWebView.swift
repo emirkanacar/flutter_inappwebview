@@ -327,7 +327,8 @@ public class InAppWebView: WKWebView, WKUIDelegate,
             let javaScriptBridgeOriginAllowList = settings?.javaScriptBridgeOriginAllowList ?? pluginScriptsOriginAllowList
             let javaScriptBridgeForMainFrameOnly = settings?.javaScriptBridgeForMainFrameOnly ?? pluginScriptsForMainFrameOnly
             
-            configuration.userContentController.addPluginScript(PromisePolyfillJS.PROMISE_POLYFILL_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList, forMainFrameOnly: pluginScriptsForMainFrameOnly))
+            // No Promise polyfill: WebKit on macOS 10.14+ ships a native Promise in every
+            // content world, so the guarded polyfill never ran and only cost a parse.
             configuration.userContentController.addPluginScript(JavaScriptBridgeJS.JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT(expectedBridgeSecret: exceptedBridgeSecret, allowedOriginRules: javaScriptBridgeOriginAllowList, forMainFrameOnly: javaScriptBridgeForMainFrameOnly))
             configuration.userContentController.addPluginScript(ConsoleLogJS.CONSOLE_LOG_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList))
             configuration.userContentController.addPluginScript(PrintJS.PRINT_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList, forMainFrameOnly: pluginScriptsForMainFrameOnly))

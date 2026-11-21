@@ -1,3 +1,11 @@
+## Unreleased
+
+- Stop injecting the RSVP Promise polyfill document-start plugin script when
+  the JavaScript bridge is enabled. WebKit on macOS 10.14+ has a native
+  `Promise` in every content world, so the guarded polyfill never ran and only
+  added a ~16 KB parse to every document, frame, and content world.
+  `PromisePolyfillJS` is kept for source compatibility and marked deprecated.
+
 ## 1.1.13 - 2026-11-14
 
 - Support `isLockdownModeEnabled`. The value is written to the initial
