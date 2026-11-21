@@ -9,7 +9,7 @@
 namespace flutter_inappwebview_plugin {
 
 ContainerManager::ContainerManager(const FlutterInappwebviewWindowsPlugin* plugin)
-    : ChannelDelegate(plugin->registrar->messenger(), METHOD_CHANNEL_NAME), plugin_(plugin) {}
+    : ChannelDelegate(plugin->messenger(), METHOD_CHANNEL_NAME), plugin_(plugin) {}
 
 ContainerManager::~ContainerManager() { plugin_ = nullptr; }
 

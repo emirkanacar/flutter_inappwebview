@@ -14,7 +14,7 @@ namespace flutter_inappwebview_plugin
   using namespace Microsoft::WRL;
 
   WebStorageManager::WebStorageManager(const FlutterInappwebviewWindowsPlugin* plugin)
-    : plugin(plugin), ChannelDelegate(plugin->registrar->messenger(), WebStorageManager::METHOD_CHANNEL_NAME)
+    : plugin(plugin), ChannelDelegate(plugin->messenger(), WebStorageManager::METHOD_CHANNEL_NAME)
   {}
 
   void WebStorageManager::HandleMethodCall(const flutter::MethodCall<flutter::EncodableValue>& method_call,

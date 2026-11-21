@@ -318,10 +318,10 @@ namespace flutter_inappwebview_plugin
       printJobManager->dispose();
       printJobManager.reset();
     }
-    channelDelegate = channelName.has_value() ? std::make_unique<WebViewChannelDelegate>(this, plugin->registrar->messenger(), channelName.value()) :
-      std::make_unique<WebViewChannelDelegate>(this, plugin->registrar->messenger());
-    findInteractionController = std::make_unique<FindInteractionController>(this, plugin->registrar->messenger());
-    printJobManager = std::make_unique<PrintJobManager>(this, plugin->registrar->messenger());
+    channelDelegate = channelName.has_value() ? std::make_unique<WebViewChannelDelegate>(this, plugin->messenger(), channelName.value()) :
+      std::make_unique<WebViewChannelDelegate>(this, plugin->messenger());
+    findInteractionController = std::make_unique<FindInteractionController>(this, plugin->messenger());
+    printJobManager = std::make_unique<PrintJobManager>(this, plugin->messenger());
   }
 
   void InAppWebView::onContextMenuRequested(ICoreWebView2ContextMenuRequestedEventArgs* args)
@@ -1952,7 +1952,7 @@ namespace flutter_inappwebview_plugin
             // Create WebNotificationController with unique ID, passing this InAppWebView pointer
             std::string notificationControllerId = get_uuid();
             auto notificationController = std::make_shared<WebNotificationController>(
-              notificationControllerId, notification, notificationPtr, plugin->registrar->messenger(), this);
+              notificationControllerId, notification, notificationPtr, plugin->messenger(), this);
 
             // Store the controller in the map to prevent deallocation
             webNotificationControllers_[notificationControllerId] = notificationController;
@@ -2221,8 +2221,42 @@ namespace flutter_inappwebview_plugin
     }
   }
 
+  void InAppWebView::closeBeforeHostDestroyed()
+  {
+    detachHostWindow();
+    if (nativeClosed_ || !lifecycle_.acceptsCallbacks()) {
+      return;
+    }
+    nativeClosed_ = true;
+    // As in the destructor: FindInteraction handlers are removed before Close().
+    if (findInteractionController) {
+      findInteractionController->dispose();
+    }
+    if (userContentController) {
+      userContentController->detachWebView();
+    }
+    std::lock_guard<std::mutex> controllerLock(controllerMutex_);
+    if (webView) {
+      failedLog(webView->Stop());
+    }
+    if (webViewController) {
+      failedLog(webViewController->Close());
+    }
+  }
+
   LRESULT CALLBACK InAppWebView::hostWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
   {
+    if (message == WM_DESTROY) {
+      // Upstream #2884: at application quit the Flutter view window, and with
+      // it this child host window, is destroyed before the plugin. WebView2
+      // must be closed while its parent window exists. The destructor's own
+      // DestroyWindow does not get here: it removes the property first.
+      auto view = static_cast<InAppWebView*>(GetPropW(hwnd, kHostWindowViewProp));
+      if (view && view->hostWindow_ == hwnd) {
+        view->closeBeforeHostDestroyed();
+      }
+      return DefWindowProc(hwnd, message, wparam, lparam);
+    }
     if (message == WM_GETOBJECT && static_cast<DWORD>(lparam) == static_cast<DWORD>(UiaRootObjectId)) {
       auto view = static_cast<InAppWebView*>(GetPropW(hwnd, kHostWindowViewProp));
       if (view && view->isAccessibilityFocusEnabled() && view->lifecycle_.acceptsCallbacks() &&
@@ -2833,7 +2867,7 @@ namespace flutter_inappwebview_plugin
 
     std::set<std::string> originRulesSet(allowedOriginRules.begin(), allowedOriginRules.end());
     auto listener = std::make_unique<WebMessageListener>(
-      plugin->registrar->messenger(), listenerId, jsObjectName, originRulesSet, this);
+      plugin->messenger(), listenerId, jsObjectName, originRulesSet, this);
     webMessageListeners_[jsObjectName] = std::move(listener);
 
     std::string allowedOriginRulesJs = "[";
@@ -2929,7 +2963,7 @@ namespace flutter_inappwebview_plugin
       {
         if (!result.empty() && result != "null") {
           auto channel = std::make_unique<WebMessageChannel>(
-            plugin->registrar->messenger(), channelId, this);
+            plugin->messenger(), channelId, this);
           webMessageChannels_[channelId] = std::move(channel);
           if (callback) callback(channelId);
         }
@@ -4569,7 +4603,7 @@ namespace flutter_inappwebview_plugin
       findInteractionController.reset();
     }
     userContentController = nullptr;
-    {
+    if (!nativeClosed_) {
       std::lock_guard<std::mutex> controllerLock(controllerMutex_);
       if (webView) {
         failedLog(webView->Stop());
