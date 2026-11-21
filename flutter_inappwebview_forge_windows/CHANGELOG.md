@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Make the native code conform to Visual Studio 18 (MSVC 14.51): define
+  `always_false_v`, fix the `to_uppercase`/`to_lowercase` in-place helpers,
+  and drop class self-qualification from 18 member declarations (C4596)
+  ([#2936](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2936)). The experimental coroutine deprecation
+  ([#2937](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2937)) was already silenced.
 - Fix the native build of every app that depends on the plugin. The CMake
   target and bundled-library variable still used the upstream names
   (`flutter_inappwebview_windows_plugin`), but Flutter's generated
