@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Content blockers fail closed: a rule change adds the new list before removing
+  the old one, a failed compile keeps the previous rules, and the initial load
+  and navigations wait for the requested rules and are cancelled if they fail
+  ([#2928](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2928)).
 - In a popup WebView (`windowId`), JavaScript for a named `ContentWorld` or a
   subframe fails closed instead of running in the page world ([#2932](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2932)).
 - Fix the legacy `callAsyncJavaScript` wrapper's unclosed parameter list ([#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).

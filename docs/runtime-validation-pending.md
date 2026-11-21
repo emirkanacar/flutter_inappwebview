@@ -98,6 +98,7 @@ Details for each are in `known-issues.md`.
 
 | Record | Still required |
 | --- | --- |
+| Content blockers fail closed, 2026-11-22 ([details](known-issues.md#2026-11-22-content-blockers-fail-closed-2928)): PR #2928 | iOS, macOS, Linux: swapping rule sets while loading keeps blocking; invalid rules stop the initial load and cancel navigations; disposing during a compile answers the navigation once. |
 | iOS popup content worlds and legacy async wrapper, 2026-11-22 ([details](known-issues.md#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds)): PR #2931, #2932 | iOS popup: page world works, named world and subframe fail closed. Android camera/video upload. macOS 10.15 `callAsyncJavaScript` with arguments. |
 | Windows teardown at application quit, 2026-11-22 ([details](known-issues.md#2026-11-22-windows-teardown-at-application-quit-2884-2956-2957)): #2884, PR #2956, PR #2957 | Windows app quit with mounted InAppWebViews and a KeepAlive WebView, and closing one of two engines' windows, with no WebView2 `ERROR_INVALID_STATE` or 0xC000041D. |
 | Keyboard and screen reader focus, 2026-11-22 ([details](known-issues.md#2026-11-22-keyboard-and-screen-reader-focus-on-macos-and-windows-2952-2953)): PRs #2952, #2953 | macOS Tab/Shift+Tab, click, and VoiceOver runs; Windows Tab/Shift+Tab with Narrator and NVDA, including KeepAlive reattach. Only builds and source tests so far. |

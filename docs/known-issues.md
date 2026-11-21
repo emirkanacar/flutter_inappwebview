@@ -203,6 +203,47 @@ webkitgtk support (#2890). macOS SwiftPM 10.15 (#2891) is already covered (see
 hardening PRs #2914-#2934 are triaged in
 [Upstream hardening PRs #2914-#2934](#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds).
 
+## 2026-11-22 Content blockers fail closed (#2928)
+
+Upstream PR [#2928](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2928), ported to iOS, macOS, and Linux.
+
+Root cause:
+
+- Every content blocker change removed the active rules first
+  (`removeAllContentRuleLists` / `removeAllFilters`) and then compiled the new
+  set asynchronously. Pages loaded during the compile ran without blocking,
+  and a failed compile left no rules at all.
+- The initial load ran even when compilation failed: iOS and macOS only
+  printed the error and skipped the load callback in some paths, and Linux
+  logged "loading content anyway".
+- One fixed store identifier (`ContentBlockingRules`,
+  `flutter_inappwebview_content_rules`) was shared by every WebView, so two
+  concurrent compiles could hand one WebView the other's rules.
+
+Fix:
+
+- Each rule set is stored under its own identifier (SHA-256 of the sorted JSON
+  on Apple, `std::hash` on Linux), looked up before compiling, and the new list
+  is added before the previous one is removed. A failed compile keeps the
+  previous rules. A result that arrives after a newer request is dropped.
+  Identifiers of earlier processes are removed once per process.
+- The initial load (`FlutterWebViewController`, `InAppBrowserWebViewController`,
+  Linux `InAppWebView`) waits for the rules and does not run if they fail.
+- A main-frame or subframe navigation while rules are requested but none are
+  in force waits for them and is cancelled if they fail.
+- Forge addition: Apple `dispose()` clears the request and answers waiting
+  navigations with `.cancel`, so each `decisionHandler` is called exactly once
+  and a late compile is not enforced on a disposed WebView. The Linux handler
+  destructor already settles waiters.
+
+Behavior change: invalid `contentBlockers` now stop the initial load and
+cancel navigations instead of loading without blocking.
+
+Evidence: `test/content_blocker_source_test.dart` in the iOS, macOS, and Linux
+packages; iOS simulator and macOS example build. Linux native build is CI only.
+Runtime validation is pending
+([runtime-validation-pending.md](runtime-validation-pending.md)).
+
 ## 2026-11-22 Android screenshot of a playing video (#2732)
 
 Issue [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732): `takeScreenshot` shows the video area of a playing `<video>`
@@ -295,8 +336,9 @@ Already covered: #2930 (Linux theme color guarded by
 Not ported, not compared in detail: Windows #2915-#2922 (input, rendering,
 lifecycle; need Windows hardware, 2,300-4,000 lines each), #2923, #2925,
 #2927, #2924 (example), #2926 (`CustomSchemeResponse.headers`, API
-addition), #2928 (content blockers fail closed), #2929 (Linux DMA-BUF),
+addition), #2929 (Linux DMA-BUF),
 #2933 (cancel JavaScript work at document end), #2934 (macOS warnings).
+#2928 was ported later ([Content blockers fail closed](#2026-11-22-content-blockers-fail-closed-2928)).
 
 Evidence: iOS `test/flutter_inappwebview_ios_test.dart`, macOS
 `test/legacy_async_wrapper_source_test.dart`, Android
