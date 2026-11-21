@@ -602,10 +602,20 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING) &&
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     ) {
-      WebSettingsCompat.setAlgorithmicDarkeningAllowed(
-        settings,
-        customSettings.algorithmicDarkeningAllowed == true
-      )
+      try {
+        // Some vendor or outdated WebView providers throw ClassCastException
+        // from WebSettingsCompat's settings adapter, like setForceDarkStrategy.
+        WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+          settings,
+          customSettings.algorithmicDarkeningAllowed == true
+        )
+      } catch (e: Exception) {
+        Log.w(
+          LOG_TAG,
+          "Unable to apply algorithmicDarkeningAllowed for the active WebView provider.",
+          e
+        )
+      }
     }
 
     if (
@@ -1745,10 +1755,20 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING) &&
       Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     ) {
-      WebSettingsCompat.setAlgorithmicDarkeningAllowed(
-        settings,
-        newCustomSettings.algorithmicDarkeningAllowed == true
-      )
+      try {
+        // Some vendor or outdated WebView providers throw ClassCastException
+        // from WebSettingsCompat's settings adapter, like setForceDarkStrategy.
+        WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+          settings,
+          newCustomSettings.algorithmicDarkeningAllowed == true
+        )
+      } catch (e: Exception) {
+        Log.w(
+          LOG_TAG,
+          "Unable to update algorithmicDarkeningAllowed for the active WebView provider.",
+          e
+        )
+      }
     }
     if (
       changed(
@@ -3379,8 +3399,27 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
     setWebChromeClient(WebChromeClient())
     setWebViewClient(object : WebViewClient() {
-      override fun onPageFinished(view: WebView?, url: String?) {
+      private var destroyRequested = false
+
+      private fun destroyOnce() {
+        if (destroyRequested) return
+        destroyRequested = true
         destroy()
+      }
+
+      override fun onPageFinished(view: WebView?, url: String?) {
+        destroyOnce()
+      }
+
+      // The WebView stays attached to its renderer until about:blank finishes
+      // loading. Returning false here would let Android WebView kill the app
+      // if the renderer goes away during that window.
+      override fun onRenderProcessGone(
+        view: WebView?,
+        detail: RenderProcessGoneDetail?
+      ): Boolean {
+        destroyOnce()
+        return true
       }
     })
 

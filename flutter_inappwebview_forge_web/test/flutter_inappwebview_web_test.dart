@@ -18,6 +18,38 @@ void _assert(bool condition, String message) {
 
 void main() {
   test('Web source contracts remain guarded', _runSourceContractAssertions);
+  test(
+    'Web support bundle ships without a sourcemap and matches its source',
+    () {
+      // Upstream #2955: the published asset embedded an inline development
+      // sourcemap. The bundle must also be reproducible from web_support/src.
+      final bundle = _sourceFile(
+        'lib/assets/web/web_support.js',
+      ).readAsStringSync();
+      final candidates = [
+        File('../web_support/src/index.ts'),
+        File('web_support/src/index.ts'),
+      ];
+      final tsSource = candidates
+          .firstWhere((file) => file.existsSync())
+          .readAsStringSync();
+      final buildScript = [
+        File('../web_support/package.json'),
+        File('web_support/package.json'),
+      ].firstWhere((file) => file.existsSync()).readAsStringSync();
+
+      expect(bundle, isNot(contains('sourceMappingURL')));
+      expect(buildScript, isNot(contains('--sourcemap')));
+      for (final marker in [
+        'const getIFrameUrl = function',
+        'scheduleScrollChanged: function',
+        'reattach: function',
+      ]) {
+        expect(bundle, contains(marker));
+        expect(tsSource, contains(marker));
+      }
+    },
+  );
   test('Web lifecycle coordinator is idempotent', () {
     final lifecycle = WebViewLifecycleCoordinator();
 

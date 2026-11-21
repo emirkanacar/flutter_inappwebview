@@ -24,15 +24,59 @@ declare global {
 
   window.flutter_inappwebview_plugin = {
     createFlutterInAppWebView: function (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement, bridgeSecret: string) {
-      const iframeId = iframe.id;
+      let iframeId = iframe.id;
+      // The iframe element's `src` attribute is only the requested URL. It does
+      // not change when the embedded page navigates itself. Reading the actual
+      // location is also subject to the browser's same-origin policy, so return
+      // null instead of exposing a stale URL for cross-origin documents.
+      const getIFrameUrl = function (iframeElement: HTMLIFrameElement | null | undefined): string | null {
+        try {
+          const url = iframeElement?.contentWindow?.location?.href;
+          return typeof url === 'string' && url.length > 0 ? url : null;
+        } catch (_) {
+          return null;
+        }
+      };
       const webView: InAppWebView = {
         viewId: viewId,
         iframeId: iframeId,
         iframe: null,
         iframeContainer: null,
+        reattach: function (viewId2: number | string, iframe2: HTMLIFrameElement, iframeContainer2: HTMLDivElement) {
+          viewId = viewId2;
+          iframe = iframe2;
+          iframeContainer = iframeContainer2;
+          iframeId = iframe2.id;
+          webView.viewId = viewId2;
+          webView.iframe = iframe2;
+          webView.iframeContainer = iframeContainer2;
+        },
         isFullscreen: false,
         documentTitle: null,
         functionMap: {},
+        scrollEventFramePending: false,
+        lastScrollX: 0,
+        lastScrollY: 0,
+        scheduleScrollChanged: function () {
+          try {
+            webView.lastScrollX = iframe.contentWindow!.scrollX;
+            webView.lastScrollY = iframe.contentWindow!.scrollY;
+          } catch (e) {
+            webView.lastScrollX = 0;
+            webView.lastScrollY = 0;
+          }
+          if (webView.scrollEventFramePending) {
+            return;
+          }
+          webView.scrollEventFramePending = true;
+          const schedule = window.requestAnimationFrame || function (callback: FrameRequestCallback) {
+            return window.setTimeout(callback, 0);
+          };
+          schedule(function () {
+            webView.scrollEventFramePending = false;
+            _nativeCommunication('onScrollChanged', viewId, [webView.lastScrollX, webView.lastScrollY]);
+          });
+        },
         settings: {},
         javaScriptBridgeEnabled: true,
         disableContextMenuHandler: function (event: Event) {
@@ -142,12 +186,7 @@ declare global {
                 webView.evaluateJavascript(ifStatement.length > 4 ? `${ifStatement}) { ${source} }` : source);
               }
 
-              let url = iframe.src;
-              try {
-                url = iframe.contentWindow.location.href;
-              } catch (e) {
-                console.log(e);
-              }
+              const url = getIFrameUrl(iframe);
               _nativeCommunication('onLoadStart', viewId, [url]);
 
               try {
@@ -184,24 +223,14 @@ declare global {
                 const originalPushState = iframe.contentWindow.history.pushState;
                 iframe.contentWindow.history.pushState = function (state, unused, url) {
                   originalPushState.call(iframe.contentWindow!.history, state, unused, url);
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow!.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication('onUpdateVisitedHistory', viewId, [iframeUrl]);
                 };
 
                 const originalReplaceState = iframe.contentWindow.history.replaceState;
                 iframe.contentWindow.history.replaceState = function (state, unused, url) {
                   originalReplaceState.call(iframe.contentWindow!.history, state, unused, url);
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow!.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication('onUpdateVisitedHistory', viewId, [iframeUrl]);
                 };
 
@@ -224,12 +253,7 @@ declare global {
 
                 const originalPrint = iframe.contentWindow.print;
                 iframe.contentWindow.print = function () {
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow!.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication('onPrintRequest', viewId, [iframeUrl]);
                   originalPrint.call(iframe.contentWindow);
                 };
@@ -265,25 +289,12 @@ declare global {
                 });
 
                 iframe.contentWindow.addEventListener('popstate', function (event: Event) {
-                  let iframeUrl = iframe.src;
-                  try {
-                    iframeUrl = iframe.contentWindow!.location.href;
-                  } catch (e) {
-                    console.log(e);
-                  }
+                  const iframeUrl = getIFrameUrl(iframe);
                   _nativeCommunication('onUpdateVisitedHistory', viewId, [iframeUrl]);
                 });
 
                 iframe.contentWindow.addEventListener('scroll', function (event: Event) {
-                  let x = 0;
-                  let y = 0;
-                  try {
-                    x = iframe.contentWindow!.scrollX;
-                    y = iframe.contentWindow!.scrollY;
-                  } catch (e) {
-                    console.log(e);
-                  }
-                  _nativeCommunication('onScrollChanged', viewId, [x, y]);
+                  webView.scheduleScrollChanged();
                 });
 
                 iframe.contentWindow.addEventListener('focus', function (event: Event) {
@@ -491,13 +502,7 @@ declare global {
         },
         getUrl: function () {
           const iframe = webView.iframe;
-          let url = iframe?.src;
-          try {
-            url = iframe?.contentWindow?.location.href;
-          } catch (e) {
-            console.log(e);
-          }
-          return url;
+          return getIFrameUrl(iframe);
         },
         getTitle: function () {
           const iframe = webView.iframe;

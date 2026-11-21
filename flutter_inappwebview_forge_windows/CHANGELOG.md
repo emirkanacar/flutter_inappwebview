@@ -1,3 +1,16 @@
+## Unreleased
+
+- Keep the texture callback and `TextureBridge` alive until Flutter's
+  asynchronous `UnregisterTexture` completes. `~CustomPlatformView` freed both
+  right after requesting unregistration, so the raster thread could call into
+  freed memory when an actively rendering WebView was closed. Capture is now
+  stopped first and the resources are released from the completion callback
+  ([#2896](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2896)).
+- `callHandler` replies no longer throw `std::bad_variant_access` when the
+  Dart result is not a string or the reply pointer is null; the JavaScript
+  promise resolves with `null` instead (from upstream PR
+  [#2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).
+
 ## 1.0.17 - 2026-11-14
 
 - Add `WebStorageManager` on Windows with `deleteBrowsingData()`, which

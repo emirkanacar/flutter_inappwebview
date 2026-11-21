@@ -1,5 +1,13 @@
 ## Unreleased
 
+- `WebResourceError.fromMap` maps an unknown or missing native error type to
+  `WebResourceErrorType.UNKNOWN` instead of returning `null` for the
+  non-nullable `type` field ([#2900](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2900)).
+- Add Linux native values for `HttpAuthResponseAction` (CANCEL, PROCEED,
+  USE_SAVED_HTTP_AUTH_CREDENTIALS) and `SslErrorType` (`GTlsCertificateFlags`
+  bits), so Linux authentication responses and SSL errors decode
+  ([#2898](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2898)). Regenerated serializers.
+
 - Add `InAppWebViewSettings.shouldInterceptRequestUrlFilter` (Android): a list
   of regular expressions that limits which requests reach
   `shouldInterceptRequest`. Defaults to an empty list (every request, as

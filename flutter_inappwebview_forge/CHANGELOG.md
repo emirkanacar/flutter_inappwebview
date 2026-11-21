@@ -1,5 +1,14 @@
 ## Unreleased
 
+- Android: a provider that throws from algorithmic darkening no longer crashes WebView creation ([#2893](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2893)).
+- Android: a renderer crash during `dispose()` no longer kills the app ([#2945](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2945)).
+- iOS, macOS: no unhandled promise rejection when `callHandler` runs after the WebView is disposed ([#2940](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2940)).
+- Linux: build with WPE WebKit 2.54+ and isolated CMake WPEPlatform probe ([#2913](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2913), [#2912](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2912)).
+- Linux: fix server-trust PROCEED use-after-free and decode Linux auth/SSL values ([#2898](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2898)).
+- `WebResourceError.type` falls back to `UNKNOWN` for unknown native error types ([#2900](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2900)).
+- Windows: fix a use-after-free when closing a rendering WebView ([#2896](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2896)) and a `callHandler` reply crash.
+- Web: the `web_support.js` asset no longer ships an inline sourcemap ([#2955](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2955)).
+
 - Android: add `InAppWebViewSettings.shouldInterceptRequestUrlFilter` to send
   only matching requests to `shouldInterceptRequest`. Other requests skip the
   synchronous Dart round trip; the default empty list keeps today's behavior.

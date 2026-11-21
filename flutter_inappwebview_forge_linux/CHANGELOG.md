@@ -1,3 +1,19 @@
+## Unreleased
+
+- Build with WPE WebKit 2.54+, which renamed `WPE_SETTING_DISABLE_ANIMATIONS`
+  to `WPE_SETTING_REDUCED_MOTION`. Older WPE releases map the new name to the
+  old setting ([#2913](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2913)).
+- CMake: run the WPEPlatform probe inside `cmake_push_check_state(RESET)` /
+  `cmake_pop_check_state()` so its include directories and libraries no
+  longer leak into later checks, and link the probe with the pkg-config
+  `*_LINK_LIBRARIES` full paths (falling back to `*_LIBRARIES`) ([#2912](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2912)).
+- `onReceivedServerTrustAuthRequest` PROCEED no longer reads a freed URI
+  (the callback captured WebKit's borrowed `failing_uri` pointer) and now
+  reloads the failing URI instead of the previous page. The SSL error `code`
+  is sent as the `GTlsCertificateFlags` value instead of a string, and
+  `previousFailureCount` of HTTP authentication challenges is an integer
+  ([#2898](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2898)). Adds `linux/test/authentication_challenge_test.cc`.
+
 ## 1.0.10 - 2026-11-14
 
 - Add `WebStorageManager.deleteBrowsingData()` and

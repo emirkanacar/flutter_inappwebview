@@ -1,3 +1,10 @@
+## Unreleased
+
+- The `web_support.js` asset no longer embeds an inline development
+  sourcemap ([#2955](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2955)). The bundle is rebuilt from `web_support/src`,
+  which now contains the iframe URL helper, `reattach`, and scroll coalescing
+  that were previously only in the built asset. No behavior change.
+
 ## 1.0.5 - 2026-11-13
 
 - `getHtml` now logs (via `debugPrint`) when the `file://` asset fallback

@@ -1,5 +1,10 @@
 ## Unreleased
 
+- JavaScript bridge: handle the Promise returned by WebKit's
+  `postMessage` when the `callHandler` message handler was already removed.
+  The rejection is caught and the pending `callHandler` entry deleted instead
+  of surfacing an unhandled rejection in the page ([#2940](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2940)).
+
 - Stop injecting the RSVP Promise polyfill document-start plugin script when
   the JavaScript bridge is enabled. WebKit on macOS 10.14+ has a native
   `Promise` in every content world, so the guarded polyfill never ran and only
