@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` with `usePixelCopy` in texture composition copies from
+  Flutter's render surface instead of the window, which returned an all-black
+  image. Only the copy captures playing `<video>` frames ([#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732)).
 - The `FileProvider` no longer maps the public `Pictures/` and `Movies/`
   directories; captures use the app-scoped `Captures/` directory ([#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - JavaScript handler results are resolved with `JSON.parse` of a string

@@ -46,6 +46,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.webview.ChannelEventFi
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.ContextMenuSettings
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.web_message.WebMessageChannel
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.web_message.WebMessageListener
+import io.flutter.embedding.android.FlutterSurfaceView
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -1103,6 +1104,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   // interrupted, so a cancel that lands mid-draw takes effect right after it.
   // usePixelCopy copies the composited window pixels instead of drawing; any
   // precondition that does not hold, and any copy failure, falls back to draw.
+  // Only a copy captures hardware video frames (upstream #2732): draw() renders
+  // the page without the decoded video surface. In texture composition the
+  // WebView is shown through Flutter's FlutterSurfaceView, a separate surface
+  // that the window copy sees as a black hole, so the copy reads that surface.
 
   override fun takeScreenshot(
     screenshotConfiguration: MutableMap<String, Any?>,
@@ -1311,6 +1316,17 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       return false // off-viewport capture needs draw()
     }
     val scaled = request.scaleToSnapshot && request.dstWidth > 0 && request.dstHeight > 0
+    // Texture composition: copy from the Flutter surface that shows this view.
+    val flutterSurface = if (customSettings.useHybridComposition != true) {
+      findFlutterSurfaceView(decorView, source)
+    } else {
+      null
+    }
+    if (flutterSurface != null) {
+      val surfaceLocation = IntArray(2)
+      flutterSurface.getLocationInWindow(surfaceLocation)
+      source.offset(-surfaceLocation[0], -surfaceLocation[1])
+    }
     val bitmap = Bitmap.createBitmap(
       if (scaled) request.dstWidth else source.width(),
       if (scaled) request.dstHeight else source.height(),
@@ -1334,7 +1350,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       }
     }
     try {
-      PixelCopy.request(window, source, bitmap, listener, ScreenshotEncoder.handler)
+      if (flutterSurface != null) {
+        PixelCopy.request(flutterSurface, source, bitmap, listener, ScreenshotEncoder.handler)
+      } else {
+        PixelCopy.request(window, source, bitmap, listener, ScreenshotEncoder.handler)
+      }
     } catch (e: IllegalArgumentException) {
       // For example "Window doesn't have a backing surface": draw instead.
       bitmap.recycle()
@@ -1342,6 +1362,27 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       return false
     }
     return true
+  }
+
+  /**
+   * The visible FlutterSurfaceView whose window bounds contain [windowRect], or
+   * null (for example a FlutterTextureView, which draws into the window itself).
+   */
+  private fun findFlutterSurfaceView(root: View, windowRect: Rect): SurfaceView? {
+    if (root is FlutterSurfaceView) {
+      if (!root.isShown || root.holder?.surface?.isValid != true) return null
+      val location = IntArray(2)
+      root.getLocationInWindow(location)
+      val bounds = Rect(location[0], location[1], location[0] + root.width, location[1] + root.height)
+      return if (bounds.contains(windowRect)) root else null
+    }
+    if (root !is ViewGroup) return null
+    for (index in 0 until root.childCount) {
+      val child = root.getChildAt(index) ?: continue
+      val found = findFlutterSurfaceView(child, windowRect)
+      if (found != null) return found
+    }
+    return null
   }
 
   /** Looper-side fallback for a failed PixelCopy, with the draw-path settlement rules. */

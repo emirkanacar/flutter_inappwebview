@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Document that on Android only `ScreenshotConfiguration.usePixelCopy`
+  captures hardware-decoded video frames ([#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732)).
 - Add `InAppWebViewSettings.enableAccessibilityFocus` (macOS, Windows,
   default `false`): native keyboard and screen reader focus follows Flutter
   focus into and out of the page ([#2952](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2952), [#2953](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2953)).

@@ -137,6 +137,38 @@ void main() {
     expect(webView, contains('!viewBounds.contains(source)'));
   });
 
+  test('usePixelCopy reads the Flutter surface in texture composition', () {
+    // Upstream #2732: in texture composition the window copy returned an
+    // all-black image, because the WebView is shown through FlutterSurfaceView.
+    final webView = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final start = webView.indexOf('private fun requestPixelCopy(');
+    final end = webView.indexOf('private fun drawScreenshotAfterFailedCopy(');
+    expect(start, greaterThan(0));
+    final body = webView.substring(start, end);
+    expect(
+      body,
+      contains(
+        'if (customSettings.useHybridComposition != true) {\n'
+        '      findFlutterSurfaceView(decorView, source)',
+      ),
+    );
+    expect(
+      body,
+      contains('source.offset(-surfaceLocation[0], -surfaceLocation[1])'),
+    );
+    expect(
+      body,
+      contains(
+        'PixelCopy.request(flutterSurface, source, bitmap, listener, ScreenshotEncoder.handler)',
+      ),
+    );
+    expect(body, contains('if (root is FlutterSurfaceView) {'));
+    expect(body, contains('root.holder?.surface?.isValid != true'));
+    expect(body, contains('bounds.contains(windowRect)'));
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Android JS dialogs are answered once, even without an activity', () {

@@ -203,6 +203,51 @@ webkitgtk support (#2890). macOS SwiftPM 10.15 (#2891) is already covered (see
 hardening PRs #2914-#2934 are triaged in
 [Upstream hardening PRs #2914-#2934](#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds).
 
+## 2026-11-22 Android screenshot of a playing video (#2732)
+
+Issue [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732): `takeScreenshot` shows the video area of a playing `<video>`
+as black (reported on an Android TV emulator, API 34).
+
+Reproduction: `flutter_inappwebview_forge_android/example/integration_test/video_screenshot_test.dart`
+plays a generated H.264 clip (`example/test_assets/screenshot_video.mp4`)
+served through `shouldInterceptRequest`, takes a screenshot with and without
+`usePixelCopy` in hybrid and texture composition, and measures the video
+rectangle and the white page below it. Samsung SM-A165F, Android 17 (API 37),
+WebView 157.0.8103.50:
+
+| Composition | Path | Video rect colored | Page below black |
+| --- | --- | --- | --- |
+| hybrid | draw | 0.00 | 0.00 |
+| hybrid | PixelCopy | 0.95 | 0.00 |
+| texture | draw | 0.00 | 0.00 |
+| texture | PixelCopy, before fix | 0.00 | 1.00 |
+| texture | PixelCopy, after fix | 0.95 | 0.00 |
+
+Root cause:
+
+- `View.draw(canvas)` renders the page without the hardware-decoded video
+  frame, so the default path cannot capture video on any composition. On this
+  device the rectangle keeps the page colour; the reported black is the same
+  missing frame on another renderer.
+- `usePixelCopy` copied `PixelCopy.request(window, ...)`. In texture
+  composition the WebView is shown through Flutter's `FlutterSurfaceView`, a
+  separate surface, so the window copy succeeded with an all-black image
+  instead of falling back.
+
+Fix: with `useHybridComposition` off, `requestPixelCopy` looks for the visible
+`FlutterSurfaceView` with a valid surface whose window bounds contain the
+requested rect, offsets the rect into that surface, and copies from it. No
+such surface (for example a `FlutterTextureView`, which draws into the window)
+keeps the window copy; all other preconditions and failures still fall back
+to drawing. The default path is unchanged; the `usePixelCopy` documentation
+now says only the copy captures video. A copy contains anything drawn over the
+WebView, as before.
+
+Evidence: the device test above asserts both PixelCopy rows; the source
+contract is in `flutter_inappwebview_forge_android/test/stability_regression_test.dart`.
+Remaining gap: no Android TV, emulator, or virtual-display run; virtual display
+is not the visible child of the window, so it still draws.
+
 ## 2026-11-22 macOS SwiftPM 10.15 conformance (#2891)
 
 Upstream issue [#2891](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2891): the macOS `Package.swift` declares
@@ -2042,9 +2087,9 @@ These CSV entries are notable enough to keep in the engineering backlog. The
 records already listed in [runtime-validation-pending.md](runtime-validation-pending.md)
 have a documented local implementation or mitigation boundary; their next
 action is target validation, not speculative code change. The remaining
-active examples that still need a reproducible matrix before implementation
-are [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732)
-and [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615).
+active example that still needs a reproducible matrix before implementation
+is [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615);
+#2732 is resolved in [Android screenshot of a playing video](#2026-11-22-android-screenshot-of-a-playing-video-2732).
 Duplicate `forceDarkStrategy` provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
 and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
 are already covered by the runtime register and should be validated together.
