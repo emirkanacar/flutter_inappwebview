@@ -5,7 +5,6 @@ import android.util.Log
 import android.webkit.WebResourceResponse
 import androidx.webkit.WebViewAssetLoader
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
-import com.emirkanacar.flutter_inappwebview_forge_android.Util
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -155,11 +154,10 @@ open class WebViewAssetLoaderExt(
 
         @Throws(InterruptedException::class)
         fun handle(path: String): WebResourceResponseExt? {
-            val channel = getChannel() ?: return null
             val callback = SyncHandleCallback()
             val obj = HashMap<String, Any?>()
             obj["path"] = path
-            return Util.invokeMethodAndWaitResult(channel, "handle", obj, callback)
+            return invokeMethodAndWaitResult("handle", obj, callback)
         }
 
         override fun dispose() {

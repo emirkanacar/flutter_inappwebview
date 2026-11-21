@@ -2,6 +2,8 @@
 
 - Android: a provider that throws from algorithmic darkening no longer crashes WebView creation ([#2893](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2893)).
 - Android: a renderer crash during `dispose()` no longer kills the app ([#2945](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2945)).
+- Android: `dispose()` no longer leaves intercepted resource requests waiting for the timeout ([#2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).
+- Windows: cursor moves are sent once per frame instead of once per hover sample ([#2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).
 - iOS, macOS: no unhandled promise rejection when `callHandler` runs after the WebView is disposed ([#2940](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2940)).
 - Linux: build with WPE WebKit 2.54+ and isolated CMake WPEPlatform probe ([#2913](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2913), [#2912](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2912)).
 - Linux: fix server-trust PROCEED use-after-free and decode Linux auth/SSL values ([#2898](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2898)).

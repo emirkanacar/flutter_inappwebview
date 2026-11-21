@@ -4,10 +4,12 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 import '../platform_util.dart';
 import '_static_channel.dart';
+import 'cursor_move_coalescer.dart';
 import '../pull_to_refresh_controller.dart';
 
 const Map<String, SystemMouseCursor> _cursors = {
@@ -167,6 +169,7 @@ class CustomPlatformViewController
     await _creatingCompleter.future;
     if (!_isDisposed) {
       _isDisposed = true;
+      _cursorMoves.discard();
       await _eventStreamSubscription?.cancel();
       await _pluginChannel.invokeMethod('dispose', {"id": _textureId});
     }
@@ -194,6 +197,7 @@ class CustomPlatformViewController
       return;
     }
     assert(value.isInitialized);
+    _cursorMoves.flush();
     return _methodChannel.invokeMethod('setPointerUpdate', [
       pointer,
       kind.index,
@@ -204,16 +208,27 @@ class CustomPlatformViewController
     ]);
   }
 
-  /// Moves the virtual cursor to [position].
+  late final CursorMoveCoalescer _cursorMoves = CursorMoveCoalescer(
+    send: (position) {
+      if (_isDisposed) {
+        return;
+      }
+      _methodChannel.invokeMethod('setCursorPos', [position.dx, position.dy]);
+    },
+    scheduleFrame: (callback) {
+      SchedulerBinding.instance.scheduleFrameCallback((_) => callback());
+      SchedulerBinding.instance.ensureVisualUpdate();
+    },
+  );
+
+  /// Moves the virtual cursor to [position], coalesced to one message per
+  /// frame (see [CursorMoveCoalescer]).
   Future<void> _setCursorPos(Offset position) async {
     if (_isDisposed) {
       return;
     }
     assert(value.isInitialized);
-    return _methodChannel.invokeMethod('setCursorPos', [
-      position.dx,
-      position.dy,
-    ]);
+    _cursorMoves.move(position);
   }
 
   /// Indicates whether the specified [button] is currently down.
@@ -225,6 +240,7 @@ class CustomPlatformViewController
       return;
     }
     assert(value.isInitialized);
+    _cursorMoves.flush();
     return _methodChannel.invokeMethod('setPointerButton', <String, dynamic>{
       'kind': kind.index,
       'button': button.index,
@@ -237,6 +253,7 @@ class CustomPlatformViewController
       return;
     }
     assert(value.isInitialized);
+    _cursorMoves.flush();
     return _methodChannel.invokeMethod('setScrollDelta', [dx, dy]);
   }
 

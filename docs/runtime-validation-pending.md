@@ -98,7 +98,7 @@ Details for each are in `known-issues.md`.
 
 | Record | Still required |
 | --- | --- |
-| Post-export upstream fixes, 2026-11-21 ([details](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958)): Android #2893, #2945; iOS/macOS #2940; Linux PR #2898, #2912, #2913; Windows #2896, PR #2938 (callHandler); Web #2955; PR #2900 (Dart only) | Android provider/renderer-kill runs; Apple post-dispose `callHandler`; Linux WPE 2.54 and older builds, gtest, TLS PROCEED/CANCEL; MSVC build and WebView close loop; Web browser smoke test. |
+| Post-export upstream fixes, 2026-11-21 ([details](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958)): Android #2893, #2945; iOS/macOS #2940; Linux PR #2898, #2912, #2913; Windows #2896, PR #2938 (callHandler, cursor coalescing); Android PR #2954; Web #2955; PR #2900 (Dart only) | Android provider/renderer-kill runs, dispose with in-flight intercepted requests; Apple post-dispose `callHandler`; Linux WPE 2.54 and older builds, gtest, TLS PROCEED/CANCEL; MSVC build, WebView close loop, hover exit and click after a fast move; Web browser smoke test. |
 | #2882 iOS 27 `canOpenURL` replacement (iOS 2.1.33) | `openWithSystemBrowser` on iOS 27, plus an unopenable URL returning `cannot be opened!`. |
 | Web `Sandbox.ALLOW_ALL` (Web 1.0.5) | Browser: no `sandbox` attribute for `ALLOW_ALL`, empty `sandbox` for `ALLOW_NONE`. |
 | Android example build directory (Forge PR #1) | `flutter build apk --debug` in the Android example on Flutter 3.44.8. |

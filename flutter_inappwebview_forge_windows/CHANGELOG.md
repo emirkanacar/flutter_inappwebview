@@ -10,6 +10,10 @@
   Dart result is not a string or the reply pointer is null; the JavaScript
   promise resolves with `null` instead (from upstream PR
   [#2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).
+- Coalesce virtual cursor moves to one `setCursorPos` message per frame
+  instead of one per hover sample. Button, touch and wheel input first flush a
+  pending move so they use the current position; dispose drops it (from
+  upstream PR [#2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).
 
 ## 1.0.17 - 2026-11-14
 
