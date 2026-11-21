@@ -114,10 +114,17 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: flutter_inappwebview_forge_windows/example
+        # The checkout path (D:\a\<repo>\<repo>\...) plus the plugin
+        # symlink and header path exceeds MSVC's 260-character MAX_PATH, so
+        # the example is built from a short substituted drive.
+        working-directory: 'X:\flutter_inappwebview_forge_windows\example'
     steps:
       - name: Check out
         uses: actions/checkout@v4
+
+      - name: Map the checkout to a short drive
+        working-directory: .
+        run: cmd //c subst X: "$(cygpath -w "$GITHUB_WORKSPACE")"
 
       - name: Read Flutter version from .fvmrc
         id: flutter-version

@@ -43,6 +43,14 @@ had never been built:
   to `PluginScript` and was called through a nonexistent `PluginScriptsUtil`
   class, and the proxy bypass list called `.value()` on a `std::vector`.
 
+Windows path length: the registrant header resolves to
+`<app>\windows\flutter\ephemeral\.plugin_symlinks\flutter_inappwebview_forge_windows\windows\include\flutter_inappwebview_forge_windows\flutter_inappwebview_windows_plugin_c_api.h`,
+about 190 characters below the app root, and MSVC fails with C1083 once the
+full path exceeds 260 characters (app roots longer than about 70 characters).
+The header name is fixed by Flutter's `<package>/<pluginClass>.h` convention;
+CI builds from a `subst` drive, and apps with long paths should do the same
+or move the project.
+
 Remaining gap: runtime check of Linux container data isolation on a device.
 
 ## 2026-11-21 Post-export upstream triage (#2884-#2958)

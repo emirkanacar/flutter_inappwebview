@@ -6,7 +6,10 @@
   `generated_plugins.cmake` links `flutter_inappwebview_forge_windows_plugin`,
   so CMake generation failed. The public header folder is renamed to
   `include/flutter_inappwebview_forge_windows/` to match the generated plugin
-  registrant. Found by the new native desktop CI job.
+  registrant. Found by the new native desktop CI job. The full header path
+  is about 190 characters below the app root; keep the app root under about
+  70 characters (or build from a `subst` drive) to stay within MSVC's
+  260-character path limit.
 - Fix compile errors in the `disableAutocorrection` plugin script and the
   proxy bypass list.
 - Keep the texture callback and `TextureBridge` alive until Flutter's
