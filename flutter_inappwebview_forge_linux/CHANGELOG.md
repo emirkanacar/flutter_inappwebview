@@ -1,5 +1,8 @@
 ## Unreleased
 
+- JavaScript handler results are parsed with `jsc_value_new_from_json`
+  instead of `jsc_context_evaluate`; invalid JSON rejects the `callHandler`
+  promise. Supports `JavaScriptHandlerJsonResult` ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).
 - `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
   `null` and discards a late result; the native snapshot is not interrupted
   ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).

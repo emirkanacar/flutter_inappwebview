@@ -63,6 +63,14 @@ namespace flutter_inappwebview_plugin
   constexpr auto kHostWindowViewProp = L"flutter_inappwebview_forge.InAppWebView";
 
   namespace {
+    // Encodes text as a JavaScript string literal (a JSON string), so it can be
+    // embedded in JavaScript source without ever running as code. Invalid
+    // UTF-8 is replaced instead of throwing.
+    std::string javaScriptStringLiteral(const std::string& text)
+    {
+      return nlohmann::json(text).dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    }
+
     constexpr wchar_t kFlutterAssetsHostName[] = L"flutter-inappwebview-forge.local";
 
     bool isSafeFlutterAssetPath(const std::filesystem::path& path)
@@ -4509,10 +4517,15 @@ namespace flutter_inappwebview_plugin
                 }
               }
 
-              evaluateJavascript("if (window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "] != null) { \
-                      window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "].resolve(" + json + "); \
-                      delete window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "]; \
-                    }", ContentWorld::page(), nullptr);
+              // The result is JSON text from Dart, possibly passed through
+              // unchanged (JavaScriptHandlerJsonResult). Parse it from a string
+              // literal so it never runs as code; invalid JSON rejects.
+              const auto handler = "window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "]";
+              evaluateJavascript("(function() { var handler = " + handler + "; if (handler == null) { return; } \
+                      delete " + handler + "; var value; \
+                      try { value = JSON.parse(" + javaScriptStringLiteral(json) + "); } \
+                      catch (e) { handler.reject(e); return; } \
+                      handler.resolve(value); })();", ContentWorld::page(), nullptr);
             };
           callback->error = [this, callHandlerID](const std::string& error_code, const std::string& error_message, const flutter::EncodableValue* error_details)
             {
@@ -4520,7 +4533,7 @@ namespace flutter_inappwebview_plugin
               debugLog(errorMessage);
 
               evaluateJavascript("if (window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "] != null) { \
-                      window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "].reject(new Error('" + replace_all_copy(errorMessage, "\'", "\\'") + "')); \
+                      window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "].reject(new Error(" + javaScriptStringLiteral(errorMessage) + ")); \
                       delete window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "]; \
                     }", ContentWorld::page(), nullptr);
             };

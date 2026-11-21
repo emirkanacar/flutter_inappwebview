@@ -265,14 +265,17 @@ class JavaScriptBridgeInterface(
                     override fun defaultBehaviour(json: Any?) {
                         val callbackWebView = inAppWebView ?: return
                         if (!callbackWebView.acceptsCallbacks()) return
-                        val sourceCode = "if (window." +
-                            JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
-                            "[" + callHandlerId + "] != null) { " +
-                            "window." + JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
-                            "[" + callHandlerId + "].resolve(" + json + "); " +
-                            "delete window." + JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME() +
-                            "[" + callHandlerId + "]; " +
-                            "}"
+                        // The result is JSON text from Dart, possibly passed through
+                        // unchanged (JavaScriptHandlerJsonResult). Parse it as a string
+                        // literal so it never runs as code; invalid JSON rejects.
+                        val text = json as? String ?: "null"
+                        val bridge = "window." + JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME()
+                        val sourceCode = "(function() { var handler = " + bridge +
+                            "[" + callHandlerId + "]; if (handler == null) { return; } " +
+                            "delete " + bridge + "[" + callHandlerId + "]; var value; " +
+                            "try { value = JSON.parse(" + JSONObject.quote(text) + "); } " +
+                            "catch (e) { handler.reject(e); return; } " +
+                            "handler.resolve(value); })();"
                         callbackWebView.evaluateJavascript(sourceCode, null)
                     }
 

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- JavaScript handler results are resolved with `JSON.parse` of a string
+  literal instead of being spliced into JavaScript source; invalid JSON
+  rejects the `callHandler` promise. Supports `JavaScriptHandlerJsonResult`
+  ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).
 - Support `InAppWebViewSettings.enableNativePromptDialog`
   ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
 - JavaScript `alert`, `confirm`, `prompt`, and before-unload dialogs are
