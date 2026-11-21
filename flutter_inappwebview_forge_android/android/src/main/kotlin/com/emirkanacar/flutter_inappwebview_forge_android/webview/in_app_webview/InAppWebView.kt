@@ -3591,7 +3591,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       WebViewCompat.setWebViewRenderProcessClient(this, null)
     }
 
-    setWebChromeClient(WebChromeClient())
+    setWebChromeClient(DisposedWebChromeClient)
     setWebViewClient(object : WebViewClient() {
       private var destroyRequested = false
 
@@ -3741,5 +3741,44 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
 
   override fun destroy() {
     super.destroy()
+  }
+}
+
+/**
+ * Chrome client installed while a WebView is torn down. A page unload (for
+ * example a before-unload handler during the about:blank load) must not open a
+ * system dialog on a disposed WebView or leave page JavaScript blocked, so
+ * every JavaScript dialog is cancelled.
+ */
+private object DisposedWebChromeClient : WebChromeClient() {
+  override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+    result?.cancel()
+    return true
+  }
+
+  override fun onJsConfirm(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
+    result?.cancel()
+    return true
+  }
+
+  override fun onJsPrompt(
+    view: WebView?,
+    url: String?,
+    message: String?,
+    defaultValue: String?,
+    result: JsPromptResult?
+  ): Boolean {
+    result?.cancel()
+    return true
+  }
+
+  override fun onJsBeforeUnload(
+    view: WebView?,
+    url: String?,
+    message: String?,
+    result: JsResult?
+  ): Boolean {
+    result?.cancel()
+    return true
   }
 }

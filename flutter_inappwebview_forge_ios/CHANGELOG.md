@@ -1,5 +1,7 @@
 ## Unreleased
 
+- Support `InAppWebViewSettings.enableNativePromptDialog`: when `false`, an
+  unhandled prompt completes with `nil` ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
 - `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
   `null` and discards a late result; the native snapshot is not interrupted
   ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).

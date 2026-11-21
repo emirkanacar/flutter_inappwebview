@@ -44,4 +44,31 @@ void main() {
     expect(source, contains('func presentJavaScriptPanel('));
     expect(source, isNot(contains(': window?.rootViewController else {')));
   });
+
+  test('enableNativePromptDialog=false cancels unhandled prompts', () {
+    // Upstream PR #2901.
+    final source = _sourceFile(
+      'ios/flutter_inappwebview_forge_ios/Sources/flutter_inappwebview_forge_ios/'
+      'InAppWebView/InAppWebView.swift',
+    ).readAsStringSync();
+    final settings = _sourceFile(
+      'ios/flutter_inappwebview_forge_ios/Sources/flutter_inappwebview_forge_ios/'
+      'InAppWebView/InAppWebViewSettings.swift',
+    ).readAsStringSync();
+
+    expect(settings, contains('var enableNativePromptDialog = true'));
+    final prompt = _functionBody(
+      source,
+      'runJavaScriptTextInputPanelWithPrompt message: String',
+    );
+    expect(
+      prompt,
+      contains(
+        'guard self.settings?.enableNativePromptDialog != false else {\n'
+        '                    completionHandler(nil)\n'
+        '                    return\n'
+        '                }',
+      ),
+    );
+  });
 }

@@ -3482,6 +3482,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     completionHandler(nil)
                     return
                 }
+                guard self.settings?.enableNativePromptDialog != false else {
+                    completionHandler(nil)
+                    return
+                }
                 self.createPromptDialog(message: message, defaultValue: defaultValue, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle,
                                         cancelButtonTitle: cancelButtonTitle, value: value, completionHandler: completionHandler)
             }

@@ -66,7 +66,7 @@ Do not copy an upstream PR directly; each item changes a public contract.
 | Issue | Request | Next step |
 | --- | --- | --- |
 | [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Decide whether URL/resource interception is enough; do not promise DNS control. Threat model before API work. |
-| Post-export PRs #2901, #2948, #2952, #2953 | Prompt control, pre-encoded JSON results, accessibility | API decisions; see [known-issues](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958). |
+| Post-export PRs #2948, #2952, #2953 | Pre-encoded JSON results, accessibility | API decisions; see [known-issues](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958). |
 | [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Turn the request into a concrete DOM event/API and test case; security and event-volume review first. |
 
 ### P3: Needs reporter data
@@ -94,7 +94,7 @@ any of these.
 | Toolchain and migration | [#2575](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2575), [#2574](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2574) |
 
 PRs already implemented locally (#2243, #2474, #2743, #2758, #2771, #2823,
-#2825, #2853, #2866, #2871, #2909-#2911) are tracked in the runtime register.
+#2825, #2853, #2866, #2871, #2901, #2909-#2911) are tracked in the runtime register.
 
 ## Leaving this plan
 
