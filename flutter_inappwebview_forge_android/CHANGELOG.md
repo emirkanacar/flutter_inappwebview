@@ -1,5 +1,16 @@
 ## Unreleased
 
+- `takeScreenshot` scales and compresses on a background thread instead of
+  the UI thread; only the draw stays on the WebView looper. At most 2
+  captures per WebView and 4 per process can be in flight; a call over the
+  limit returns `null` right away
+  ([#2909](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2909)).
+- `takeScreenshot` supports `cancellationSignal`: a cancel returns `null`,
+  skips a queued capture, and stops scaling or compression at the next
+  checkpoint through the new `cancelScreenshot` channel method. `dispose()`
+  cancels pending captures ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
+- Support `ScreenshotConfiguration.drawScaled` and `usePixelCopy` (API 26+,
+  falls back to drawing) ([#2911](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2911)).
 - `takeScreenshot` replies `null` when `Bitmap.compress` fails instead of
   sending a partial buffer, and recycles the full-size bitmap when
   `snapshotWidth` scales it ([#2908](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2908)).

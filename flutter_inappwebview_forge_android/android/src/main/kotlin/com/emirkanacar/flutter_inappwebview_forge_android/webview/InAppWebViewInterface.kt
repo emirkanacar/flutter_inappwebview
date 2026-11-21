@@ -47,7 +47,12 @@ interface InAppWebViewInterface {
     fun canGoBackOrForward(steps: Int): Boolean
     fun stopLoading()
     fun isLoading(): Boolean
-    fun takeScreenshot(screenshotConfiguration: MutableMap<String, Any?>, result: MethodChannel.Result)
+    fun takeScreenshot(
+        screenshotConfiguration: MutableMap<String, Any?>,
+        requestId: Long?,
+        result: MethodChannel.Result
+    )
+    fun cancelScreenshot(requestId: Long): Boolean
     fun setSettings(newSettings: InAppWebViewSettings, newSettingsMap: HashMap<String, Any?>)
     fun getCustomSettings(): InAppWebViewSettings
     fun getCustomSettingsMap(): MutableMap<String, Any?>

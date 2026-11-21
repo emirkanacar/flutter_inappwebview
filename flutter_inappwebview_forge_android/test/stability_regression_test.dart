@@ -13,34 +13,130 @@ File _sourceFile(String relativePath) {
 }
 
 void main() {
+  const kotlinRoot =
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/';
+
   test('takeScreenshot replies null on a failed compress and frees bitmaps', () {
     // Upstream PR #2908: a failed Bitmap.compress replied with the partial
     // buffer, and createScaledBitmap overwrote the only reference to the
-    // full-size bitmap, which was never recycled.
+    // full-size bitmap, which was never recycled. Since #2909 the scale and
+    // compress stages live in ScreenshotEncoder.
     final source = _sourceFile(
-      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
-      'webview/in_app_webview/InAppWebView.kt',
+      '${kotlinRoot}webview/in_app_webview/ScreenshotEncoder.kt',
     ).readAsStringSync();
-    final start = source.indexOf('override fun takeScreenshot(');
-    final body = source.substring(
-      start,
-      source.indexOf('override fun setSettings(', start),
-    );
 
+    expect(source, isNot(contains('bitmap = Bitmap.createScaledBitmap(')));
+    expect(source, contains('if (output !== bitmap)'));
     expect(
-      body,
-      isNot(contains('screenshotBitmap = Bitmap.createScaledBitmap(')),
-    );
-    expect(body, contains('if (outputBitmap !== sourceBitmap)'));
-    expect(
-      body,
+      source,
       contains(
-        'if (outputBitmap.compress(compressFormat, quality, byteArrayOutputStream)) {\n'
-        '          bytes = byteArrayOutputStream.toByteArray()',
+        'if (output.compress(request.compressFormat, request.quality, stream)) {\n'
+        '        bytes = stream.toByteArray()',
       ),
     );
-    expect(body, contains('} finally {'));
+    expect(source, contains('} finally {'));
+    expect(source, contains('scaled?.recycle()'));
+    expect(source, contains('bitmap.recycle()'));
   });
+
+  test('takeScreenshot scales and compresses off the WebView looper', () {
+    // Upstream PR #2909: scale and compress ran on the UI thread.
+    final encoder = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/ScreenshotEncoder.kt',
+    ).readAsStringSync();
+    final webView = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    expect(encoder, contains('HandlerThread('));
+    expect(encoder, contains('"fiwv-screenshot-encode"'));
+    expect(encoder, contains('MAX_IN_FLIGHT = 4'));
+    expect(encoder, contains('class CancellableByteArrayOutputStream'));
+    expect(webView, contains('MAX_PENDING_SCREENSHOTS_PER_WEBVIEW = 2'));
+    expect(
+      webView,
+      contains(
+        'ScreenshotEncoder.submit(request, captured, ::settleScreenshot)',
+      ),
+    );
+    final start = webView.indexOf('private fun drawScreenshot(');
+    final drawBody = webView.substring(
+      start,
+      webView.indexOf('private fun requestPixelCopy(', start),
+    );
+    expect(drawBody, isNot(contains('.compress(')));
+    expect(drawBody, isNot(contains('createScaledBitmap')));
+  });
+
+  test('takeScreenshot cancellation settles once and dispose cancels all', () {
+    // Upstream PR #2910.
+    final webView = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final delegate = _sourceFile(
+      '${kotlinRoot}webview/WebViewChannelDelegate.kt',
+    ).readAsStringSync();
+    final methods = _sourceFile(
+      '${kotlinRoot}webview/WebViewChannelDelegateMethods.kt',
+    ).readAsStringSync();
+    expect(methods, contains('cancelScreenshot,'));
+    expect(
+      delegate,
+      contains('WebViewChannelDelegateMethods.cancelScreenshot ->'),
+    );
+    expect(
+      delegate,
+      contains('(call.argument<Any?>("requestId") as? Number)?.toLong()'),
+    );
+    expect(
+      webView,
+      contains('override fun cancelScreenshot(requestId: Long): Boolean'),
+    );
+    final start = webView.indexOf('private fun cancelScreenshotRequest(');
+    final cancelBody = webView.substring(
+      start,
+      webView.indexOf('private fun captureScreenshot(', start),
+    );
+    expect(cancelBody, contains('if (!request.cancel()) return false'));
+    expect(
+      cancelBody,
+      contains('completeScreenshotResult(request.operationId, null)'),
+    );
+    expect(cancelBody, contains('mainLooperHandler.removeCallbacks(it)'));
+    expect(
+      cancelBody,
+      contains('if (request.tryMarkStarted()) releaseScreenshot(request)'),
+    );
+    final disposeStart = webView.indexOf(
+      'private fun finishPendingScreenshotResultsOnDispose()',
+    );
+    expect(
+      webView.substring(disposeStart, disposeStart + 400),
+      contains('cancelScreenshotRequest(it)'),
+    );
+  });
+
+  test('takeScreenshot drawScaled and usePixelCopy fall back to drawing', () {
+    // Upstream PR #2911.
+    final webView = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    expect(webView, contains('canvas.scale('));
+    expect(
+      webView,
+      contains(
+        'PixelCopy.request(window, source, bitmap, listener, ScreenshotEncoder.handler)',
+      ),
+    );
+    expect(
+      webView,
+      contains(
+        'Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requestPixelCopy(request)',
+      ),
+    );
+    expect(webView, contains('drawScreenshotAfterFailedCopy(request)'));
+    expect(webView, contains('!viewBounds.contains(source)'));
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Android resource interception has bounded synchronous backpressure', () {

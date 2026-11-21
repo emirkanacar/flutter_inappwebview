@@ -1,5 +1,8 @@
 ## Unreleased
 
+- `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
+  `null` and discards a late result; the native snapshot is not interrupted
+  ([#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910)).
 - Fix the native build of every app that depends on the plugin. The CMake
   target and bundled-library variable still used the upstream names
   (`flutter_inappwebview_linux_plugin`), but Flutter's generated

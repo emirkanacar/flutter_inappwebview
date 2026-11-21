@@ -200,9 +200,67 @@ Each fix has a source-level regression test that fails on the previous source.
 
 Native prompt
 control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
-([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
-options (#2909-#2911), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-21 Android screenshot encoder, cancellation, and PixelCopy (#2909-#2911)
+
+Upstream PRs [#2909](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2909),
+[#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910), and
+[#2911](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2911), ported
+to Kotlin on top of the #2908 fix.
+
+Root cause: Android `takeScreenshot` drew, scaled, and PNG/JPEG-compressed the
+bitmap in one runnable on the WebView looper. A full-viewport PNG compress
+takes hundreds of milliseconds, so every capture blocked the UI thread for
+that long, and a capture could not be abandoned once requested.
+
+Fix:
+
+- `ScreenshotEncoder` runs scale and compress on one process-wide background
+  `HandlerThread` (`fiwv-screenshot-encode`). The looper only parses the
+  configuration and draws. The reply is still sent on the looper through
+  `completeScreenshotResult`, so the result bookkeeping stays single-threaded
+  and idempotent.
+- Admission: at most 4 accepted captures per process (`MAX_IN_FLIGHT`) and 2
+  per WebView (`MAX_PENDING_SCREENSHOTS_PER_WEBVIEW`) can hold bitmaps at once.
+  A call over either limit replies `null` immediately. Before this change
+  captures were serialized on the looper, so a third concurrent call on one
+  WebView now returns `null` instead of waiting.
+- `ScreenshotCancellationSignal` (platform interface) and the
+  `cancellationSignal` parameter. The Android Dart controller sends a
+  `requestId` and calls the new `cancelScreenshot` channel method. A native
+  cancel replies `null`, removes a queued capture, and stops a running one at
+  the next checkpoint; `CancellableByteArrayOutputStream` aborts
+  `Bitmap.compress`. Other platforms reject pre-cancelled signals and discard
+  late results in Dart only.
+- `ScreenshotConfiguration.drawScaled` draws straight at `snapshotWidth` size.
+  `usePixelCopy` (API 26+) copies the window surface; when the view is not the
+  visible child of a window, the rect is not fully on screen, or the copy
+  fails, it falls back to drawing.
+- `dispose()` cancels every request after the looper queue is cleared, so
+  unstarted requests release their admission slot.
+
+Regression coverage: `flutter_inappwebview_forge_platform_interface/test/screenshot_cancellation_signal_test.dart`
+(guard rules, serializer fields) and four source-contract tests in
+`flutter_inappwebview_forge_android/test/stability_regression_test.dart`.
+
+Evidence, 2026-11-21, Samsung SM-A165F, Android 17, WebView 157 (release
+build, flutter.dev):
+
+- default 1080x2105 PNG; `snapshotWidth: 300` gives 844x1645 with draw,
+  `drawScaled`, and `usePixelCopy`; JPEG at 200 OK;
+- `usePixelCopy` with a 300x5000 rect falls back to drawing (844x14063);
+- cancel right after the call returns `null` in 0 ms; cancel after 30 ms
+  returns `null`; a pre-cancelled signal returns `null`; the next capture
+  succeeds;
+- three concurrent calls: two images and one `null`;
+- 60 consecutive captures at `snapshotWidth: 270` with draw, `drawScaled`, and
+  `usePixelCopy`: 60/60 each (38.2 s, 34.8 s, 33.4 s).
+
+Remaining gaps: UI-thread frame time during a capture was not measured; cancel
+during `Bitmap.compress` was not isolated from cancel during the draw; dispose
+with a capture in flight was not run on the device.
 
 ## 2026-11-21 JavaScript panel answers and Android screenshot robustness (#2943, #2908)
 

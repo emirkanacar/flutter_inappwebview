@@ -5,7 +5,9 @@ package com.emirkanacar.flutter_inappwebview_forge_android.webview.in_app_webvie
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Resources
 import android.content.pm.PackageInfo
 import android.graphics.*
@@ -23,6 +25,7 @@ import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import android.widget.*
 import android.widget.AbsoluteLayout
+import androidx.annotation.RequiresApi
 import androidx.webkit.*
 import com.emirkanacar.flutter_inappwebview_forge_android.InAppWebViewFlutterPlugin
 import com.emirkanacar.flutter_inappwebview_forge_android.WebViewStartupCoordinator
@@ -51,11 +54,15 @@ import java.util.HashMap
 import java.util.Iterator
 import java.util.Set
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 
 class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   companion object {
     private const val LOG_TAG = "InAppWebView"
+    /** Requests alive per WebView: one cancelled-but-draining request plus a new one. */
+    private const val MAX_PENDING_SCREENSHOTS_PER_WEBVIEW = 2
     private const val MAX_NATIVE_REGISTRATION_ATTEMPTS = 8
     private const val NATIVE_REGISTRATION_RETRY_DELAY_MS = 100L
 
@@ -180,6 +187,11 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   private val saveWebArchiveCallbacks: MutableMap<String, ValueCallback<String>> = HashMap()
   private val saveWebArchiveOperationIds: MutableMap<String, Long> = HashMap()
   private val pendingScreenshotResults: MutableMap<Long, MethodChannel.Result> = HashMap()
+  // Keyed by request id. Written on the looper; the encoder thread only removes.
+  private val pendingScreenshots: MutableMap<Long, ScreenshotRequest> = ConcurrentHashMap()
+  private val nativeScreenshotRequestIds = AtomicLong()
+  @Volatile
+  private var screenshotsDisposed = false
   @JvmField
   val channelEventFilter = ChannelEventFilter()
   private var pendingScrollX: Int? = null
@@ -1081,8 +1093,20 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
     WebStorage.getInstance().deleteAllData()
   }
 
+  // Screenshot pipeline (upstream #2909-#2911).
+  //
+  // The capture stage (draw or PixelCopy request) runs on the WebView looper;
+  // scale and compress run on ScreenshotEncoder's background thread. Replies
+  // and their bookkeeping stay on the looper through completeScreenshotResult,
+  // which is idempotent. A cancel replies null at once; the stage that owns the
+  // bitmap discards its output at the next checkpoint. draw() itself cannot be
+  // interrupted, so a cancel that lands mid-draw takes effect right after it.
+  // usePixelCopy copies the composited window pixels instead of drawing; any
+  // precondition that does not hold, and any copy failure, falls back to draw.
+
   override fun takeScreenshot(
     screenshotConfiguration: MutableMap<String, Any?>,
+    requestId: Long?,
     result: MethodChannel.Result
   ) {
     val operationId = lifecycle.beginAsyncOperation()
@@ -1091,104 +1115,268 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       return
     }
     pendingScreenshotResults[operationId] = result
-    val pixelDensity = Util.getPixelDensity(context)
-    val posted = mainLooperHandler.post {
-      if (!lifecycle.acceptsCallbacks()) {
-        completeScreenshotResult(operationId, null)
-        return@post
+    // Dart supplies positive ids so it can cancel by id; a caller without one
+    // gets a negative id that exists only for the registry.
+    val id = requestId ?: -nativeScreenshotRequestIds.incrementAndGet()
+    if (screenshotsDisposed ||
+      pendingScreenshots.size >= MAX_PENDING_SCREENSHOTS_PER_WEBVIEW ||
+      pendingScreenshots.containsKey(id)
+    ) {
+      completeScreenshotResult(operationId, null)
+      return
+    }
+    if (!ScreenshotEncoder.tryAcquire()) {
+      completeScreenshotResult(operationId, null)
+      return
+    }
+    val request = ScreenshotRequest(
+      id,
+      operationId,
+      screenshotConfiguration,
+      Util.getPixelDensity(context)
+    )
+    pendingScreenshots[id] = request
+    val captureTask = Runnable { captureScreenshot(request) }
+    request.captureTask = captureTask
+    if (!mainLooperHandler.post(captureTask)) {
+      request.tryMarkStarted()
+      settleScreenshot(request, null)
+    }
+  }
+
+  override fun cancelScreenshot(requestId: Long): Boolean {
+    val request = pendingScreenshots[requestId] ?: return false
+    return cancelScreenshotRequest(request)
+  }
+
+  /** Frees the admission slot of a request whose bitmap work is over. Any thread, once. */
+  private fun releaseScreenshot(request: ScreenshotRequest) {
+    if (!request.markFinished()) return
+    pendingScreenshots.remove(request.id, request)
+    ScreenshotEncoder.release()
+  }
+
+  /**
+   * Ends a request: frees its slot and sends the reply on the looper. A
+   * cancelled request always replies null (normally it already has).
+   */
+  private fun settleScreenshot(request: ScreenshotRequest, bytes: ByteArray?) {
+    releaseScreenshot(request)
+    val value = if (request.isCancelled) null else bytes
+    if (Looper.myLooper() == mainLooperHandler.looper) {
+      completeScreenshotResult(request.operationId, value)
+    } else {
+      // If this post is dropped by dispose, dispose has already replied null.
+      mainLooperHandler.post { completeScreenshotResult(request.operationId, value) }
+    }
+  }
+
+  private fun cancelScreenshotRequest(request: ScreenshotRequest): Boolean {
+    if (!request.cancel()) return false
+    completeScreenshotResult(request.operationId, null)
+    request.captureTask?.let { mainLooperHandler.removeCallbacks(it) }
+    // An unstarted capture never runs now and allocated nothing.
+    if (request.tryMarkStarted()) releaseScreenshot(request)
+    return true
+  }
+
+  private fun captureScreenshot(request: ScreenshotRequest) {
+    if (!request.tryMarkStarted()) {
+      return // cancelled while queued; the cancel already released it
+    }
+    var handedOff = false
+    try {
+      if (request.isCancelled || !lifecycle.acceptsCallbacks()) return
+      val configuration = request.configuration
+      val pixelDensity = request.pixelDensity
+      var bitmapWidth = measuredWidth
+      var bitmapHeight = measuredHeight
+      var bitmapScrollX = scrollX
+      var bitmapScrollY = scrollY
+
+      val rect = configuration["rect"] as? Map<*, *>
+      if (rect != null) {
+        bitmapScrollX =
+          ((rect["x"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
+            ?: bitmapScrollX
+        bitmapScrollY =
+          ((rect["y"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
+            ?: bitmapScrollY
+        bitmapWidth =
+          ((rect["width"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
+            ?: bitmapWidth
+        bitmapHeight =
+          ((rect["height"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
+            ?: bitmapHeight
       }
-      var sourceBitmap: Bitmap? = null
-      var scaledBitmap: Bitmap? = null
-      val byteArrayOutputStream = ByteArrayOutputStream()
-      var bytes: ByteArray? = null
-      try {
-        var bitmapWidth = measuredWidth
-        var bitmapHeight = measuredHeight
-        var bitmapScrollX = scrollX
-        var bitmapScrollY = scrollY
-        var compressFormat = Bitmap.CompressFormat.PNG
-        var quality = 100
 
-        val rect = screenshotConfiguration["rect"] as? Map<*, *>
-        if (rect != null) {
-          bitmapScrollX =
-            ((rect["x"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
-              ?: bitmapScrollX
-          bitmapScrollY =
-            ((rect["y"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
-              ?: bitmapScrollY
-          bitmapWidth =
-            ((rect["width"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
-              ?: bitmapWidth
-          bitmapHeight =
-            ((rect["height"] as? Number)?.toDouble()?.times(pixelDensity)?.plus(0.5))?.toInt()
-              ?: bitmapHeight
-        }
-
-        (screenshotConfiguration["compressFormat"] as? String)?.let { format ->
-          try {
-            compressFormat = Bitmap.CompressFormat.valueOf(format)
-          } catch (e: IllegalArgumentException) {
-            Log.e(LOG_TAG, "", e)
-          }
-        }
-        quality = (screenshotConfiguration["quality"] as? Number)?.toInt() ?: quality
-
-        sourceBitmap =
-          Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(sourceBitmap)
-        canvas.translate(-bitmapScrollX.toFloat(), -bitmapScrollY.toFloat())
-        draw(canvas)
-
-        var outputBitmap: Bitmap = sourceBitmap
-        val snapshotWidth = (screenshotConfiguration["snapshotWidth"] as? Number)?.toDouble()
-        if (snapshotWidth != null) {
-          val destinationWidth = (snapshotWidth * pixelDensity + 0.5).toInt()
-          val ratioBitmap = sourceBitmap.width.toFloat() / sourceBitmap.height.toFloat()
-          val destinationHeight = (destinationWidth / ratioBitmap).toInt()
-          outputBitmap = Bitmap.createScaledBitmap(
-            sourceBitmap,
-            destinationWidth,
-            destinationHeight,
-            true
-          )
-          // createScaledBitmap can return the source itself; only a distinct
-          // bitmap is tracked so that it is recycled exactly once.
-          if (outputBitmap !== sourceBitmap) {
-            scaledBitmap = outputBitmap
-          }
-        }
-
-        if (outputBitmap.compress(compressFormat, quality, byteArrayOutputStream)) {
-          bytes = byteArrayOutputStream.toByteArray()
-        } else {
-          // A failed compress leaves an empty or truncated buffer; reply null.
-          Log.e(
-            LOG_TAG,
-            "Screenshot cannot be compressed using compressFormat " +
-              compressFormat.name + " with quality " + quality,
-            null
-          )
-        }
-      } catch (e: IllegalArgumentException) {
-        Log.e(LOG_TAG, "", e)
-      } catch (e: Throwable) {
-        // Includes OutOfMemoryError from createBitmap on low-memory devices.
-        Log.e(LOG_TAG, "Screenshot failed", e)
-      } finally {
-        scaledBitmap?.recycle()
-        sourceBitmap?.recycle()
+      (configuration["compressFormat"] as? String)?.let { format ->
         try {
-          byteArrayOutputStream.close()
-        } catch (e: IOException) {
+          request.compressFormat = Bitmap.CompressFormat.valueOf(format)
+        } catch (e: IllegalArgumentException) {
           Log.e(LOG_TAG, "", e)
         }
       }
-      completeScreenshotResult(operationId, bytes)
+      request.quality = (configuration["quality"] as? Number)?.toInt() ?: request.quality
+      request.drawScaled = configuration["drawScaled"] == true
+      request.usePixelCopy = configuration["usePixelCopy"] == true
+      request.captureX = bitmapScrollX
+      request.captureY = bitmapScrollY
+      request.captureWidth = bitmapWidth
+      request.captureHeight = bitmapHeight
+      val snapshotWidth = (configuration["snapshotWidth"] as? Number)?.toDouble()
+      if (snapshotWidth != null) {
+        // Same rounding as before the encoder split, so the output size is unchanged.
+        request.scaleToSnapshot = true
+        request.dstWidth = (snapshotWidth * pixelDensity + 0.5).toInt()
+        val ratioBitmap = bitmapWidth.toFloat() / bitmapHeight.toFloat()
+        request.dstHeight = (request.dstWidth / ratioBitmap).toInt()
+      }
+
+      if (request.usePixelCopy &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && requestPixelCopy(request)
+      ) {
+        handedOff = true // the PixelCopy listener owns the request from here
+        return
+      }
+      handedOff = drawScreenshot(request)
+    } catch (e: IllegalArgumentException) {
+      Log.e(LOG_TAG, "", e)
+    } catch (e: Throwable) {
+      // Includes OutOfMemoryError from createBitmap on low-memory devices.
+      Log.e(LOG_TAG, "Screenshot failed", e)
+    } finally {
+      if (!handedOff) {
+        settleScreenshot(request, null)
+      }
     }
-    if (!posted) {
-      completeScreenshotResult(operationId, null)
+  }
+
+  /**
+   * Draws the view into a fresh bitmap and hands it to the encoder. Returns
+   * true once the encoder owns the request. With drawScaled and a smaller
+   * snapshot size the canvas is scaled first, so the scale stage is skipped.
+   */
+  private fun drawScreenshot(request: ScreenshotRequest): Boolean {
+    val scaledDraw = request.drawScaled && request.scaleToSnapshot &&
+      request.dstWidth > 0 && request.dstHeight > 0 &&
+      request.dstWidth < request.captureWidth
+    val width = if (scaledDraw) request.dstWidth else request.captureWidth
+    val height = if (scaledDraw) request.dstHeight else request.captureHeight
+    var screenshotBitmap: Bitmap? = null
+    try {
+      screenshotBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+      val canvas = Canvas(screenshotBitmap)
+      if (scaledDraw) {
+        canvas.scale(
+          width / request.captureWidth.toFloat(),
+          height / request.captureHeight.toFloat()
+        )
+      }
+      canvas.translate(-request.captureX.toFloat(), -request.captureY.toFloat())
+      // Last chance to skip the one stage that cannot be interrupted.
+      if (request.isCancelled) return false
+      draw(canvas)
+      if (request.isCancelled) return false
+      request.alreadyScaled = scaledDraw
+      val captured: Bitmap = screenshotBitmap
+      screenshotBitmap = null
+      return ScreenshotEncoder.submit(request, captured, ::settleScreenshot)
+    } finally {
+      screenshotBitmap?.recycle()
     }
+  }
+
+  /**
+   * Copies the visible pixels of this view from the window surface into a
+   * bitmap of the final size; the listener runs on the encoder thread.
+   * Returns false (nothing started) when the view is not the visible child of
+   * a window or the requested rect is not fully on screen; the caller then
+   * draws. A copy that fails at runtime also falls back to drawing.
+   */
+  @RequiresApi(Build.VERSION_CODES.O)
+  private fun requestPixelCopy(request: ScreenshotRequest): Boolean {
+    val window = findScreenshotWindow() ?: return false
+    val decorView = window.peekDecorView()
+    if (decorView == null || rootView !== decorView || !isAttachedToWindow || !isShown) {
+      return false
+    }
+    val location = IntArray(2)
+    getLocationInWindow(location)
+    val viewBounds = Rect(location[0], location[1], location[0] + width, location[1] + height)
+    val left = location[0] + (request.captureX - scrollX)
+    val top = location[1] + (request.captureY - scrollY)
+    val source = Rect(left, top, left + request.captureWidth, top + request.captureHeight)
+    if (source.isEmpty || !viewBounds.contains(source)) {
+      return false // off-viewport capture needs draw()
+    }
+    val scaled = request.scaleToSnapshot && request.dstWidth > 0 && request.dstHeight > 0
+    val bitmap = Bitmap.createBitmap(
+      if (scaled) request.dstWidth else source.width(),
+      if (scaled) request.dstHeight else source.height(),
+      Bitmap.Config.ARGB_8888
+    )
+    request.alreadyScaled = scaled
+    val listener = PixelCopy.OnPixelCopyFinishedListener { copyResult ->
+      // Runs on the encoder thread.
+      if (copyResult == PixelCopy.SUCCESS) {
+        ScreenshotEncoder.encode(request, bitmap, ::settleScreenshot)
+        return@OnPixelCopyFinishedListener
+      }
+      bitmap.recycle()
+      request.alreadyScaled = false
+      if (request.isCancelled || screenshotsDisposed) {
+        settleScreenshot(request, null)
+        return@OnPixelCopyFinishedListener
+      }
+      if (!mainLooperHandler.post { drawScreenshotAfterFailedCopy(request) }) {
+        settleScreenshot(request, null)
+      }
+    }
+    try {
+      PixelCopy.request(window, source, bitmap, listener, ScreenshotEncoder.handler)
+    } catch (e: IllegalArgumentException) {
+      // For example "Window doesn't have a backing surface": draw instead.
+      bitmap.recycle()
+      request.alreadyScaled = false
+      return false
+    }
+    return true
+  }
+
+  /** Looper-side fallback for a failed PixelCopy, with the draw-path settlement rules. */
+  private fun drawScreenshotAfterFailedCopy(request: ScreenshotRequest) {
+    var handedOff = false
+    try {
+      if (request.isCancelled || screenshotsDisposed || !lifecycle.acceptsCallbacks()) return
+      handedOff = drawScreenshot(request)
+    } catch (e: Throwable) {
+      Log.e(LOG_TAG, "Screenshot failed", e)
+    } finally {
+      if (!handedOff) {
+        settleScreenshot(request, null)
+      }
+    }
+  }
+
+  /**
+   * The window this view is drawn in right now: from the attached root's
+   * context first (an Activity can be recreated under a WebView that stays
+   * alive), then the creation context, then the plugin Activity.
+   */
+  private fun findScreenshotWindow(): Window? {
+    return windowOf(rootView.context)
+      ?: windowOf(context)
+      ?: plugin?.activity?.window
+  }
+
+  private fun windowOf(start: Context?): Window? {
+    var current = start
+    while (current is ContextWrapper) {
+      if (current is Activity) return current.window
+      current = current.baseContext
+    }
+    return null
   }
 
   @SuppressLint("RestrictedApi")
@@ -3531,6 +3719,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   }
 
   private fun finishPendingScreenshotResultsOnDispose() {
+    // Queued captures were removed with the looper messages; cancel every
+    // request so unstarted ones free their slot and running ones stop.
+    screenshotsDisposed = true
+    ArrayList(pendingScreenshots.values).forEach { cancelScreenshotRequest(it) }
     val pendingResults = ArrayList(pendingScreenshotResults.entries)
     pendingScreenshotResults.clear()
     pendingResults.forEach { entry ->
