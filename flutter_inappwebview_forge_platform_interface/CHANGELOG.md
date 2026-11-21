@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Add `JavaScriptHandlerJsonResult`: a JavaScript handler can return
+  pre-encoded JSON text, which is passed to the page without a decode/encode
+  round trip. `JavaScriptHandlerJsonResult.encode` is the shared result
+  encoder for platform implementations ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).
 - Add `InAppWebViewSettings.enableNativePromptDialog` (Android, iOS, default
   `true`). When `false`, a prompt that `onJsPrompt` does not handle is
   cancelled ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)). Regenerated serializers.

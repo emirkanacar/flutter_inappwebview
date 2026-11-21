@@ -198,9 +198,68 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-Pre-encoded JSON handler results
-([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+macOS/Windows accessibility (#2952, #2953), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-21 Pre-encoded JSON handler results (#2948)
+
+Upstream PR [#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948), implemented with a parsed (not evaluated) delivery
+path.
+
+Root cause:
+
+- A JavaScript handler result was always passed through `jsonEncode`. A
+  handler that already held JSON text (from a cache, a file, or another
+  bridge) had to decode it first, only for it to be encoded again.
+- Upstream's change passes such text through unchanged. Native code then
+  spliced the result into JavaScript source as `...resolve(<json>)` on
+  Android, iOS, macOS, and Windows, and Linux ran it with
+  `jsc_context_evaluate`. With text that is not produced by `jsonEncode`,
+  invalid or untrusted text would run as code in the page.
+- The error path built `new Error('<message>')` by escaping only single
+  quotes, so a message with a backslash or newline broke the script.
+
+Fix:
+
+- New `JavaScriptHandlerJsonResult(String json)` in the platform interface.
+  `JavaScriptHandlerJsonResult.encode` returns its text unchanged and
+  `jsonEncode`s every other result; all six controllers use it. `toJson()`
+  decodes the text, so the type also works nested inside other results.
+- Android, iOS, macOS, and Windows embed the result as a string literal
+  (`JSONObject.quote`, `JSONSerialization` with `.fragmentsAllowed`,
+  `nlohmann::json::dump` with invalid UTF-8 replaced) and resolve with
+  `JSON.parse`. A parse error rejects the `callHandler` promise. The handler
+  entry is deleted before it is resolved or rejected.
+- Linux builds the reply with `jsc_value_new_from_json`; invalid JSON (or
+  text with an embedded NUL) answers with
+  `webkit_script_message_reply_return_error_message`.
+- Web already returns the text through `JSON.parse` in `web_support`; only
+  the Dart encode changed.
+- Error messages are encoded as string literals on iOS, macOS, and Windows.
+- Results from `jsonEncode` are always valid JSON, so existing handlers
+  resolve with the same values.
+
+Regression coverage: `test/javascript_handler_json_result_test.dart` in the
+platform interface (3 tests), and a
+`test/javascript_handler_result_source_test.dart` source-contract test in the
+Android, iOS, macOS, Windows, and Linux packages.
+
+Evidence:
+
+- Samsung SM-A165F, Android 17, WebView 157 (release build, 2026-11-21), and
+  the iOS simulator (iPhone 18 Pro, debug build, 2026-11-22): valid JSON text resolved as an
+  object; `{a:1}` rejected with `SyntaxError`; the injection text
+  `1); window.pwned = true; (1` rejected and `window.pwned` stayed `false`;
+  a 200,000-element array resolved (Android 122 ms, simulator 18 ms); a map,
+  `null`, `JavaScriptHandlerJsonResult('null')`, and a throwing handler
+  behaved as before (a string with quotes, U+2028, and `</script>`
+  compared equal on Android);
+- the Android, iOS simulator, and macOS examples build; the web package
+  analyzes cleanly against the local platform interface.
+
+Remaining gaps: Windows and Linux were validated only by source tests and CI
+builds, not run; the iOS simulator logger cut the U+2028 string line, so that
+comparison was not seen on iOS; macOS was built, not run.
 
 ## 2026-11-21 JavaScript dialog answers and native prompt control (#2901)
 

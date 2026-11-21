@@ -1,5 +1,9 @@
 ## Unreleased
 
+- JavaScript handler results are resolved with `JSON.parse` of a string
+  literal instead of being spliced into JavaScript source; invalid JSON
+  rejects the `callHandler` promise, and handler error messages are encoded
+  as string literals. Supports `JavaScriptHandlerJsonResult` ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).
 - Support `InAppWebViewSettings.enableNativePromptDialog`: when `false`, an
   unhandled prompt completes with `nil` ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
 - `takeScreenshot` accepts `cancellationSignal`. A cancelled signal returns
