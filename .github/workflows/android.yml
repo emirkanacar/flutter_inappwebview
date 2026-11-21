@@ -1,0 +1,73 @@
+name: Android build
+
+# The release APK build and 16 KB alignment check only change when the Android
+# native code, the Android build configuration, the example's native
+# dependencies, or the Flutter toolchain change, so they do not run for every
+# Dart-only or other-platform change. Run it manually before a release.
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.fvmrc'
+      - '.github/workflows/android.yml'
+      - 'tool/check_android_16k_alignment.sh'
+      - 'flutter_inappwebview_forge_android/android/**'
+      - 'flutter_inappwebview_forge_android/pubspec.yaml'
+      - 'flutter_inappwebview_forge/pubspec.yaml'
+      - 'flutter_inappwebview_forge/example/android/**'
+      - 'flutter_inappwebview_forge/example/pubspec.yaml'
+      - 'flutter_inappwebview_forge/example/pubspec.lock'
+  pull_request:
+    paths:
+      - '.fvmrc'
+      - '.github/workflows/android.yml'
+      - 'tool/check_android_16k_alignment.sh'
+      - 'flutter_inappwebview_forge_android/android/**'
+      - 'flutter_inappwebview_forge_android/pubspec.yaml'
+      - 'flutter_inappwebview_forge/pubspec.yaml'
+      - 'flutter_inappwebview_forge/example/android/**'
+      - 'flutter_inappwebview_forge/example/pubspec.yaml'
+      - 'flutter_inappwebview_forge/example/pubspec.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-build:
+    name: Android example build and 16 KB check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Build release APK
+        working-directory: flutter_inappwebview_forge/example
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Check 16 KB native library alignment
+        run: bash tool/check_android_16k_alignment.sh flutter_inappwebview_forge/example/build/app/outputs/flutter-apk/app-release.apk
