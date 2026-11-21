@@ -253,11 +253,12 @@ namespace flutter_inappwebview_plugin
         if (initialSettings->proxyBypassRules.has_value() &&
             !initialSettings->proxyBypassRules->empty()) {
           proxyArguments += " --proxy-bypass-list=";
-          for (size_t i = 0; i < initialSettings->proxyBypassRules->value().size(); ++i) {
+          const auto& bypassRules = initialSettings->proxyBypassRules.value();
+          for (size_t i = 0; i < bypassRules.size(); ++i) {
             if (i > 0) {
               proxyArguments += ";";
             }
-            proxyArguments += initialSettings->proxyBypassRules->value()[i];
+            proxyArguments += bypassRules[i];
           }
         }
         environmentOptions->put_AdditionalBrowserArguments(
@@ -534,7 +535,7 @@ namespace flutter_inappwebview_plugin
     if (userContentController) {
       if (settings->disableAutocorrection) {
         userContentController->addPluginScript(
-            PluginScriptsUtil::DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
+            DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT(
                 settings->pluginScriptsOriginAllowList,
                 settings->pluginScriptsForMainFrameOnly));
       }

@@ -16,6 +16,40 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test('Linux containers use the WPE WebKit 2.0 network session API', () {
+    // WPE WebKit 2.0 removed webkit_website_data_manager_new and
+    // webkit_web_context_new_with_website_data_manager; using them broke the
+    // build. Persistent container data lives in a WebKitNetworkSession.
+    final source = _sourceFile(
+      'linux/in_app_webview/in_app_webview.cc',
+    ).readAsStringSync();
+    expect(source, isNot(contains('webkit_website_data_manager_new(')));
+    expect(
+      source,
+      isNot(contains('webkit_web_context_new_with_website_data_manager(')),
+    );
+    expect(source, contains('webkit_network_session_new('));
+  });
+  test('Linux CMake plugin target matches the package name', () {
+    // Flutter's generated_plugins.cmake links `<package>_plugin` and bundles
+    // `<package>_bundled_libraries`; the upstream names broke every app build.
+    final source = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
+    expect(
+      source,
+      contains('set(PLUGIN_NAME "flutter_inappwebview_forge_linux_plugin")'),
+    );
+    expect(
+      source,
+      contains('set(flutter_inappwebview_forge_linux_bundled_libraries'),
+    );
+    // generated_plugin_registrant.cc includes `<package>/<pluginClass>.h`.
+    expect(
+      _sourceFile(
+        'linux/include/flutter_inappwebview_forge_linux/flutter_inappwebview_linux_plugin.h',
+      ).existsSync(),
+      isTrue,
+    );
+  });
   test(
     'Linux native source contracts remain guarded',
     _runSourceContractAssertions,

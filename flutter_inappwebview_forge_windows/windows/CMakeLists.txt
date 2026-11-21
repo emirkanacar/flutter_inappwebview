@@ -21,7 +21,7 @@ cmake_policy(VERSION 3.14...3.25)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed
-set(PLUGIN_NAME "flutter_inappwebview_windows_plugin")
+set(PLUGIN_NAME "flutter_inappwebview_forge_windows_plugin")
 
 find_program(NUGET nuget)
 if(NOT NUGET)
@@ -264,7 +264,7 @@ list(APPEND PLUGIN_SOURCES
 # Define the plugin library target. Its name must not be changed (see comment
 # on PLUGIN_NAME above).
 add_library(${PLUGIN_NAME} SHARED
-  "include/flutter_inappwebview_windows/flutter_inappwebview_windows_plugin_c_api.h"
+  "include/flutter_inappwebview_forge_windows/flutter_inappwebview_windows_plugin_c_api.h"
   "flutter_inappwebview_windows_plugin_c_api.cpp"
   ${PLUGIN_SOURCES}
 )
@@ -333,7 +333,7 @@ target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin)
 # List of absolute paths to libraries that should be bundled with the plugin.
 # This list could contain prebuilt libraries, or libraries created by an
 # external build triggered from this build file.
-set(flutter_inappwebview_windows_bundled_libraries
+set(flutter_inappwebview_forge_windows_bundled_libraries
   PARENT_SCOPE
 )
 

@@ -60,8 +60,7 @@ namespace flutter_inappwebview_plugin
         forMainFrameOnly,
         allowedOriginRules,
         nullptr,
-        true,
-        std::vector<std::string>{});
+        true);
   }
 }
 

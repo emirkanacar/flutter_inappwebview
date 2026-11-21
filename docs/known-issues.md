@@ -15,6 +15,44 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-11-21 Linux and Windows CMake plugin target name
+
+Linux and Windows (Forge-only, found by the new `native-desktop.yml` job):
+every app build failed at CMake generation with `No target
+"flutter_inappwebview_forge_windows_plugin"`. Flutter's generated
+`generated_plugins.cmake` links `<package>_plugin` and bundles
+`<package>_bundled_libraries`, but both plugin `CMakeLists.txt` files still
+used the upstream names from before the 1.0.0 rename, and the registrant's
+`#include <flutter_inappwebview_forge_<os>/...>` did not match the
+`include/flutter_inappwebview_<os>/` folder. The target, variable and include
+folder now use the package name, and a source-level test in each package
+checks them. Evidence:
+the `native-desktop.yml` Linux and Windows example builds.
+
+The same CI run then exposed native compile errors from Forge features that
+had never been built:
+
+- Linux containers (`InAppWebViewSettings.containerId`) called
+  `webkit_website_data_manager_new` and
+  `webkit_web_context_new_with_website_data_manager`, which WPE WebKit 2.0
+  removed. A container now gets a persistent
+  `webkit_network_session_new(dataDir, cacheDir)` session; an incognito
+  (ephemeral) session takes precedence. A `contentBlockersChanged` typo in
+  `setSettings` was also fixed.
+- Windows `DISABLE_AUTOCORRECTION_JS_PLUGIN_SCRIPT` passed an extra argument
+  to `PluginScript` and was called through a nonexistent `PluginScriptsUtil`
+  class, and the proxy bypass list called `.value()` on a `std::vector`.
+
+Windows path length: the registrant header resolves to
+`<app>\windows\flutter\ephemeral\.plugin_symlinks\flutter_inappwebview_forge_windows\windows\include\flutter_inappwebview_forge_windows\flutter_inappwebview_windows_plugin_c_api.h`,
+about 190 characters below the app root, and MSVC fails with C1083 once the
+full path exceeds 260 characters (app roots longer than about 70 characters).
+The header name is fixed by Flutter's `<package>/<pluginClass>.h` convention;
+CI builds from a `subst` drive, and apps with long paths should do the same
+or move the project.
+
+Remaining gap: runtime check of Linux container data isolation on a device.
+
 ## 2026-11-21 Post-export upstream triage (#2884-#2958)
 
 Upstream issues and PRs filed after the 125-issue CSV snapshot were screened
