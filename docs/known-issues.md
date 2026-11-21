@@ -198,8 +198,48 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
-#2914-#2934.
+macOS SwiftPM 10.15 (#2891) and webkitgtk support (#2890). The closed
+hardening PRs #2914-#2934 are triaged in
+[Upstream hardening PRs #2914-#2934](#2026-11-22-upstream-hardening-prs-2914-2934-and-popup-content-worlds).
+
+## 2026-11-22 Upstream hardening PRs #2914-#2934 and popup content worlds
+
+Upstream closed PRs #2914 to #2934 on 2026-10-18 without merging them. Most
+Windows PRs are stacked (each includes the previous one's commits).
+
+Ported:
+
+- [#2932](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2932), iOS popup content worlds. Root cause: to avoid the
+  WebKit popup crash (#2771, PR #2776), Forge ran every popup evaluation in
+  the page world, including requests for a named `ContentWorld` or a
+  subframe, so that code ran with page access. Fix: in a popup (`windowId`
+  set), named worlds and non-nil frames fail closed (`evaluateJavascript`
+  returns `null` and logs a console error; `callAsyncJavaScript` returns the
+  error). The main-frame page world is unchanged. Upstream allows named worlds
+  on iOS 18+; Forge keeps them closed on every version because the crash was
+  observed up to iOS 26.
+- [#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931). The legacy `callAsyncJavaScript` wrapper (iOS below
+  14, macOS below 11) left its parameter list unclosed when arguments were
+  passed. Fixed on iOS and macOS. Android already used `Captures/` (#2873); the
+  public `Pictures/` and `Movies/` mappings were for pre-N Android and are
+  removed (minSdk 24).
+
+Already covered: #2930 (Linux theme color guarded by
+`WEBKIT_CHECK_VERSION(2, 50, 0)`) and the MSVC part of #2914.
+
+Not ported, not compared in detail: Windows #2915-#2922 (input, rendering,
+lifecycle; need Windows hardware, 2,300-4,000 lines each), #2923, #2925,
+#2927, #2924 (example), #2926 (`CustomSchemeResponse.headers`, API
+addition), #2928 (content blockers fail closed), #2929 (Linux DMA-BUF),
+#2933 (cancel JavaScript work at document end), #2934 (macOS warnings).
+
+Evidence: iOS `test/flutter_inappwebview_ios_test.dart`, macOS
+`test/legacy_async_wrapper_source_test.dart`, Android
+`test/flutter_inappwebview_android_test.dart`; the iOS example builds for the
+simulator.
+
+Remaining gaps: iOS popup run (page world works, named world fails closed, no
+crash); Android camera/video upload; macOS 10.15 legacy wrapper.
 
 ## 2026-11-22 Windows teardown at application quit (#2884, #2956, #2957)
 

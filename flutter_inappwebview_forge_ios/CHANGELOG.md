@@ -1,5 +1,8 @@
 ## Unreleased
 
+- In a popup WebView (`windowId`), JavaScript for a named `ContentWorld` or a
+  subframe fails closed instead of running in the page world ([#2932](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2932)).
+- Fix the legacy `callAsyncJavaScript` wrapper's unclosed parameter list ([#2931](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2931)).
 - JavaScript handler results are resolved with `JSON.parse` of a string
   literal instead of being spliced into JavaScript source; invalid JSON
   rejects the `callHandler` promise, and handler error messages are encoded

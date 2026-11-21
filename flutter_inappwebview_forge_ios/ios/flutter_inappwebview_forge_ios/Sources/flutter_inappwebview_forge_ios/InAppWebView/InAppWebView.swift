@@ -2016,6 +2016,16 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             completionHandler?(nil)
             return
         }
+        // Upstream PR #2932: a popup only evaluates in the page world (see
+        // evaluateJavaScript(_:frame:contentWorld:)). A named world fails closed
+        // instead of running with page access.
+        if windowId != nil, contentWorld != WKContentWorld.page {
+            if lifecycle.acceptsCallbacks {
+                channelDelegate?.onConsoleMessage(message: popupContentWorldUnavailableError().localizedDescription, messageLevel: 3)
+            }
+            completionHandler?(nil)
+            return
+        }
 
         var jsToInject = source
         if let wrapper = jsWrapper {
@@ -2123,7 +2133,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
         // Popup WebViews reuse the parent's WKWebViewConfiguration. WebKit can dereference an
         // uninitialized content-world/frame pair during popup creation on multiple iOS releases.
-        // Keep popup evaluation in the initialized page world for the full supported range.
+        // Popups therefore never reach the content-world overload: the main-frame page world
+        // uses the frame-less API, and a named world or a subframe fails closed instead of
+        // running in the page world (upstream PR #2932).
         if windowId != nil {
             guard windowCreated else {
                 let error = NSError(
@@ -2132,6 +2144,10 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     userInfo: [NSLocalizedDescriptionKey: "Popup WebView is not attached"]
                 )
                 completionHandler?(.failure(error))
+                return
+            }
+            guard contentWorld == WKContentWorld.page, frame == nil else {
+                completionHandler?(.failure(popupContentWorldUnavailableError()))
                 return
             }
             evaluateJavaScriptInPageWorld(javaScript, completionHandler: completionHandler)
@@ -2147,6 +2163,14 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             return
         }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
+    }
+
+    private func popupContentWorldUnavailableError() -> NSError {
+        return NSError(
+            domain: "flutter_inappwebview_forge",
+            code: -3,
+            userInfo: [NSLocalizedDescriptionKey: "Popup WebViews evaluate JavaScript only in the page world of the main frame"]
+        )
     }
 
     private func evaluateJavaScriptInPageWorld(_ javaScript: String, completionHandler: ((Result<Any, Error>) -> Void)?) {
@@ -2191,8 +2215,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
         }
 
-        // Keep popup async evaluation on the initialized page world for the same
-        // popup/content-world crash path handled above.
+        // Popup async evaluation stays in the main-frame page world for the same
+        // popup/content-world crash path handled above; other worlds fail closed.
         if windowId != nil {
             guard windowCreated else {
                 let error = NSError(
@@ -2205,7 +2229,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 }
                 return
             }
-            super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: wrappedCompletionHandler)
+            guard contentWorld == WKContentWorld.page, frame == nil else {
+                if completionHandler != nil {
+                    consumeNativeCallAsyncJavaScriptResult(resultUuid, result: .failure(popupContentWorldUnavailableError()))
+                }
+                return
+            }
+            super.callAsyncJavaScript(functionBody, arguments: arguments, in: nil, in: WKContentWorld.page, completionHandler: wrappedCompletionHandler)
             return
         }
         super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: wrappedCompletionHandler)
