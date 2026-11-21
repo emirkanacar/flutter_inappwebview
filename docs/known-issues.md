@@ -179,12 +179,22 @@ Each fix has a source-level regression test that fails on the previous source.
 - **Android hybrid composition repaint ([#2950](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2950), [#2889](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2889)).**
   `LAYER_TYPE_HARDWARE` with hybrid composition can stop repainting. The
   proposed fix (`LAYER_TYPE_NONE`) changes rendering for every Android user and
-  needs device evidence first.
+  needs device evidence first. Not reproduced on 2026-11-21 on a Samsung
+  SM-A165F (Android 17, WebView 157.0.8103.50) with release builds from
+  Flutter 3.44.8 and 3.47.8: the #2950 page drew its bottom link after six
+  keyboard open/close cycles (hybrid composition, `hardwareAcceleration:
+  true`), and the #2889 `flutter.dev` page drew after four `reload()` calls.
+  Upstream reports are from a Xiaomi (HyperOS) and a OnePlus 6T (Adreno 630),
+  so the fault may be vendor- or GPU-specific.
 - **Linux dispose crash ([#2904](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2904)).** Needs a Linux reproduction.
 - **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [PR #2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956),
   [PR #2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).** Shutdown ordering of WebView2 controller, environment,
   and channel delegates; Windows hardware needed.
-- **Impeller black screen ([#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939)).** Needs reproduction.
+- **Impeller black screen ([#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939)).** Needs reproduction. Not reproduced
+  on 2026-11-21 on the Samsung SM-A165F above (Flutter 3.47.8 release, Impeller
+  on): the issue's app, with Home pressed while "WebView removed" was shown
+  and resumed after the new WebView was built, drew the WebView in 4 of 4
+  runs. The report used a Samsung SM-A146P and a Pixel 4a 5G.
 
 ### Ideas needing an API or product decision
 
@@ -224,8 +234,17 @@ are now released in `finally`; the scaled bitmap is recycled only when
 
 Evidence: `test/javascript_panel_source_test.dart` (iOS, macOS) and the
 `takeScreenshot` test in the Android `stability_regression_test.dart` failed
-before the fix. Example builds for Android, iOS Simulator, and macOS compile.
-Remaining gap: device runs (see runtime-validation-pending).
+before the fix. Example builds for Android, iOS Simulator, and macOS compile
+(macOS with `MACOSX_DEPLOYMENT_TARGET=12.0`, because Xcode 27 rejects the
+example's 10.15). Android device run, 2026-11-21, Samsung SM-A165F, Android 17
+(API 37), WebView 157.0.8103.50, Flutter 3.47.8 release build:
+`takeScreenshot` returned a PNG of 1080x2105 by default, 844x1645 with
+`snapshotWidth: 300` (dp at density 2.8125), and a JPEG with
+`snapshotWidth: 200, quality: 50`; 60 consecutive calls with
+`snapshotWidth: 540` all returned data, without OOM or crash, and graphics
+memory fell from 335 MB to 211 MB after the loop. Remaining gap: iOS and macOS
+panel runs and a forced Android compress failure (see
+runtime-validation-pending).
 
 ## 2026-11-21 Apple SwiftPM Flutter 3.41 baseline (#2951)
 
