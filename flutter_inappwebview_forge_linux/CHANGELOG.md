@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Fix the native build of every app that depends on the plugin. The CMake
+  target and bundled-library variable still used the upstream names
+  (`flutter_inappwebview_linux_plugin`), but Flutter's generated
+  `generated_plugins.cmake` links `flutter_inappwebview_forge_linux_plugin`,
+  so CMake generation failed. Found by the new native desktop CI job.
 - Build with WPE WebKit 2.54+, which renamed `WPE_SETTING_DISABLE_ANIMATIONS`
   to `WPE_SETTING_REDUCED_MOTION`. Older WPE releases map the new name to the
   old setting ([#2913](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2913)).

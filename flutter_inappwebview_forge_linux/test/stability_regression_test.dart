@@ -16,6 +16,19 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test('Linux CMake plugin target matches the package name', () {
+    // Flutter's generated_plugins.cmake links `<package>_plugin` and bundles
+    // `<package>_bundled_libraries`; the upstream names broke every app build.
+    final source = _sourceFile('linux/CMakeLists.txt').readAsStringSync();
+    expect(
+      source,
+      contains('set(PLUGIN_NAME "flutter_inappwebview_forge_linux_plugin")'),
+    );
+    expect(
+      source,
+      contains('set(flutter_inappwebview_forge_linux_bundled_libraries'),
+    );
+  });
   test(
     'Linux native source contracts remain guarded',
     _runSourceContractAssertions,

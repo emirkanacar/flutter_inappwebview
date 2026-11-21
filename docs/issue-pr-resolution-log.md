@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-21 | Linux and Windows CMake plugin target name fix ([details](known-issues.md#2026-11-21-linux-and-windows-cmake-plugin-target-name)) | Forge-only | Unreleased |
 | 2026-11-21 | Post-export upstream triage: Android, iOS/macOS, Linux, Windows, Web, and platform interface fixes ([details](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958)) | #2893, #2896, #2940, #2945, #2955, PR #2898, #2900, #2912, #2913, #2938, #2954 | Unreleased |
 | 2026-11-21 | iOS fullscreen video after seek moved back to the open plan (failed physical iOS run) | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | - |
 | 2026-11-13 | Xcode 27 / Swift 6.4 iOS and macOS build fix | [Forge #2](https://github.com/emirkanacar/flutter_inappwebview/issues/2) | root 2.1.78, iOS 2.1.36, macOS 1.1.11 |

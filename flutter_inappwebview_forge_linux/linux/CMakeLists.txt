@@ -9,7 +9,7 @@ project(${PROJECT_NAME} LANGUAGES CXX C)
 
 # This value is used when generating builds using this plugin, so it must
 # not be changed.
-set(PLUGIN_NAME "flutter_inappwebview_linux_plugin")
+set(PLUGIN_NAME "flutter_inappwebview_forge_linux_plugin")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -383,7 +383,7 @@ endif()
 # Also need to create symlinks for the sonames that the libraries expect
 # This will be handled at install time in the example CMakeLists.txt
 
-set(flutter_inappwebview_linux_bundled_libraries
+set(flutter_inappwebview_forge_linux_bundled_libraries
   ${WPE_BUNDLED_LIBS}
   PARENT_SCOPE
 )

@@ -15,6 +15,18 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-11-21 Linux and Windows CMake plugin target name
+
+Linux and Windows (Forge-only, found by the new `native-desktop.yml` job):
+every app build failed at CMake generation with `No target
+"flutter_inappwebview_forge_windows_plugin"`. Flutter's generated
+`generated_plugins.cmake` links `<package>_plugin` and bundles
+`<package>_bundled_libraries`, but both plugin `CMakeLists.txt` files still
+used the upstream names from before the 1.0.0 rename. Both names now use the
+package name, and a source-level test in each package checks them. Evidence:
+the `native-desktop.yml` Linux and Windows example builds. Remaining gap:
+none beyond that CI run.
+
 ## 2026-11-21 Post-export upstream triage (#2884-#2958)
 
 Upstream issues and PRs filed after the 125-issue CSV snapshot were screened

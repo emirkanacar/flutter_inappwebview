@@ -1,5 +1,10 @@
 ## Unreleased
 
+- Fix the native build of every app that depends on the plugin. The CMake
+  target and bundled-library variable still used the upstream names
+  (`flutter_inappwebview_windows_plugin`), but Flutter's generated
+  `generated_plugins.cmake` links `flutter_inappwebview_forge_windows_plugin`,
+  so CMake generation failed. Found by the new native desktop CI job.
 - Keep the texture callback and `TextureBridge` alive until Flutter's
   asynchronous `UnregisterTexture` completes. `~CustomPlatformView` freed both
   right after requesting unregistration, so the raster thread could call into

@@ -16,6 +16,19 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test('Windows CMake plugin target matches the package name', () {
+    // Flutter's generated_plugins.cmake links `<package>_plugin` and bundles
+    // `<package>_bundled_libraries`; the upstream names broke every app build.
+    final source = _sourceFile('windows/CMakeLists.txt').readAsStringSync();
+    expect(
+      source,
+      contains('set(PLUGIN_NAME "flutter_inappwebview_forge_windows_plugin")'),
+    );
+    expect(
+      source,
+      contains('set(flutter_inappwebview_forge_windows_bundled_libraries'),
+    );
+  });
   test(
     'Windows native source contracts remain guarded',
     _runSourceContractAssertions,

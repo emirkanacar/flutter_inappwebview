@@ -112,8 +112,8 @@ not rebuild the APK. Run it manually (`gh workflow run android.yml`) before a
 release.
 
 `.github/workflows/native-desktop.yml` compiles the desktop native code. The
-`linux` job (Ubuntu 24.04) installs the newest available WPE WebKit
-development package, runs `flutter build linux --debug` for the Linux example,
+`linux` job runs in a `debian:trixie` container (Ubuntu 24.04 no longer ships
+WPE WebKit), installs `libwpewebkit-2.0-dev`, runs `flutter build linux --debug` for the Linux example,
 and runs the `flutter_inappwebview_linux_test` gtest runner under `xvfb-run`.
 The `windows` job runs `flutter build windows --debug` for the Windows
 example (MSVC, WebView2 and WIL from NuGet). It runs only when `.fvmrc`, the
