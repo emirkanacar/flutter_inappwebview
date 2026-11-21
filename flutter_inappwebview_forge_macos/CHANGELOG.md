@@ -1,5 +1,12 @@
 ## Unreleased
 
+- With `enableAccessibilityFocus: true`, Tab and Shift+Tab move AppKit
+  keyboard focus into the page (first or last focusable element) and back to
+  the next or previous Flutter widget, a click into the page moves Flutter
+  focus onto the WebView, and VoiceOver can read the page. Uses the private
+  WebKit `_webView:takeFocus:` delegate method; with the setting off it keeps
+  WebKit's default key-view behavior and the earlier unfocus-on-click
+  workaround ([#2952](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2952)).
 - JavaScript handler results are resolved with `JSON.parse` of a string
   literal instead of being spliced into JavaScript source; invalid JSON
   rejects the `callHandler` promise, and handler error messages are encoded

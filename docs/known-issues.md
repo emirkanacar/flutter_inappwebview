@@ -198,8 +198,77 @@ Each fix has a source-level regression test that fails on the previous source.
 
 ### Ideas needing an API or product decision
 
-macOS/Windows accessibility (#2952, #2953), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-22 Keyboard and screen reader focus on macOS and Windows (#2952, #2953)
+
+Upstream PRs [#2952](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2952)
+(macOS) and [#2953](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2953)
+(Windows), ported behind the new opt-in setting
+`InAppWebViewSettings.enableAccessibilityFocus` (default `false`).
+
+Root cause:
+
+- macOS: Flutter focus could stand on the web view, but nothing made the
+  `WKWebView` AppKit's first responder. Tab stopped on the view without
+  entering the page. VoiceOver follows the first responder and found only an
+  empty group for the platform view, so it could not read the page. The
+  `_onMouseDown` workaround for upstream #2380 also unfocused Flutter on every
+  click into the page.
+- Windows: with visual hosting (composition controller) the page is a texture
+  to Flutter. The WebView2 UI Automation tree is not attached to any window,
+  so Narrator and NVDA saw nothing, and Win32 keyboard focus never moved into
+  the page on Tab.
+
+Fix:
+
+- Platform interface: `enableAccessibilityFocus` (`bool?`, default `false`,
+  supported on macOS and Windows).
+- macOS: `InAppWebView+KeyboardFocus.swift`. A Dart `Focus` watcher (it never
+  takes focus) around the `AppKitView` calls `_focusPage` with the Tab
+  direction (`next`, `previous`, or none) or `_releasePage`. Native code
+  makes the web view, or the Flutter view, first responder, and walks the key
+  view loop once so WebKit picks the first or last element. The private
+  `_webView:takeFocus:` delegate method returns the keyboard to Flutter and
+  sends `_onTakeFocus`; `becomeFirstResponder` sends
+  `_onBecomeFirstResponder` so a click moves Flutter focus onto the view.
+  `_onMouseDown` now carries `accessibilityFocus`; Dart skips the unfocus
+  only when it is set and Flutter focus is already on the view.
+- Windows: the hidden host window class uses `InAppWebView::hostWindowProc`,
+  which answers `WM_GETOBJECT`/`UiaRootObjectId` with
+  `ICoreWebView2CompositionController2::get_AutomationProvider` through
+  `UiaReturnRawElementProvider` (links `uiautomationcore`). The view is
+  found through a window property. `moveFocus` calls `MoveFocus`
+  NEXT/PREVIOUS after Tab traversal. A handled `MoveFocusRequested` returns
+  Win32 focus to the Flutter view and sends `moveFocusRequested` on the
+  custom platform view event channel.
+- With the setting off every native entry point is a no-op or keeps the old
+  path: `_focusPage`/`_releasePage` and `moveFocus` return without action,
+  `_onBecomeFirstResponder` is not sent, `_webView:takeFocus:` walks the
+  window key view loop as WebKit does without the delegate method,
+  `hostWindowProc` falls through to `DefWindowProc`, `MoveFocusRequested` is
+  left unhandled, and Dart keeps the #2380 unfocus.
+- Lifetime: the Windows window property is removed first in the
+  `InAppWebView` destructor (only if it still points at that view), and the
+  move-focus callback is cleared there and in `~CustomPlatformView`. Dart
+  clears the controller focus callbacks in `dispose`, closes the
+  move-focus stream on dispose, and ignores channel errors from `moveFocus`.
+
+Regression coverage: `test/accessibility_focus_setting_test.dart` in the
+platform interface (default, round trip, supported platforms), and
+`test/accessibility_focus_source_test.dart` source-contract tests in the
+macOS (6) and Windows (5) packages.
+
+Evidence: the macOS example builds (Xcode, deployment target 12.0); macOS
+(35) and Windows (23) package tests pass; Windows relies on the CI build.
+
+Remaining gaps: no runtime run yet. Needed: macOS Tab/Shift+Tab into and out
+of the page, a click into the page, and VoiceOver reading the page; Windows
+Tab/Shift+Tab with Narrator and NVDA, including KeepAlive reattach. Windows
+screen reader highlight rectangles may not match the page position (texture
+hosting). `_webView:takeFocus:` is private WebKit API and is used only for
+the delegate callback.
 
 ## 2026-11-21 Pre-encoded JSON handler results (#2948)
 

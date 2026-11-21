@@ -71,7 +71,39 @@ Useful settings include:
   `backForwardCacheMaxPagesInCache` on Android when BFCache features are
   supported;
 - `obscuredContentInsets` on iOS/macOS 26+ when the WebView is under system
-  chrome.
+  chrome;
+- `enableAccessibilityFocus` on macOS and Windows (see below).
+
+## Keyboard and screen reader focus (macOS, Windows)
+
+By default Tab can stop on the WebView without getting into the page, and
+VoiceOver, Narrator, or NVDA cannot read the page. Set
+`enableAccessibilityFocus: true` to move native keyboard and screen reader
+focus with Flutter focus:
+
+```dart
+InAppWebView(
+  initialSettings: InAppWebViewSettings(
+    enableAccessibilityFocus: true,
+  ),
+)
+```
+
+- Tab into the WebView starts at the page's first focusable element,
+  Shift+Tab at its last one.
+- Tab past the last element (Shift+Tab before the first) continues in
+  Flutter's focus order.
+- On macOS a click into the page also moves Flutter focus onto the WebView,
+  and VoiceOver reads the page. macOS uses the private WebKit
+  `_webView:takeFocus:` delegate method; with the setting off that method
+  keeps WebKit's default key-view behavior.
+- On Windows the page's UI Automation tree is exposed through the WebView's
+  host window, so Narrator and NVDA can read it. Screen reader highlight
+  rectangles may not match the page position because the page is drawn as a
+  Flutter texture.
+
+The default is `false`, which keeps the earlier focus behavior. Screen reader
+behavior still needs device validation; see the package changelogs.
 
 ## JavaScript
 

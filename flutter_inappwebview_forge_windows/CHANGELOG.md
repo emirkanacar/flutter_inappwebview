@@ -1,5 +1,11 @@
 ## Unreleased
 
+- With `enableAccessibilityFocus: true`, Narrator and NVDA can read the page
+  (the WebView2 UI Automation tree is exposed through the host window,
+  `ICoreWebView2CompositionController2::AutomationProvider`), and Tab and
+  Shift+Tab move focus into the page and back out to Flutter (`MoveFocus`,
+  `MoveFocusRequested`). Links `uiautomationcore`. With the setting off the
+  host window and focus behave as before ([#2953](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2953)).
 - JavaScript handler results are resolved with `JSON.parse` of a string
   literal instead of being spliced into JavaScript source; invalid JSON
   rejects the `callHandler` promise, and handler error messages are encoded

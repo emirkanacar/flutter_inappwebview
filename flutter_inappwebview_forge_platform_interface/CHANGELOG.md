@@ -1,5 +1,8 @@
 ## Unreleased
 
+- Add `InAppWebViewSettings.enableAccessibilityFocus` (macOS, Windows,
+  default `false`): native keyboard and screen reader focus follows Flutter
+  focus into and out of the page ([#2952](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2952), [#2953](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2953)).
 - Add `JavaScriptHandlerJsonResult`: a JavaScript handler can return
   pre-encoded JSON text, which is passed to the page without a decode/encode
   round trip. `JavaScriptHandlerJsonResult.encode` is the shared result
