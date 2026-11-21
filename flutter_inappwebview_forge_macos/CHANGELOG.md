@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Always answer JavaScript `alert`, `confirm`, and `prompt` panels when the
+  web view was released before the Dart callback returned, and do not drop a
+  held paused-timers alert on a second alert or on dispose
+  ([#2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)).
 - Require Flutter 3.41.0 or newer. The Swift Package Manager manifest depends
   on the `FlutterFramework` package, which Flutter creates from 3.41.0; on
   older Flutter versions SwiftPM builds could not resolve it

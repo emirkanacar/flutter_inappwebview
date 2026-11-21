@@ -3237,6 +3237,29 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         return identityAndTrust
     }
     
+    /// Presents a JavaScript panel from the topmost view controller. WebKit
+    /// requires every panel completion handler to be called, so `onFailure`
+    /// answers the panel when UIKit cannot present it (another controller is
+    /// being dismissed, the view is off-screen, or `present` is rejected).
+    func presentJavaScriptPanel(_ panel: UIAlertController, onFailure: @escaping () -> Void) {
+        var presenter: UIViewController? = inAppBrowserDelegate != nil
+            ? inAppBrowserDelegate as? InAppBrowserWebViewController
+            : window?.rootViewController
+        while let presented = presenter?.presentedViewController, !presented.isBeingDismissed {
+            presenter = presented
+        }
+        guard let presenter = presenter,
+              !presenter.isBeingDismissed,
+              presenter.viewIfLoaded?.window != nil else {
+            onFailure()
+            return
+        }
+        presenter.present(panel, animated: true, completion: nil)
+        if panel.presentingViewController == nil {
+            onFailure()
+        }
+    }
+
     func createAlertDialog(message: String?, responseMessage: String?, confirmButtonTitle: String?, completionHandler: @escaping () -> Void) {
         let title = responseMessage != nil && !responseMessage!.isEmpty ? responseMessage : message
         let okButton = confirmButtonTitle != nil && !confirmButtonTitle!.isEmpty ? confirmButtonTitle : NSLocalizedString("Ok", comment: "")
@@ -3247,11 +3270,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             _ in completionHandler()}
         )
         
-        guard let presentingViewController = inAppBrowserDelegate != nil ? inAppBrowserDelegate as? InAppBrowserWebViewController : window?.rootViewController else {
+        presentJavaScriptPanel(alertController) {
             completionHandler()
-            return
         }
-        presentingViewController.present(alertController, animated: true, completion: {})
     }
     
     public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
@@ -3262,7 +3283,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
 
         if (isPausedTimers) {
+            // WebKit requires every panel handler to be called; answer the
+            // one that was held before replacing it.
+            let previousPausedTimersCompletionHandler = isPausedTimersCompletionHandler
             isPausedTimersCompletionHandler = completionHandler
+            previousPausedTimersCompletionHandler?()
             return
         }
         
@@ -3289,7 +3314,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 completionHandlerCalled = true
                 let responseMessage = response?.message
                 let confirmButtonTitle = response?.confirmButtonTitle
-                self?.createAlertDialog(message: message, responseMessage: responseMessage,
+                guard let self = self else {
+                    completionHandler()
+                    return
+                }
+                self.createAlertDialog(message: message, responseMessage: responseMessage,
                                        confirmButtonTitle: confirmButtonTitle, completionHandler: completionHandler)
             }
         }
@@ -3323,11 +3352,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             completionHandler(false)
         }))
         
-        guard let presentingViewController = inAppBrowserDelegate != nil ? inAppBrowserDelegate as? InAppBrowserWebViewController : window?.rootViewController else {
+        presentJavaScriptPanel(confirmController) {
             completionHandler(false)
-            return
         }
-        presentingViewController.present(confirmController, animated: true, completion: nil)
     }
     
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
@@ -3363,7 +3390,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 let responseMessage = response?.message
                 let confirmButtonTitle = response?.confirmButtonTitle
                 let cancelButtonTitle = response?.cancelButtonTitle
-                self?.createConfirmDialog(message: message, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle, cancelButtonTitle: cancelButtonTitle, completionHandler: completionHandler)
+                guard let self = self else {
+                    completionHandler(false)
+                    return
+                }
+                self.createConfirmDialog(message: message, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle, cancelButtonTitle: cancelButtonTitle, completionHandler: completionHandler)
             }
         }
         callback.error = { (code: String, message: String?, details: Any?) in
@@ -3407,11 +3438,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             completionHandler(nil)
         }))
         
-        guard let presentingViewController = inAppBrowserDelegate != nil ? inAppBrowserDelegate as? InAppBrowserWebViewController : window?.rootViewController else {
+        presentJavaScriptPanel(promptController) {
             completionHandler(nil)
-            return
         }
-        presentingViewController.present(promptController, animated: true, completion: nil)
     }
     
     public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt message: String, defaultText defaultValue: String?, initiatedByFrame frame: WKFrameInfo,
@@ -3449,7 +3478,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 let confirmButtonTitle = response?.confirmButtonTitle
                 let cancelButtonTitle = response?.cancelButtonTitle
                 let value = response?.value
-                self?.createPromptDialog(message: message, defaultValue: defaultValue, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle,
+                guard let self = self else {
+                    completionHandler(nil)
+                    return
+                }
+                self.createPromptDialog(message: message, defaultValue: defaultValue, responseMessage: responseMessage, confirmButtonTitle: confirmButtonTitle,
                                         cancelButtonTitle: cancelButtonTitle, value: value, completionHandler: completionHandler)
             }
         }
@@ -4909,7 +4942,9 @@ if(window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())[\(_callHandlerID)] 
         uiDelegate = nil
         navigationDelegate = nil
         scrollView.delegate = nil
+        let pausedTimersCompletionHandler = isPausedTimersCompletionHandler
         isPausedTimersCompletionHandler = nil
+        pausedTimersCompletionHandler?()
         SharedLastTouchPointTimestamp.removeValue(forKey: self)
         finishPendingAsyncJavaScriptCallsOnDispose()
         _scrollChangedUpdatePending = false

@@ -1,5 +1,7 @@
 ## Unreleased
 
+- iOS, macOS: JavaScript `alert`, `confirm`, and `prompt` panels are always answered, avoiding a WebKit crash ([#2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)).
+- Android: `takeScreenshot` returns `null` instead of a partial image when compression fails ([#2908](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2908)).
 - Require Flutter 3.41.0 or newer: the iOS and macOS SwiftPM manifests depend on `FlutterFramework` ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)).
 - Windows: the native code conforms to Visual Studio 18 / MSVC 14.51 ([#2936](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2936)).
 - Linux, Windows: fix app builds failing at CMake generation (stale plugin target name) and native compile errors in containers, autocorrection, and proxy settings.

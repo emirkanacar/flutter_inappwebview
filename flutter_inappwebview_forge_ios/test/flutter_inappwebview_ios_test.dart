@@ -522,7 +522,7 @@ void _runSourceContractAssertions() {
     'iOS openWithSystemBrowser still uses canOpenURL or force-unwraps the URL',
   );
   _assert(
-    source.contains('guard let presentingViewController') &&
+    source.contains('guard let presenter = presenter,') &&
         source.contains('visibleViewController'),
     'iOS prompt presentation path does not guard missing presenters',
   );

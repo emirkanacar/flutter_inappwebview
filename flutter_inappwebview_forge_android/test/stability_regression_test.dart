@@ -13,6 +13,34 @@ File _sourceFile(String relativePath) {
 }
 
 void main() {
+  test('takeScreenshot replies null on a failed compress and frees bitmaps', () {
+    // Upstream PR #2908: a failed Bitmap.compress replied with the partial
+    // buffer, and createScaledBitmap overwrote the only reference to the
+    // full-size bitmap, which was never recycled.
+    final source = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final start = source.indexOf('override fun takeScreenshot(');
+    final body = source.substring(
+      start,
+      source.indexOf('override fun setSettings(', start),
+    );
+
+    expect(
+      body,
+      isNot(contains('screenshotBitmap = Bitmap.createScaledBitmap(')),
+    );
+    expect(body, contains('if (outputBitmap !== sourceBitmap)'));
+    expect(
+      body,
+      contains(
+        'if (outputBitmap.compress(compressFormat, quality, byteArrayOutputStream)) {\n'
+        '          bytes = byteArrayOutputStream.toByteArray()',
+      ),
+    );
+    expect(body, contains('} finally {'));
+  });
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test('Android resource interception has bounded synchronous backpressure', () {

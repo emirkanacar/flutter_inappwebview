@@ -1097,6 +1097,10 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         completeScreenshotResult(operationId, null)
         return@post
       }
+      var sourceBitmap: Bitmap? = null
+      var scaledBitmap: Bitmap? = null
+      val byteArrayOutputStream = ByteArrayOutputStream()
+      var bytes: ByteArray? = null
       try {
         var bitmapWidth = measuredWidth
         var bitmapHeight = measuredHeight
@@ -1130,33 +1134,35 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
         }
         quality = (screenshotConfiguration["quality"] as? Number)?.toInt() ?: quality
 
-        var screenshotBitmap =
+        sourceBitmap =
           Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(screenshotBitmap)
+        val canvas = Canvas(sourceBitmap)
         canvas.translate(-bitmapScrollX.toFloat(), -bitmapScrollY.toFloat())
         draw(canvas)
 
-        val byteArrayOutputStream = ByteArrayOutputStream()
+        var outputBitmap: Bitmap = sourceBitmap
         val snapshotWidth = (screenshotConfiguration["snapshotWidth"] as? Number)?.toDouble()
         if (snapshotWidth != null) {
           val destinationWidth = (snapshotWidth * pixelDensity + 0.5).toInt()
-          val ratioBitmap =
-            screenshotBitmap.width.toFloat() / screenshotBitmap.height.toFloat()
+          val ratioBitmap = sourceBitmap.width.toFloat() / sourceBitmap.height.toFloat()
           val destinationHeight = (destinationWidth / ratioBitmap).toInt()
-          screenshotBitmap = Bitmap.createScaledBitmap(
-            screenshotBitmap,
+          outputBitmap = Bitmap.createScaledBitmap(
+            sourceBitmap,
             destinationWidth,
             destinationHeight,
             true
           )
+          // createScaledBitmap can return the source itself; only a distinct
+          // bitmap is tracked so that it is recycled exactly once.
+          if (outputBitmap !== sourceBitmap) {
+            scaledBitmap = outputBitmap
+          }
         }
 
-        if (!screenshotBitmap.compress(
-            compressFormat,
-            quality,
-            byteArrayOutputStream
-          )
-        ) {
+        if (outputBitmap.compress(compressFormat, quality, byteArrayOutputStream)) {
+          bytes = byteArrayOutputStream.toByteArray()
+        } else {
+          // A failed compress leaves an empty or truncated buffer; reply null.
           Log.e(
             LOG_TAG,
             "Screenshot cannot be compressed using compressFormat " +
@@ -1164,21 +1170,21 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
             null
           )
         }
-
+      } catch (e: IllegalArgumentException) {
+        Log.e(LOG_TAG, "", e)
+      } catch (e: Throwable) {
+        // Includes OutOfMemoryError from createBitmap on low-memory devices.
+        Log.e(LOG_TAG, "Screenshot failed", e)
+      } finally {
+        scaledBitmap?.recycle()
+        sourceBitmap?.recycle()
         try {
           byteArrayOutputStream.close()
         } catch (e: IOException) {
           Log.e(LOG_TAG, "", e)
         }
-        screenshotBitmap.recycle()
-        completeScreenshotResult(operationId, byteArrayOutputStream.toByteArray())
-      } catch (e: IllegalArgumentException) {
-        Log.e(LOG_TAG, "", e)
-        completeScreenshotResult(operationId, null)
-      } catch (e: Throwable) {
-        Log.e(LOG_TAG, "Screenshot failed", e)
-        completeScreenshotResult(operationId, null)
       }
+      completeScreenshotResult(operationId, bytes)
     }
     if (!posted) {
       completeScreenshotResult(operationId, null)
