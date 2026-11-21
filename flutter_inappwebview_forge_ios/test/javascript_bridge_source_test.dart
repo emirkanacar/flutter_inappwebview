@@ -23,7 +23,9 @@ void main() {
     expect(source, contains('_Promise_then = window.Promise.prototype.then;'));
     expect(
       source,
-      contains('var _postMessageResult = _postMessage.call(_UserMessageHandler'),
+      contains(
+        'var _postMessageResult = _postMessage.call(_UserMessageHandler',
+      ),
     );
     expect(
       source,

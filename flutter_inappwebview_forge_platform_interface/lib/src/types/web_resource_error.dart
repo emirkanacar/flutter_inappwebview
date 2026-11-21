@@ -5,7 +5,10 @@ import 'enum_method.dart';
 
 part 'web_resource_error.g.dart';
 
-WebResourceErrorType _typeDeserializer(dynamic value, {EnumMethod? enumMethod}) {
+WebResourceErrorType _typeDeserializer(
+  dynamic value, {
+  EnumMethod? enumMethod,
+}) {
   // Native error codes without a WebResourceErrorType mapping (for example
   // codes added by a newer WebView provider) must not throw a null check error.
   return switch (enumMethod ?? EnumMethod.nativeValue) {
