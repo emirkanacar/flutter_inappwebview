@@ -7,6 +7,7 @@ import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/pull_to_refresh_controller.dart';
 import 'headless_in_app_webview.dart';
 import 'in_app_webview_controller.dart';
+import '_channel_event_filter.dart';
 
 /// Object specifying creation parameters for creating a [PlatformInAppWebViewWidget].
 ///
@@ -341,6 +342,7 @@ class IOSInAppWebViewWidget extends PlatformInAppWebViewWidget {
             params.initialUserScripts?.map((e) => e.toMap()).toList() ?? [],
         'pullToRefreshSettings': pullToRefreshSettings,
         'keepAliveId': params.keepAlive?.id,
+        skippedChannelEventsKey: skippedChannelEvents(params),
         'preventGestureDelay': params.preventGestureDelay,
       },
       creationParamsCodec: const StandardMessageCodec(),

@@ -48,6 +48,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     private var lastSeekedFrameInfo: WKFrameInfo?
     private var lastSeekedAt: Date?
     var preventGestureDelay = false
+    public let channelEventFilter = ChannelEventFilter()
     private let lifecycle = WebViewLifecycleCoordinator()
     private var windowIdJSInitializationScheduled = false
     private var windowIdJSInitializationInFlight = false
@@ -819,9 +820,14 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             let javaScriptBridgeOriginAllowList = settings?.javaScriptBridgeOriginAllowList ?? pluginScriptsOriginAllowList
             let javaScriptBridgeForMainFrameOnly = settings?.javaScriptBridgeForMainFrameOnly ?? pluginScriptsForMainFrameOnly
             
-            configuration.userContentController.addPluginScript(PromisePolyfillJS.PROMISE_POLYFILL_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList, forMainFrameOnly: pluginScriptsForMainFrameOnly))
+            // No Promise polyfill: WebKit on iOS 15+ ships a native Promise in every
+            // content world, so the guarded polyfill never ran and only cost a parse.
             configuration.userContentController.addPluginScript(JavaScriptBridgeJS.JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT(expectedBridgeSecret: exceptedBridgeSecret, allowedOriginRules: javaScriptBridgeOriginAllowList, forMainFrameOnly: javaScriptBridgeForMainFrameOnly))
-            configuration.userContentController.addPluginScript(ConsoleLogJS.CONSOLE_LOG_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList))
+            // Without a Dart onConsoleMessage listener the console hook would only
+            // stringify, post, and resolve every console call for nothing.
+            if !channelEventFilter.isSkipped("onConsoleMessage") {
+                configuration.userContentController.addPluginScript(ConsoleLogJS.CONSOLE_LOG_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList))
+            }
             configuration.userContentController.addPluginScript(PrintJS.PRINT_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList, forMainFrameOnly: pluginScriptsForMainFrameOnly))
             configuration.userContentController.addPluginScript(OnWindowBlurEventJS.ON_WINDOW_BLUR_EVENT_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList))
             configuration.userContentController.addPluginScript(OnWindowFocusEventJS.ON_WINDOW_FOCUS_EVENT_JS_PLUGIN_SCRIPT(allowedOriginRules: pluginScriptsOriginAllowList))
@@ -1878,6 +1884,45 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         return self.settings!.getRealSettings(obj: self)
     }
     
+    /// Applies the `skippedEvents` creation parameter and keeps the console
+    /// hook in line with it. Called again on every platform-view attach
+    /// (KeepAlive reuse, headless transfer), when the WebView is already
+    /// prepared, so a changed console listener is applied to the current
+    /// document and to the scripts used by the next navigation.
+    public func updateChannelEventFilter(_ raw: Any?) {
+        let wasConsoleEnabled = !channelEventFilter.isSkipped("onConsoleMessage")
+        channelEventFilter.update(raw)
+        let consoleEnabled = !channelEventFilter.isSkipped("onConsoleMessage")
+        // Before prepare() the scripts are not added yet and
+        // prepareAndAddUserScripts() reads the filter itself. Popup windows
+        // share the opener configuration and never own plugin scripts.
+        guard consoleEnabled != wasConsoleEnabled, windowId == nil,
+              javaScriptBridgeEnabled, lifecycle.state != .creating, lifecycle.acceptsCallbacks else {
+            return
+        }
+        let userContentController = configuration.userContentController
+        let groupName = ConsoleLogJS.CONSOLE_LOG_JS_PLUGIN_SCRIPT_GROUP_NAME
+        if consoleEnabled {
+            userContentController.addPluginScript(ConsoleLogJS.CONSOLE_LOG_JS_PLUGIN_SCRIPT(allowedOriginRules: settings?.pluginScriptsOriginAllowList))
+            userContentController.sync(scriptMessageHandler: self)
+        } else if userContentController.containsPluginScript(with: groupName) {
+            userContentController.removePluginScripts(with: groupName)
+        }
+        // The hook source is guarded against double installation, so it is
+        // safe to evaluate it in a document that already has it.
+        var source = ConsoleLogJS.SET_CONSOLE_MESSAGES_ENABLED_JS_SOURCE(consoleEnabled)
+        if consoleEnabled {
+            source += ConsoleLogJS.CONSOLE_LOG_JS_SOURCE()
+        }
+        if #available(iOS 14.0, *) {
+            for contentWorld in userContentController.contentWorlds {
+                evaluateJavaScript(source, frame: nil, contentWorld: contentWorld, completionHandler: nil)
+            }
+        } else {
+            evaluateJavaScript(source, completionHandler: nil)
+        }
+    }
+
     public func enablePluginScriptAtRuntime(flagVariable: String, enable: Bool, pluginScript: PluginScript) {
         evaluateJavascript(source: flagVariable) { (alreadyLoaded) in
             if let alreadyLoaded = alreadyLoaded as? Bool, alreadyLoaded {
@@ -2089,25 +2134,29 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 completionHandler?(.failure(error))
                 return
             }
-            super.evaluateJavaScript(javaScript) { result, error in
-                if let error = error {
-                    completionHandler?(.failure(error))
-                } else {
-                    completionHandler?(.success(result as Any))
-                }
-            }
+            evaluateJavaScriptInPageWorld(javaScript, completionHandler: completionHandler)
             return
         }
-        if frame == nil {
-            let error = NSError(
-                domain: "flutter_inappwebview_forge",
-                code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "Frame is nil"]
-            )
-            completionHandler?(.failure(error))
+        // A nil frame means the main frame. Popups, where WebKit could crash on a
+        // nil frame (#2771), already returned above. The page world keeps using
+        // the frame-less API so it never reaches the content-world overload with
+        // a nil frame; a custom world needs that overload and targets the main
+        // frame of this fully created WebView.
+        if frame == nil, contentWorld == WKContentWorld.page {
+            evaluateJavaScriptInPageWorld(javaScript, completionHandler: completionHandler)
             return
         }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
+    }
+
+    private func evaluateJavaScriptInPageWorld(_ javaScript: String, completionHandler: ((Result<Any, Error>) -> Void)?) {
+        super.evaluateJavaScript(javaScript) { result, error in
+            if let error = error {
+                completionHandler?(.failure(error))
+            } else {
+                completionHandler?(.success(result as Any))
+            }
+        }
     }
     
     public func evaluateJavascript(source: String, completionHandler: ((Any?) -> Void)? = nil) {

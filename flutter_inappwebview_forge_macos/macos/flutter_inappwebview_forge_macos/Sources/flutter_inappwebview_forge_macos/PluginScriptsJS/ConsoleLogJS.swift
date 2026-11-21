@@ -25,12 +25,28 @@ public class ConsoleLogJS {
             messageHandlerNames: [])
     }
     
+    // Sets the per-document switch read by CONSOLE_LOG_JS_SOURCE. When it is
+    // false the console methods still run but nothing is stringified or sent
+    // over the bridge, which is the no-listener fast path.
+    public static func SET_CONSOLE_MESSAGES_ENABLED_JS_SOURCE(_ enabled: Bool) -> String {
+        return "if (window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME()) != null) { window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME())._consoleMessagesEnabled = \(enabled); }"
+    }
+
     // the message needs to be concatenated with '' in order to have the same behavior like on Android
     public static func CONSOLE_LOG_JS_SOURCE() -> String {
         return """
         (function(console) {
+            var _bridge = window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME());
+            if (_bridge != null) {
+                // Hook once per document and content world, so a runtime
+                // re-injection cannot report the same message twice.
+                if (_bridge._consoleLogHooked === true) { return; }
+                _bridge._consoleLogHooked = true;
+            }
         
             function _callHandler(logLevel, args) {
+                var bridge = window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME());
+                if (bridge == null || bridge._consoleMessagesEnabled === false) { return; }
                 var message = '';
                 for (var i in args) {
                     try {
@@ -38,7 +54,7 @@ public class ConsoleLogJS {
                     } catch(_) {}
                 }
                 try {
-                    window.\(JavaScriptBridgeJS.get_JAVASCRIPT_BRIDGE_NAME()).callHandler('onConsoleMessage', {'level': logLevel, 'message': message})
+                    bridge.callHandler('onConsoleMessage', {'level': logLevel, 'message': message})
                 } catch(_) {}
             }
         

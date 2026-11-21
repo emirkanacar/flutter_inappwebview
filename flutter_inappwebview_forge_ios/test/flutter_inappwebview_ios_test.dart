@@ -20,34 +20,41 @@ void _assert(bool condition, String message) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test(
-    'iOS obscuredContentInsets uses the SDK UIEdgeInsets type (issue #2)',
-    () {
-      final webViewSource = _sourceFile(
-        'ios/flutter_inappwebview_forge_ios/Sources/'
-        'flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift',
-      ).readAsStringSync();
-      final settingsSource = _sourceFile(
-        'ios/flutter_inappwebview_forge_ios/Sources/'
-        'flutter_inappwebview_forge_ios/InAppWebView/InAppWebViewSettings.swift',
-      ).readAsStringSync();
-      _assert(
-        !webViewSource.contains('NSDirectionalEdgeInsets') &&
-            !settingsSource.contains('NSDirectionalEdgeInsets'),
-        'WKWebView.obscuredContentInsets is UIEdgeInsets, not NSDirectionalEdgeInsets',
-      );
-      _assert(
-        !settingsSource.contains('obscuredContentInsets.leading') &&
-            !settingsSource.contains('obscuredContentInsets.trailing'),
-        'UIEdgeInsets has no leading/trailing members',
-      );
-      _assert(
-        webViewSource.contains('obscuredContentInsets = insets') &&
-            settingsSource.contains('webView.obscuredContentInsets.toMap()'),
-        'iOS obscuredContentInsets is not assigned/read as UIEdgeInsets',
-      );
-    },
-  );
+  test('iOS no longer injects the Promise polyfill plugin script', () {
+    final webViewSource = _sourceFile(
+      'ios/flutter_inappwebview_forge_ios/Sources/'
+      'flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift',
+    ).readAsStringSync();
+
+    expect(webViewSource, isNot(contains('PROMISE_POLYFILL_JS_PLUGIN_SCRIPT')));
+    expect(webViewSource, contains('JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT'));
+  });
+
+  test('iOS obscuredContentInsets uses the SDK UIEdgeInsets type (issue #2)', () {
+    final webViewSource = _sourceFile(
+      'ios/flutter_inappwebview_forge_ios/Sources/'
+      'flutter_inappwebview_forge_ios/InAppWebView/InAppWebView.swift',
+    ).readAsStringSync();
+    final settingsSource = _sourceFile(
+      'ios/flutter_inappwebview_forge_ios/Sources/'
+      'flutter_inappwebview_forge_ios/InAppWebView/InAppWebViewSettings.swift',
+    ).readAsStringSync();
+    _assert(
+      !webViewSource.contains('NSDirectionalEdgeInsets') &&
+          !settingsSource.contains('NSDirectionalEdgeInsets'),
+      'WKWebView.obscuredContentInsets is UIEdgeInsets, not NSDirectionalEdgeInsets',
+    );
+    _assert(
+      !settingsSource.contains('obscuredContentInsets.leading') &&
+          !settingsSource.contains('obscuredContentInsets.trailing'),
+      'UIEdgeInsets has no leading/trailing members',
+    );
+    _assert(
+      webViewSource.contains('obscuredContentInsets = insets') &&
+          settingsSource.contains('webView.obscuredContentInsets.toMap()'),
+      'iOS obscuredContentInsets is not assigned/read as UIEdgeInsets',
+    );
+  });
 
   test(
     'iOS goBack tolerates a missing native channel during teardown',
@@ -506,9 +513,7 @@ void _runSourceContractAssertions() {
     inAppBrowserManagerSource.contains(
           'guard let absoluteUrl = URL(string: url)?.absoluteURL',
         ) &&
-        inAppBrowserManagerSource.contains(
-          'open(absoluteUrl, options:',
-        ) &&
+        inAppBrowserManagerSource.contains('open(absoluteUrl, options:') &&
         inAppBrowserManagerSource.contains('result(true)') &&
         inAppBrowserManagerSource.contains('cannot be opened!') &&
         !inAppBrowserManagerSource.contains('canOpenURL') &&
@@ -793,13 +798,33 @@ void _runSourceContractAssertions() {
         source.contains('completionHandler: wrappedCompletionHandler'),
     'popup async JavaScript does not use the page content world fallback',
   );
-  _assert(
-    source.contains('if frame == nil'),
-    'evaluateJavaScript does not guard a nil frame',
+  // #2771: a popup never reaches the content-world overload, and a nil-frame
+  // page-world call uses the frame-less API. A nil frame is the main frame, so
+  // it must not be rejected for regular WebViews.
+  final evaluateStart = source.indexOf(
+    'public func evaluateJavaScript(_ javaScript: String, frame: WKFrameInfo?',
+  );
+  final evaluateBody = source.substring(
+    evaluateStart,
+    source.indexOf('private func evaluateJavaScriptInPageWorld', evaluateStart),
+  );
+  final popupBranch = evaluateBody.indexOf('if windowId != nil');
+  final nilFrameBranch = evaluateBody.indexOf(
+    'if frame == nil, contentWorld == WKContentWorld.page',
+  );
+  final contentWorldCall = evaluateBody.indexOf(
+    'super.evaluateJavaScript(javaScript, in: frame, in: contentWorld',
   );
   _assert(
-    source.contains('Frame is nil'),
-    'nil-frame evaluateJavaScript does not return a structured error',
+    popupBranch >= 0 &&
+        nilFrameBranch > popupBranch &&
+        contentWorldCall > nilFrameBranch,
+    'nil-frame evaluateJavaScript does not route popups and the page world '
+    'away from the content-world overload',
+  );
+  _assert(
+    !evaluateBody.contains('Frame is nil'),
+    'evaluateJavaScript rejects a nil (main) frame for regular WebViews',
   );
 
   final asyncWrapper = _sourceFile(
@@ -1057,7 +1082,8 @@ void _runSourceContractAssertions() {
     'flutter_inappwebview_forge_ios/FindInteraction/FindInteractionController.swift',
   ).readAsStringSync();
   _assert(
-    findSource.contains('WKFindConfiguration') && findSource.contains('func findString'),
+    findSource.contains('WKFindConfiguration') &&
+        findSource.contains('func findString'),
     'iOS programmatic findString is missing',
   );
 }

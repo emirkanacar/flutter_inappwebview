@@ -54,6 +54,7 @@ public class FlutterWebViewController: NSView, Disposable {
         }
 
         webView!.contextMenu = contextMenu
+        webView?.updateChannelEventFilter(params[ChannelEventFilter.CREATION_PARAM])
 
         let findInteractionController = FindInteractionController(
             plugin: plugin,

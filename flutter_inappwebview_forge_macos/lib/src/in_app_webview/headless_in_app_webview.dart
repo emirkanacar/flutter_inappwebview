@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebview_forge_platform_interface.dart';
 import '../find_interaction/find_interaction_controller.dart';
 import 'in_app_webview_controller.dart';
+import '_channel_event_filter.dart';
 
 /// Object specifying creation parameters for creating a [MacOSHeadlessInAppWebView].
 ///
@@ -358,6 +359,7 @@ class MacOSHeadlessInAppWebView extends PlatformHeadlessInAppWebView
             params.initialUserScripts?.map((e) => e.toMap()).toList() ?? [],
         'pullToRefreshSettings': pullToRefreshSettings,
         'initialSize': params.initialSize.toMap(),
+        skippedChannelEventsKey: skippedChannelEvents(params),
       },
     );
     await _sharedChannel.invokeMethod('run', args);

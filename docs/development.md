@@ -87,10 +87,19 @@ request, and on manual dispatch. It reads the Flutter version from `.fvmrc`.
 | `dart` (one per package) | Ubuntu | `dart format --set-exit-if-changed lib`, `flutter analyze --no-pub --no-fatal-infos lib test`, `flutter test --no-pub` |
 | `generated-code` | Ubuntu | Reruns `build_runner` for the platform interface and fails if any generated file changes |
 | `apple-static` | macOS | `swift package dump-package` for the iOS and macOS packages, plus `tool/run_ios_native_lifecycle_tests.sh`, `tool/run_apple_website_data_matcher_tests.sh`, and `tool/run_linux_website_data_matcher_tests.sh` |
-| `android-build` | Ubuntu, JDK 17 | `flutter build apk --release` for the main example, then `tool/check_android_16k_alignment.sh` on the APK |
 
 Web and Linux do not commit a `pubspec_overrides.yaml`; CI creates one so
 they are tested against the platform interface in the same checkout.
+
+`.github/workflows/android.yml` runs the `android-build` job (Ubuntu, JDK 17):
+`flutter build apk --release` for the main example, then
+`tool/check_android_16k_alignment.sh` on the APK. It runs only when a push to
+`master` or a pull request changes `.fvmrc`, the Android package's
+`android/` sources or `pubspec.yaml`, the root package or main example
+`pubspec.yaml`, the main example's `android/` folder or `pubspec.lock`, the
+check script, or the workflow itself. Dart-only and other-platform changes do
+not rebuild the APK. Run it manually (`gh workflow run android.yml`) before a
+release.
 
 Known gaps: CI does not analyze the `example/` apps, does not run the main
 example's `example/test/` suite, does not build the iOS, macOS, Windows,

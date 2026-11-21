@@ -661,7 +661,12 @@ open class InAppWebViewClient(
       }
     }
 
-    if (webView.customSettings.useShouldInterceptRequest == true) {
+    // Requests outside shouldInterceptRequestUrlFilter skip the synchronous
+    // Dart round trip and continue through custom schemes and content blockers.
+    if (
+      webView.customSettings.useShouldInterceptRequest == true &&
+      webView.customSettings.shouldInterceptRequestUrlMatcher.matches(request.url)
+    ) {
       var response: WebResourceResponseExt? = null
       val channelDelegate = webView.channelDelegate
       if (channelDelegate != null) {

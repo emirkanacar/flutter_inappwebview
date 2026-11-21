@@ -11,6 +11,7 @@ import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.emirkanacar.flutter_inappwebview_forge_android.ISettings
 import com.emirkanacar.flutter_inappwebview_forge_android.types.PreferredContentModeOptionType
+import com.emirkanacar.flutter_inappwebview_forge_android.types.UrlRegexFilter
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.InAppWebViewInterface
 import java.util.HashMap
 import java.util.HashSet
@@ -113,6 +114,9 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
     @JvmField var scrollBarFadeDuration: Int? = null
     @JvmField var rendererPriorityPolicy: MutableMap<String, Any?>? = null
     @JvmField var useShouldInterceptRequest: Boolean? = false
+    @JvmField var shouldInterceptRequestUrlFilter: MutableList<String> = mutableListOf()
+    /** Compiled form of [shouldInterceptRequestUrlFilter], rebuilt by [parse]. */
+    @JvmField var shouldInterceptRequestUrlMatcher: UrlRegexFilter = UrlRegexFilter.NONE
     @JvmField var useOnRenderProcessGone: Boolean? = false
     @JvmField var disableDefaultErrorPage: Boolean? = false
     @JvmField var useHybridComposition: Boolean? = true
@@ -232,6 +236,18 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
                 "scrollBarFadeDuration" -> scrollBarFadeDuration = value as Int
                 "rendererPriorityPolicy" -> rendererPriorityPolicy = value as MutableMap<String, Any?>
                 "useShouldInterceptRequest" -> useShouldInterceptRequest = value as Boolean
+                "shouldInterceptRequestUrlFilter" -> {
+                    val sources = value as? List<*> ?: emptyList<Any?>()
+                    shouldInterceptRequestUrlFilter = sources.filterIsInstance<String>().toMutableList()
+                    shouldInterceptRequestUrlMatcher = UrlRegexFilter.compile(sources)
+                    shouldInterceptRequestUrlMatcher.invalidPattern?.let {
+                        Log.w(
+                            LOG_TAG,
+                            "Ignoring shouldInterceptRequestUrlFilter: invalid pattern \"$it\"; " +
+                                "every request is sent to shouldInterceptRequest."
+                        )
+                    }
+                }
                 "useOnRenderProcessGone" -> useOnRenderProcessGone = value as Boolean
                 "disableDefaultErrorPage" -> disableDefaultErrorPage = value as Boolean
                 "useHybridComposition" -> useHybridComposition = value as Boolean
@@ -362,6 +378,7 @@ open class InAppWebViewSettings : ISettings<InAppWebViewInterface> {
         put("scrollBarFadeDuration", scrollBarFadeDuration)
         put("rendererPriorityPolicy", rendererPriorityPolicy)
         put("useShouldInterceptRequest", useShouldInterceptRequest)
+        put("shouldInterceptRequestUrlFilter", shouldInterceptRequestUrlFilter)
         put("useOnRenderProcessGone", useOnRenderProcessGone)
         put("disableDefaultErrorPage", disableDefaultErrorPage)
         put("useHybridComposition", useHybridComposition)

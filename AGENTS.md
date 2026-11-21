@@ -21,7 +21,7 @@ This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It
 | `scripts/` | Legacy test/publish helper scripts (emulator wait, test runners) |
 | `test_node_server/` | Local Node test server and TLS/client certificates used by integration tests |
 | `web_support/` | TypeScript source for the Web iframe helper; `npm run build` there bundles it into `flutter_inappwebview_forge_web/lib/assets/web/web_support.js` (do not hand-edit the bundle) |
-| `.github/workflows/` | CI (`ci.yml`: per-package format/analyze/test, generated-code drift, Apple static checks, Android example build and 16 KB check), docs site deployment, and issue lock/stale/no-response automation |
+| `.github/workflows/` | CI (`ci.yml`: per-package format/analyze/test, generated-code drift, Apple static checks; `android.yml`: Android example build and 16 KB check, only for Android/toolchain changes), docs site deployment, and issue lock/stale/no-response automation |
 
 ## Working rules
 

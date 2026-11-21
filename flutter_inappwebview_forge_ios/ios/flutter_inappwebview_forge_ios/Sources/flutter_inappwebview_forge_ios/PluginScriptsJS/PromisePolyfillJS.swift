@@ -8,6 +8,7 @@
 import Foundation
 import WebKit
 
+@available(*, deprecated, message: "No longer injected: WebKit on iOS 15+ has a native Promise. Kept for source compatibility and will be removed in a future major release.")
 public class PromisePolyfillJS {
     public static let PROMISE_POLYFILL_JS_PLUGIN_SCRIPT_GROUP_NAME = "IN_APP_WEBVIEW_PROMISE_POLYFILL_JS_PLUGIN_SCRIPT"
     

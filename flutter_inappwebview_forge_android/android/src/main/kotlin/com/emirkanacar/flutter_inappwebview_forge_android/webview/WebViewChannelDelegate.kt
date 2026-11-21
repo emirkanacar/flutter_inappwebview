@@ -768,6 +768,7 @@ open class WebViewChannelDelegate(
   }
 
   private fun invokeEvent(method: String, arguments: Any? = HashMap<String, Any?>()) {
+    if (webView?.channelEventFilter?.isSkipped(method) == true) return
     if (!canDispatchCallbacks()) return
     getChannel()?.invokeMethod(method, arguments)
   }

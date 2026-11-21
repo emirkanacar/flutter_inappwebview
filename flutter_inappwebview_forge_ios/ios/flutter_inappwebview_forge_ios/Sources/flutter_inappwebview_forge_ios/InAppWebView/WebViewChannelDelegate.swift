@@ -23,6 +23,7 @@ public class WebViewChannelDelegate: ChannelDelegate {
     }
 
     private func invokeMethod(_ method: String, arguments: Any) {
+        if webView?.channelEventFilter.isSkipped(method) == true { return }
         guard canDispatchCallbacks(), let channel = channel else { return }
         channel.invokeMethod(method, arguments: arguments)
     }

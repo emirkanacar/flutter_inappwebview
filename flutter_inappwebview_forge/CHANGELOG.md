@@ -1,3 +1,19 @@
+## Unreleased
+
+- Android: add `InAppWebViewSettings.shouldInterceptRequestUrlFilter` to send
+  only matching requests to `shouldInterceptRequest`. Other requests skip the
+  synchronous Dart round trip; the default empty list keeps today's behavior.
+- Add opt-in `ChannelCallStats` for measuring native-to-Dart platform channel
+  traffic (count, rate, optional payload bytes, Dart handler time) on every
+  platform. Disabled by default.
+- Android, iOS, macOS: stop injecting the unused RSVP Promise polyfill script
+  (~16 KB per document and frame) when the JavaScript bridge is enabled; all
+  supported WebViews ship a native `Promise`.
+- Android, iOS, macOS: skip encoding and sending scroll, over-scroll, progress,
+  title, console, and zoom events that have no Dart listener. KeepAlive and
+  headless WebViews follow the callbacks of the widget that currently owns
+  them; InAppBrowser is unchanged.
+
 ## 2.1.80 - 2026-11-14
 
 - Support `ContextMenu` (custom items, `hideDefaultSystemContextMenuItems`,

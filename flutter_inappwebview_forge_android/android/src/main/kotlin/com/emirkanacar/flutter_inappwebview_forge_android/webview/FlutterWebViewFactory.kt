@@ -85,6 +85,11 @@ open class FlutterWebViewFactory(
             resultWebView.makeInitialLoad(params)
         }
 
+        // Re-apply on every creation: a KeepAlive or headless WebView is reused
+        // by a new widget whose callbacks may differ from the previous owner.
+        resultWebView.webView?.channelEventFilter?.update(
+            params[ChannelEventFilter.CREATION_PARAM]
+        )
         resultWebView.webView?.markRetainedWebViewReattached()
         return resultWebView
     }

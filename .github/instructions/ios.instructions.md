@@ -123,7 +123,7 @@ ios/Classes/
 │   ├── OriginalViewPortMetaTagContentJS.swift # Viewport meta capture
 │   ├── PluginScriptsUtil.swift          # Script utilities
 │   ├── PrintJS.swift                    # Print handling
-│   ├── PromisePolyfillJS.swift          # Promise polyfill
+│   ├── PromisePolyfillJS.swift          # Deprecated, not injected
 │   ├── SupportZoomJS.swift              # Zoom control
 │   ├── WebMessageChannelJS.swift        # WebMessage channel variables
 │   ├── WebMessageListenerJS.swift       # PostMessage API
@@ -287,7 +287,7 @@ JavaScript files injected into WebViews for native-web communication:
 | **InterceptFetchRequestJS** | `InterceptFetchRequestJS.swift` | Wraps `window.fetch()` to intercept Fetch API requests. Enables `shouldInterceptFetchRequest` callback. |
 | **OnLoadResourceJS** | `OnLoadResourceJS.swift` | Uses `PerformanceObserver` to track resource loading (images, scripts, etc.). Enables `onLoadResource` callback. |
 | **PrintJS** | `PrintJS.swift` | Overrides `window.print()` to trigger `onPrintRequest` callback instead of native print dialog. |
-| **PromisePolyfillJS** | `PromisePolyfillJS.swift` | Polyfill for `Promise` API on older WebKit versions using RSVP.js library. |
+| **PromisePolyfillJS** | `PromisePolyfillJS.swift` | Deprecated and no longer injected; WebKit on iOS 15+ has a native `Promise`. |
 | **FindTextHighlightJS** | `FindTextHighlightJS.swift` | JavaScript-based text search and highlighting for `FindInteractionController`. Highlights matches with CSS spans. |
 | **WebMessageListenerJS** | `WebMessageListenerJS.swift` | Implements `FlutterInAppWebViewWebMessageListener` class for `postMessage` API. |
 | **WebMessageChannelJS** | `WebMessageChannelJS.swift` | Variable definitions for `WebMessageChannel` ports storage. |

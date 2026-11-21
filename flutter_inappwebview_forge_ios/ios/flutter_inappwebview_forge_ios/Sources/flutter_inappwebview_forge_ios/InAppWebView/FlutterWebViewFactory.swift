@@ -86,6 +86,9 @@ public class FlutterWebViewFactory: NSObject, FlutterPlatformViewFactory {
             flutterWebView?.makeInitialLoad(params: arguments!)
         }
 
+        // Re-apply on every creation: a KeepAlive or headless WebView is reused
+        // by a new widget whose callbacks may differ from the previous owner.
+        flutterWebView?.webView()?.updateChannelEventFilter(arguments?[ChannelEventFilter.CREATION_PARAM])
         flutterWebView?.webView()?.markRetainedWebViewReattached()
         
         return flutterWebView!
