@@ -35,7 +35,7 @@ native implementations, and release process.
 | Target | Minimum |
 | --- | --- |
 | Dart | `^3.8.0` |
-| Flutter | `>=3.38.6` |
+| Flutter | `>=3.41.0` |
 | Android | `minSdkVersion >= 24`, AGP `>= 7.3.0` (stay on 2.1.76 for API 19-23) |
 | iOS | 15.0+, Xcode 15+ |
 | macOS | 10.14+, Xcode 15+ |
@@ -43,8 +43,10 @@ native implementations, and release process.
 | Linux | WPE WebKit 2.0 development packages |
 | Web | iframe plus the plugin support script when required |
 
-iOS still needs Flutter 3.38.6 or newer. Earlier Flutter versions can dispatch
-WebView gestures incorrectly on iOS.
+iOS and macOS need Flutter 3.41.0 or newer: their Swift Package Manager
+manifests depend on the `FlutterFramework` package, which Flutter creates from
+3.41.0. Apps on Flutter 3.38-3.40 should stay on the previous plugin
+versions.
 
 ## Installation
 

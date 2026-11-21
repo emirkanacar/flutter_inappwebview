@@ -11,3 +11,7 @@ so you do not need to add it to your `pubspec.yaml`.
 
 However, if you `import` this package to use any of its APIs directly, you
 should add it to your `pubspec.yaml` as usual.
+## Requirements
+
+- macOS 10.14 or newer
+- Flutter 3.41.0 or newer (SwiftPM `FlutterFramework` dependency)
