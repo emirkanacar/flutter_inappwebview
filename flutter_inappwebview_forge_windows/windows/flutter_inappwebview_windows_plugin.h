@@ -5,6 +5,7 @@
 
 namespace flutter_inappwebview_plugin
 {
+  class PluginMessenger;
   class WebViewEnvironmentManager;
   class InAppWebViewManager;
   class InAppBrowserManager;
@@ -16,7 +17,14 @@ namespace flutter_inappwebview_plugin
   class WebStorageManager;
 
   class FlutterInappwebviewWindowsPlugin : public flutter::Plugin {
+    // Declared first: destroyed after every manager that registered through it.
+    std::unique_ptr<PluginMessenger> messenger_;
+
   public:
+    // Messenger for every channel of this plugin instance. It forwards to the
+    // registrar's messenger until registrar teardown, then drops sends and
+    // handler changes (upstream PR #2957).
+    flutter::BinaryMessenger* messenger() const;
     flutter::PluginRegistrarWindows* registrar;
     std::unique_ptr<WebViewEnvironmentManager> webViewEnvironmentManager;
     std::unique_ptr<InAppWebViewManager> inAppWebViewManager;

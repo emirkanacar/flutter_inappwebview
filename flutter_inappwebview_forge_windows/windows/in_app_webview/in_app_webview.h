@@ -178,7 +178,7 @@ namespace flutter_inappwebview_plugin
     void markReady() { lifecycle_.markReady(); }
     void markDetachedRetained() { lifecycle_.markDetachedRetained(); }
     void markReattached() { lifecycle_.markAttached(); lifecycle_.markReady(); }
-    bool acceptsCallbacks() const { return lifecycle_.acceptsCallbacks(); }
+    bool acceptsCallbacks() const { return !nativeClosed_ && lifecycle_.acceptsCallbacks(); }
     void prepare(const InAppWebViewCreationParams& params);
     void onContextMenuRequested(ICoreWebView2ContextMenuRequestedEventArgs* args);
     std::optional<std::string> getUrl() const;
@@ -281,6 +281,12 @@ namespace flutter_inappwebview_plugin
     // Hidden parent window carrying the kHostWindowViewProp property.
     HWND hostWindow_ = nullptr;
     void detachHostWindow();
+    // Upstream #2884: the host window is being destroyed (application quit,
+    // or the Flutter view window closing). Stops the page and closes the
+    // WebView2 controller while its parent window still exists; the
+    // destructor then skips those calls. Idempotent.
+    void closeBeforeHostDestroyed();
+    bool nativeClosed_ = false;
     float scaleFactor_ = 1.0;
     POINT lastCursorPos_ = { 0, 0 };
     VirtualKeyState virtualKeys_;

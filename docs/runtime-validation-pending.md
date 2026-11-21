@@ -98,6 +98,7 @@ Details for each are in `known-issues.md`.
 
 | Record | Still required |
 | --- | --- |
+| Windows teardown at application quit, 2026-11-22 ([details](known-issues.md#2026-11-22-windows-teardown-at-application-quit-2884-2956-2957)): #2884, PR #2956, PR #2957 | Windows app quit with mounted InAppWebViews and a KeepAlive WebView, and closing one of two engines' windows, with no WebView2 `ERROR_INVALID_STATE` or 0xC000041D. |
 | Keyboard and screen reader focus, 2026-11-22 ([details](known-issues.md#2026-11-22-keyboard-and-screen-reader-focus-on-macos-and-windows-2952-2953)): PRs #2952, #2953 | macOS Tab/Shift+Tab, click, and VoiceOver runs; Windows Tab/Shift+Tab with Narrator and NVDA, including KeepAlive reattach. Only builds and source tests so far. |
 | Pre-encoded JSON handler results, 2026-11-21 ([details](known-issues.md#2026-11-21-pre-encoded-json-handler-results-2948)): PR #2948 | Windows and Linux runs (valid, invalid, and large results); macOS run. Android device (2026-11-21) and iOS simulator (2026-11-22) runs passed. |
 | JavaScript dialog answers and native prompt control, 2026-11-21 ([details](known-issues.md#2026-11-21-javascript-dialog-answers-and-native-prompt-control-2901)): PR #2901 | iOS `enableNativePromptDialog: false` on a simulator or device; Android late Dart reply with a detached activity. Android setting, dialog dismissal on dispose, and dispose with a pending Dart reply passed on a device on 2026-11-21. |

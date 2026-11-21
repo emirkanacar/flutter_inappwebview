@@ -187,9 +187,9 @@ Each fix has a source-level regression test that fails on the previous source.
   Upstream reports are from a Xiaomi (HyperOS) and a OnePlus 6T (Adreno 630),
   so the fault may be vendor- or GPU-specific.
 - **Linux dispose crash ([#2904](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2904)).** Needs a Linux reproduction.
-- **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [PR #2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956),
-  [PR #2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).** Shutdown ordering of WebView2 controller, environment,
-  and channel delegates; Windows hardware needed.
+- **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), PR #2956, PR #2957).** Fixed
+  locally on 2026-11-22; see
+  [Windows teardown at application quit](#2026-11-22-windows-teardown-at-application-quit-2884-2956-2957).
 - **Impeller black screen ([#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939)).** Needs reproduction. Not reproduced
   on 2026-11-21 on the Samsung SM-A165F above (Flutter 3.47.8 release, Impeller
   on): the issue's app, with Home pressed while "WebView removed" was shown
@@ -200,6 +200,59 @@ Each fix has a source-level regression test that fails on the previous source.
 
 macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-22 Windows teardown at application quit (#2884, #2956, #2957)
+
+Upstream issue [#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884) and PRs
+[#2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956) and [#2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957).
+
+Root cause:
+
+- #2884: when the application quits, Windows destroys the Flutter view window
+  and its child windows, including each InAppWebView's hidden host window
+  (the WebView2 controller's parent), before the engine destroys the plugin.
+  `~InAppWebView` then called `Stop()`, `get_ParentWindow()`, and `Close()` on
+  a controller whose parent window no longer existed. WebView2 logged
+  `ERROR_INVALID_STATE` and could fail the browser process.
+- #2957: the Windows engine clears its messenger's engine pointer before it
+  destroys registrars. Channel delegates that unregister their handlers while
+  the plugin is destroyed called `FlutterDesktopMessengerSetCallback` on the
+  disconnected messenger (0xC000041D, an exception in a callback).
+- #2956 (shared composition resources released after the dispatcher queue)
+  was already covered in Forge: `InAppWebViewManager` counts instances under
+  `shared_resources_mutex_` and, for the last manager, intentionally leaks the
+  process-lifetime WinRT compositor objects before it shuts the dispatcher
+  queue down. No change.
+
+Fix:
+
+- `InAppWebView::hostWindowProc` handles `WM_DESTROY`. When the window
+  property still points to the view, `closeBeforeHostDestroyed()` removes the
+  property, removes the FindInteraction handlers, detaches the
+  `UserContentController` from the WebView (no script removals sent to a
+  closed controller), and calls `Stop()` and `Close()` under
+  `controllerMutex_` while the parent window still exists. It sets
+  `nativeClosed_`, which makes `acceptsCallbacks()` false and makes the
+  destructor skip `Stop()`, `DestroyWindow`, and `Close()`. The call is
+  idempotent. A normal dispose is unchanged: the destructor removes the
+  property before its own `DestroyWindow`, so `WM_DESTROY` finds no view.
+- Port of #2957: every channel of the plugin uses
+  `FlutterInappwebviewWindowsPlugin::messenger()`, a `PluginMessenger`
+  wrapper that forwards to the registrar's messenger. The plugin destructor
+  detaches it first, so later `Send` and `SetMessageHandler` calls are
+  dropped. The wrapper is declared before the managers and is destroyed
+  after them.
+
+Evidence: `flutter_inappwebview_forge_windows/test/teardown_order_source_test.dart`
+checks the `WM_DESTROY` path, the destructor guard, the detach order, and
+that no source outside the plugin file uses `registrar->messenger()`. The
+Windows example build runs on CI.
+
+Remaining gaps: application quit with mounted InAppWebViews, closing one of
+two Flutter engines' windows, and a KeepAlive WebView at quit need a Windows
+run with WebView2 logs. The pre-existing native GoogleTest file
+(`windows/test/flutter_inappwebview_windows_plugin_test.cpp`) uses a default
+plugin constructor that no longer exists and is not built; it was not changed.
 
 ## 2026-11-22 Keyboard and screen reader focus on macOS and Windows (#2952, #2953)
 

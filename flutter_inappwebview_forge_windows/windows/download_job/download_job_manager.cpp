@@ -22,7 +22,7 @@ namespace flutter_inappwebview_plugin
 
     auto controller = std::make_shared<DownloadJobController>(
       id,
-      plugin_->registrar->messenger(),
+      plugin_->messenger(),
       this,
       std::move(downloadOperation),
       url,

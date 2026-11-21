@@ -1,5 +1,11 @@
 ## Unreleased
 
+- At application quit, close each WebView2 controller when its host window
+  receives `WM_DESTROY`, while the parent window still exists, instead of in
+  the plugin destructor afterwards (`ERROR_INVALID_STATE`, [#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884)).
+  Every channel now uses a plugin messenger that is detached first when the
+  plugin is destroyed, so channel teardown no longer calls into the
+  engine's disconnected messenger (0xC000041D, [#2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).
 - With `enableAccessibilityFocus: true`, Narrator and NVDA can read the page
   (the WebView2 UI Automation tree is exposed through the host window,
   `ICoreWebView2CompositionController2::AutomationProvider`), and Tab and

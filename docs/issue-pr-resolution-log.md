@@ -27,6 +27,7 @@ changes by date; it does not repeat their details.
 
 | Date | Change | Upstream record | Release |
 | --- | --- | --- | --- |
+| 2026-11-22 | Windows: WebView2 closed before its host window at application quit; plugin messenger detached at teardown ([details](known-issues.md#2026-11-22-windows-teardown-at-application-quit-2884-2956-2957)) | #2884, PR #2956 (already covered), PR #2957 | Unreleased (runtime pending) |
 | 2026-11-22 | Opt-in `enableAccessibilityFocus`: keyboard and screen reader focus into and out of the page on macOS and Windows ([details](known-issues.md#2026-11-22-keyboard-and-screen-reader-focus-on-macos-and-windows-2952-2953)) | PRs #2952, #2953 | Unreleased (runtime pending) |
 | 2026-11-21 | `JavaScriptHandlerJsonResult`; handler results parsed with `JSON.parse` instead of run as code ([details](known-issues.md#2026-11-21-pre-encoded-json-handler-results-2948)) | PR #2948 | Unreleased (runtime pending) |
 | 2026-11-21 | JavaScript dialogs always answered on Android; `enableNativePromptDialog` setting ([details](known-issues.md#2026-11-21-javascript-dialog-answers-and-native-prompt-control-2901)) | PR #2901 | Unreleased (runtime pending) |

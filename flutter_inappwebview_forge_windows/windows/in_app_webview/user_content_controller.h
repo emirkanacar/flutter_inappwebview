@@ -21,6 +21,9 @@ namespace flutter_inappwebview_plugin
   public:
     UserContentController(InAppWebView* webView);
     ~UserContentController();
+    // The WebView2 controller was closed before the owner (upstream #2884):
+    // do not send script removals to it any more.
+    void detachWebView() { webView_ = nullptr; }
 
     std::vector<std::shared_ptr<UserScript>> getUserOnlyScriptsAt(const UserScriptInjectionTime& injectionTime) const;
     void addUserOnlyScript(std::shared_ptr<UserScript> userScript);

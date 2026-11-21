@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Windows: quitting the app with mounted WebViews no longer closes WebView2 after its window is gone or calls into a disconnected messenger ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [#2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).
 - Add `InAppWebViewSettings.enableAccessibilityFocus` (macOS, Windows): Tab and screen readers can get into and out of the page ([#2952](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2952), [#2953](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2953)).
 - JavaScript handlers can return `JavaScriptHandlerJsonResult` to pass pre-encoded JSON through; handler results are parsed with `JSON.parse` instead of run as code, and invalid JSON rejects `callHandler` ([#2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)).
 - Add `InAppWebViewSettings.enableNativePromptDialog` (Android, iOS); Android always answers JavaScript dialogs, including after `dispose()` ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
