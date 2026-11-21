@@ -124,7 +124,9 @@ jobs:
 
       - name: Map the checkout to a short drive
         working-directory: .
-        run: cmd //c subst X: "$(cygpath -w "$GITHUB_WORKSPACE")"
+        run: |
+          cmd //c subst X: "$(cygpath -w "$GITHUB_WORKSPACE")"
+          ls /x/flutter_inappwebview_forge_windows/example > /dev/null
 
       - name: Read Flutter version from .fvmrc
         id: flutter-version
