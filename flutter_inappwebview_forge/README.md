@@ -21,15 +21,17 @@ package names, native implementations, and releases.
 ## Requirements
 
 - Dart SDK `^3.8.0`
-- Flutter `>=3.38.6`
+- Flutter `>=3.41.0`
 - Android `minSdkVersion >= 24`
 - iOS 15.0+
 - macOS 10.14+
 - Windows with the WebView2 runtime
 - Linux with WPE WebKit 2.0 development packages
 
-The iOS implementation requires Flutter 3.38.6 or newer. Earlier Flutter
-versions can still dispatch WebView gestures incorrectly on iOS.
+iOS and macOS need Flutter 3.41.0 or newer: their Swift Package Manager
+manifests depend on the `FlutterFramework` package, which Flutter creates from
+3.41.0. Apps on Flutter 3.38-3.40 should stay on the previous plugin
+versions.
 
 ## Installation
 

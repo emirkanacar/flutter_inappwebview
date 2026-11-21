@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Flutter `3.44.8`, selected by `.fvmrc`, with Dart `3.12.2`. Published package compatibility still starts at Flutter `>=3.38.6` where declared.
+- Flutter `3.44.8`, selected by `.fvmrc`, with Dart `3.12.2`. Published package compatibility starts at Flutter `>=3.41.0` for the root, iOS, and macOS packages and `>=3.32.0` for the others.
 - FVM or an equivalent Flutter installation available as `fvm flutter`.
 - Xcode for iOS/macOS builds and Swift package checks.
 - Android SDK, JDK 17, Gradle/AGP tooling, and a WebView-capable Android device or emulator.

@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Require Flutter 3.41.0 or newer: the iOS and macOS SwiftPM manifests depend on `FlutterFramework` ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)).
 - Windows: the native code conforms to Visual Studio 18 / MSVC 14.51 ([#2936](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2936)).
 - Linux, Windows: fix app builds failing at CMake generation (stale plugin target name) and native compile errors in containers, autocorrection, and proxy settings.
 - Android: a provider that throws from algorithmic darkening no longer crashes WebView creation ([#2893](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2893)).

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Require Flutter 3.41.0 or newer. The Swift Package Manager manifest depends
+  on the `FlutterFramework` package, which Flutter creates from 3.41.0; on
+  older Flutter versions SwiftPM builds could not resolve it
+  ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)).
 - JavaScript bridge: handle the Promise returned by WebKit's
   `postMessage` when the `callHandler` message handler was already removed
   (for example after the WebView was disposed). The rejection is caught and

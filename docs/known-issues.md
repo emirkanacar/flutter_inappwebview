@@ -184,8 +184,6 @@ Each fix has a source-level regression test that fails on the previous source.
 - **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [PR #2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956),
   [PR #2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).** Shutdown ordering of WebView2 controller, environment,
   and channel delegates; Windows hardware needed.
-- **iOS SwiftPM `FlutterFramework` dependency ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)).** Requires a
-  Flutter 3.41 minimum (iOS currently declares 3.38.6); a baseline decision.
 - **Impeller black screen ([#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939)).** Needs reproduction.
 
 ### Ideas needing an API or product decision
@@ -195,6 +193,26 @@ control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull
 ([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
 options (#2908-#2911), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
+
+## 2026-11-21 Apple SwiftPM Flutter 3.41 baseline (#2951)
+
+iOS and macOS ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)): both `Package.swift` manifests have depended on
+`.package(name: "FlutterFramework", path: "../FlutterFramework")` since the
+SwiftPM migration, but the pubspecs allowed Flutter 3.38.6 (iOS and the root
+package) and 3.32.0 (macOS). Flutter creates the `FlutterFramework` package
+from 3.41.0 (checked in the SDK history: `swift_package_manager.dart` has no
+`FlutterFramework` at tag 3.38.6 and has it at 3.41.0), so an app on Flutter
+3.38-3.40 with SwiftPM enabled could not resolve the manifest. CocoaPods
+builds were not affected.
+
+Fix: the root, iOS, and macOS packages and their examples require
+`flutter: ">=3.41.0"`. The Dart constraint stays `^3.8.0`; Flutter 3.41
+already implies a newer Dart. Android, Windows, Linux, Web, and the platform
+interface keep `>=3.32.0`.
+
+Evidence: `test/swiftpm_flutter_baseline_test.dart` in the iOS and macOS
+packages fails when the manifest references `FlutterFramework` and the pubspec
+allows a Flutter version below 3.41.
 
 ## 2026-11-13 Web `Sandbox.ALLOW_ALL` iframe sandbox
 

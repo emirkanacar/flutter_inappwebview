@@ -3,7 +3,7 @@
 ## Requirements
 
 - Dart SDK `^3.8.0`
-- Flutter `>=3.38.6`
+- Flutter `>=3.41.0`
 - Android `minSdkVersion >= 24`
 - iOS 15.0 or newer
 - macOS 10.14 or newer
