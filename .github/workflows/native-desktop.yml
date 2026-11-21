@@ -1,0 +1,152 @@
+name: Native desktop build
+
+# Compiles the Linux (WPE WebKit) and Windows (WebView2/MSVC) native code,
+# which the Dart jobs in ci.yml do not build. The Linux job also runs the
+# native gtest suite. Runs only when native desktop code, its build
+# configuration, or the Flutter toolchain change.
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.fvmrc'
+      - '.github/workflows/native-desktop.yml'
+      - 'flutter_inappwebview_forge_linux/linux/**'
+      - 'flutter_inappwebview_forge_linux/pubspec.yaml'
+      - 'flutter_inappwebview_forge_linux/example/linux/**'
+      - 'flutter_inappwebview_forge_linux/example/pubspec.yaml'
+      - 'flutter_inappwebview_forge_windows/windows/**'
+      - 'flutter_inappwebview_forge_windows/pubspec.yaml'
+      - 'flutter_inappwebview_forge_windows/example/windows/**'
+      - 'flutter_inappwebview_forge_windows/example/pubspec.yaml'
+  pull_request:
+    paths:
+      - '.fvmrc'
+      - '.github/workflows/native-desktop.yml'
+      - 'flutter_inappwebview_forge_linux/linux/**'
+      - 'flutter_inappwebview_forge_linux/pubspec.yaml'
+      - 'flutter_inappwebview_forge_linux/example/linux/**'
+      - 'flutter_inappwebview_forge_linux/example/pubspec.yaml'
+      - 'flutter_inappwebview_forge_windows/windows/**'
+      - 'flutter_inappwebview_forge_windows/pubspec.yaml'
+      - 'flutter_inappwebview_forge_windows/example/windows/**'
+      - 'flutter_inappwebview_forge_windows/example/pubspec.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux example build and native tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: flutter_inappwebview_forge_linux/example
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        working-directory: .
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config xvfb \
+            libgtk-3-dev libepoxy-dev libsecret-1-dev libwayland-dev \
+            libwpe-1.0-dev
+          # Install the newest WPE WebKit development package the image
+          # provides; the plugin's CMake selects the matching API.
+          wpe_webkit=""
+          for candidate in libwpewebkit-2.0-dev libwpewebkit-1.1-dev libwpewebkit-1.0-dev; do
+            if apt-cache show "$candidate" > /dev/null 2>&1; then
+              wpe_webkit="$candidate"
+              break
+            fi
+          done
+          if [ -z "$wpe_webkit" ]; then
+            echo "::error::No WPE WebKit development package is available."
+            exit 1
+          fi
+          echo "Installing $wpe_webkit"
+          sudo apt-get install -y "$wpe_webkit"
+          # The WPEPlatform API is preferred; WPEBackend-FDO is the fallback.
+          sudo apt-get install -y libwpebackend-fdo-1.0-dev || true
+          pkg-config --list-all | grep -E 'wpe|epoxy|gtk\+-3' || true
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        working-directory: .
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Use the local platform interface
+        run: |
+          for dir in . ..; do
+            if [ ! -f "$dir/pubspec_overrides.yaml" ]; then
+              printf 'dependency_overrides:\n  flutter_inappwebview_forge_platform_interface:\n    path: %s\n' \
+                "$(realpath ../../flutter_inappwebview_forge_platform_interface)" > "$dir/pubspec_overrides.yaml"
+            fi
+          done
+
+      - name: Build Linux example
+        run: |
+          flutter pub get
+          flutter build linux --debug
+
+      - name: Run native gtest suite
+        run: |
+          runner="$(find build/linux -type f -name 'flutter_inappwebview_linux_test' | head -n 1)"
+          if [ -z "$runner" ]; then
+            echo "::error::Native test runner was not built."
+            exit 1
+          fi
+          xvfb-run -a "$runner"
+
+  windows:
+    name: Windows example build
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: flutter_inappwebview_forge_windows/example
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Read Flutter version from .fvmrc
+        id: flutter-version
+        working-directory: .
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ steps.flutter-version.outputs.version }}
+          channel: stable
+          cache: true
+
+      - name: Set up NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Use the local platform interface
+        run: |
+          if [ ! -f pubspec_overrides.yaml ]; then
+            printf 'dependency_overrides:\n  flutter_inappwebview_forge_platform_interface:\n    path: ../../flutter_inappwebview_forge_platform_interface\n' > pubspec_overrides.yaml
+          fi
+
+      - name: Build Windows example
+        run: |
+          flutter pub get
+          flutter build windows --debug

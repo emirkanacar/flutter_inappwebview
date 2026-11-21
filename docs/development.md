@@ -111,9 +111,19 @@ check script, or the workflow itself. Dart-only and other-platform changes do
 not rebuild the APK. Run it manually (`gh workflow run android.yml`) before a
 release.
 
+`.github/workflows/native-desktop.yml` compiles the desktop native code. The
+`linux` job (Ubuntu 24.04) installs the newest available WPE WebKit
+development package, runs `flutter build linux --debug` for the Linux example,
+and runs the `flutter_inappwebview_linux_test` gtest runner under `xvfb-run`.
+The `windows` job runs `flutter build windows --debug` for the Windows
+example (MSVC, WebView2 and WIL from NuGet). It runs only when `.fvmrc`, the
+workflow, or the Linux/Windows package or example native sources or
+`pubspec.yaml` change; run it manually with `gh workflow run
+native-desktop.yml`.
+
 Known gaps: CI does not analyze the `example/` apps, does not run the main
-example's `example/test/` suite, does not build the iOS, macOS, Windows,
-Linux, or Web examples, and does not run integration tests. Analyzer infos
+example's `example/test/` suite, does not build the iOS, macOS, or Web
+examples, and does not run integration tests. Analyzer infos
 are reported but are not fatal. These remain local or device validation
 steps.
 
