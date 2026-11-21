@@ -1,7 +1,7 @@
 # Android Kotlin/KTS and Native Package Migration Plan
 
-Last reviewed: 2026-08-06  
-Status: Conditional AGP 9 compatibility is implemented; Flutter/AGP runtime validation and API/performance validation remain  
+Last reviewed: 2026-11-21\
+Status: Conditional AGP 9 compatibility is implemented; Flutter/AGP runtime validation and API/performance validation remain\
 Scope: `flutter_inappwebview_forge_android` and the Android example applications
 
 ## Objective
@@ -26,10 +26,10 @@ Current Flutter documentation presents Kotlin as the default language for Androi
 
 | Area | Current state | Target |
 | --- | --- | --- |
-| Native language | 157 Kotlin files under `android/src/main/kotlin`; no plugin native Java source remains | All native sources in Kotlin under `android/src/main/kotlin` |
+| Native language | Done: 157 Kotlin files, no Java | Kotlin only |
 | Gradle | `build.gradle.kts` and `settings.gradle.kts` using the transition plugin model | `build.gradle.kts`, `plugins {}` DSL, and the supported built-in Kotlin model |
 | Kotlin build model | Android 1.0.48 applies KGP only for AGP <9 and configures JVM 17 through the Kotlin extension | AGP 9+ built-in Kotlin with no forced KGP application |
-| Native namespace | `com.pichillilorenzo.flutter_inappwebview_android` | `com.emirkanacar.flutter_inappwebview_forge_android` |
+| Native namespace | Done: `com.emirkanacar.flutter_inappwebview_forge_android` | Same |
 | Flutter baseline | Flutter `3.44.8`, Dart `3.12.2` | Flutter `>=3.47.0`, Dart `^3.12.0` for built-in Kotlin |
 | Java/Kotlin bytecode | Java 17 target | Java/Kotlin JVM 17 target |
 | Android build | AGP `8.13.2` with the transitional KTS toolchain | Flutter-template-compatible AGP 9.x and matching Gradle |
@@ -49,64 +49,28 @@ static migration regression passes. The target Flutter >=3.47, AGP 9, Gradle
 9, JDK 17, built-in-Kotlin, release/AAB, and consuming-app validation remains a
 runtime/toolchain gate.
 
-## Initial implementation checkpoint — 2026-08-06
+## Implementation checkpoint — 2026-08-06
 
-The first implementation slice is complete:
+Complete at this checkpoint (details are in git history and the Android
+changelog):
 
-- The plugin Android build, the plugin example, and the root example application use `.gradle.kts` files.
-- The native namespace was migrated to `com.emirkanacar.flutter_inappwebview_forge_android`; manifests and example application identities were updated.
-- The plugin entry point was moved to `InAppWebViewFlutterPlugin.kt`, and both example `MainActivity` classes were migrated to Kotlin.
-- `ISettings`, `InAppWebViewFileProvider`, `PlatformUtil`, `MyWebStorage`, `WebViewFeatureManager`, the print adapter/callback bridge, and the find-interaction, tracing, pull-to-refresh, proxy, and context-menu settings models were migrated as the first low-risk native group.
-- `AndroidResource`, `ContentWorld`, `UserScript`, `PluginScript`, `Disposable`, navigation-policy/injection-time types, and content-blocker models were migrated as the second low-risk native group.
-- InAppBrowser, Chrome Custom Tabs, Print Job, and Process Global Config settings models were migrated as the third low-risk native group; public Java fields were preserved for channel-map compatibility.
-- The callback/channel delegate infrastructure was migrated to Kotlin; channel handlers are cleared during disposal and callback results are decoded with explicit nullability.
-- `URLProtectionSpace`, `URLAuthenticationChallenge`, `ClientCertChallenge`, `ClientCertResponse`, `HttpAuthResponse`, `ServerTrustAuthResponse`, and `ServerTrustChallenge` were migrated while preserving Java-visible constructors, getters/setters, and `Map<String, Object>` contracts.
-- Credential database contracts, helper/DAO classes, and `CredentialDatabaseHandler` were migrated with explicit nullable credential/protection-space values, SQLite cursor cleanup, and channel argument validation.
-- `WebMessage`, `PrintJobManager`, Custom Tabs `ServiceConnection`/callback types, and `TrustedWebActivitySingleInstance` were migrated while preserving public Java fields and Android callback signatures.
-- JavaScript alert/confirm/prompt/beforeunload responses, `PermissionResponse`, file chooser request/response types, and `DownloadStartRequest` were migrated while preserving nullable fields and Java-visible signatures.
-- Custom Tabs action/menu/secondary-toolbar models, `CustomSchemeResponse`, `FindSession`, geolocation permission responses, `HitTestResult`, `SafeBrowsingResponse`, and `Size2D` were migrated while preserving byte-array/map conversions and boolean getter names.
-- Print attributes/job, media size, resolution, and margins types, together with SSL/proxy/web-resource error models, were migrated while preserving API-level guards and certificate payloads with explicit nullable returns.
-- `URLRequest`, `NavigationAction`, `CreateWindowAction`, `JavaScriptHandlerFunctionData`, and `InAppWebViewRect` were migrated while preserving navigation/map contracts and Java-visible boolean accessor names.
-- WebMessage port/compat models, `WebResourceRequestExt`/`WebResourceResponseExt`, and `InAppBrowserMenuItem` were migrated while preserving public port fields, callback exceptions, byte-array, and header-map contracts.
-- `WebMessageChannel` was migrated while preserving its public list/field surface, AndroidX WebKit callbacks, Java channel-delegate integration, and messenger lifecycle checks.
-- `WebMessageListener` was migrated while preserving AndroidX listener/reply-proxy callbacks, origin-rule validation, public fields, and disposal behavior with explicit nullability.
-- WebMessage channel delegates and the `PreferredContentModeOptionType` enum were migrated with explicit argument validation and Java-visible static factories.
-- Chrome Custom Tabs receiver/single-instance classes, `ActivityResultListener`, `DisplayListenerProxy`, and `ProcessGlobalConfigManager` were migrated while preserving intent extras, API/reflection guards, and plugin messenger lifecycle behavior.
-- Find Interaction, Tracing, Print Job, and InApp Browser channel delegates were migrated while preserving callback payloads, static API calls, and disposal cleanup.
-- Pull-to-refresh, Headless WebView, and Service Worker channel delegates were migrated with nullable-safe method argument validation, WebView feature checks, and synchronous callback exception compatibility.
-- OnLoadResource, window focus/blur, print script generators, and the shared `PluginScriptsUtil` were migrated while preserving Java-visible static constants/factories and JavaScript placeholder payloads.
-- Find Interaction, Tracing, and Print Job controller/manager classes were migrated with preserved static factory calls, channel lifecycle handling, and nullable print-job cleanup.
-- Service Worker, Pull-to-refresh, and Proxy manager/layout classes were migrated while preserving API-level/feature guards, callback flows, and proxy-rule map contracts.
-- `WebViewAssetLoaderExt` and its custom path-handler callback bridge were migrated while preserving asset/resource handler selection, the API 21 response guard, and synchronous callback exception behavior.
-- The keep-alive service, no-history Custom Tabs activity callbacks, and Headless WebView manager were migrated while preserving lifecycle callback fields and nullable WebView-map cleanup.
-- The CookieManager channel implementation was migrated while preserving API 19/21 cookie/sync flows, Java-visible static manager state, and cookie-map payloads; required channel arguments now return explicit errors.
-- `PlatformWebView`, `InAppBrowserDelegate`, `InAppWebViewInterface`, and the platform-view factory were migrated while preserving Java implementer overloads, callback/throws contracts, and generic collection signatures.
-- `CustomTabsHelper` and `CustomTabActivityHelper` were migrated while preserving static package selection, keep-alive extras, overloads, and service-connection callbacks.
-- `TrustedWebActivity`, `HeadlessInAppWebView`, `ChromeSafariBrowserManager`, and `InAppBrowserManager` were migrated while preserving Trusted Web Activity settings, headless lifecycle, browser registries, system-browser chooser behavior, and activity extras.
-- The Headless WebView channel delegate was updated to call the Kotlin `getSize()` method explicitly after JavaBean property interop changed.
-- `FlutterWebView`, the renderer-process callback client, `InputAwareWebView`, and the threaded input-connection proxy view were migrated while preserving platform-view initial-load deferral, renderer callbacks, pre-N IME threading, and keyboard/focus reset behavior.
-- `WebViewChannelDelegateMethods` and `ChromeCustomTabsChannelDelegate` were migrated while preserving method/event payload contracts, nullable channel inputs, and activity lifecycle cleanup.
-- `ContentBlockerHandler` was migrated while preserving URL/domain/top-frame filtering, CSS injection, `make-https` responses, and resource-type detection with explicit URI/HTTP nullability.
-- `JavaScriptBridgeInterface` was migrated while preserving bridge-secret and origin/frame allow-list checks, internal JavaScript handlers, print/callback flows, and disposal behavior.
-- `InAppWebViewManager` was migrated while preserving Safe Browsing, WebView package/debugging, cache, KeepAlive, and JavaScript bridge-name channel methods with explicit nullable plugin/context flows.
-- `Util` was migrated while preserving asset/certificate/network/JSON/screen/reflection helpers, `@JvmStatic` Java access, and the `PrivateKeyAndCertificates` nested-type contract.
-- `UserContentController` was migrated while preserving document-start/end script generation, content-world wrappers, origin/frame checks, and AndroidX `ScriptHandler` lifecycle.
-- `InAppWebViewSettings` was migrated while preserving its public Java field surface, `parse`/`toMap`/`getRealSettings` keys, API guards, and boxed nullable settings.
-- `PromisePolyfillJS` was migrated without changing its large JavaScript source payload, while preserving the Java-visible static group/source/factory API.
-- `InterceptAjaxRequestJS` and `InterceptFetchRequestJS` were migrated while preserving interception JavaScript payloads, origin/frame settings, and Java-visible static factory/flag APIs.
-- `JavaScriptBridgeJS` was migrated while preserving the bridge name, utility/web-message variables, platform-ready script, and large bridge JavaScript payload with its static API.
-- The Java sources were initially moved into the new `src/main/kotlin` tree; the final seven Java files were then migrated: `ChromeCustomTabsActivity`, `InAppBrowserActivity`, `WebViewChannelDelegate`, `InAppWebView`, `InAppWebViewChromeClient`, `InAppWebViewClient`, and `InAppWebViewClientCompat`. Their WebView lifecycle, navigation, dialog, popup, permission, file chooser, fullscreen, client callback, and channel-payload flows now use explicit null-safe Kotlin.
-- The plugin native source tree contains no Java files; 157 Kotlin files compile successfully.
-- `InAppWebViewInterface` was updated with nullable platform-type returns so Kotlin overrides match inherited WebView APIs correctly.
-- Flutter SDK `3.44.8` and Dart `3.12.2` are in use. Because this template sets `android.builtInKotlin=false`, the AGP 9 built-in Kotlin step remains a separate toolchain task.
-- The migrated Kotlin files use neither `!!` nor `@JvmSuppressWildcards`; messenger lifecycle checks and Java `Map` signatures are explicit.
-- The FileProvider authority suffix (`flutter_inappwebview_android.fileprovider`) was preserved for URI compatibility with existing applications.
-- The Flutter 3.44.8 template does not enable the AGP 9 built-in Kotlin model. This checkpoint uses KTS with the transitional Kotlin Gradle plugin model; the built-in Kotlin step will be applied when the toolchain moves to Flutter `>=3.47.0`.
-- The plugin `compileDebugKotlin`/`compileDebugJavaWithJavac` tasks, both root/platform example `assembleDebug` builds, and the Android package FileProvider path test passed with Flutter 3.44.8. The examples were built after offline dependency resolution.
+- The plugin and both example apps use `.gradle.kts`.
+- All plugin native sources are Kotlin (157 files, no Java); the example
+  `MainActivity` classes are Kotlin. Migrated files use neither `!!` nor
+  `@JvmSuppressWildcards`.
+- The migration preserved Java-visible fields, getters, static factories,
+  overloads, `Map<String, Object>` channel contracts, API-level guards, and
+  JavaScript plugin payloads. Required channel arguments return explicit
+  errors.
+- The namespace is `com.emirkanacar.flutter_inappwebview_forge_android`. The
+  FileProvider authority suffix (`flutter_inappwebview_android.fileprovider`)
+  is unchanged for URI compatibility.
+- `compileDebugKotlin`, both example `assembleDebug` builds, and the
+  FileProvider path test passed on Flutter 3.44.8.
 
-The Java-to-Kotlin migration is complete at this checkpoint. API 19–36/performance validation in Phase 4 and the AGP 9 built-in Kotlin migration after Flutter `>=3.47.0` remain open.
-
-Flutter’s guide identifies Flutter 3.44/Dart 3.12 as the base for `kotlin.compilerOptions` and Flutter 3.47 or later for built-in Kotlin validation. The migration therefore targets `Flutter >=3.47.0`; the exact versions must be verified from the selected stable Flutter template before that phase begins.
+Open: Phase 4 device/performance validation and the AGP 9 built-in Kotlin
+validation on Flutter `>=3.47.0` (verify the exact versions from the stable
+template before starting).
 
 ## Package and authority decision
 

@@ -218,33 +218,46 @@ Exit criteria:
 
 ### A3 — Event-channel pressure (P1)
 
-Problem: scroll, progress, and console callbacks allocate payload maps and cross the platform channel at high frequency.
+Problem: scroll, progress, and console callbacks cross the platform channel at
+high frequency.
 
-Phase 1 status: iOS scroll-change callbacks are coalesced once per main-loop turn while preserving the latest offset and user-scroll signal; progress and content-size updates are also de-duplicated/coalesced. Android now drops duplicate progress and unchanged scroll payloads and coalesces scroll updates to the next animation frame; event-rate and terminal-event validation remain open.
+Status (merged, unreleased):
 
-Phase 2 status (implemented, unreleased, source/unit validated): Android, iOS, and macOS skip fire-and-forget events that have no Dart listener before encoding them. Dart sends a `skippedEvents` list in the platform-view creation params and the headless `run` params; the native `ChannelEventFilter` intersects it with a fixed allowlist (`onConsoleMessage`, `onScrollChanged`, `onProgressChanged`, `onTitleChanged`, `onOverScrolled`, `onZoomScaleChanged`) and checks it only in the fire-and-forget invoke path, so callbacks that wait for a Dart result are never filtered. Each `FlutterWebViewFactory` creation re-applies the list, so KeepAlive reuse and headless transfer follow the callbacks of the widget that currently owns the WebView. A missing or malformed list clears the filter (pre-filter behavior). InAppBrowser does not send the list and is never filtered. Android also skips scheduling the scroll frame dispatch when `onScrollChanged` is filtered; the iOS scroll-lock side effects still run. Skipped events no longer appear in debug logging. Windows and Linux are not yet covered. Device gate: measured on iOS and Android on 2026-11-21 (see the evidence paragraphs below); Windows, Linux, and macOS runtime evidence remain open.
+- Phase 1: iOS coalesces scroll changes once per main-loop turn and
+  de-duplicates progress and content-size updates. Android drops duplicate
+  progress and unchanged scroll payloads and coalesces scroll to the next
+  animation frame.
+- Phase 2: Android, iOS, and macOS skip fire-and-forget events with no Dart
+  listener. Dart sends `skippedEvents` in the platform-view and headless `run`
+  params; the native `ChannelEventFilter` intersects it with a fixed allowlist
+  (`onConsoleMessage`, `onScrollChanged`, `onProgressChanged`,
+  `onTitleChanged`, `onOverScrolled`, `onZoomScaleChanged`) and never filters
+  callbacks that wait for a result. Each factory attach re-applies the list
+  (KeepAlive and headless transfer follow the current owner); a missing or
+  malformed list clears the filter; InAppBrowser is never filtered. Windows and
+  Linux are not covered.
+- Console hook: iOS/macOS do not inject `ConsoleLogJS` when `onConsoleMessage`
+  is skipped. `updateChannelEventFilter` adds or removes the script for the
+  next navigation and toggles `_consoleMessagesEnabled` in every known content
+  world for the current document. Known limit: `removePluginScripts(with:)`
+  removes only the default-world copy, so a custom world keeps the hook until
+  the next `prepareAndAddUserScripts()`. Popups are not changed.
 
-Phase 2 console hook (implemented, unreleased, source/unit validated): on iOS and macOS the `ConsoleLogJS` document-start plugin script is not injected when `onConsoleMessage` is in `skippedEvents`. Before this, every `console.*` call stringified its arguments, called `callHandler` (timer, `postMessage`, promise), was parsed natively, and was resolved with `evaluateJavaScript`, only for the event to be dropped. `InAppWebView.updateChannelEventFilter` re-applies the filter on each attach; when an already prepared WebView changes its console listener it adds or removes the plugin script for the next navigation and evaluates a `_consoleMessagesEnabled` switch (plus the hook source when enabling) in every known content world for the current document. The hook installs at most once per document and content world (`_consoleLogHooked`). Known limitation: `removePluginScripts(with:)` removes only the default-world copy, so a custom content world keeps the hook in later documents and keeps reporting until the next `prepareAndAddUserScripts()`; the current document is switched off in every world. Popup windows (`windowId`) share the opener configuration and are not changed. Android is not affected because console messages come from `WebChromeClient`, not a JavaScript hook.
+Device results (2026-11-21, `channel_pressure_test.dart` in the iOS and
+Android examples):
 
-iOS device evidence (2026-11-21, physical iPhone, iOS 27.2.1 (24B156), profile build of `flutter_inappwebview_forge_ios/example/integration_test/channel_pressure_test.dart`): 5 rounds of 5000 `console.log` calls take a median of 37-41 ms in JavaScript with an `onConsoleMessage` listener (25000 channel calls, 25000 Dart callbacks) and 1-2 ms without one (0 channel calls, hook not injected). 301 programmatic scroll steps send 300 `onScrollChanged` calls with a listener and 0 without one. The KeepAlive reattach sequence (no listener, listener, no listener, reload, listener, reload) produced the expected hook states `undefined/undefined`, `true/true`, `true/false`, `undefined/undefined`, `true/true`, `true/undefined`, with one Dart message per `console.log` while enabled and no channel calls while disabled. The first device run found that the reattach switch was rejected by `InAppWebView.evaluateJavaScript(_:frame:contentWorld:)`, which failed every nil (main) frame with "Frame is nil"; that guard was corrected for all callers (see #2771 in [known-issues.md](known-issues.md)) and the rerun passed through the shared evaluation path. Still open: macOS runtime evidence (macOS is build-validated only).
+| Device | 5x5000 `console.log`, listener vs none | 301 scroll steps | KeepAlive reattach |
+| --- | --- | --- | --- |
+| iPhone, iOS 27.2.1, profile | JS median 37-41 ms vs 1-2 ms; 25000 vs 0 channel calls | 300 vs 0 calls | Expected hook states; found and fixed the nil-frame guard (#2771) |
+| Samsung A16, Android 16, WebView 157, debug | 25000 vs 0 calls; drain about 20 s vs 2.2 s (no JS hook on Android) | 300 vs 0 calls | 0/1/0/1 messages as expected |
 
-Android device evidence (2026-11-21, Samsung SM-A165F, Android 16, Android System WebView 157.0.8103.50, debug build of `flutter_inappwebview_forge_android/example/integration_test/channel_pressure_test.dart`): 5 rounds of 5000 `console.log` calls send 25000 `onConsoleMessage` channel calls with a listener and 0 without one. JavaScript time is similar in both cases (median 82.5 ms vs 77.1 ms) because Android has no JavaScript console hook; the saving is on the native/Dart side, where draining the 25000 messages took about 20 s of wall time against 2.2 s with the filter. 301 programmatic scroll steps send 300 `onScrollChanged` calls with a listener and 0 without one. A KeepAlive reattach sequence (no listener, listener, no listener, listener) delivered 0, 1, 0, 1 Dart messages and the same channel-call counts for one `console.log`. The first attempt was killed by a Play Store WebView update during the run (`stop com.google.android.webview due to installPackageLI`), not by the plugin.
+Plugin-script minification and concatenation were measured and rejected:
+about 2-4 KB saved per document, while a minifier risks the bridge-secret
+placeholder substitution and concatenation breaks per-group removal.
 
-Plugin script minification and concatenation were measured and rejected: stripping whitespace saves about 2 KB per document on Android (bridge 11150 -> 8927 bytes) and about 4 KB on iOS (11983 -> 7692 bytes), which is microseconds of parse time, while a minifier would put the `$IN_APP_WEBVIEW_JAVASCRIPT_BRIDGE_BRIDGE_SECRET` placeholder substitution at risk and concatenation would break per-group runtime removal.
-
-Plan:
-
-- Measure event rates before changing semantics.
-- Coalesce scroll events to the latest position while preserving the final position in each frame/window.
-- Throttle progress updates without suppressing the terminal 100% state.
-- Add bounded console-message handling for high-volume pages; preserve error-level messages.
-- Evaluate the additive `bridgeEvents` design from [PR #2794](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2794) only after Android and iOS runtime validation.
-
-Exit criteria:
-
-- At least 30% fewer channel calls in the scroll benchmark without a visible position regression.
-- No lost terminal progress event.
-- Console/bridge payload size and allocation behavior are documented.
+Still open: macOS, Windows, and Linux runtime evidence; bounded console
+handling for high-volume pages; the `bridgeEvents` design from
+[PR #2794](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2794).
 
 ### A4 — Composition, IME, fullscreen, and disposal (P1)
 

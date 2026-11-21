@@ -1,728 +1,106 @@
 # Open Work Plan
 
-Last reviewed: 2026-11-13
+Last reviewed: 2026-11-21
 
-This is the active implementation and reproduction backlog for work that is
-not yet resolved in the local Forge repository. Locally implemented records
-that still need real runtime evidence are tracked separately in
-[`runtime-validation-pending.md`](runtime-validation-pending.md). The plan is
-derived from the supplied `issues.csv` and `pr.csv` snapshots, the current
-source tree, package changelogs, and [`known-issues.md`](known-issues.md).
+Active implementation and reproduction backlog: only records with no complete
+local implementation. Implemented records that still need device, provider,
+browser, or artifact evidence are in
+[`runtime-validation-pending.md`](runtime-validation-pending.md). Root cause
+and evidence for every record are in [`known-issues.md`](known-issues.md).
 
-## Scope and counts
+## Counts
 
-The export contains 125 issues and 73 PRs. Ninety-five issue records have a
-documented local implementation, mitigation, source-review, or host/platform
-boundary: 78 await real runtime validation, #2709 is source-validated with no
-native runtime gate, #2745 is closed by source review, and
-#2570/#2584/#2598/#2636/#2659/#2680/#2688/#2698/#2713/#2723/#2727/#2753/#2796/#2815/#2831 have no Forge-owned fix because
-their failures belong to host app/site configuration, the Apple/WebKit
-Simulator, Android framework/provider/dependency, and Flutter engine/platform-view layers.
-The other 30 issue records
-remain in this active plan. Nine additional PR-only records
-(`#2243`, `#2771`, `#2871`, `#2474`, `#2823`, `#2853`, `#2743`, `#2825`, and
-`#2866`) are implemented locally and await
-runtime validation; they do not change the issue counts below.
+The `issues.csv` / `pr.csv` export has 125 issues and 73 PRs. Every export row
+is `OPEN`; that is historical metadata, not the local status.
 
-The scope table and priority queue are authoritative for the current snapshot;
-dated validation notes below retain their contemporaneous counts.
+| Category | Export | Runtime pending | No runtime gate | Source-review closed | Host/platform boundary | Active open |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Bugs | 98 | 57 | 1 | 1 | 15 | 24 |
+| Enhancements | 16 | 13 | 0 | 0 | 0 | 3 |
+| Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 |
+| Showcase | 3 | 0 | 0 | 0 | 0 | 3 |
+| **Total** | **125** | **78** | **1** | **1** | **15** | **30** |
 
-| Category | Export | Runtime pending | Source-validated; no runtime gate | Source-review closed | Host/platform boundary | Active open | Treatment |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Bugs | 98 | 57 | 1 | 1 | 15 | 24 | Technical work, validation, or reproduction required |
-| Enhancements | 16 | 13 | 0 | 0 | 0 | 3 | API/design decision and implementation required |
-| Unlabelled | 8 | 8 | 0 | 0 | 0 | 0 | Triage before implementation |
-| Showcase | 3 | 0 | 0 | 0 | 0 | 3 | Product examples, not plugin engineering work |
-| **Total issue records** | **125** | **78** | **1** | **1** | **15** | **30** | **27 active technical records after excluding showcase entries** |
-
-The upstream export marks every record `OPEN`. That value is historical metadata; this plan uses local code evidence to decide whether a record is resolved, mitigated, validation-only, or still open.
-
-## Local feature addition: WebView prewarm/reuse
-
-`InAppWebViewPreloader` is implemented in the root package as an additive
-convenience API over the existing headless and KeepAlive ownership contract.
-It is not an upstream issue record and does not change the export counts. The
-source acceptance criteria are complete: concurrent starts are coalesced,
-failed starts can be retried, ownership is forwarded without copying the
-native WebView, and disposal is idempotent. Release/profile measurements for
-cold start, first usable frame, memory, and page readiness remain a separate
-runtime-validation task; no device test is required for this source-only
-slice.
-
-## Local feature addition: native WebView API gaps
-
-Cross-platform mute, opt-in native downloads, Android visual-state
-callbacks, iOS/macOS cookie observers, Android Profile headers/prefetch,
-feature-gated AndroidX WebKit navigation/prerender/BFCache APIs, and
-iOS 26 helpers are implemented through root 2.1.76 / 2.1.77. The follow-up
-wave (2.1.77) adds NavigationParameters, Profile `preconnect`, BFCache
-depth settings, opt-in WebViewBuilder, `saveStateWithOptions`,
-ProcessGlobalConfig UI-thread startup mode, Windows `DownloadJobController`
-parity, and iOS 26 `conversationContext`, and raises Android to
-**`minSdk 24` + `androidx.webkit:1.16.0`**. The 2.1.80 release line adds
-`WebStorageManager.deleteBrowsingData` / `deleteBrowsingDataForSite` on
-Android (`DELETE_BROWSING_DATA`), iOS, macOS, and Linux, plus Windows
-`deleteBrowsingData` through `ICoreWebView2Profile2::ClearBrowsingDataAll`
-(Linux and Windows native code not yet built on a target host). iOS/macOS
-`isLockdownModeEnabled` and `CookieManager.setCookiePolicy` are also
-source-complete (2.1.80), as is the Android
-`ContainerController.warmUpRendererProcess`
-(`WARM_UP_RENDERER_PROCESS`). Windows `ContextMenu` support through WebView2
-`ContextMenuRequested` is source-complete as well, but not built on a
-Windows host yet. These are not upstream issue
-records and do not change the export counts. Physical-device validation
-remains in [`runtime-validation-pending.md`](runtime-validation-pending.md).
+The status lists behind these columns are in the
+[runtime register](runtime-validation-pending.md#current-counts). Showcase
+records are excluded from engineering metrics (27 active technical records).
 
 ## Status rules
 
-- **P0 containment:** crash, security, data-loss, or deadlock risk. Reproduce or add a safe guard before feature work.
-- **P1 stability:** confirmed runtime, lifecycle, build, or release compatibility problem.
-- **P2 API/feature:** requires a public API, platform capability, or product decision.
-- **P3 triage:** low-detail, duplicate, environment-specific, or unconfirmed report.
-- **Runtime validation pending:** the local implementation, regression coverage, and host/build checks pass, but the target device, provider, browser engine, native runtime, or release artifact still needs real validation. These records live in [`runtime-validation-pending.md`](runtime-validation-pending.md), not in this active queue.
-- **Host/platform boundary:** available evidence identifies an external runtime or provider failure with no package-owned control point. These records remain visible in [`known-issues.md`](known-issues.md) and the resolution log, but are not counted as local fixes or active implementation work.
-- **Source-validated; no runtime gate:** the complete behavior is a pure Dart or source-contract path covered by focused regression tests, so no device/provider/native runtime gate is required.
-- **Locally resolved:** the acceptance criteria, regression coverage, affected native build, and required device/runtime or documented host-limitation evidence all pass. A source-only patch is not enough.
-- **Active open work:** no complete local implementation boundary has been established, or a runtime failure has returned the issue to implementation/reproduction.
-
-## Local resolutions outside this plan
-
-The local iOS input accessory refresh and cross-platform
-`disableAutocorrection` setting are implemented in root 2.1.70, iOS 2.1.31,
-Android 1.0.53, macOS 1.1.9, Windows 1.0.14, Linux 1.0.8, Web 1.0.3, and
-platform-interface 1.1.17. They are not an exported issue record and therefore
-do not change the 125-issue counts; physical keyboard/WebView validation is
-tracked in the runtime register.
-
-Upstream [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
-was filed after the CSV snapshot. iOS 2.1.33 / root 2.1.74 replace
-`UIApplication.canOpenURL` in `openWithSystemBrowser` with
-`open(_:options:completionHandler:)` and keep the existing FlutterError
-contract. It is not one of the 125 exported issue records and does not change
-the active-queue counts; iOS 27 Simulator/device open-URL validation is
-tracked in the runtime register.
-
-The 5.x Options, platform-prefixed callback, and `IOS*`/`Android*` type
-shims stay as public compatibility APIs. Root 2.1.75, platform-interface
-1.1.20, and Android 1.0.54 document the current-name mapping, give
-`saveFormData` a non-empty deprecation message, and leave native Android
-SDK-deprecated call sites in place until an explicit minSdk increase. The
-sequence is [`deprecated-api-migration-plan.md`](deprecated-api-migration-plan.md).
-This is not an exported issue record and does not change the 125-issue counts.
-
-The 2026-11-13 Forge-repository records (Web `Sandbox.ALLOW_ALL` iframe
-sandbox in Web 1.0.5, the Android example build directory from Forge PR #1,
-and the Xcode 27 / Swift 6.4 build failure from Forge #2) are not exported
-CSV records and do not change the 125-issue counts. Their source fixes are
-complete and their runtime gates are tracked in the runtime register.
-
-Android 1.0.56 raised `minSdkVersion` to 24, which removes the floor that
-blocked the native SDK-deprecated cleanup for #2641 / #2685. Phase 3 step 1
-(Android 1.0.58) removed the unreachable API <= 24 branches; step 2, the
-re-evaluation of `forceDark`, `saveFormData`, `WebView.clearCache`,
-AbsoluteLayout, and legacy print/fullscreen, is still open in
-[`deprecated-api-migration-plan.md`](deprecated-api-migration-plan.md).
-
-The 78 implementation or mitigation records awaiting real validation are
-listed in [`runtime-validation-pending.md`](runtime-validation-pending.md),
-along with the nine PR-only records. They are resolved implementation work,
-not active queue items, and therefore are excluded from the active counts
-above. [#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)
-is closed by source review and has no package runtime gate. Android [#2721](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2721)
-now has an idempotent native WebView geometry refresh for display-size changes
-and visibility recovery; its Android 16/API 36 and OEM provider validation is
-tracked in the runtime register. The opt-in display-size diagnostic starts on
-the API 35 AVD, but host `wm size` change/reset currently disconnects that AVD
-before the geometry assertion. The same reversible override on the 2026-08-11
-and 2026-08-12 Samsung A16 runs restarts the example activity/VM service before
-geometry can be read; the Activity remains up and no app crash/ANR is captured,
-so no runtime count changes.
-
-## 2026-08-13 lifecycle and settings refactor checkpoint
-
-The first Android/iOS implementation wave is source-complete for the scoped
-changes: Android and iOS keep-alive/headless manager maps no longer retain
-nullable placeholders; duplicate IDs replace and dispose the previous owner;
-headless disposal is idempotent; both packages have an internal lifecycle
-coordinator and exactly-once handling for tracked async JavaScript callbacks;
-Android and iOS channel dispatch now route JavaScript, settings, WebMessage, and
-lifecycle operations through internal feature handlers;
-Android bridge queue callbacks and iOS evaluateJavascript completions are also
-lifecycle-tracked, so disposal cannot leave stale native work evaluating
-JavaScript or an outstanding result unaccounted; native default decisions are
-also guarded with the same exactly-once callback boundary during teardown
-races; the boundary also rejects a fallback after a handled result has
-completed, while allowing the owning result handler to perform its native
-default action;
-Android JavaScript UI and bridge error paths claim this boundary before their
-native cancel/reject fallbacks;
-headless-to-normal factories now remove the old headless owner before native
-handoff, stale entries without a native view are disposed, and identity checks
-prevent late cleanup from removing a newer owner;
-Android content-blocker and asset-loader work is skipped when unchanged; and
-iOS partial settings updates no longer recompile unchanged content blockers
-or overwrite omitted media/scroll values. The public Dart API, MethodChannel
-names, method names, and payload keys are unchanged. Focused package tests,
-Android example Kotlin compilation, SwiftPM manifest validation, and targeted
-diagnostic analysis pass. The iOS Simulator now passes the expanded 100-cycle
-disposal/recreate diagnostic plus 50 keep-alive and 50 headless transfer cycles.
-The connected Android API 36 device also passed 100 disposal/recreate cycles
-and 50 keep-alive plus 50 headless transfer cycles without uninstalling the
-app before the final Android headless guaranteed-cleanup path was added. The
-final Android code then passed the same 100 disposal/recreate and 50+50
-ownership-transfer matrix on the API 35 `Medium_Phone` emulator with
-`--no-uninstall`. On 2026-08-13 it also passed the final 100 disposal/recreate
-and 50+50 ownership-transfer matrix on the connected physical API 36 target
-without uninstalling the app; the filtered post-test log had no app
-`AndroidRuntime`, fatal, signal, or ANR entry. Broader Android provider/OEM and
-renderer-loss coverage remains pending.
-Android and iOS now also skip duplicate
-active native user/plugin script registration while preserving retryable failed
-registrations. Android provider/renderer-loss, repeated physical iOS
-keyboard/scene/provider validation, and target-runtime desktop validation
-remain pending. The follow-up ownership slice is now source-complete on
-macOS, Windows, Linux, and Web: macOS maps are non-null and duplicate-safe,
-Windows/Linux duplicate owners are replaced explicitly, Linux opens its WPE
-callback gate before cleanup, Linux applies only changed WebKit/WPE settings
-and skips duplicate content-blocker compilation, Linux and Windows also route
-retained ownership through internal lifecycle coordinators, and Web headless transfer preserves the
-iframe/bridge while rebinding the new MethodChannel ID. Web create, prepare,
-retained-transfer, reattach, and disposal now also use one internal lifecycle
-coordinator, so callbacks are rejected after teardown without changing the Web
-MethodChannel contract. Outgoing Web callbacks re-check lifecycle admission
-after asynchronous channel work, and internal operation IDs reject duplicate
-completion while preserving pending-operation accounting.
-Android's remaining local disposal flag was removed so startup, renderer,
-scroll, and geometry guards use the same coordinator. Windows and Linux now
-gate both method calls and native event/callback dispatch through their
-lifecycle coordinators; callback requests retain their existing default
-fallback behavior after teardown.
-Android WebView channel events and decision callbacks now use the same gate,
-with native default behavior preserved when teardown races a pending decision;
-the Android headless wrapper no longer keeps a separate dispose flag.
-The iOS and macOS delegates apply the same outgoing callback gate, including
-WebMessage and FindInteraction sub-delegates; their pending MethodChannel
-results are drained exactly once during teardown. macOS tracks native and
-legacy async JavaScript operations so each pending callback is completed
-exactly once when disposal begins.
-The iOS WebKit delegate also completes stale permission, navigation,
-authentication, dialog, and popup decisions with native defaults after
-disposal, rather than creating a new native operation.
-Delayed Android IME, scroll-stop, and context-menu callbacks, together with
-iOS delayed keyboard, gesture, scroll, content-size, and context-menu callbacks,
-now re-check lifecycle admission before native UI work.
-Android floating-menu repositioning and runtime plugin-script callbacks, plus
-iOS delayed focus/image-reference lookups, use the same admission check. The
-iOS incremental `isPagingEnabled` settings update now targets the correct
-scroll-view property.
-Android web-archive and iOS screenshot/PDF/web-archive completions are also
-lifecycle-tracked and drained once during teardown, preserving their existing
-null-result channel fallback.
-Android screenshot and initial platform-view loading work also re-check
-lifecycle admission before posted native work runs.
-The iOS deferred popup initialization and fullscreen-container presentation
-callbacks use the same lifecycle gate on the main queue.
-Android and iOS pull-to-refresh delegates also reject callbacks from a
-disposing hosted WebView while restoring the native refreshing indicator.
-Headless-to-normal transfer now removes the transferred native WebView from
-the old active ownership map before disposing the headless wrapper, preventing
-stale dual ownership. Android, iOS, and macOS managers also clear their
-ownership maps before disposing every remaining active or retained WebView
-during plugin teardown. Native disposal also reaches the terminal coordinator
-state through guaranteed cleanup paths if an intermediate operation returns.
-Auxiliary Android print-job/Custom Tabs and iOS print-job,
-authentication-session/in-app-browser managers now use non-null ownership maps,
-clear those maps before child disposal, and remove child entries idempotently.
-Android async JavaScript preparation and queued evaluation failures now drain
-their operation exactly once; iOS screenshot option parsing no longer force-casts
-nullable channel values. Host validation passes and target runtime validation
-remains pending.
-Android and iOS coordinator state transitions now use an internal lock, with
-debug-trace access serialized as well; no public API or channel payload changed.
-iOS KVO teardown now uses registration-aware, idempotent observer removal.
-Headless-to-normal factory handoff also restores the transferred WebView in the
-active manager map after detaching the old headless owner, so the native
-instance remains reachable for later lookup and plugin teardown.
-Android now has a device-free JVM lifecycle suite, and iOS has a host Swift
-runner covering coordinator state transitions, renderer-loss reattachment,
-exactly-once async completion, and concurrent idempotent disposal. These tests
-do not replace provider/GPU/IME integration validation.
-
-The Web package test and example web build pass. macOS source tests and the
-SwiftPM manifest pass; the example build is blocked by the host Xcode beta
-rejecting the example's existing 10.15 deployment target (the SDK now
-requires 12.0), and the standalone package build cannot resolve the local
-FlutterFramework dependency. Windows and Linux source tests pass; Windows
-native build requires Windows/WebView2, and Linux native build requires the
-WPE packages plus `pkg-config` (not installed on this host).
-
-Android [#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)
-is source-validated with a focused Dart serialization test and has no device or
-provider runtime gate. iOS [#2711](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2711)
-now has a Dart regression guard for stale-controller `goBack()` calls after the
-native channel disappears during scene/platform-view teardown; iOS package
-tests, SwiftPM manifest validation, and the simulator build pass, while real
-scene/device validation remains in the runtime register. Windows [#2814](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2814)
-was previously grouped under an unrelated Android listener note and is back in
-the active reproduction queue with its actual platform scope.
-
-Android [#2536](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2536)
-now has Android 35 AVD and 2026-08-11 Samsung A16 happy-path evidence for the
-recursive activity-extra codec across InAppBrowser and Chrome Custom Tabs,
-including lifecycle callbacks and the expected history URL. Samsung logs one
-system `ActivityManager` IntentRedirect Hardening warning for the Custom Tabs
-intent, but no app crash or ANR. Malformed external extras, restore/rotation,
-and physical/provider coverage remain in the runtime register; therefore the
-69 runtime-pending count includes this release-gate record.
-
-Pub.dev analysis issue [#2757](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2757)
-and its related upstream [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758)
-are fixed locally by changing disabled `linter.rules` overrides from the
-string `ignore` form to boolean `false` across the federated packages. The
-legacy Pana 0.23.3 failure reproduces with the old form and passes with the
-new form in an isolated package. Published 2.1.72 scores static analysis
-40/50 for three `lints_core` INFO findings; root 2.1.73 and
-platform-interface 1.1.19 address those identifiers and return types. A
-republished Pana 50/50 score remains the remaining gate.
-
-Android release-gate issue [#2687](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2687)
-is mitigated in the example release path. The Gradle build directory now
-resolves from the project directory to the Flutter-expected `example/build`
-path. After a normal release tooling regeneration (without `--no-pub`), the
-JDK 21 release build produces `build/app/outputs/flutter-apk/app-release.apk`,
-the Android plugin `syncReleaseLibJars` task succeeds, and the APK installs and
-launches on the API 35 `emulator-5554` with `MainActivity` resumed and no fatal
-crash in the smoke log. A clean JDK 17/provider/AAB/publish matrix remains in
-the runtime register.
-
-Android [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641)
-and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685)
-are implemented in Android 1.0.40. Legacy API 19/20 and provider compatibility
-paths remain SDK-gated, while the native compatibility files explicitly isolate
-their deprecation diagnostics. The 47-test Android package suite,
-`compileDebugKotlin`, and the debug APK build pass without package-owned
-Java/Android deprecation warnings. A clean release/AAB/publish matrix remains
-in the runtime register because the direct release compile still encounters the
-generated dev-only `integration_test` registrant and the normal Flutter release
-path uses a stale configured Android Studio JDK location in this environment.
-
-Shared iOS/Android [#2720](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2720)
-now clears stale localhost-server state when the request stream ends or errors.
-Platform-interface source coverage includes controlled restart and independent
-server lifecycles; release-mode background/lock/resume, explicit restart, and
-WebView reload validation remains in the runtime register.
-
-iOS [#2568](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2568)
-now defers `loadUrl` calls made during `shouldOverrideUrlLoading` until the
-WebKit navigation decision is released. Source/regression, SwiftPM, and Xcode
-example validation pass; physical iOS navigation/header validation remains in
-the runtime register.
-
-iOS/macOS [#2830](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2830)
-now isolates the `ASWebAuthenticationPresentationContextProviding` witness in
-an availability-gated provider object. iOS/macOS source tests and SwiftPM
-manifest checks pass, and the iOS example builds with Xcode 27; exact Xcode
-26.4.1 and macOS consuming-app validation remain in the runtime register.
-
-iOS [#2787](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2787)
-now retains the WebView's pre-keyboard `UIScrollView` zoom scale and content
-offset, then refreshes the final platform-view frame/layout after dismissal so
-WKWebView's DOM `visualViewport` returns to the Flutter WebView geometry. A
-fresh iPhone 17 Pro iOS 26.2 Simulator run on 2026-08-10 passed
-(`778px -> 435.44px -> 778px`) and restored the scale and page offset. Earlier
-clean DDS reruns were inconclusive because iOS 26.2 reported zero viewport
-metrics and iOS 27 did not expose a software keyboard transition. One physical
-iOS device run now passes the keyboard transition and restoration. Custom
-page-zoom, native `WKWebView` comparison, and broader physical iOS validation
-remain in the runtime register, so #2787 remains validation-pending.
-
-iOS [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710)
-is implemented in iOS 2.1.17 and remains outside the active queue in the
-runtime-validation register. The iPhone 17 Pro iOS 26.2 Simulator
-seek/fullscreen diagnostic passes three native-container entry, runtime opt-out
-dismissal, and re-entry cycles with the expected state. Physical iOS 26/GPU and
-media evidence is still required, so the implementation is resolved with
-runtime validation pending; the 69 runtime-pending and 40 active counts are
-unchanged.
-
-Android [#2580](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2580)
-now prioritizes `shouldInterceptRequest` and Service Worker interception on the
-main looper, removes timed-out queued dispatches, and ignores late callback
-results. The fresh 2026-08-10 API 35 diagnostic also exposed and fixed a Kotlin overload
-recursion in `injectDeferredObject` that caused `OutOfMemoryError` during rapid
-navigation; Android 1.0.34 calls the platform `WebView.evaluateJavascript`
-overload directly. Source tests and the API 35/WebView 124 diagnostic pass with
-no app `AndroidRuntime`, fatal, ANR, or OOM log. The 2026-08-11 A16
-(`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181) run also passes 24
-rapid navigations with `finalLoaded=true`, the `final` DOM marker, and 31
-interception callbacks; only Chromium tile-memory warnings appear. Physical
-Android 10/11 OEM/provider and back/forward validation remain in the runtime
-register, so the active/runtime counts do not change.
-
-The 2026-08-12 Android 16/API 36 physical run also passes the rapid
-interception diagnostic on WebView 151.0.7922.83; the IME, fullscreen keyboard,
-disposal, renderer/fullscreen, screen-lock, cold-start, activity-handoff,
-transition, and cookie diagnostics pass as well. The display-size diagnostic
-remains a harness limitation because the reversible `wm size` override restarts
-the Activity/VM service before geometry can be asserted. These results do not
-change the runtime register or active counts.
-
-Android [#2718](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2718)
-is source-fixed in Android 1.0.43. API 21+ cookie mutations no longer call
-the synchronous `CookieManager.flush()` after asynchronous updates, while the
-explicit `flush` API now completes its MethodChannel result. The Android package
-suite passes 48/48 tests and the native debug compilation/AAR build pass. The
-2026-08-11 A16 (`SM-A165F`, Android 16/API 36, MediaTek MT6789, WebView
-150.0.7871.181) cookie diagnostic passes 10/10 mutation-and-explicit-flush
-cycles, records an empty final cookie list, and emits no app `AndroidRuntime`,
-fatal, or ANR; the filtered log contains only Chromium tile-memory warnings.
-Android 10/provider and Play Console validation remain in the runtime register,
-so the 69 runtime-pending and 40 active counts are unchanged.
-
-Android [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
-has a fresh 2026-08-10 API 35 AVD diagnostic pass for both virtual-display and
-hybrid composition: the Flutter keyboard reopens after WebView clear/dispose
-with `keyboardInsetAfterDispose=24.0` and an active Flutter focus node. The
-2026-08-11 A16 run passes both modes with `keyboardInsetAfterDispose=358.4`,
-and no AndroidRuntime, fatal, or IME NPE. Android 10 physical-device and
-OEM/provider validation remain in the separate runtime register, so the 69
-runtime-pending and 40 active counts are unchanged.
-
-Android [#2878](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2878)
-is source-hardened and remains outside this active plan in the runtime register.
-The existing API 35/WebView 124 diagnostic passes only with the documented
-`SystemChannels.textInput.show` workaround; the 2026-08-11 workaround-free A16
-run (`SM-A165F`, Android 16/API 36, WebView 150.0.7871.181) reports
-`insetBeforeFocus=0.0`, `insetAfterFocus=346.31`, and an active Flutter focus
-node with no AndroidRuntime, fatal, or ANR. Android 10/OEM and broader
-physical-device validation remain required, so the 69 runtime-pending count is
-unchanged.
-
-Android file chooser PR [#2243](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2243) is implemented locally in Android 1.0.41. The native callback boundary rejects canonicalized private-sandbox `file://` URIs from single-select, multi-select, and legacy picker results while preserving `content://` and FileProvider capture URIs. The source regression and native build are release evidence; hostile external-picker/provider validation remains a separate runtime gate, and this PR-only record does not change the issue counts above.
-
-The iOS compatibility work from PRs [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), and [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), together with the Android compatibility work from PRs [#2474](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2474), [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), and [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), is also implemented locally. These are PR-only export records rather than issue rows, so they are tracked in the resolution log and known-issues validation matrix instead of the issue counts above.
-
-Their remaining device/build checks are included in the runtime register. Do
-not reopen their implementation without new failing evidence.
-
-The Android provider-cast reports [#2673](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2673)
-and [#2594](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2594)
-are now mapped to the reported `WebSettingsCompat.setForceDarkStrategy` boundary;
-their setter/getter fail-open guards and source tests are in the runtime register.
-Android [#2856](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2856)
-also validates optional native MethodChannel string fields by runtime type before
-dispatching callbacks. Android 1.0.37 additionally rejects malformed permission
-request/cancellation maps and non-list resources containers, while filtering
-unknown resource entries without changing the public callback contract. Its
-API/provider matrix remains in the runtime register, so the 69 runtime-pending
-count is unchanged.
-
-Android [#2843](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2843)
-and [#2849](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2849)
-now also release the first-load gate after a bounded WebView provider-startup
-timeout, while preserving bridge and document-start registration retries. The
-API 35/WebView 124 profile/AOT diagnostic passes four clean cold-start installs
-with `onWebViewCreated`, `onLoadStop`, and both bridge checks succeeding. The
-opt-in headless document-start diagnostic passes four create/load/dispose cycles
-and the general headless suite passes 6/6 on the API 35 AVD. Explicit disposal
-emits the known Chromium renderer exit code `-1`, but no app fatal/ANR/native
-fatal appears and the tests exit 0. Physical release/R8 and provider validation
-remains in the runtime register, so the 69 runtime-pending count is unchanged.
-The separate Android System WebView renderer report [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698)
-contains only provider/Chromium termination evidence and provider rollback
-results, so it is tracked as a host/platform boundary until a Forge-owned stack
-or minimal-host comparison identifies a package control point.
-
-iOS/Android disposal report [#2654](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2654)
-now completes pending async JavaScript callbacks during teardown in both native
-implementations, in addition to the idempotent disposal guards. The iPhone 17
-Pro iOS 26.2 Simulator diagnostic completes four navigate-away/dispose/recreate
-cycles with the safe `WebView navigation started` terminal result; the harness
-accepts that result as well as `WebView disposed`. The API 35 AVD diagnostic
-does the same across virtual-display and hybrid composition. A fresh 2026-08-10
-`flutter drive` run completes all four cycles with exit code 0. Android emits the
-expected Chromium renderer exit code `-1` while an explicitly destroyed WebView
-is released, but no app `AndroidRuntime`, fatal, ANR, or Dart test failure
-appears. This matches the teardown signature reported by external
-[#2491](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2491),
-which is outside the supplied issue export; its exact back-button/OEM path
-remains unvalidated. The 2026-08-11 Samsung A16 disposal diagnostic completes
-four `WebView disposed` outcomes across virtual-display and hybrid composition
-with no app crash, ANR, or Dart failure; only Chromium tile-memory warnings are
-logged. Android
-IME report [#2555](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2555)
-has detached-view and stale-runtime guards. Android fullscreen surface report
-[#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2819)
-now also restores fullscreen state from `onRenderProcessGone` before forwarding
-renderer-loss callbacks, while retaining its pre-destroy fullscreen exit
-fallback. The Android package suite passes all 49 tests on 2026-08-10, and the
-normal fullscreen/exit path passes on the MediaTek A16. On 2026-08-12, the
-opt-in direct Vimeo iframe diagnostic enters hybrid fullscreen on the A16; after
-Wi-Fi is disabled, a black/loading surface is observed, but `onExitFullscreen`
-is delivered, `onRenderProcessGone` is not delivered, and the test exits with
-no app crash or ANR. The upstream banner/popup and forced MediaTek
-gralloc/renderer-loss path were not reproduced. All three remain runtime
-pending until the affected physical-device matrices pass. The A16 IME
-diagnostic also passes for virtual-display and hybrid composition WebViews
-after clear/dispose, but the Android 10/OEM gate remains pending. The #2654
-physical iOS 17+ and Android API 33+/OEM renderer matrix also remains a release
-gate. On 2026-08-13, the final iOS code passed 100 physical disposal/recreate
-cycles plus 50 KeepAlive and 50 headless-to-normal transfer cycles without
-uninstalling the app. Broader iOS version/provider coverage and the remaining
-Android OEM renderer matrix remain required, so the runtime-pending count
-stays 69.
-
-iOS popup crash report [#2867](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2867)
-now also completes pending popup async JavaScript callbacks when a new
-provisional navigation starts. A fresh 2026-08-10 `flutter drive` run on the
-iPhone 17 Pro iOS 26.2 Simulator passes three popup attach/evaluate/navigate/
-dispose cycles with exit code 0 and no `EXC_BAD_ACCESS`/fatal log. Physical iOS
-15–26 and Xcode 16/26 validation remains in the runtime register, so the 69
-runtime-pending count is unchanged.
-
-Android screen-lock report [#2837](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2837)
-now has API 35 AVD and 2026-08-11 Samsung A16 lock/unlock evidence. On the A16,
-both hybrid and virtual-display composition preserve the WebView marker and URL
-through a real ADB keyevent lock/unlock sequence and exit successfully. No app
-AndroidRuntime, fatal, or renderer crash appears; Android 10 and OEM/provider
-validation remain in the runtime register and the count stays 69.
-
-The following records are outside the implementation queue because the
-available evidence identifies a host/platform failure with no package-owned
-control point. They remain visible in the resolution log and must not be
-reported as upstream-closed:
-
-- [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636):
-  iOS 18.4/18.5 Simulator can fail to resolve `libswiftWebKit.dylib` when the
-  app deployment target remains below the affected runtime's requirement.
-  The issue is addressed by newer Simulator/WebKit runtimes or host
-  configuration; raising Forge's iOS 15 baseline would be an incompatible
-  workaround.
-- [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584):
-  the reported iOS 18.4 startup crash is in Simulator/WebKit's
-  `libswiftWebKit.dylib` boundary and has no reproducible Forge-owned source
-  control point. It remains visible for Xcode/Simulator runtime tracking and
-  must not be conflated with the local WebMessage payload validation work.
-- [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659):
-  Android's HTML time input reaches the platform `TimePicker` and the supplied
-  stack ends in `TimePickerSpinnerDelegate.updateInputState`. Forge does not
-  create or own that picker, so an OEM/framework fix or a reproducible provider
-  workaround is required before changing plugin code.
-- [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727):
-  reports consistently identify Flutter's iOS platform-view gesture lifecycle;
-  multiple upstream users report that upgrading Flutter to 3.41 resolves the
-  modal-sheet/dialog regression. The Forge plugin cannot safely repair an
-  engine gesture state from its WebKit layer while retaining the 3.38.6
-  compatibility baseline.
-- [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713):
-  the Drawer dismissal/touch-loss report aligns with Flutter's iOS platform-view
-  hit-testing and gesture lifecycle issue chain ([#175099](https://github.com/flutter/flutter/issues/175099),
-  [#158961](https://github.com/flutter/flutter/issues/158961)). Reported
-  workarounds operate at the Flutter overlay or engine level; Forge's iOS
-  WebKit layer has no safe control point for resetting that gesture state.
-- [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723):
-  the ListView/NestedScrollView tap-loss report is tied to the Flutter iOS
-  platform-view gesture path. The report uses Flutter 3.35.5, while the linked
-  [workaround](https://khal.it/blog/flutter-webview-tap-gestures-break-nestedscrollview-ios-fix)
-  identifies the framework fix as Flutter 3.38.6+; Forge's compatibility
-  baseline is already 3.38.6. The plugin cannot repair an older Flutter
-  gesture arena from its WebKit layer.
-- [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598):
-  dragging a Flutter `Draggable`/`Positioned` overlay can still scroll the
-  underlying iOS WebView. Forge passes the caller's recognizers to `UiKitView`,
-  while its opt-in `preventGestureDelay` hook only runs when the WebView itself
-  wins hit testing; the plugin does not own the overlay's Flutter gesture arena.
-  This is tracked as a host/platform boundary until a reproducible Flutter
-  3.38.6+ minimal example identifies a Forge-owned control point.
-- [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680):
-  the Android mobile-data MP3 failure is tied to a Cloudflare `206 Partial
-  Content` response and Android WebView/provider network delivery. The
-  follow-up reports that the same URL works with `webview_flutter`, while
-  Forge's default path passes through to Android WebView unless the host app
-  supplies an interception response. The upstream record was stale-closed on
-  2026-08-07; it remains a host/provider boundary locally until a Forge-owned
-  interception regression is demonstrated.
-- [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688):
-  Android 35 hybrid, virtual-display, and direct-native transition diagnostics
-  pass, and an external ADB capture shows a clean WebView-to-Flutter transition
-  without a blank, black, or returning WebView frame. Source review found no
-  Forge route-animation or Android surface-ordering control point, so this is
-  tracked as an Android/Flutter engine/platform-view boundary rather than an
-  implementation item.
-- [#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570):
-  iCloud Keychain Password AutoFill depends on the host app's Associated
-  Domains entitlement, the site's `apple-app-site-association` response, and
-  semantic HTML `autocomplete` fields. The Forge iOS configuration has no
-  Password AutoFill switch and cannot edit host entitlements or the remote
-  login page, so the record is tracked as a host/application boundary.
-- [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753):
-  iOS `WKNavigationDelegate` reports navigation failures, not arbitrary
-  HTTPS iframe subresource failures. The upstream report has no Forge-owned
-  native callback or complete cross-origin JavaScript replacement; adding a
-  partial error script would not preserve the `onReceivedError` contract.
-  The record is tracked as an Apple/WebKit capability boundary pending a
-  documented API-level decision or new WebKit evidence.
-- [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831):
-  the installed WebKit SDK declares the public geolocation decision delegate
-  at iOS 27.0, not iOS 26.0. The iPhone 17 Pro iOS 26.2 diagnostic confirms
-  `callbackOrigin=null` with a secure HTTPS page, while the fresh 2026-08-10
-  iOS 27 Simulator run receives the Dart callback and completes the deny path.
-  iOS 26 prompt
-  button behavior has no public Forge-owned decision hook; private WebKit APIs
-  are not an acceptable plugin fix, so the record is tracked as a host boundary.
-- [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796):
-  the issue body references missing Pigeon classes inside
-  `webview_flutter_android` 4.10.13, but the Forge dependency graph has no
-  `webview_flutter_android` dependency or generated classes. It remains visible
-  for dependency attribution tracking and has no Forge-owned build fix.
+- **P0:** crash, security, data-loss, or deadlock risk. Reproduce or add a safe guard before feature work.
+- **P1:** confirmed runtime, lifecycle, build, or release problem.
+- **P2:** needs a public API, platform capability, or product decision.
+- **P3:** low-detail, duplicate, environment-specific, or unconfirmed report.
+- **Runtime pending:** source, regression, and host/build checks pass; target runtime evidence is missing. Lives in the runtime register.
+- **Host/platform boundary:** the failure belongs to an external runtime, provider, or host app with no package-owned control point. Not a local fix.
+- **Locally resolved:** acceptance criteria, regression coverage, native build, and runtime (or documented host-limitation) evidence all pass. A source-only patch is not enough.
 
 ## Priority queue
 
-### P0: Contain and reproduce
+### P0
 
-No unresolved P0 implementation item is currently in the active queue. Former
-P0 record [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)
-is now classified as an Apple/WebKit host boundary: the public geolocation
-decision delegate is available in the iOS 27 SDK, while the iPhone 17 Pro iOS
-26.2 run never invokes it. The iOS 27 Simulator deny-path diagnostic passes;
-iOS 26 prompt ownership remains with WebKit.
+None open.
 
-### P1: Native stability and compatibility
-
-#### Apple platforms
+### P1: Native stability
 
 | Issues | Work package | Plan |
 | --- | --- | --- |
-| None currently | iOS channel and scene lifecycle | #2711 now catches only `MissingPluginException` from stale `goBack()` calls after native channel teardown. Keep it in the runtime register until physical iOS scene transitions, platform-view recreation, and a production-like stale-controller sequence are validated. |
-| None currently | Apple keyboard viewport and accessibility layout | #2787 is source-fixed in iOS 2.1.20 and moved to the runtime register. Its iPhone 17 Pro iOS 26.2 Simulator diagnostic passes after restoring the pre-keyboard zoom/offset and final frame/layout; physical iOS 17/device and native `WKWebView` comparison validation remain pending. |
+| [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2807](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2807) | Linux/Windows startup and renderer failures | Reproduce on Arch Linux/WPE and affected Windows machines with native logs. Test create/destroy/recreate, graphics-context loss, bundled/system WPE, and WebView2 runtime versions. |
+| [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Windows focus, transparency, hit testing, release behavior | Windows smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Check child-window state after every async callback. |
+| [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot of video, missing plugin | Reproduce with hardware video frames and generated registrants. Capture video surfaces or return a documented unsupported result. |
 
-#### Android
-
-| Issues | Work package | Plan |
-| --- | --- | --- |
-| None currently | Android WebView/platform-view transition | #2688 has clean Android 35 hybrid, virtual-display, direct-native, and external ADB visual evidence with no Forge-owned route-animation or surface-ordering control point; retain it in the host/platform boundary register. |
-
-#### Windows and Linux
-
-| Issues | Work package | Plan |
-| --- | --- | --- |
-| None currently | Windows child-window teardown | #2814 now detaches `FindInteractionController` before WebView2 `Stop`/`Close`; keep it in the runtime register until the reported Windows 11 multi-window close/recreate flow is validated. |
-| [#2615](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2615), [#2807](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2807) | Native startup and renderer failures | Reproduce on Arch Linux/WPE and affected Windows machines with full native logs. Test create/destroy/recreate, graphics-context invalidation, bundled/system WPE, and WebView2 runtime versions. |
-| [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Windows focus, transparency, hit testing, and release behavior | Add a Windows native smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Verify C++ child-window state after every async callback. |
-| [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot/video and missing-plugin behavior | Reproduce with hardware video frames and generated plugin registrants. Define whether the native backend can capture video surfaces; otherwise return a documented unsupported result instead of a black image or missing method. |
-
-### P1: Build, packaging, and release gates
+### P1: Build and release gates
 
 | Issues | Plan | Exit criterion |
 | --- | --- | --- |
-| [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce Xcode 26, CMake, and Windows/Linux warning failures on the supported toolchain. Pin or conditionally gate toolchain-specific settings. | Clean debug/release builds and actionable diagnostics on the supported matrix; unsupported toolchains fail with a clear prerequisite message. |
-| [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize the remaining Windows build-warning and release-artifact path. Android [#2641](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2641) and [#2685](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2685) are implemented in Android 1.0.40; their clean release/provider/AAB/publish matrix remains in the runtime register. #2687's release JAR path is also mitigated and its remaining JDK/provider/AAB/publish matrix is tracked there. | `flutter analyze`, publish dry-run, Android release build, and all generated metadata checks pass without package-owned warnings. |
-| [#2788](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2788), [#2695](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2695), [#2686](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2686), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682) | Triage vague initialization, Windows warning/release, network, Safari, and packaging reports | Require a reproducible command, environment, and stack trace. Close as host/application-specific in the local log when no package path exists. |
+| [#2820](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2820), [#2672](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2672) | Reproduce Xcode 26, CMake, and Windows/Linux warning failures; pin or gate toolchain-specific settings. | Clean debug/release builds on the supported matrix; unsupported toolchains fail with a clear message. |
+| [#2691](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2691) | Stabilize the remaining Windows build-warning and release-artifact path. | Analyze, publish dry-run, release build, and metadata checks pass without package-owned warnings. |
+| [#2788](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2788), [#2695](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2695), [#2686](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2686) | Triage vague initialization, warning, network, Safari, and packaging reports. | A reproducible command, environment, and stack trace, or a host-specific classification. |
 
-### P2: API and feature decisions
+### P2: API decisions
 
-These items must not be implemented by copying an upstream PR directly. Each one changes a public contract or has platform capability differences.
+Do not copy an upstream PR directly; each item changes a public contract.
 
-| Issue | Requested capability | Design step | Implementation boundary |
-| --- | --- | --- | --- |
-| [#2793](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2793) | Typed `bridgeEvents` API | Implemented additively in platform-interface 1.1.8/root 2.1.57; validate event ordering, bridge readiness, backpressure, payload typing, and compatibility with current JavaScript handlers. | `JavaScriptBridgeEvents`, existing handler bridge on all active platforms, and integration/runtime tests. |
-| [#2760](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2760) | Windows pull-to-refresh without a scrollbar | Implemented as an opt-in Flutter platform-view gesture; verify the document top-edge check and WebView2 touch forwarding on Windows. | `PullToRefreshSettings.allowWithNoScrollbar`, Windows controller state/indicator, and `onRefresh` callback. Runtime validation remains pending. |
-| [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Define whether URL/resource interception is sufficient; do not promise DNS control from an iframe/WebView callback. | Threat model, platform feasibility decision, and documentation before API work. |
-| [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Convert the vague request into a concrete DOM event/API and test case. | JavaScript bridge only after security and event-volume review. |
+| Issue | Request | Next step |
+| --- | --- | --- |
+| [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Decide whether URL/resource interception is enough; do not promise DNS control. Threat model before API work. |
+| [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Turn the request into a concrete DOM event/API and test case; security and event-volume review first. |
 
-### P3: Low-detail and product backlog
+### P3: Needs reporter data
 
-These records remain listed so they are not lost, but they should not consume implementation time before P0/P1 work has evidence:
+`#2824`, `#2821`, `#2804`, `#2798`, `#2795`, `#2742`, `#2730`, `#2702`,
+`#2681`, `#2667`. Before any work, record platform, OS/runtime version,
+minimal reproduction, expected and actual behavior, and a native stack trace.
 
-`#2824`, `#2821`, `#2804`, `#2798`, `#2795`, `#2742`, `#2730`, `#2702`, `#2681`, `#2667`.
-
-For each P3 item, first add the platform, OS/runtime version, minimal reproduction, expected behavior, actual behavior, and native stack trace to the triage record. A title-only report is not enough for a shared implementation change.
-
-Showcase records [#2822](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2822), [#2769](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2769), and [#2716](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2716) remain community/product references and are excluded from engineering completion metrics.
-
-## Runtime validation register
-
-Runtime-pending records are resolved implementation work, not active queue
-items. The complete register contains 78 issue records and nine PR-only
-records; counts, issue IDs, and platform gates are maintained in
-[`runtime-validation-pending.md`](runtime-validation-pending.md). This plan
-keeps only the 30 issue records that still need implementation, design, or
-reproduction. Fifteen host/platform boundaries are tracked above and are not
-counted as resolved implementations. [#2882](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2882)
-is a post-export iOS SDK compatibility fix tracked in that runtime register
-and is not part of the 125-issue active queue.
+Showcase: [#2822](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2822),
+[#2769](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2769),
+[#2716](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2716).
 
 ## PR queue
 
-The PR export is also marked `OPEN`; do not merge or copy it without checking the current Forge source. These are the most relevant candidate records for the work packages above:
+The PR export is also `OPEN`; check the current Forge source before reusing
+any of these.
 
-| Work package | Related PRs/issues |
+| Work package | Related PRs |
 | --- | --- |
-| Linux rendering/build | [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2881), [#2832](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2832), [#2829](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2829) |
-| iOS/macOS crashes and APIs | [#2871](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2871), [#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879), [#2870](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2870), [#2853](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2853), [#2836](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2836), [#2828](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2828), [#2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809), [#2771](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2771), [#2671](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2671) |
-| Cross-platform container API and stability | [#2825](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2825), [#2823](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2823), [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817), [#2756](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2756), [#2743](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2743), [#2722](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2722) |
+| Linux rendering/build | [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2881) (EGL re-import; evidence for #2861, not merged), [#2832](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2832), [#2829](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2829) |
+| iOS/macOS crashes and APIs | [#2879](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2879), [#2870](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2870), [#2836](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2836), [#2828](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2828), [#2809](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2809), [#2671](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2671) |
+| Cross-platform stability | [#2817](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2817), [#2756](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2756), [#2722](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2722) |
 | Windows stability/API | [#2869](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2869), [#2838](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2838), [#2806](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2806), [#2786](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2786), [#2768](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2768), [#2708](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2708) |
 | Web and JavaScript bridge | [#2794](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2794), [#2792](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2792), [#2715](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2715), [#2495](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2495) |
-| Toolchain and migration | [#2846](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2846), [#2758](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2758), [#2575](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2575), [#2574](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2574) |
+| Toolchain and migration | [#2575](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2575), [#2574](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2574) |
 
-Upstream PR [#2881](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2881) remains open. Its Linux EGL re-import work and reporter validation are useful evidence for #2861, but the PR is not treated as merged or as a substitute for the Forge Fedora/X11/Intel runtime gate.
+PRs already implemented locally (#2243, #2474, #2743, #2758, #2771, #2823,
+#2825, #2853, #2866, #2871) are tracked in the runtime register.
 
-## Implementation sequence
+## Leaving this plan
 
-### Phase 0: Reproduction and test harness
+An issue moves to the runtime register when:
 
-- Add issue-specific test case names and environment fields to the example/test runner.
-- Create Android, iOS/macOS, Windows, Linux, and Web matrices without changing behavior.
-- Capture native logs, WebView/WebKit/WPE versions, composition mode, Flutter version, and platform lifecycle events.
-- Mark each record `reproduced`, `not reproduced`, `host-specific`, or `needs reporter data`.
+1. The scenario has a failing-then-passing regression test or a documented host/platform limitation.
+2. The fix is in the owning package and keeps channel/API contracts.
+3. Affected native builds and source tests pass.
+4. The missing runtime gate is listed in the runtime register.
+5. The changelog, `known-issues.md`, and the runtime register agree.
 
-### Phase 1: P0 containment
-
-- Keep the runtime validation register current for the Linux rendering fallback, iOS popup/geolocation behavior, Android activity extras, and the other local mitigations.
-- Reopen a runtime-pending record here only when its real validation produces a new failure or shows that the implementation boundary is incomplete.
-- Add only guards that are idempotent, nullable-safe, and covered by a failing regression test.
-
-### Phase 2: Native stability
-
-- Run the Apple crash/layout matrix, Android provider/WebView matrix, and Windows/Linux native lifetime matrix.
-- Fix confirmed crashes and deadlocks in the owning platform package.
-- Keep platform-interface changes limited to payload or capability corrections required by a confirmed native fix.
-
-### Phase 3: Build and release gates
-
-- Resolve toolchain failures and warnings on the supported versions.
-- Run generated metadata, `flutter analyze`, package tests, native builds, SPM/CocoaPods checks, and Android APK/AAB artifact validation.
-- Update package changelogs only after the relevant acceptance criteria pass.
-
-### Phase 4: API and feature work
-
-- Make a written capability/threat-model decision for each P2 item.
-- Implement platform interface, generated files, all platform adapters, documentation, and integration tests together.
-- Ship additive APIs only when unsupported platforms have explicit capability behavior.
-
-## Definition of done
-
-The counts in this paragraph are a dated 2026-08-13 snapshot; the current
-counts are in [Scope and counts](#scope-and-counts). The 2026-08-13 status pass had 77 locally implemented or mitigated issue
-records awaiting runtime validation, one source-validated issue (#2709) with
-no runtime gate, one issue (#2745) closed by source review, fifteen
-host/platform boundaries (#2570, #2584, #2598, #2636, #2659, #2680, #2688,
-#2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831), and 31 active issue records in this plan. The runtime-pending
-records and host boundaries are
-deliberately not counted as active implementation work; their status notes
- live in [`runtime-validation-pending.md`](runtime-validation-pending.md) and
- [`known-issues.md`](known-issues.md). The active queue then contained 24 bugs, 4
- enhancements, 0 unlabelled records, and 3 showcase records (28 active
-technical records after excluding showcases).
-
-An issue leaves this plan for the runtime register when:
-
-1. The original scenario has a minimal regression test or a documented host/platform limitation.
-2. The fix is implemented in the owning federated package and preserves channel/API contracts.
-3. Affected native builds and source tests pass on the target platform.
-4. The missing device, browser engine, WebView, WebKit, WPE, or artifact gate is recorded in the runtime register.
-5. The package changelog, [`known-issues.md`](known-issues.md), this plan, and the runtime register agree.
-
-An issue leaves the runtime register only when its required real validation
-passes and the final status is recorded in `known-issues.md` and the
-resolution log.
+A failed runtime gate moves the issue back here with the failing environment.
