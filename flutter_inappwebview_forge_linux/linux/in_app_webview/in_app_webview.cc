@@ -667,6 +667,31 @@ void InAppWebView::InitWpeBackend() {
 #endif
 }
 
+namespace {
+
+// Returns a persistent network session for InAppWebViewSettings.containerId,
+// or nullptr when no container is configured or the directory is unavailable.
+WebKitNetworkSession* CreateContainerNetworkSession(
+    const InAppWebViewCreationParams& params) {
+  if (!params.initialSettings ||
+      !params.initialSettings->containerId.has_value()) {
+    return nullptr;
+  }
+  const auto dataDirectory = ContainerManager::dataDirectoryFor(
+      params.initialSettings->containerId.value());
+  if (!dataDirectory.has_value()) {
+    return nullptr;
+  }
+  const auto cacheDirectory = dataDirectory.value().parent_path() / "cache";
+  std::error_code error;
+  std::filesystem::create_directories(dataDirectory.value(), error);
+  std::filesystem::create_directories(cacheDirectory, error);
+  return webkit_network_session_new(dataDirectory.value().c_str(),
+                                    cacheDirectory.c_str());
+}
+
+}  // namespace
+
 void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
 #ifdef HAVE_WPE_PLATFORM
   // === WPEPlatform API ===
@@ -690,26 +715,13 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
   }
   
   WebKitWebContext* webContext = params.webContext;
-  WebKitWebContext* containerContext = nullptr;
-  WebKitWebsiteDataManager* containerDataManager = nullptr;
-  if (webContext == nullptr && params.initialSettings &&
-      params.initialSettings->containerId.has_value()) {
-    const auto dataDirectory = ContainerManager::dataDirectoryFor(
-        params.initialSettings->containerId.value());
-    if (dataDirectory.has_value()) {
-      const auto cacheDirectory = dataDirectory.value().parent_path() / "cache";
-      std::error_code error;
-      std::filesystem::create_directories(dataDirectory.value(), error);
-      std::filesystem::create_directories(cacheDirectory, error);
-      containerDataManager = webkit_website_data_manager_new(
-          dataDirectory.value().c_str(), cacheDirectory.c_str());
-      if (containerDataManager != nullptr) {
-        containerContext = webkit_web_context_new_with_website_data_manager(
-            containerDataManager);
-        g_object_unref(containerDataManager);
-        webContext = containerContext;
-      }
-    }
+  // WPE WebKit 2.0 stores website data per WebKitNetworkSession; the
+  // WebKitWebsiteDataManager/WebKitWebContext constructors were removed.
+  // An incognito (ephemeral) session takes precedence over a container.
+  WebKitNetworkSession* containerSession = nullptr;
+  if (networkSession == nullptr && webContext == nullptr) {
+    containerSession = CreateContainerNetworkSession(params);
+    networkSession = containerSession;
   }
   
   // Check if we're creating a related webview (for multi-window support)
@@ -757,8 +769,9 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
     }
     return;
   }
-  if (containerContext != nullptr) {
-    g_object_unref(containerContext);
+  if (containerSession != nullptr) {
+    // The WebView holds its own reference.
+    g_object_unref(containerSession);
   }
 
   if (params.initialSettings != nullptr && params.initialSettings->proxySettings.has_value()) {
@@ -883,26 +896,13 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
 
     // Check if a custom WebKitWebContext is provided
     WebKitWebContext* webContext = params.webContext;
-    WebKitWebContext* containerContext = nullptr;
-    WebKitWebsiteDataManager* containerDataManager = nullptr;
-    if (webContext == nullptr && params.initialSettings &&
-        params.initialSettings->containerId.has_value()) {
-      const auto dataDirectory = ContainerManager::dataDirectoryFor(
-          params.initialSettings->containerId.value());
-      if (dataDirectory.has_value()) {
-        const auto cacheDirectory = dataDirectory.value().parent_path() / "cache";
-        std::error_code error;
-        std::filesystem::create_directories(dataDirectory.value(), error);
-        std::filesystem::create_directories(cacheDirectory, error);
-        containerDataManager = webkit_website_data_manager_new(
-            dataDirectory.value().c_str(), cacheDirectory.c_str());
-        if (containerDataManager != nullptr) {
-          containerContext = webkit_web_context_new_with_website_data_manager(
-              containerDataManager);
-          g_object_unref(containerDataManager);
-          webContext = containerContext;
-        }
-      }
+    // WPE WebKit 2.0 stores website data per WebKitNetworkSession; the
+    // WebKitWebsiteDataManager/WebKitWebContext constructors were removed.
+    // An incognito (ephemeral) session takes precedence over a container.
+    WebKitNetworkSession* containerSession = nullptr;
+    if (networkSession == nullptr && webContext == nullptr) {
+      containerSession = CreateContainerNetworkSession(params);
+      networkSession = containerSession;
     }
 
     if (webContext != nullptr) {
@@ -950,8 +950,9 @@ void InAppWebView::InitWebView(const InAppWebViewCreationParams& params) {
 
     webkit_web_view_set_settings(webview_, settings);
     g_object_unref(settings);
-    if (containerContext != nullptr) {
-      g_object_unref(containerContext);
+    if (containerSession != nullptr) {
+      // The WebView holds its own reference.
+      g_object_unref(containerSession);
     }
 
     if (params.initialSettings != nullptr && params.initialSettings->proxySettings.has_value()) {
@@ -2801,7 +2802,7 @@ void InAppWebView::setSettings(const std::shared_ptr<InAppWebViewSettings> newSe
         newContentBlockers != content_blockers_snapshot_;
 
     // Apply content blockers if they have been updated
-    if (content_blockersChanged && content_blocker_handler_ != nullptr) {
+    if (contentBlockersChanged && content_blocker_handler_ != nullptr) {
       content_blocker_handler_->setContentBlockers(newSettings->contentBlockers, nullptr);
       content_blockers_snapshot_ = newContentBlockers;
     }
