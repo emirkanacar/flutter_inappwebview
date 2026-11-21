@@ -2105,6 +2105,18 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   @SupportedPlatforms(platforms: [IOSPlatform()])
   bool? disableInputAccessoryView;
 
+  ///Whether to show the plugin's native JavaScript `prompt()` dialog when the
+  ///`onJsPrompt` event does not handle the prompt (no callback, a `null`
+  ///response, or `handledByClient: false`). The default value is `true`.
+  ///
+  ///When `false`, such prompts are cancelled and `prompt()` returns `null` in
+  ///JavaScript. `onJsPrompt` is still called, and a response with
+  ///`handledByClient: true` is applied as usual. Alert, confirm, and
+  ///before-unload dialogs are not affected, and a dialog that is already visible
+  ///is not dismissed.
+  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  bool? enableNativePromptDialog;
+
   ///Set to `true` to disable autocorrection and spelling suggestions for editable HTML elements in the WebView.
   ///This applies the HTML `autocorrect="off"` and `spellcheck="false"` hints at document start,
   ///including editable elements added later by the page.
@@ -3788,6 +3800,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.allowingReadAccessTo,
     this.disableLongPressContextMenuOnLinks = false,
     this.disableInputAccessoryView = false,
+    this.enableNativePromptDialog = true,
     this.disableAutocorrection = false,
     this.underPageBackgroundColor,
     this.isTextInteractionEnabled = true,

@@ -95,7 +95,20 @@ open class InAppWebViewChromeClient(
 
   val DEFAULT_MIME_TYPES = "*/*"
   @JvmField
-  val dialogs: MutableMap<DialogInterface, JsResult> = HashMap()
+  val dialogs: MutableMap<DialogInterface, JsDialogResult> = HashMap()
+
+  /**
+   * JavaScript dialog results that are not answered yet: waiting for the Dart
+   * reply or shown as a native dialog. Main thread only. [dispose] cancels them
+   * so page JavaScript is never left blocked.
+   */
+  private val pendingJsResults: MutableSet<JsDialogResult> = LinkedHashSet()
+
+  private fun trackJsResult(result: JsResult): JsDialogResult {
+    val dialogResult = JsDialogResult(result) { pendingJsResults.remove(it) }
+    pendingJsResults.add(dialogResult)
+    return dialogResult
+  }
 
   private var mCustomView: View? = null
   private var mCustomViewCallback: WebChromeClient.CustomViewCallback? = null
@@ -169,13 +182,18 @@ open class InAppWebViewChromeClient(
   }
 
   override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
-    val channelDelegate = inAppWebView?.channelDelegate ?: return false
+    val channelDelegate = inAppWebView?.channelDelegate
+    if (channelDelegate == null) {
+      result.cancel()
+      return true
+    }
+    val dialogResult = trackJsResult(result)
     channelDelegate.onJsAlert(url, message, null, object : WebViewChannelDelegate.JsAlertCallback() {
       override fun nonNullSuccess(response: JsAlertResponse): Boolean {
         if (response.isHandledByClient) {
           when (response.action ?: 1) {
-            0 -> result.confirm()
-            else -> result.cancel()
+            0 -> dialogResult.confirm()
+            else -> dialogResult.cancel()
           }
           return false
         }
@@ -185,7 +203,7 @@ open class InAppWebViewChromeClient(
       override fun defaultBehaviour(response: JsAlertResponse?) {
         createAlertDialog(
           message,
-          result,
+          dialogResult,
           response?.message,
           response?.confirmButtonTitle
         )
@@ -194,7 +212,7 @@ open class InAppWebViewChromeClient(
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        result.cancel()
+        dialogResult.cancel()
       }
     })
     return true
@@ -202,12 +220,17 @@ open class InAppWebViewChromeClient(
 
   fun createAlertDialog(
     message: String,
-    result: JsResult,
+    result: JsDialogResult,
     responseMessage: String?,
     confirmButtonTitle: String?
   ) {
+    if (result.isAnswered) return
+    val activity = getActivity()
+    if (activity == null) {
+      result.cancel()
+      return
+    }
     val alertMessage = responseMessage.takeUnless { it.isNullOrEmpty() } ?: message
-    val activity = getActivity() ?: return
     val clickListener = DialogInterface.OnClickListener { dialog, _ ->
       result.confirm()
       dialog.dismiss()
@@ -234,13 +257,18 @@ open class InAppWebViewChromeClient(
   }
 
   override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
-    val channelDelegate = inAppWebView?.channelDelegate ?: return false
+    val channelDelegate = inAppWebView?.channelDelegate
+    if (channelDelegate == null) {
+      result.cancel()
+      return true
+    }
+    val dialogResult = trackJsResult(result)
     channelDelegate.onJsConfirm(url, message, null, object : WebViewChannelDelegate.JsConfirmCallback() {
       override fun nonNullSuccess(response: JsConfirmResponse): Boolean {
         if (response.isHandledByClient) {
           when (response.action ?: 1) {
-            0 -> result.confirm()
-            else -> result.cancel()
+            0 -> dialogResult.confirm()
+            else -> dialogResult.cancel()
           }
           return false
         }
@@ -250,7 +278,7 @@ open class InAppWebViewChromeClient(
       override fun defaultBehaviour(response: JsConfirmResponse?) {
         createConfirmDialog(
           message,
-          result,
+          dialogResult,
           response?.message,
           response?.confirmButtonTitle,
           response?.cancelButtonTitle
@@ -260,7 +288,7 @@ open class InAppWebViewChromeClient(
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        result.cancel()
+        dialogResult.cancel()
       }
     })
     return true
@@ -268,13 +296,18 @@ open class InAppWebViewChromeClient(
 
   fun createConfirmDialog(
     message: String,
-    result: JsResult,
+    result: JsDialogResult,
     responseMessage: String?,
     confirmButtonTitle: String?,
     cancelButtonTitle: String?
   ) {
+    if (result.isAnswered) return
+    val activity = getActivity()
+    if (activity == null) {
+      result.cancel()
+      return
+    }
     val alertMessage = responseMessage.takeUnless { it.isNullOrEmpty() } ?: message
-    val activity = getActivity() ?: return
     val confirmClickListener = DialogInterface.OnClickListener { dialog, _ ->
       result.confirm()
       dialog.dismiss()
@@ -316,7 +349,12 @@ open class InAppWebViewChromeClient(
     defaultValue: String,
     result: JsPromptResult
   ): Boolean {
-    val channelDelegate = inAppWebView?.channelDelegate ?: return false
+    val channelDelegate = inAppWebView?.channelDelegate
+    if (channelDelegate == null) {
+      result.cancel()
+      return true
+    }
+    val dialogResult = trackJsResult(result)
     channelDelegate.onJsPrompt(
       url,
       message,
@@ -326,8 +364,8 @@ open class InAppWebViewChromeClient(
         override fun nonNullSuccess(response: JsPromptResponse): Boolean {
           if (response.isHandledByClient) {
             when (response.action ?: 1) {
-              0 -> result.confirm(response.value)
-              else -> result.cancel()
+              0 -> dialogResult.confirm(response.value)
+              else -> dialogResult.cancel()
             }
             return false
           }
@@ -335,11 +373,15 @@ open class InAppWebViewChromeClient(
         }
 
         override fun defaultBehaviour(response: JsPromptResponse?) {
+          if (inAppWebView?.customSettings?.enableNativePromptDialog == false) {
+            dialogResult.cancel()
+            return
+          }
           createPromptDialog(
             view,
             message,
             defaultValue,
-            result,
+            dialogResult,
             response?.message,
             response?.defaultValue,
             response?.value,
@@ -351,7 +393,7 @@ open class InAppWebViewChromeClient(
         override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
           if (!beginCallbackCompletion()) return
           Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-          result.cancel()
+          dialogResult.cancel()
         }
       }
     )
@@ -362,7 +404,7 @@ open class InAppWebViewChromeClient(
     view: WebView,
     message: String,
     defaultValue: String,
-    result: JsPromptResult,
+    result: JsDialogResult,
     responseMessage: String?,
     responseDefaultValue: String?,
     value: String?,
@@ -381,8 +423,13 @@ open class InAppWebViewChromeClient(
     layout.setPaddingRelative(45, 15, 45, 0)
     layout.addView(input)
 
+    if (result.isAnswered) return
+    val activity = getActivity()
+    if (activity == null) {
+      result.cancel()
+      return
+    }
     val alertMessage = responseMessage.takeUnless { it.isNullOrEmpty() } ?: message
-    val activity = getActivity() ?: return
     val confirmClickListener = DialogInterface.OnClickListener { dialog, _ ->
       result.confirm(value ?: input.text.toString())
       dialog.dismiss()
@@ -424,13 +471,18 @@ open class InAppWebViewChromeClient(
     message: String,
     result: JsResult
   ): Boolean {
-    val channelDelegate = inAppWebView?.channelDelegate ?: return false
+    val channelDelegate = inAppWebView?.channelDelegate
+    if (channelDelegate == null) {
+      result.cancel()
+      return true
+    }
+    val dialogResult = trackJsResult(result)
     channelDelegate.onJsBeforeUnload(url, message, object : WebViewChannelDelegate.JsBeforeUnloadCallback() {
       override fun nonNullSuccess(response: JsBeforeUnloadResponse): Boolean {
         if (response.isHandledByClient) {
           when (response.action ?: 1) {
-            0 -> result.confirm()
-            else -> result.cancel()
+            0 -> dialogResult.confirm()
+            else -> dialogResult.cancel()
           }
           return false
         }
@@ -440,7 +492,7 @@ open class InAppWebViewChromeClient(
       override fun defaultBehaviour(response: JsBeforeUnloadResponse?) {
         createBeforeUnloadDialog(
           message,
-          result,
+          dialogResult,
           response?.message,
           response?.confirmButtonTitle,
           response?.cancelButtonTitle
@@ -450,7 +502,7 @@ open class InAppWebViewChromeClient(
       override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) {
         if (!beginCallbackCompletion()) return
         Log.e(LOG_TAG, "$errorCode, ${errorMessage ?: ""}")
-        result.cancel()
+        dialogResult.cancel()
       }
     })
     return true
@@ -458,13 +510,18 @@ open class InAppWebViewChromeClient(
 
   fun createBeforeUnloadDialog(
     message: String,
-    result: JsResult,
+    result: JsDialogResult,
     responseMessage: String?,
     confirmButtonTitle: String?,
     cancelButtonTitle: String?
   ) {
+    if (result.isAnswered) return
+    val activity = getActivity()
+    if (activity == null) {
+      result.cancel()
+      return
+    }
     val alertMessage = responseMessage.takeUnless { it.isNullOrEmpty() } ?: message
-    val activity = getActivity() ?: return
     val confirmClickListener = DialogInterface.OnClickListener { dialog, _ ->
       result.confirm()
       dialog.dismiss()
@@ -1052,6 +1109,8 @@ open class InAppWebViewChromeClient(
       dialog.dismiss()
     }
     dialogs.clear()
+    pendingJsResults.toList().forEach { it.cancel() }
+    pendingJsResults.clear()
     plugin?.activityPluginBinding?.removeActivityResultListener(this)
     inAppBrowserDelegate?.let { delegate ->
       delegate.getActivityResultListeners().clear()

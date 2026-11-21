@@ -1,5 +1,12 @@
 ## Unreleased
 
+- Support `InAppWebViewSettings.enableNativePromptDialog`
+  ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
+- JavaScript `alert`, `confirm`, `prompt`, and before-unload dialogs are
+  always answered exactly once: `dispose()` cancels results still waiting for
+  the Dart reply, a missing activity or channel cancels instead of leaving the
+  page blocked, late replies are ignored, and the teardown chrome client
+  cancels dialogs instead of showing system ones.
 - `takeScreenshot` scales and compresses on a background thread instead of
   the UI thread; only the draw stays on the WebView looper. At most 2
   captures per WebView and 4 per process can be in flight; a call over the

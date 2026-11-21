@@ -139,6 +139,114 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('Android JS dialogs are answered once, even without an activity', () {
+    // Upstream PR #2901 follow-up: the dialog creators returned on a missing
+    // activity without answering the JsResult, and results still waiting for a
+    // Dart reply were never cancelled on dispose, leaving page JavaScript
+    // blocked in alert()/confirm()/prompt().
+    final chrome = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    final once = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/JsDialogResult.kt',
+    ).readAsStringSync();
+
+    expect(once, contains('answered.compareAndSet(false, true)'));
+    expect(once, contains('onAnswered(this)'));
+    for (final creator in [
+      'createAlertDialog',
+      'createConfirmDialog',
+      'createPromptDialog',
+      'createBeforeUnloadDialog',
+    ]) {
+      final start = chrome.indexOf('  fun $creator(');
+      final body = chrome.substring(start, chrome.indexOf('\n  }\n', start));
+      expect(body, isNot(contains('getActivity() ?: return')), reason: creator);
+    }
+    expect(
+      RegExp(
+        r'val activity = getActivity\(\)\n    if \(activity == null\) \{\n'
+        r'      result\.cancel\(\)\n      return\n    \}',
+      ).allMatches(chrome).length,
+      4,
+    );
+    expect(
+      RegExp(r'if \(result\.isAnswered\) return').allMatches(chrome).length,
+      4,
+    );
+    expect(chrome, contains('val pendingJsResults'));
+    expect(
+      RegExp(
+        r'val dialogResult = trackJsResult\(result\)',
+      ).allMatches(chrome).length,
+      4,
+    );
+    expect(
+      chrome,
+      contains('pendingJsResults.toList().forEach { it.cancel() }'),
+    );
+    // A disposed WebView cancels instead of falling back to the system dialog.
+    expect(
+      RegExp(
+        r'val channelDelegate = inAppWebView\?\.channelDelegate\n'
+        r'    if \(channelDelegate == null\) \{\n      result\.cancel\(\)\n'
+        r'      return true\n    \}',
+      ).allMatches(chrome).length,
+      4,
+    );
+  });
+
+  test('Android disposal chrome client cancels JS dialogs', () {
+    final webView = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    expect(webView, isNot(contains('setWebChromeClient(WebChromeClient())')));
+    expect(webView, contains('setWebChromeClient(DisposedWebChromeClient)'));
+    for (final method in [
+      'onJsAlert',
+      'onJsConfirm',
+      'onJsPrompt',
+      'onJsBeforeUnload',
+    ]) {
+      expect(webView, contains('override fun $method('));
+    }
+  });
+
+  test('Android enableNativePromptDialog=false cancels unhandled prompts', () {
+    // Upstream PR #2901.
+    final chrome = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebViewChromeClient.kt',
+    ).readAsStringSync();
+    final settings = _sourceFile(
+      '${kotlinRoot}webview/in_app_webview/InAppWebViewSettings.kt',
+    ).readAsStringSync();
+
+    expect(
+      settings,
+      contains('@JvmField var enableNativePromptDialog: Boolean? = true'),
+    );
+    expect(
+      settings,
+      contains(
+        '"enableNativePromptDialog" -> enableNativePromptDialog = value as Boolean',
+      ),
+    );
+    expect(
+      settings,
+      contains('put("enableNativePromptDialog", enableNativePromptDialog)'),
+    );
+    expect(
+      chrome,
+      contains(
+        'if (inAppWebView?.customSettings?.enableNativePromptDialog == false) {\n'
+        '            dialogResult.cancel()\n'
+        '            return\n'
+        '          }',
+      ),
+    );
+  });
+
   test('Android resource interception has bounded synchronous backpressure', () {
     final clientSource = _sourceFile(
       'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'

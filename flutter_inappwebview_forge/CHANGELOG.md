@@ -1,5 +1,6 @@
 ## Unreleased
 
+- Add `InAppWebViewSettings.enableNativePromptDialog` (Android, iOS); Android always answers JavaScript dialogs, including after `dispose()` ([#2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)).
 - `takeScreenshot` accepts a `ScreenshotCancellationSignal`; Android also gains `drawScaled`/`usePixelCopy` and compresses off the UI thread ([#2909](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2909), [#2910](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2910), [#2911](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2911)).
 - iOS, macOS: JavaScript `alert`, `confirm`, and `prompt` panels are always answered, avoiding a WebKit crash ([#2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)).
 - Android: `takeScreenshot` returns `null` instead of a partial image when compression fails ([#2908](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2908)).
