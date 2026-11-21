@@ -1,150 +1,77 @@
 # Agent Guide
 
-This repository is the `flutter_inappwebview_forge` federated Flutter plugin. It is a maintained fork of Flutter InAppWebView, so changes must preserve both the public Dart API and the native platform contracts unless a breaking change is explicitly intended.
+`flutter_inappwebview_forge` is a federated Flutter plugin forked from Flutter
+InAppWebView. Preserve the public Dart API and the native platform contracts
+unless a breaking change is explicitly intended.
 
-## Repository map
-
-| Path | Responsibility |
-| --- | --- |
-| `flutter_inappwebview_forge/` | Public Dart package, shared widgets, assets, and the main example app |
-| `flutter_inappwebview_forge_platform_interface/` | Federated platform interface, shared types, generated serializers, and capability metadata |
-| `flutter_inappwebview_forge_android/` | Android WebView, Kotlin native implementation, and Android example |
-| `flutter_inappwebview_forge_ios/` | iOS `WKWebView`, Swift Package Manager/CocoaPods integration, and iOS example |
-| `flutter_inappwebview_forge_macos/` | macOS `WKWebView`, Swift Package Manager/CocoaPods integration, and macOS example |
-| `flutter_inappwebview_forge_windows/` | Windows WebView2 C++ implementation and Windows example |
-| `flutter_inappwebview_forge_linux/` | Linux WPE WebKit C++ implementation and Linux example |
-| `flutter_inappwebview_forge_web/` | Browser iframe implementation and Web example |
-| `dev_packages/` | Internal annotations and code generators |
-| `tool/` | Repository checks: Android 16 KB artifact validation, iOS native lifecycle test runner, documentation-site API generation/verification |
-| `docs/` | Engineering records: architecture, development, migration, triage, runtime-validation, and release notes |
-| `documentation/` | User-facing VitePress guide site; generated `public/api/` and `.vitepress/dist/` are not committed |
-| `scripts/` | Legacy test/publish helper scripts (emulator wait, test runners) |
-| `test_node_server/` | Local Node test server and TLS/client certificates used by integration tests |
-| `web_support/` | TypeScript source for the Web iframe helper; `npm run build` there bundles it into `flutter_inappwebview_forge_web/lib/assets/web/web_support.js` (do not hand-edit the bundle) |
-| `.github/workflows/` | CI (`ci.yml`: per-package format/analyze/test, generated-code drift, Apple static checks; `android.yml`: Android example build and 16 KB check, only for Android/toolchain changes), docs site deployment, and issue lock/stale/no-response automation |
+Packages: `flutter_inappwebview_forge/` (public API and main example),
+`_platform_interface/` (contract, types, generated serializers, capability
+metadata), and `_android/`, `_ios/`, `_macos/`, `_windows/`, `_linux/`,
+`_web/` implementations, each with an `example/`. Repository folders,
+toolchain baselines, and platform notes are in
+[`docs/project-overview.md`](docs/project-overview.md); commands, CI, and
+release steps are in [`docs/development.md`](docs/development.md).
 
 ## Working rules
 
-- Keep the federated package name `flutter_inappwebview_forge` and the `com.emirkanacar.flutter_inappwebview_forge_android` Android namespace. Do not reintroduce upstream package names in active source.
-- Treat MethodChannel/EventChannel names, method names, event payload maps, platform-view IDs, JavaScript bridge names, and generated capability metadata as compatibility surfaces.
-- Keep the iOS 26 `WKUIDelegate` geolocation decision callback compiler- and availability-guarded for the iOS 15 deployment target, forward `allow` through the existing channel contract, and call WebKit's decision handler exactly once.
-- Change the platform interface before or together with a platform implementation when a public setting, enum, event, or method changes.
-- Native callbacks are versioned and nullable input. Do not force-unwrap values from WebView2, Android WebView, WebKit, WPE, or platform channels.
+- Keep the `flutter_inappwebview_forge` package names and the `com.emirkanacar.flutter_inappwebview_forge_android` Android namespace. Do not reintroduce upstream package names in active source.
+- MethodChannel/EventChannel names, method names, event payload maps, platform-view IDs, JavaScript bridge names, and generated capability metadata are compatibility surfaces.
+- Change the platform interface before or together with an implementation when a public setting, enum, event, or method changes.
+- Native callbacks are versioned, nullable input. Never force-unwrap values from WebView2, Android WebView, WebKit, WPE, or platform channels.
 - Lifecycle callbacks are not guaranteed during renderer, GPU, surface, process, or window failure. Disposal and fallback paths must be idempotent.
-- Keep security-sensitive filesystem and URL mappings least-privilege. Do not broaden `FileProvider`, local-origin, or universal file access without a documented threat-model decision.
-- Update the affected package `CHANGELOG.md` for behavior, API, compatibility, or release changes. Link related issue/PR records when the change is based on the triage log.
-- Do not hand-edit generated `*.g.dart`, plugin registrants, lockfiles, or native generated metadata unless the package explicitly owns that generated file. Regenerate and inspect the result instead.
-- Use ASCII for new documentation and source unless the existing file requires another character set.
+- Keep the iOS 26 `WKUIDelegate` geolocation decision callback compiler- and availability-guarded for iOS 15, forward `allow` through the existing channel contract, and call WebKit's decision handler exactly once.
+- Keep filesystem and URL mappings least-privilege. Do not broaden `FileProvider`, local-origin, or universal file access without a documented threat-model decision.
+- Do not hand-edit generated `*.g.dart`, plugin registrants, lockfiles, or native generated metadata; regenerate and inspect. `web_support/` builds `flutter_inappwebview_forge_web/lib/assets/web/web_support.js`; do not edit the bundle.
+- Use ASCII for new documentation and source unless the file already needs another character set.
+- Never publish (`npm run publish:*`), commit, or push without explicit authorization.
 
-## Toolchain baseline
+## Commands
 
-- FVM selects Flutter `3.44.8` from `.fvmrc`; the package compatibility minimum remains Flutter `>=3.38.6`.
-- The root package requires Dart `^3.8.0` and Flutter `>=3.38.6`.
-- iOS support starts at iOS 15.0. macOS starts at 10.14. Android declares `minSdkVersion 24` (AndroidX WebKit `1.16.0`); older API 19-23 hosts must stay on 2.1.76 / Android 1.0.55.
-- Android builds with `compileSdk 36`, Java/JVM target 17, AGP `8.13.2` and Kotlin `2.2.20` in the standalone plugin build; the Kotlin Android plugin is applied only when AGP < 9.
-- Android native code is Kotlin and the Android build uses Kotlin DSL. The built-in Kotlin/AGP 9 migration is tracked in [`docs/android-kotlin-kts-migration-plan.md`](docs/android-kotlin-kts-migration-plan.md).
-- iOS and macOS support Swift Package Manager while retaining CocoaPods. The design is documented in [`docs/ios-uiscene-spm-migration-plan.md`](docs/ios-uiscene-spm-migration-plan.md).
-- Linux requires WPE WebKit and its development packages. Read `flutter_inappwebview_forge_linux/WPE_BACKEND.md` before changing CMake or rendering code.
-- Windows depends on the WebView2 runtime and native C++/WinRT tooling.
-
-## Dependency and code generation workflow
-
-Run commands from the repository root. Prefer the FVM binary when it is available:
+Run from the repository root with the FVM SDK. Run `fvm flutter pub get`
+before any `--no-pub` command.
 
 ```sh
 fvm flutter pub get
 fvm flutter analyze --no-pub
 fvm flutter test --no-pub
-```
-
-The repository scripts in `package.json` are the canonical multi-package commands:
-
-```sh
-npm run build
+npm run build    # build_runner for the platform interface; inspect generated diffs
 npm run format
-npm run docs:gen
 ```
-
-The user documentation site lives in `documentation/` (VitePress):
-
-```sh
-npm install --prefix documentation
-npm run docs:site:dev     # generates documentation/public/api/ on first run
-npm run docs:site:build   # regenerates the dart doc API reference, builds, and verifies
-```
-
-Publishing goes bottom-up through the federated graph (`publish:annotations`, `publish:platform_interface`, platform packages, then `publish:plugin`). Follow the "Publishing to pub.dev" section of [`docs/development.md`](docs/development.md) and never publish without explicit authorization.
-
-`npm run build` runs `build_runner` for the platform-interface package. After generation, inspect all changed generated files and run the platform-interface tests.
 
 ## Test selection
 
-- Dart API/platform-interface change: test `flutter_inappwebview_forge_platform_interface` and the root package.
-- Android channel, lifecycle, security, or WebView change: run the Android package tests and build the Android example; use a real device for IME, fullscreen, WebView-provider, and renderer behavior.
-- iOS/macOS change: run package tests, native static tests, Swift package checks, and an Xcode build; use physical Apple devices for scene, keyboard, fullscreen, and WebKit behavior.
-- Windows/Linux native change: run the package tests and native example build on the target OS. A Dart-only test is not sufficient for C++/WinRT/WPE changes.
-- Web change: run the Web package tests and browser integration tests; same-origin and cross-origin behavior must be tested separately.
-- Integration behavior: use the main example under `flutter_inappwebview_forge/example/integration_test/` or the platform example integration test.
+- Dart API / platform interface: test the platform interface and the root package.
+- Android, iOS/macOS, Windows, Linux native: run the package tests and build the native example on the target OS. A Dart-only test is not enough for native changes. IME, fullscreen, keyboard, scene, WebView-provider, and renderer behavior need a real device.
+- Web: package tests plus browser integration tests, same-origin and cross-origin separately.
+- Integration behavior: `flutter_inappwebview_forge/example/integration_test/` or the platform example's integration tests.
 
-Useful focused commands:
+Focused commands and tool scripts are listed under "Test ladder" in `docs/development.md`.
 
-```sh
-cd flutter_inappwebview_forge_platform_interface && fvm flutter test
-cd flutter_inappwebview_forge_android && fvm flutter test
-cd flutter_inappwebview_forge_ios && fvm flutter test
-cd flutter_inappwebview_forge_web && fvm flutter test
-tool/check_android_16k_alignment.sh <release.apk-or-aab>
-tool/run_ios_native_lifecycle_tests.sh   # swiftc-based WebViewLifecycleCoordinator tests
-tool/run_linux_website_data_matcher_tests.sh   # C++17 WebsiteDataSiteMatcher tests (no WPE needed)
-```
+## Issues and records
 
-For Apple package validation, use `swift package dump-package` in each native package and build with the full Xcode installation. For Linux, verify the required `pkg-config` modules before running Flutter.
+Follow [`docs/issue-resolution-workflow.md`](docs/issue-resolution-workflow.md):
+record, reproduce, trace both the Dart and native side of the whole call path,
+add a failing regression test, make the smallest idempotent fix, validate, then
+update records. An issue is not locally resolved until source, regression
+coverage, validation status, changelog, and records agree.
+
+Record each fact once:
+
+- `docs/known-issues.md` holds the detailed record (root cause, fix, evidence, remaining gaps).
+- `docs/issue-pr-resolution-log.md`, `docs/open-work-plan.md`, and `docs/runtime-validation-pending.md` get a short status entry that links to it. Do not copy root cause or evidence text into them.
+- Implemented but missing device/runtime evidence: list it in `runtime-validation-pending.md`, not as resolved. A failed runtime gate moves it back to `open-work-plan.md`.
+- Never present a CSV `OPEN` value as an upstream-closed issue; export metadata and local status are separate.
+- These files are large: search for the issue number and read only the matching section.
+- Engineering records go in `docs/`; application-facing guides go in `documentation/`. Update the relevant `docs/` document when behavior, support, migration, or validation status changes.
+
+Changelogs: put the full entry under `## Unreleased` in the affected package's
+`CHANGELOG.md`. The root package changelog gets one short line per
+user-visible change. Bump versions only for a release.
 
 ## Review checklist
 
-- Confirm the change is in the correct federated layer.
-- Check nullability and unknown-enum handling at every native/Dart boundary.
-- Check attach, detach, reattach, KeepAlive, renderer-loss, and dispose paths.
-- Add or update a regression test before changing a platform-specific workaround.
-- Verify generated files, package versions, lockfiles, changelogs, and README requirements.
-- Update the relevant document in `docs/` when behavior, support, migration, or validation status changes.
-- Never represent a CSV `OPEN` value as an upstream-closed issue. The local implementation status and the export metadata are separate; see [`docs/issue-pr-resolution-log.md`](docs/issue-pr-resolution-log.md).
-
-## Issue resolution workflow
-
-Follow [docs/issue-resolution-workflow.md](docs/issue-resolution-workflow.md) for every issue. The required sequence is:
-
-1. Record the upstream reference, local status, affected package/platform, environment, severity, and original evidence.
-2. Reproduce the issue and capture a baseline. Mark source-only validation separately from device/runtime validation.
-3. Trace both the Flutter/Dart and native sides of the complete platform-interface, channel, WebView/WebKit, and callback lifecycle path. A fix is incomplete if one side is changed while the other side's contract, payload, nullability, fallback, or lifecycle behavior is left inconsistent.
-4. Write the root cause hypothesis, affected files, compatibility/fallback behavior, acceptance criteria, and documentation updates into the relevant plan.
-5. Add a failing regression test, inspect and test both Flutter and native paths, then implement the smallest idempotent fix while preserving public and native contracts. If one side requires no code change, record why it was verified and left unchanged.
-6. Run focused tests, affected native builds, generation/format checks, and required device/provider validation.
-7. After the fix is validated, update the affected package changelog and version metadata, plus docs/known-issues.md, docs/issue-pr-resolution-log.md, docs/open-work-plan.md, and any relevant architecture, migration, performance, security, API, README, or support documentation.
-8. Review the diff for unrelated or personal files, run git diff --check, and commit/push only with authorization.
-
-An issue must not be marked locally resolved until the source, regression coverage, validation status, changelog, release metadata, and relevant documentation agree. An upstream CSV state remains historical metadata and must not be changed to imply local resolution.
-
-`docs/open-work-plan.md` is the live unresolved-work queue, not a list of
-source patches. When the implementation is complete but target
-native/device/runtime evidence is still missing, move the record to
-`docs/runtime-validation-pending.md` and link the detailed evidence from
-`docs/known-issues.md`. If the team does not genuinely have enough evidence to
-call an issue fully resolved, keep it in the runtime register rather than
-counting it as closed. A failed runtime gate moves the issue back to the open
-work plan with its environment and native evidence.
-
-## Documentation index
-
-- [`docs/README.md`](docs/README.md): documentation entry point.
-- [`docs/project-overview.md`](docs/project-overview.md): architecture and package responsibilities.
-- [`docs/development.md`](docs/development.md): setup, tests, native validation, and release workflow.
-- [`docs/known-issues.md`](docs/known-issues.md): detailed issue triage and remaining validation.
-- [`docs/issue-pr-resolution-log.md`](docs/issue-pr-resolution-log.md): supplied issue/PR export and local resolution history.
-- [`docs/open-work-plan.md`](docs/open-work-plan.md): unresolved work, priorities, acceptance criteria, and implementation sequence.
-- [`docs/runtime-validation-pending.md`](docs/runtime-validation-pending.md): implemented issues still waiting for device/provider/browser/native evidence.
-- [`docs/issue-resolution-workflow.md`](docs/issue-resolution-workflow.md): mandatory per-issue triage, fix, validation, and documentation steps.
-- [`docs/performance-and-webview-upgrade-plan.md`](docs/performance-and-webview-upgrade-plan.md): startup, channel pressure, AndroidX WebKit tracks, and device validation.
-- [`docs/deprecated-api-migration-plan.md`](docs/deprecated-api-migration-plan.md): 5.x shim retention and removal phases.
-- [`docs/android-kotlin-kts-migration-plan.md`](docs/android-kotlin-kts-migration-plan.md) and [`docs/ios-uiscene-spm-migration-plan.md`](docs/ios-uiscene-spm-migration-plan.md): native build-system migrations.
-- [`documentation/README.md`](documentation/README.md): user-facing guides (getting started, features, platforms, examples, deprecated APIs, migration, changelog).
+- Correct federated layer; nullability and unknown-enum handling at every native/Dart boundary.
+- Attach, detach, reattach, KeepAlive, renderer-loss, and dispose paths.
+- A regression test exists before a platform-specific workaround changes.
+- Generated files, versions, lockfiles, changelogs, and README requirements are consistent.
+- No unrelated or personal files in the diff; `git diff --check` is clean.

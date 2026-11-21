@@ -170,8 +170,6 @@ Use these documents for planning:
 - docs/known-issues.md for issue root cause, mitigation, and validation gaps.
 - docs/performance-and-webview-upgrade-plan.md for performance and dependency
   work.
-- docs/android-kotlin-kts-migration-plan.md for Android build/native migration.
-- docs/ios-uiscene-spm-migration-plan.md for Apple lifecycle/package migration.
 
 Do not treat an upstream PR as an implementation plan. Re-implement the
 necessary behavior against the current fork, preserve the fork package names,
@@ -244,22 +242,28 @@ relevant.
 Documentation updates are mandatory after an issue is resolved. Update the
 documents that describe the affected behavior, not only the source code.
 
-At minimum, update:
+Record each fact once, so a later change edits one place:
 
-- The affected package CHANGELOG.md with the behavior, compatibility,
-  security, performance, or build change.
-- The root package CHANGELOG.md when the public package behavior, dependency
-  graph, or release contains the fix.
-- docs/known-issues.md with the root cause, local resolution, validation
-  status, and remaining device/provider limitations.
-- docs/issue-pr-resolution-log.md with the issue/PR reference, local status,
-  changed package, tests/builds, and commit or release reference. Keep the
-  imported CSV state unchanged and distinguish it from local status.
-- docs/open-work-plan.md by checking off completed work, updating counts and
-  priorities, and leaving explicit follow-up validation items.
+- The affected package CHANGELOG.md, under `## Unreleased`, with the full
+  behavior, compatibility, security, performance, or build change.
+- The root package CHANGELOG.md with one short line per user-visible change
+  when the release contains it. Do not repeat the platform entry.
+- docs/known-issues.md with the detailed record: root cause, local
+  resolution, validation status, and remaining device/provider limitations.
+  This is the only place for that text.
+- docs/issue-pr-resolution-log.md with a short entry: issue/PR reference,
+  local status, changed packages, tests/builds, commit or release, and a link
+  to the known-issues.md section. Keep the imported CSV state unchanged and
+  distinguish it from local status.
+- docs/open-work-plan.md or docs/runtime-validation-pending.md with the
+  status change, counts, and remaining validation items, linking to
+  known-issues.md instead of restating the evidence.
 - The relevant architecture, migration, performance, security, API, README,
-  or support-matrix document when the issue changes those contracts.
+  or support-matrix document only when the issue changes those contracts.
 - docs/README.md when a new durable document is added.
+
+These files are large. Search for the issue number and edit the matching
+section; do not read or rewrite them whole.
 
 Also verify:
 
@@ -309,7 +313,7 @@ An issue is ready to mark locally resolved when all applicable conditions hold:
 - Runtime/device validation is complete or the limitation is explicit.
 - Affected changelogs, versions, lockfiles, and generated outputs are
   consistent.
-- known-issues.md, issue-pr-resolution-log.md, open-work-plan.md, and any
-  relevant technical document are updated.
+- known-issues.md has the detailed record, and the log, open-work plan, or
+  runtime register has a linked status entry.
 - The diff contains no unrelated or personal files.
 - The commit and remote state are recorded when delivery was authorized.

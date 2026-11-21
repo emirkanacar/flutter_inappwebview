@@ -75,6 +75,16 @@ fvm flutter analyze --no-pub
 fvm flutter test --no-pub
 ```
 
+Native unit tests that do not need a device:
+
+```sh
+tool/run_ios_native_lifecycle_tests.sh          # swiftc WebViewLifecycleCoordinator tests
+tool/run_apple_website_data_matcher_tests.sh
+tool/run_linux_website_data_matcher_tests.sh    # C++17, no WPE needed
+```
+
+For Apple packages, also run `swift package dump-package` in each native package and build with the full Xcode installation. For Linux, check the required `pkg-config` modules before running Flutter.
+
 The main example has extensive integration coverage under `flutter_inappwebview_forge/example/integration_test/`. Platform examples also have platform-specific integration tests. Integration tests require the target runtime and are not replaced by host-only unit tests.
 
 ## Continuous integration
@@ -173,7 +183,7 @@ For issue-specific work, follow the detailed [issue resolution workflow](issue-r
 3. Add a regression test that fails for the original issue or scenario.
 4. Implement the smallest platform-local fix; preserve fallback behavior for older runtimes.
 5. Run generation, formatting, focused tests, analysis, and the affected native build.
-6. Update the affected changelog and relevant document in `docs/`.
+6. Update the affected changelog and relevant document in `docs/` (see "Records and changelogs" in the [issue resolution workflow](issue-resolution-workflow.md#7-documentation-and-release-metadata)).
 7. Inspect `git diff` and `git status`; do not include unrelated worktree changes.
 
 ## Release checklist

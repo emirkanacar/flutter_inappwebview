@@ -53,13 +53,13 @@ The JavaScript bridge, document-start scripts, content blockers, web messages, b
 
 ### Android
 
-Android uses Kotlin native sources under `android/src/main/kotlin` and Kotlin DSL build files. The declared minimum SDK is 24 with AndroidX WebKit `1.16.0`, compile SDK 36, and Java/Kotlin JVM target 17; hosts that still need API 19-23 must stay on 2.1.76 / Android 1.0.55. AndroidX WebKit compatibility must be checked before dependency upgrades. Sensitive paths include WebView provider startup, document-start script registration, platform-view attach, IME focus, fullscreen cleanup, synchronous request interception, cookie deletion, and navigation-context preservation.
+Android uses Kotlin native sources under `android/src/main/kotlin` and Kotlin DSL build files. The declared minimum SDK is 24 with AndroidX WebKit `1.16.0`, compile SDK 36, and Java/Kotlin JVM target 17. The standalone plugin build uses AGP `8.13.2` and Kotlin `2.2.20`, and applies the Kotlin Android plugin only when AGP < 9 (AGP 9 built-in Kotlin validation is tracked as [#2846](known-issues.md#2846---android-agp-9-built-in-kotlin-compatibility)); The FileProvider authority suffix stays `flutter_inappwebview_android.fileprovider` for URI compatibility; changing it is a separate breaking decision. Hosts that still need API 19-23 must stay on 2.1.76 / Android 1.0.55. AndroidX WebKit compatibility must be checked before dependency upgrades. Sensitive paths include WebView provider startup, document-start script registration, platform-view attach, IME focus, fullscreen cleanup, synchronous request interception, cookie deletion, and navigation-context preservation.
 
 The Android implementation does not ship a plugin-owned JNI/NDK library. The consuming application's final APK/AAB still needs the [16 KB alignment check](../tool/check_android_16k_alignment.sh) because Flutter and transitive dependencies may contain native libraries.
 
 ### iOS and macOS
 
-Apple implementations use `WKWebView`. iOS is scene-aware and requires iOS 15.0 or newer. Both iOS and macOS retain CocoaPods support and provide Swift Package Manager manifests with FlutterFramework and processed resources. Window presentation must resolve an active scene/window instead of relying on `UIApplicationDelegate.window`.
+Apple implementations use `WKWebView`. iOS is scene-aware and requires iOS 15.0 or newer; macOS requires 10.14 or newer. Both iOS and macOS retain CocoaPods support and provide Swift Package Manager manifests with FlutterFramework and processed resources. Window presentation must resolve an active scene/window instead of relying on `UIApplicationDelegate.window`.
 
 ### Windows
 
@@ -74,6 +74,19 @@ Linux uses WPE WebKit with an EGL/texture rendering path and a software fallback
 The Web implementation uses an iframe and browser JavaScript helpers. Same-origin documents may expose their current URL; cross-origin documents are restricted by the browser and must return `null` rather than stale initial data.
 
 ## Repository boundaries
+
+Top-level folders outside the packages:
+
+| Path | Responsibility |
+| --- | --- |
+| `dev_packages/` | Internal annotations and code generators |
+| `tool/` | Repository checks: Android 16 KB artifact validation, Apple/Linux native unit tests, documentation-site API generation and verification |
+| `docs/` | Engineering records: architecture, development, migration, triage, runtime validation, release notes |
+| `documentation/` | User-facing VitePress guide site; generated `public/api/` and `.vitepress/dist/` are not committed |
+| `scripts/` | Legacy test/publish helper scripts |
+| `test_node_server/` | Local Node test server and TLS/client certificates for integration tests |
+| `web_support/` | TypeScript source of the Web iframe helper; `npm run build` there bundles it into `flutter_inappwebview_forge_web/lib/assets/web/web_support.js` |
+| `.github/workflows/` | CI (`ci.yml`, `android.yml`), documentation deployment, and issue automation |
 
 - `lib/` in the root package is the public API; avoid platform-specific behavior here.
 - `platform_interface/lib/` is the compatibility contract; changes require all implementations to be audited.

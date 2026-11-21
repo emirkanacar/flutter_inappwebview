@@ -305,38 +305,6 @@ InAppWebView(
 If popups are required, create a child `InAppWebView` using the supplied
 `windowId`, keep it owned by the parent feature, and handle `onCloseWindow`.
 
-## Handle downloads without silently losing them
-
-The callback is a decision point. Use `onDownloadStarting` (not the deprecated
-`onDownloadStart` / `onDownloadStartRequest`). Either hand the request to a
-native download job, return an explicit cancellation, or return `null` for
-notify-only behavior:
-
-```dart
-InAppWebView(
-  onDownloadStarting: (controller, request) async {
-    final url = request.url;
-    debugPrint('Download requested: $url');
-
-    // Option A: notify-only — start your own downloader.
-    // return null;
-
-    // Option B: cancel explicitly.
-    return DownloadStartResponse(
-      handled: true,
-      action: DownloadStartResponseAction.CANCEL,
-    );
-  },
-  initialUrlRequest: URLRequest(
-    url: WebUri('https://example.com/files'),
-  ),
-)
-```
-
-See [Start a native download](#start-a-native-download) and
-[Notify-only downloads](#notify-only-downloads) below for handled jobs and
-`DownloadJobController` progress.
-
 ## Load HTML data or an asset
 
 Use `initialData` for the first document, or use the controller later when the
@@ -521,9 +489,11 @@ and Options shims.
 
 ## Start a native download
 
-A `null` `onDownloadStarting` result stays notify-only. This starts an
-opt-in native job on Android, iOS, macOS, and Windows when the provider
-returns a download ID:
+`onDownloadStarting` is a decision point (the deprecated `onDownloadStart` /
+`onDownloadStartRequest` are not). Return `null` for notify-only behavior,
+`CANCEL` to refuse, or a handled `DOWNLOAD` with a path to start a native job
+on Android, iOS, macOS, or Windows. Track progress when `request.downloadId`
+is present:
 
 ```dart
 import 'package:path_provider/path_provider.dart';
@@ -533,12 +503,24 @@ DownloadJobController? activeDownload;
 InAppWebView(
   initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
   onDownloadStarting: (controller, request) async {
-    final dir = await getTemporaryDirectory();
-    final name = request.suggestedFilename ?? 'download.bin';
-    final path = '${dir.path}/$name';
-
-    // Notify-only: return null and handle the URL yourself.
+    // Notify-only: start your own downloader and return null.
+    // await myAppDownloader.enqueue(request.url);
     // return null;
+
+    final dir = await getTemporaryDirectory();
+    final path = '${dir.path}/${request.suggestedFilename ?? 'file.bin'}';
+
+    final downloadId = request.downloadId;
+    if (downloadId != null && DownloadJobController.isClassSupported()) {
+      activeDownload?.dispose();
+      activeDownload = DownloadJobController(id: downloadId)
+        ..onProgressChanged = (progress) async {
+          debugPrint('download ${(progress * 100).toStringAsFixed(0)}%');
+        }
+        ..onComplete = (completed, error) async {
+          debugPrint(completed ? 'saved: $path' : 'failed: $error');
+        };
+    }
 
     return DownloadStartResponse(
       handled: true,
@@ -546,56 +528,11 @@ InAppWebView(
       resultFilePath: path,
     );
   },
-  onWebViewCreated: (controller) {
-    // Attach progress when a job ID is available from the platform.
-  },
 )
-```
-
-Track progress when `request.downloadId` is present:
-
-```dart
-onDownloadStarting: (controller, request) async {
-  final dir = await getTemporaryDirectory();
-  final path = '${dir.path}/${request.suggestedFilename ?? 'file.bin'}';
-
-  final response = DownloadStartResponse(
-    handled: true,
-    action: DownloadStartResponseAction.DOWNLOAD,
-    resultFilePath: path,
-  );
-
-  final downloadId = request.downloadId;
-  if (downloadId != null && DownloadJobController.isClassSupported()) {
-    activeDownload?.dispose();
-    activeDownload = DownloadJobController(id: downloadId)
-      ..onProgressChanged = (progress) async {
-        debugPrint('download ${(progress * 100).toStringAsFixed(0)}%');
-      }
-      ..onComplete = (completed, error) async {
-        debugPrint(completed ? 'saved: $path' : 'failed: $error');
-      };
-  }
-
-  return response;
-},
 ```
 
 Do not pass a WebView cookie or authorization header to another downloader
 without checking the server's security model.
-
-## Notify-only downloads
-
-Return `null` when the application only needs to know that a download was
-requested and will start its own authenticated fetch:
-
-```dart
-onDownloadStarting: (controller, request) async {
-  debugPrint('Download requested: ${request.url}');
-  await myAppDownloader.enqueue(request.url);
-  return null;
-},
-```
 
 ## Navigate with Android NavigationParameters
 

@@ -1,6 +1,6 @@
 # Known Issues and Upstream Triage
 
-Last reviewed: 2026-11-13
+Last reviewed: 2026-11-21
 
 Source: the provided `issues.csv` snapshot and the [flutter_inappwebview issue tracker](https://github.com/pichillilorenzo/flutter_inappwebview/issues). The CSV is a metadata/title export and contains 125 rows, all marked `OPEN`: 98 bugs, 16 enhancements, 3 showcase entries, and 8 records without a label. All 125 rows were screened; 78 issue records have local implementations or mitigations awaiting real runtime validation, #2709 is source-validated with a focused Dart regression test and has no native runtime gate, #2745 is closed by source review, #2570, #2584, #2598, #2636, #2659, #2680, #2688, #2698, #2713, #2723, #2727, #2753, #2796, #2815, and #2831 are host/platform- or dependency-specific boundaries with no Forge-owned fix, and 30 remain active implementation or reproduction work. The upstream `OPEN` value is retained as export metadata and must not be read as the current local implementation status.
 
@@ -143,115 +143,143 @@ whole handoff and must not create it inside `build()`.
 
 ## 2026-08-13 Android/iOS lifecycle and settings refactor checkpoint
 
-The first lifecycle refactor wave is implemented and source-validated in the
-Android and iOS packages. Keep-alive and headless manager ownership is now
-non-null and removed before disposal; duplicate IDs dispose the previous
-native owner; headless disposal is idempotent; and both packages use an
-internal lifecycle coordinator for teardown and tracked async JavaScript
-completion. Android skips unchanged content-blocker and asset-loader work.
-iOS skips unchanged content-blocker compilation and honors partial settings
-maps for `mediaType` and the two scroll-disable axes. Public Dart and
-MethodChannel contracts are unchanged. Android and iOS channel dispatch now
-keep JavaScript, settings, WebMessage, and lifecycle operations behind internal
-feature handlers.
+Source-validated lifecycle wave (Android 1.0.53, iOS 2.1.31, plus the
+desktop/Web ownership slice). Public Dart and MethodChannel contracts are
+unchanged.
 
-The iOS Simulator now passes the expanded 100-cycle disposal/recreate
-diagnostic and 50 keep-alive plus 50 headless-to-normal transfer cycles. The
-connected Android API 36 device passed the same matrix with `--no-uninstall`
-before the final Android headless guaranteed-cleanup path was added; the final
-code then passed 100 disposal/recreate cycles and 50 keep-alive plus 50
-headless-to-normal transfer cycles on the API 35 `Medium_Phone` emulator with
-`--no-uninstall`; physical API 36/OEM/provider coverage remains pending.
-Android
-source/build validation passes. These
-results do not close physical renderer-loss, fullscreen/IME, scene/popup,
-keyboard, or provider gates. The desktop/Web ownership slice is now also
-source-validated: Web tests and example build pass; macOS source tests and
-SwiftPM manifest pass; Windows/Linux source tests pass. Target runtime gates
-remain pending because this host cannot run Windows WebView2 or Linux WPE, and
-the macOS example still has the existing 10.15 deployment target rejected by
-the installed Xcode beta's 12.0 SDK floor. Web create, retained-transfer,
-reattach, and disposal now share one internal lifecycle coordinator; the Web
-MethodChannel contract remains unchanged. Linux now applies settings through a
-previous-snapshot diff and avoids recompiling unchanged content blockers.
-Linux and Windows retained ownership also uses internal lifecycle coordinators
-for detach/reattach and disposal.
-Their channel delegates now gate both incoming method calls and outgoing native
-events/callbacks through the same lifecycle state; Android likewise no longer
-maintains a second `isDisposed` source of truth for startup, renderer, scroll,
-and geometry callbacks.
-The Android JavaScript bridge rejects queued work after disposal begins, while
-iOS tracks evaluateJavascript completions and drains them exactly once during
-navigation or teardown.
-Native Android/iOS callback results, including default decisions, use the same
-exactly-once completion boundary, so a stale channel response cannot repeat a
-callback or fallback action. The boundary also rejects a later fallback after
-a handled success/error has completed, while preserving the fallback invoked
-by that completion handler itself.
-Android channel events and decision callbacks now use this boundary too, while
-default native decisions still complete when teardown races Dart dispatch. The
-Android headless wrapper is also coordinator-backed rather than flag-backed.
-Android JavaScript UI (`alert`, `confirm`, `prompt`, and `beforeunload`) error
-paths and bridge handler errors also claim the same completion gate before
-calling the native cancel/reject fallback, so a late duplicate error cannot
-repeat that action.
-Delayed Android IME, scroll-stop, and context-menu work, and delayed iOS
-keyboard, gesture, scroll, content-size, and context-menu work, now re-check
-lifecycle admission before touching native UI. Runtime provider/keyboard
-matrices remain pending.
-The follow-up source audit also gates Android floating-menu repositioning and
-runtime plugin-script callbacks, plus iOS delayed focus/image-reference
-lookups. iOS `isPagingEnabled` incremental settings updates now target the
-matching scroll-view property. Physical device/provider validation remains
-pending.
-Native archive/screenshot/PDF completion callbacks are lifecycle-tracked and
-return their existing null-result fallback if disposal wins; target provider
-and WebKit runtime validation remains pending.
-Android screenshot and initial platform-view loading callbacks are additionally
-gated at their posted execution boundary; device validation remains pending.
-Deferred iOS popup initialization and fullscreen-container presentation are
-also gated at their main-queue execution boundary.
-The Web adapter caches its last settings snapshot and skips unchanged
-JavaScript interop updates while preserving the existing JS-side property diff.
-Outgoing load, popup, window, fullscreen, bridge, and injected-script events
-are rejected after disposal, including a second lifecycle check after an
-awaited channel response. Internal operation IDs make async completion
-idempotent. Web package tests and the example build pass; browser runtime
-validation remains pending.
-The iOS and macOS delegates apply the same outgoing callback gate, including
-WebMessage and FindInteraction sub-delegates; their pending MethodChannel
-results are drained exactly once during teardown. macOS completes both native
-`callAsyncJavaScript` and pre-macOS-11 bridge callbacks exactly once during
-disposal.
-Android and iOS pull-to-refresh delegates use the same hosted-WebView gate and
-reset the refresh indicator instead of dispatching stale callbacks during
-teardown.
-Headless-to-normal transfer also removes the native WebView from its previous
-active ownership map before the headless wrapper is disposed, preventing a
-stale duplicate owner. The Android and iOS factories now detach the headless
-map entry before handoff, dispose entries that cannot provide a native view,
-and use identity-checked cleanup so a late old wrapper cannot remove a newer
-owner. Duplicate headless IDs also replace an active owner in the shared
-namespace. Android, iOS, and macOS managers now snapshot and clear
-active/retained ownership before disposing every remaining native WebView when
-the plugin itself is torn down. Accepted disposal now reaches the terminal
-coordinator state through guaranteed cleanup paths on Android, iOS, and macOS.
-Auxiliary Android print-job/Custom Tabs and iOS print-job,
-authentication-session/in-app-browser managers also detach non-null ownership
-entries before disposing their children, so disposal cannot leave a nullable
-placeholder or mutate the live map during iteration.
-Android async JavaScript operations now consume their pending callback when
-script preparation or queue submission fails. iOS screenshot compression
-options use PNG/quality defaults for malformed channel values. Runtime provider
-and keyboard validation remains pending.
-The Android and iOS lifecycle coordinators also serialize state transitions and
-debug-trace reads; this is source/host validated, while provider runtime races
-remain pending.
-iOS KVO observer registration is tracked per object/key path, preventing
-partial-setup teardown from removing an unregistered observer.
-Headless-to-normal transfer now re-registers the transferred native WebView in
-the active manager map after removing the old headless owner; lookup and plugin
-teardown therefore retain one authoritative owner.
+- Ownership: KeepAlive and headless entries are non-null and removed before
+  disposal; duplicate IDs dispose the previous owner; headless-to-normal
+  transfer detaches the old map entry, re-registers the native WebView in the
+  active map, and uses identity-checked cleanup so a late old wrapper cannot
+  remove a newer owner. Plugin teardown snapshots and clears active/retained
+  maps before disposing every WebView (Android, iOS, macOS). Print-job,
+  Custom Tabs, authentication-session, and in-app-browser managers detach
+  entries before disposing children.
+- Coordinators: Android, iOS, macOS, Web, Windows, and Linux use an internal
+  lifecycle coordinator for create, detach/reattach, and disposal; state
+  transitions are serialized and disposal reaches the terminal state through
+  guaranteed cleanup. Android no longer keeps a second `isDisposed` flag.
+- Exactly-once completion: native callback results and default decisions,
+  JavaScript UI (`alert`/`confirm`/`prompt`/`beforeunload`) error paths,
+  bridge handler errors, archive/screenshot/PDF callbacks, async JavaScript
+  (iOS/macOS drain pending results once during teardown), and Web async
+  operations (operation IDs) complete once; a stale response cannot repeat a
+  callback or fallback.
+- Admission gates: incoming calls and outgoing events (including WebMessage,
+  FindInteraction, and pull-to-refresh delegates) are rejected after disposal.
+  Delayed Android IME, scroll-stop, context-menu, floating-menu, screenshot,
+  and initial-load work, and delayed iOS keyboard, gesture, scroll,
+  content-size, context-menu, focus, popup, and fullscreen work re-check the
+  lifecycle before touching UI.
+- Settings: Android skips unchanged content-blocker and asset-loader work; iOS
+  skips unchanged content-blocker compilation, honors partial maps for
+  `mediaType` and the scroll-disable axes, and maps `isPagingEnabled`
+  correctly; Linux diffs against the previous snapshot; Web skips unchanged
+  interop updates. iOS KVO registration is tracked per object/key path, and
+  malformed screenshot options fall back to PNG defaults.
+
+Runtime results and remaining gates are in the
+[runtime register](runtime-validation-pending.md#runtime-results-recorded-so-far)
+("Lifecycle wave" row).
+
+## Local feature and hardening records (not CSV issues)
+
+These records are outside the 125-issue export. Their remaining runtime gates
+are listed in
+[runtime-validation-pending.md](runtime-validation-pending.md#records-outside-the-csv-export).
+
+### Method-channel argument validation (iOS, macOS, Windows)
+
+**Status:** iOS 2.1.38 / macOS 1.1.13 and Windows; runtime validation pending.
+iOS and macOS read required arguments with `arguments!["key"] as! T` (about
+170 sites) and Windows with `get_fl_map_value`, which throws
+`std::out_of_range` / `std::bad_variant_access` with no handler, so a missing,
+`null`, or wrong-type argument terminated the app. iOS/macOS now read required
+values through `requiredArgument` (`Types/ChannelArguments.swift`) and complete
+the call with an `invalid_arguments` `FlutterError`. Windows
+`ChannelDelegate` wraps each `HandleMethodCall` in `HandleMethodCallGuarded`,
+which catches C++ exceptions and completes with `invalid_arguments` only if
+the handler has not already completed. Channel names, payload keys, and
+optional defaults are unchanged; Linux typed getters already return defaults.
+**Evidence:** `test/channel_argument_source_test.dart` in the iOS, macOS, and
+Windows packages failed before and passes after; package tests, the iOS native
+lifecycle tests, and both Apple example builds pass; a `swiftc` helper check
+and a `clang++ -std=c++17` guard check against a stub Flutter wrapper cover
+present, missing, `null`, wrong-type, throw-after-result, and non-`std::exception`
+cases. **Required evidence:** an MSVC Windows build with the real wrapper and a
+malformed call (for example `evaluateJavascript` without `source`) on each
+platform returning `invalid_arguments` while the WebView keeps working.
+
+### Browsing data deletion
+
+**Status:** source-complete in platform interface, Android, iOS, macOS, Linux,
+Windows, and root (2.1.80 line); Web not implemented. Android uses AndroidX
+WebKit 1.16.0 `WebStorageCompat` behind `DELETE_BROWSING_DATA` and replies
+once; iOS/macOS use `WKWebsiteDataStore` with the shared
+`WebsiteDataSiteMatcher`; Linux clears `WEBKIT_WEBSITE_DATA_ALL` with a
+standard-library matcher; Windows supports `deleteBrowsingData` only, through
+`ICoreWebView2Profile2::ClearBrowsingDataAll` on a temp WebView of the default
+environment. **Evidence:** Dart channel tests,
+`tool/run_apple_website_data_matcher_tests.sh`,
+`tool/run_linux_website_data_matcher_tests.sh`, Android debug APK, iOS
+Simulator and macOS example builds. Linux and Windows native code was not
+built. **Required evidence:** Android providers with and without the feature;
+iOS/macOS removal of cookies, storage, IndexedDB, and service workers for the
+site and subdomains only; Linux WPE run; Windows run that returns `false`
+without `ICoreWebView2Profile2`.
+
+### `removeDataModifiedSince` timestamp unit
+
+**Status:** fixed; runtime validation pending. iOS/macOS read the Dart
+millisecond timestamp as seconds, and Linux passed Unix seconds as a
+microsecond `GTimeSpan`. Both native sides are fixed without a payload change;
+Dart payload and native source-contract tests cover iOS, macOS, and Linux, and
+the glib arithmetic was checked standalone. **Required evidence:** Linux WPE
+run and an Apple device check that older data is kept and newer data removed.
+
+### Lockdown Mode and cookie policy
+
+**Status:** source-complete in platform interface, iOS, macOS, root (2.1.80
+line). `isLockdownModeEnabled` (iOS 16+, macOS 13+) is applied to the initial
+`defaultWebpagePreferences` and every `decidePolicyFor:preferences:`
+navigation; `nil` keeps the system value. `CookieManager.setCookiePolicy` /
+`getCookiePolicy` use `HTTPCookieStorePolicy` (iOS 17+, macOS 14+).
+Serialization, enum, channel, capability, and source-contract tests and both
+Apple example builds pass. **Required evidence:** `true` disables
+JIT/WebAssembly and `false` re-enables them under system Lockdown Mode;
+`setSettings` applies on the next navigation; `DISALLOW` blocks cookies for
+default and container stores and `ALLOW` restores them.
+
+### iOS `writingToolsBehavior` parsing
+
+**Status:** fixed; runtime validation pending. The native setting was `Int?`,
+not visible to Objective-C, so KVC `ISettings.parse` skipped it. It is now
+parsed explicitly; a source-contract test and the Simulator build pass.
+**Required evidence:** iOS 18+ device with Apple Intelligence where `NONE` /
+`LIMITED` changes the Writing Tools UI.
+
+### Android `warmUpRendererProcess`
+
+**Status:** source-complete in platform interface, Android, root (2.1.80
+line). The handler needs the profile store, a non-empty container id, and
+`WARM_UP_RENDERER_PROCESS`, calls the experimental
+`Profile.warmUpRendererProcess()` reflectively, and replies `false` on any
+missing piece or exception. Channel, capability, and source-contract tests and
+the example debug build pass. **Required evidence:** a provider with the
+feature starts a sandboxed renderer early (`adb shell ps`) and shortens the
+first load; a provider without it returns `false`.
+
+### Windows context menu
+
+**Status:** source-complete in Windows 1.0.17 for `InAppWebView`,
+`HeadlessInAppWebView`, and `InAppBrowser`. `types/context_menu.cpp` parses
+the params and `ICoreWebView2_11.add_ContextMenuRequested` is registered only
+when a menu is supplied; custom items need `ICoreWebView2Environment9`.
+WebView2 has no dismiss event, so `onHideContextMenu` is not raised. The
+parser passes a standalone C++ check; the WebView2 code was not built.
+**Required evidence:** custom items after the defaults, click callbacks with
+id and title, `hideDefaultSystemContextMenuItems`, menu types 7/5/8/9/0, no
+change without a `ContextMenu`, nothing raised with `disableContextMenu`.
 
 ## Resolution summary
 
@@ -314,11 +342,11 @@ Windows/Linux target builds and macOS runtime validation remain pending.
 
 | Local status | Count | Meaning |
 | --- | ---: | --- |
-| Resolved locally; runtime validation pending | 78 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
+| Resolved locally; runtime validation pending | 77 issues | The source, regression, and host/build boundary is complete; the remaining real validation is tracked in [runtime-validation-pending.md](runtime-validation-pending.md). |
 | Resolved locally; no runtime gate | 1 issue ([#2709](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2709)) | The pure Dart serialization path and regression test pass; no device/provider behavior is involved. |
 | Closed by source review | 1 issue ([#2745](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2745)) | No plugin-owned security sink was found; no package runtime gate is required. |
 | Host/platform-specific boundary | 15 issues ([#2570](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2570), [#2584](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2584), [#2598](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2598), [#2636](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2636), [#2659](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2659), [#2680](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2680), [#2688](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2688), [#2698](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2698), [#2713](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2713), [#2723](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2723), [#2727](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2727), [#2753](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2753), [#2796](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2796), [#2815](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2815), [#2831](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2831)) | The issue remains visible for host/provider/engine/application/site/dependency tracking, but no Forge-owned code change is justified by the available evidence. |
-| Open implementation or reproduction | 30 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
+| Open implementation or reproduction | 31 issues | The active queue and acceptance criteria are tracked in [open-work-plan.md](open-work-plan.md). |
 
 #### #2811 - Flutter web WASM (`dart2wasm`) compilation
 
@@ -371,12 +399,6 @@ Windows/Linux target builds and macOS runtime validation remain pending.
 #### #2752 - Windows WebView2 controller crashes during resize/teardown
 
 **Local status:** Implemented and source-validated in Windows 1.0.10; Windows native runtime validation pending. **Affected package:** Windows WebView2 controller lifetime. **Impact:** the upstream stack reaches `put_Bounds` and `put_RasterizationScale` while the controller is being closed, producing a native access violation in the WebView2/VC runtime path. **Root cause hypothesis:** late Flutter platform-view geometry callbacks can overlap controller teardown. **Fix:** resize, position, and visibility callbacks now stop immediately after disposal begins and serialize controller access with teardown through a mutex. **Required evidence:** reproduce transparent-background WebView creation on the affected Windows/WebView2 matrix, then run resize, minimize/restore, navigation, close, and recreate cycles in debug and release builds; confirm no access violation and no leaked child window.
-
-#### #2861 - Linux software-rendering fallback
-
-**Local status:** Implemented and source-validated; Fedora/X11/Intel runtime validation pending. **Affected package:** Linux rendering backend. **Impact:** the default GL/DMA-BUF path may produce black, white, or transparent output on affected Intel/X11 configurations. **Fix:** `FLUTTER_INAPPWEBVIEW_LINUX_DISABLE_GL=1` now selects the pixel-buffer/SHM fallback, sets `LIBGL_ALWAYS_SOFTWARE=1` before WPE starts, and skips EGL import when software rendering is requested so DMA-BUF frames are converted to CPU-readable pixels. **Required evidence:** Fedora/X11 with Intel i915, backend logs, and before/after frame output.
-
-The runtime GL realize path now also switches to the same fallback when GtkGLArea initialization reports an error. This is containment, not proof that every DMA-BUF/driver failure is resolved; Fedora/X11/Intel runtime evidence remains required.
 
 #### #2763 - iOS popup WebView manager lifecycle
 
@@ -491,11 +513,7 @@ The same ownership guard now covers page-started, page-finished, document-start,
 
 **Local status:** Hardened in Android 1.0.37 (root 2.1.40); device/provider validation pending. **Affected package:** Android Dart controller. **Environment:** Flutter 3.44.8/Dart 3.12.2 development baseline; published package compatibility minimum remains Flutter 3.38.6. **User impact:** malformed or nullable WebView provider fields could cause a Dart type error while converting request results or dispatching normal callbacks. **Hypothesis:** dynamic channel values were passed directly to `WebUri`, nullable public fields, non-null `String` locals, or an unchecked `List` cast. **Fix:** optional URL, title, source, origin, callback ID, touch-icon, safe-browsing, print-job, and context-menu values are accepted only when they are strings; permission request and cancellation payloads now also reject a non-map payload, non-string origin, or non-list resources container before decoding, while filtering unknown resource entries. Invalid values return the existing native default behavior or empty-title behavior; the public channel and result contracts are unchanged. **Regression evidence:** the Android nullability test reproduces the prior `String`-to-`List` cast failure with a valid origin and malformed resources container, and passes after the guard; null/malformed cancellation payloads are also ignored safely. **Required evidence:** Android API/provider matrix covering null, empty, malformed, and wrong-type callback fields.
 
-**iOS/macOS/Windows counterpart (unreleased):** required method-channel arguments are no longer force-cast on iOS/macOS or read with throwing lookups on Windows; malformed calls complete with `invalid_arguments`. Evidence and runtime gate: [runtime-validation-pending.md](runtime-validation-pending.md#ios-macos-and-windows-method-channel-argument-validation-local-hardening).
-
-#### #2737 - Web iframe URL tracking
-
-**Local status:** Existing implementation source-validated; browser integration validation pending. **Affected package:** Web. **User impact:** same-origin iframe navigation must report the current location, while cross-origin reads must not leak or repeat the initial `src`. **Fix reviewed:** the JavaScript helper reads the current iframe location where same-origin access permits it and returns `null` for cross-origin access; load events carry nullable URLs and `getUrl` avoids falling back to the initial source after a document has loaded. Regression assertions protect these boundaries. **Required evidence:** same-origin redirect/history and cross-origin browser integration tests.
+**iOS/macOS/Windows counterpart (unreleased):** required method-channel arguments are no longer force-cast on iOS/macOS or read with throwing lookups on Windows; malformed calls complete with `invalid_arguments`. Evidence and runtime gate: [runtime-validation-pending.md](#method-channel-argument-validation-ios-macos-windows).
 
 ### #2636 — iOS 18.4/18.5 Simulator missing `libswiftWebKit.dylib`
 
@@ -686,11 +704,9 @@ The different `ChromeSafariBrowser` result does not by itself establish a Forge 
 
 ## Remaining validation and follow-up
 
-The complete pending-runtime register is now maintained in
-[runtime-validation-pending.md](runtime-validation-pending.md). It contains
-77 locally implemented or mitigated issue records and nine PR-only records.
-This section remains as a pointer so the detailed findings below can retain
-the root cause and acceptance evidence without creating a second status list.
+Status lists and counts are in [runtime-validation-pending.md](runtime-validation-pending.md)
+and [open-work-plan.md](open-work-plan.md). The records below keep root cause
+and evidence only.
 
 ## Detailed findings
 
@@ -1057,7 +1073,7 @@ Issue [#2819](https://github.com/pichillilorenzo/flutter_inappwebview/issues/281
 
 Issue [#2880](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2880) calls out legacy `UIApplication.shared.delegate?.window` access. The Forge implementation now replaces those lookups with an active-scene key-window helper, registers the plugin with Flutter's scene lifecycle delegate, and raises the iOS minimum to 15.0. Flutter’s [UIScene migration guide](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate) documents the same plugin migration contract.
 
-**Remaining validation:** run the scene-aware example on multiple active/inactive iOS scenes and confirm browser presentation and authentication-session anchoring on physical devices.
+**Remaining validation:** run the scene-aware example on iOS 15 and newer scene-based devices; exercise headless rendering, Web Authentication, and InAppBrowser presentation/dismissal while scenes move between active and inactive; validate the published CocoaPods source from a tagged release (the local podspec uses a path source).
 
 ### #2762 — Flutter engine gesture conflict on older Flutter versions
 
@@ -1378,7 +1394,7 @@ While `WKNavigationDelegate.decidePolicyFor` waits for the Dart policy result, a
 
 ### #2710, #2831, and #2763 — iOS fullscreen, prompt, and multi-window behavior
 
-**Status:** #2710 is hardened in iOS 2.1.17; #2831 is classified as an iOS 26 WebKit boundary because the public decision delegate starts at iOS 27, and #2763 is source-fixed with the rejected-popup path validated on iOS 26.0, 26.2, and 27.0 Simulators. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The targeted #2710 mitigation now passes a three-cycle seek/fullscreen Simulator diagnostic; the physical iOS/GPU symptom remains an Apple/WebKit runtime gate, while #2763 still requires the physical popup matrix.
+**Status:** #2710 was hardened in iOS 2.1.17 but is open again: the physical iOS run failed (see below); #2831 is classified as an iOS 26 WebKit boundary because the public decision delegate starts at iOS 27, and #2763 is source-fixed with the rejected-popup path validated on iOS 26.0, 26.2, and 27.0 Simulators. **Impact:** User-visible iOS regressions: fullscreen video can turn black/unresponsive, location prompts may not close, and rejected `onCreateWindow` targets could navigate the caller. **Confidence:** The targeted #2710 mitigation now passes a three-cycle seek/fullscreen Simulator diagnostic; the physical iOS/GPU symptom remains an Apple/WebKit runtime gate, while #2763 still requires the physical popup matrix.
 
 [Issue #2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) has a concrete iOS 26 report: after an inline HTML5 video is scrubbed and enters native fullscreen, playback can become black or unresponsive. The report also reproduces with `webview_flutter` and remains after testing the available inline/PiP/fullscreen settings, which points to the WebKit/GPU layer rather than a package-only path.
 
