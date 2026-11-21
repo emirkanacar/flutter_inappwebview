@@ -16,6 +16,52 @@ void _expectContains(String source, String expected, String description) {
 }
 
 void main() {
+  test('Windows headers conform to MSVC 18 (VS 2026)', () {
+    // Upstream PR #2936: VS 18 rejects an undefined always_false_v, a stray
+    // `return s2;` in void to_uppercase, and member declarations qualified
+    // with their own class name (C4596).
+    final util = _sourceFile('windows/utils/util.h').readAsStringSync();
+    expect(util, contains('inline constexpr bool always_false_v = false;'));
+    final string = _sourceFile('windows/utils/string.h').readAsStringSync();
+    final upper = string.substring(
+      string.indexOf('void to_uppercase('),
+      string.indexOf('to_uppercase_copy('),
+    );
+    expect(upper, isNot(contains('return s2;')));
+    expect(upper, isNot(contains('const std::basic_string<T>& s')));
+    // Both in-place helpers transform their argument, so it cannot be const.
+    expect(string, isNot(contains('void to_lowercase(const')));
+
+    final headers =
+        Directory(_sourceFile('windows/utils/util.h').parent.parent.path)
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.h'));
+    final classPattern = RegExp(r'\b(?:class|struct)\s+(\w+)\s*(?::[^{;]*)?\{');
+    for (final header in headers) {
+      final source = header.readAsStringSync();
+      for (final match in classPattern.allMatches(source)) {
+        final name = match.group(1)!;
+        var depth = 1;
+        var i = match.end;
+        while (i < source.length && depth > 0) {
+          if (source[i] == '{') depth++;
+          if (source[i] == '}') depth--;
+          i++;
+        }
+        final body = source.substring(match.end, i);
+        final selfQualified = RegExp(
+          '^[^\\n=]*?\\b$name::(?:operator\\S*|~?\\w+)\\s*\\(',
+          multiLine: true,
+        ).allMatches(body).where((m) => !m.group(0)!.contains('return'));
+        expect(
+          selfQualified.map((m) => m.group(0)!.trim()),
+          isEmpty,
+          reason: '${header.path} qualifies members of $name',
+        );
+      }
+    }
+  });
   test('Windows CMake plugin target matches the package name', () {
     // Flutter's generated_plugins.cmake links `<package>_plugin` and bundles
     // `<package>_bundled_libraries`; the upstream names broke every app build.

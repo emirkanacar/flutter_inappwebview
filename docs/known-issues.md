@@ -53,7 +53,32 @@ or move the project.
 
 Remaining gap: runtime check of Linux container data isolation on a device.
 
-## 2026-11-21 Post-export upstream triage (#2884-#2958)
+## 2026-11-21 Windows MSVC 18 conformance (#2936, #2937)
+
+Windows (upstream [PR #2936](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2936), [PR #2937](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2937)): Visual Studio 18
+(MSVC 14.51) rejects code that older MSVC accepted. All of it is compile-time
+only.
+
+- `utils/util.h` used `always_false_v` in a `static_assert` without defining
+  it (C3861). It is now defined in the plugin namespace.
+- `utils/string.h`: `void to_uppercase` returned a nonexistent `s2`
+  (copy-paste from `to_uppercase_copy`). Both in-place helpers also took a
+  `const&` they modify, so neither could be instantiated; they now take a
+  non-const reference. Neither has a caller.
+- 18 member declarations in 10 headers qualified their own class, for example
+  `bool Rect::operator==` inside `class Rect` (C4596). The qualifiers are
+  removed inside class bodies; out-of-class definitions are unchanged.
+- #2937 (`<experimental/coroutine>` STL1011 at `cxx_std_17`) was already
+  handled: `windows/CMakeLists.txt` defines
+  `_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS`.
+
+Evidence: a source regression test in
+`flutter_inappwebview_forge_windows/test/stability_regression_test.dart`
+scans every header for self-qualified members. `native-desktop.yml` builds the
+example on `windows-2025-vs2026`. That runner built the unfixed sources without
+these diagnostics, so the upstream 14.51 failure was not reproduced there; CI
+confirms that the fixed sources still compile.
+
 
 Upstream issues and PRs filed after the 125-issue CSV snapshot were screened
 against Forge source. They do not change the export counts. Items already
@@ -168,8 +193,7 @@ Each fix has a source-level regression test that fails on the previous source.
 iOS JavaScript panels always answered ([PR #2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)), native prompt
 control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
 ([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
-options (#2908-#2911), MSVC 18 (#2936, #2937), macOS SwiftPM 10.15
-(#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+options (#2908-#2911), macOS SwiftPM 10.15 (#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
 #2914-#2934.
 
 ## 2026-11-13 Web `Sandbox.ALLOW_ALL` iframe sandbox
