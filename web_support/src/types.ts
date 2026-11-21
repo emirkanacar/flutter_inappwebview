@@ -14,11 +14,16 @@ export interface InAppWebView {
   iframeId: string,
   iframe?: HTMLIFrameElement | null,
   iframeContainer?: HTMLDivElement | null,
+  reattach: (viewId: number | string, iframe: HTMLIFrameElement, iframeContainer: HTMLDivElement) => void,
   isFullscreen: boolean,
   documentTitle?: string | null,
   functionMap: {
     "window.open"?: any;
   },
+  scrollEventFramePending: boolean,
+  lastScrollX: number,
+  lastScrollY: number,
+  scheduleScrollChanged: () => void,
   settings: InAppWebViewSettings,
   javaScriptBridgeEnabled: boolean,
   disableContextMenuHandler: (event: Event) => boolean,

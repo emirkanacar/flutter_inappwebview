@@ -15,6 +15,108 @@ The confidence labels below describe the evidence available during this review:
 
 For the active backlog, priorities, work packages, and acceptance criteria, see the [open work plan](open-work-plan.md). For locally implemented issues that still need real device, provider, browser, native, or artifact tests, see [runtime-validation-pending.md](runtime-validation-pending.md).
 
+## 2026-11-21 Post-export upstream triage (#2884-#2958)
+
+Upstream issues and PRs filed after the 125-issue CSV snapshot were screened
+against Forge source. They do not change the export counts. Items already
+handled in Forge: #2949/#2887/#2897 (`proguard-android-optimize.txt`), #2942
+(Gradle assignment syntax), #2886 (`InternalStoragePathHandler` uses
+`super.toMap()`), #2888 (latch wait has a timeout), Windows download
+`ResultFilePath`, #2903 (Linux `initialUrlRequest`), Windows
+`CustomPlatformView` mounted checks, and screenshot results on dispose
+(`finishPendingScreenshotResultsOnDispose`). #2944, #2946, #2958, and #2907 are
+fork promotion or showcase posts with no engineering action.
+
+### Fixed locally, runtime validation pending
+
+- **Android algorithmic darkening ([#2893](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2893)).** Some providers report
+  `ALGORITHMIC_DARKENING` and then throw a `ClassCastException`
+  (`WebSettingsWrapper` to `ContentSettingsAdapter`) from
+  `WebSettingsCompat.setAlgorithmicDarkeningAllowed`. Both call sites in
+  `InAppWebView.kt` (`prepare()`, `setSettings()`) are wrapped in try/catch and
+  log a warning. Gate: an affected provider creates a WebView.
+- **Android renderer loss during dispose ([#2945](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2945)).** The temporary
+  client set by `dispose()` only handled `onPageFinished`; a renderer that died
+  on `about:blank` reached the default `onRenderProcessGone`, which returns
+  `false` and kills the app. The client now destroys once from either callback
+  and returns `true`. Gate: kill the renderer (`chrome://kill`) while disposing.
+- **iOS/macOS `callHandler` after dispose ([#2940](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2940)).** WebKit's
+  `UserMessageHandler.postMessage` returns a Promise that rejects with
+  `InvalidAccessError` after the handler is removed. `JavaScriptBridgeJS.swift`
+  captures `Promise.prototype.then` at injection and deletes the pending
+  `_callHandlerID` entry on rejection. Gate: page calls `callHandler` after the
+  WebView is disposed, no unhandled rejection in Web Inspector.
+- **Linux WPE 2.54 setting rename ([PR #2913](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2913)).**
+  `in_app_webview_settings.cc` uses `WPE_SETTING_REDUCED_MOTION` and defines it
+  as `WPE_SETTING_DISABLE_ANIMATIONS` when older headers lack it. Gate: Linux
+  build against WPE 2.54 and an older WPE.
+- **Linux CMake probe isolation ([PR #2912](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2912)).** The WPEPlatform
+  `check_cxx_source_compiles` probe ran with the caller's `CMAKE_REQUIRED_*`
+  state. It now runs between `cmake_push_check_state(RESET)` and
+  `cmake_pop_check_state()` and links `*_LINK_LIBRARIES` (full paths), falling
+  back to `*_LIBRARIES`. Gate: Linux configure with a non-default WPE prefix.
+- **Linux server trust and auth values ([PR #2898](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2898)).**
+  `OnLoadFailedWithTlsErrors` captured WebKit's borrowed `failing_uri` pointer
+  in the async Dart callback (use after free) and PROCEED reloaded the previous
+  page. It now copies the URI and loads it after allowing the certificate. The
+  SSL error `code` is the int `GTlsCertificateFlags` bit (REVOKED, EXPIRED,
+  BAD_IDENTITY, UNKNOWN_CA, NOT_ACTIVATED; others `GENERIC_ERROR`) instead of
+  a string, `previousFailureCount` is an int, and the platform interface adds
+  `EnumLinuxPlatform` values to `HttpAuthResponseAction` and `SslErrorType`.
+  Tests: `platform_interface/test/native_value_mapping_test.dart` and the new
+  gtest `linux/test/authentication_challenge_test.cc` (not compiled on macOS).
+  Gate: Linux build, gtest run, self-signed site PROCEED and CANCEL.
+- **`WebResourceError` unknown type ([PR #2900](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2900)).** `fromMap` returned
+  `null` for an unknown native type although `type` is non-nullable. A custom
+  deserializer falls back to `WebResourceErrorType.UNKNOWN`. Dart-only; covered
+  by `native_value_mapping_test.dart`.
+- **Windows texture lifetime ([#2896](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2896)).** `~CustomPlatformView` called
+  `UnregisterTexture(texture_id_, nullptr)` and then freed the
+  `TextureVariant` and `TextureBridge`, while the raster thread could still run
+  the texture callback that dereferences the bridge. The destructor now stops
+  capture, clears the frame callback, and moves both objects into the
+  `UnregisterTexture` completion callback. Gate: MSVC build; close an actively
+  rendering WebView and the app repeatedly.
+- **Windows `callHandler` reply decoding (from [PR #2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938)).**
+  `std::get<std::string>` on a non-string reply or a null pointer threw inside
+  the channel reply. `std::get_if` plus a null check resolve the promise with
+  `null`. Gate: MSVC build.
+- **Web sourcemap ([#2955](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2955)).** The published `web_support.js` embedded
+  an inline development sourcemap. The build script no longer passes
+  `--sourcemap=inline`. The checked-in bundle also contained hand edits
+  (`getIFrameUrl`, `reattach`, `scheduleScrollChanged`) missing from
+  `web_support/src`; they were ported back, and a rebuild now differs from the
+  previous bundle only by one stripped comment and the sourcemap. Gate:
+  browser smoke test of URL events, scroll events, and headless transfer.
+
+Each fix has a source-level regression test that fails on the previous source.
+
+### Confirmed or plausible, not implemented
+
+- **Android hybrid composition repaint ([#2950](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2950), [#2889](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2889)).**
+  `LAYER_TYPE_HARDWARE` with hybrid composition can stop repainting. The
+  proposed fix (`LAYER_TYPE_NONE`) changes rendering for every Android user and
+  needs device evidence first.
+- **Android pending resource callbacks on dispose ([PR #2954](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2954)).**
+  Pending `shouldInterceptRequest` latches should complete on dispose.
+- **Linux dispose crash ([#2904](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2904)).** Needs a Linux reproduction.
+- **Windows teardown ([#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [PR #2956](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2956),
+  [PR #2957](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2957)).** Shutdown ordering of WebView2 controller, environment,
+  and channel delegates; Windows hardware needed.
+- **iOS SwiftPM `FlutterFramework` dependency ([#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951)).** Requires a
+  Flutter 3.41 minimum (iOS currently declares 3.38.6); a baseline decision.
+- **Impeller black screen ([#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939)).** Needs reproduction.
+
+### Ideas needing an API or product decision
+
+iOS JavaScript panels always answered ([PR #2943](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2943)), native prompt
+control ([PR #2901](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2901)), pre-encoded JSON handler results
+([PR #2948](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2948)), macOS/Windows accessibility (#2952, #2953), screenshot
+options (#2908-#2911), Windows mouse leave and cursor event coalescing
+([PR #2938](https://github.com/pichillilorenzo/flutter_inappwebview/pull/2938), remainder), MSVC 18 (#2936, #2937), macOS SwiftPM 10.15
+(#2891), webkitgtk support (#2890), and the closed Windows/Linux hardening PRs
+#2914-#2934.
+
 ## 2026-11-13 Web `Sandbox.ALLOW_ALL` iframe sandbox
 
 Web 1.0.5 (found during the pub.dev static-analysis cleanup, not a CSV

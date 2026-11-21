@@ -49,6 +49,7 @@ None open.
 | [#2735](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2735), [#2692](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2692), [#2682](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2682), [#2642](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2642), [#2577](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2577) | Windows focus, transparency, hit testing, release behavior | Windows smoke matrix for focus, minimize/restore, transparent backgrounds, Google Sheets menus, and release packaging. Check child-window state after every async callback. |
 | [#2710](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2710) | iOS fullscreen video after seek | Back from the runtime register: the 2026-08-12 physical iOS run got `request=null` after seek and no `onEnterFullscreen`, failing the first cycle (Simulator passes 3/3). Reproduce on a physical iOS 26 device with native logs, then fix or classify as a WebKit/GPU boundary. |
 | [#2732](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2732), [#2590](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2590) | Screenshot of video, missing plugin | Reproduce with hardware video frames and generated registrants. Capture video surfaces or return a documented unsupported result. |
+| [#2950](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2950), [#2889](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2889), [#2904](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2904), [#2884](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2884), [#2939](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2939) | Post-export reports: Android hybrid-composition repaint, Linux dispose crash, Windows teardown, Impeller black screen | Device reproduction before changing layer type or teardown order. Details in [known-issues](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958). |
 
 ### P1: Build and release gates
 
@@ -65,6 +66,8 @@ Do not copy an upstream PR directly; each item changes a public contract.
 | Issue | Request | Next step |
 | --- | --- | --- |
 | [#2712](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2712) | DNS-level request blocking | Decide whether URL/resource interception is enough; do not promise DNS control. Threat model before API work. |
+| [#2951](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2951) | iOS SwiftPM `FlutterFramework` dependency | Needs a Flutter 3.41 minimum; decide the iOS baseline first. |
+| Post-export PRs #2901, #2943, #2948, #2952, #2953, #2908-#2911 | Prompt control, JS panel answers, pre-encoded JSON results, accessibility, screenshot options | API decisions; see [known-issues](known-issues.md#2026-11-21-post-export-upstream-triage-2884-2958). |
 | [#2706](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2706) | H5 input-operation interception | Turn the request into a concrete DOM event/API and test case; security and event-volume review first. |
 
 ### P3: Needs reporter data

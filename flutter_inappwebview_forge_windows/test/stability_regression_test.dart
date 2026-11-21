@@ -20,6 +20,34 @@ void main() {
     'Windows native source contracts remain guarded',
     _runSourceContractAssertions,
   );
+  test('Windows texture resources outlive asynchronous unregistration', () {
+    // Upstream #2896: UnregisterTexture completes on the raster thread, so the
+    // texture callback and bridge must stay alive until its callback runs.
+    final source = _sourceFile(
+      'windows/custom_platform_view/custom_platform_view.cc',
+    ).readAsStringSync();
+    expect(source, isNot(contains('UnregisterTexture(texture_id_, nullptr)')));
+    expect(
+      source,
+      contains('std::move(texture_bridge_), std::move(flutter_texture_)'),
+    );
+    expect(source, contains('[texture_resources]() mutable'));
+    expect(
+      source.indexOf('texture_bridge_->Stop();'),
+      lessThan(source.indexOf('UnregisterTexture(')),
+    );
+  });
+  test('Windows callHandler result decoding does not throw', () {
+    final source = _sourceFile(
+      'windows/in_app_webview/in_app_webview.cpp',
+    ).readAsStringSync();
+    expect(
+      source,
+      isNot(contains('json = std::get<std::string>(*(response.value()));')),
+    );
+    expect(source, contains('std::get_if<std::string>(response.value())'));
+    expect(source, contains('response.value() != nullptr'));
+  });
 }
 
 void _runSourceContractAssertions() {

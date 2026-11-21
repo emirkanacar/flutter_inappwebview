@@ -1,5 +1,11 @@
 ## Unreleased
 
+- JavaScript bridge: handle the Promise returned by WebKit's
+  `postMessage` when the `callHandler` message handler was already removed
+  (for example after the WebView was disposed). The rejection is caught and
+  the pending `callHandler` entry deleted instead of surfacing an unhandled
+  rejection in the page ([#2940](https://github.com/pichillilorenzo/flutter_inappwebview/issues/2940)).
+
 - Fix `evaluateJavascript` with an explicit `contentWorld` (page or custom
   world) always completing with `null` on regular WebViews. The nil-frame
   guard added for #2771 rejected every content-world evaluation, because a nil

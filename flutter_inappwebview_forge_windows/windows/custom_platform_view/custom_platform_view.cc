@@ -4,6 +4,9 @@
 #include <flutter/event_stream_handler_functions.h>
 #include <flutter/method_result_functions.h>
 
+#include <memory>
+#include <utility>
+
 #ifdef HAVE_FLUTTER_D3D_TEXTURE
 #include "texture_bridge_gpu.h"
 #else
@@ -201,7 +204,24 @@ namespace flutter_inappwebview_plugin
   {
     debugLog("dealloc CustomPlatformView");
     event_sink_ = nullptr;
-    texture_registrar_->UnregisterTexture(texture_id_, nullptr);
+    if (texture_bridge_) {
+      // Stop capture first so no new frame can call back into this object.
+      texture_bridge_->Stop();
+      texture_bridge_->SetOnFrameAvailable(nullptr);
+    }
+
+    // UnregisterTexture is asynchronous: Flutter removes the texture on the
+    // raster thread and only then runs the completion callback. Until that
+    // point the raster thread may still call the texture callback, which
+    // dereferences the bridge. Keep both alive until unregistration completes
+    // (upstream #2896).
+    auto texture_resources = std::make_shared<std::pair<
+      std::unique_ptr<TextureBridge>,
+      std::unique_ptr<flutter::TextureVariant>>>(
+        std::move(texture_bridge_), std::move(flutter_texture_));
+    texture_registrar_->UnregisterTexture(
+      texture_id_,
+      [texture_resources]() mutable { texture_resources.reset(); });
   }
 
   void CustomPlatformView::RegisterEventHandlers()

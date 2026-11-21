@@ -4414,8 +4414,13 @@ namespace flutter_inappwebview_plugin
           callback->defaultBehaviour = [this, callHandlerID](const std::optional<const flutter::EncodableValue*> response)
             {
               std::string json = "null";
-              if (response.has_value() && !response.value()->IsNull()) {
-                json = std::get<std::string>(*(response.value()));
+              // The Dart side sends a JSON string. Treat a null pointer or any
+              // other encodable type as null instead of letting std::get throw
+              // inside the channel reply.
+              if (response.has_value() && response.value() != nullptr) {
+                if (const auto* encoded = std::get_if<std::string>(response.value())) {
+                  json = *encoded;
+                }
               }
 
               evaluateJavascript("if (window." + JavaScriptBridgeJS::get_JAVASCRIPT_BRIDGE_NAME() + "[" + std::to_string(callHandlerID) + "] != null) { \

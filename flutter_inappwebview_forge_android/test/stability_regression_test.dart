@@ -1431,4 +1431,48 @@ void main() {
     expect(webViewSource, isNot(contains('PROMISE_POLYFILL_JS_PLUGIN_SCRIPT')));
     expect(webViewSource, contains('JAVASCRIPT_BRIDGE_JS_PLUGIN_SCRIPT'));
   });
+
+  test('Android algorithmic darkening tolerates broken WebView providers', () {
+    // Upstream #2893: WebSettingsCompat can throw ClassCastException from
+    // WebkitToCompatConverter on vendor or outdated WebView providers.
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+
+    final calls = RegExp(
+      r'try \{\s*(?://[^\n]*\s*)*WebSettingsCompat\.setAlgorithmicDarkeningAllowed\(',
+    ).allMatches(webViewSource);
+    expect(
+      'WebSettingsCompat.setAlgorithmicDarkeningAllowed('
+          .allMatches(webViewSource)
+          .length,
+      2,
+    );
+    expect(calls.length, 2);
+  });
+
+  test('Android dispose client handles renderer loss before destroy', () {
+    // Upstream #2945: the temporary about:blank client must not return the
+    // default false from onRenderProcessGone, which kills the app.
+    final webViewSource = _sourceFile(
+      'android/src/main/kotlin/com/emirkanacar/flutter_inappwebview_forge_android/'
+      'webview/in_app_webview/InAppWebView.kt',
+    ).readAsStringSync();
+    final disposeStart = webViewSource.indexOf('override fun dispose()');
+    final disposeEnd = webViewSource.indexOf(
+      'private fun finishPendingAsyncJavaScriptCallbacksOnDispose',
+      disposeStart,
+    );
+    final disposeSource = webViewSource.substring(disposeStart, disposeEnd);
+
+    expect(disposeSource, contains('override fun onRenderProcessGone('));
+    expect(
+      RegExp(
+        r'onRenderProcessGone\([^)]*\)\s*:\s*Boolean\s*\{\s*destroyOnce\(\)\s*return true',
+      ).hasMatch(disposeSource),
+      isTrue,
+    );
+    expect(disposeSource, contains('if (destroyRequested) return'));
+  });
 }
