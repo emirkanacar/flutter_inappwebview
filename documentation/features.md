@@ -479,6 +479,26 @@ if (ServiceWorkerController.isClassSupported()) {
 Use a real `ServiceWorkerClient` when intercepting requests. Keep callbacks
 null-safe and avoid doing blocking work in request interception paths.
 
+## Filter Android request interception
+
+With `useShouldInterceptRequest`, every Android resource request waits for a
+Dart reply, and requests above a small native concurrency cap skip Dart
+entirely. On pages with many resources this can hide the request you actually
+want to handle. Limit interception to the URLs you need with Java regular
+expressions (partial match):
+
+```dart
+InAppWebViewSettings(
+  useShouldInterceptRequest: true,
+  shouldInterceptRequestUrlFilter: [r'^https://api\.example\.com/'],
+)
+```
+
+Requests that do not match continue as if interception were off, so
+`resourceCustomSchemes` and content blockers still apply to them. An empty
+list (the default) intercepts every request; an invalid pattern disables the
+filter and logs a warning. The filter can be changed with `setSettings`.
+
 ## Authentication sessions
 
 Use `WebAuthenticationSession` for provider flows that return to the

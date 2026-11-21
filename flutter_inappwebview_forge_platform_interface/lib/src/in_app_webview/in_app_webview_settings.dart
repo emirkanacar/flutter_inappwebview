@@ -1220,6 +1220,22 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
   @SupportedPlatforms(platforms: [AndroidPlatform()])
   bool? useShouldInterceptRequest;
 
+  ///Regular expressions that limit which requests are sent to the
+  ///[PlatformWebViewCreationParams.shouldInterceptRequest] event.
+  ///
+  ///Every resource request waits for a synchronous Dart reply while
+  ///[useShouldInterceptRequest] is enabled. When this list is not empty, only
+  ///requests whose URL contains a match for at least one pattern (Java regular
+  ///expression, partial match) are sent to Dart. Other requests continue as if
+  ///[useShouldInterceptRequest] were disabled for them, so
+  ///[resourceCustomSchemes] and content blockers still apply.
+  ///
+  ///If a pattern is not a valid regular expression, the whole filter is
+  ///ignored and every request is sent to Dart, as when the list is empty.
+  ///The default value is an empty list (no filter).
+  @SupportedPlatforms(platforms: [AndroidPlatform()])
+  List<String>? shouldInterceptRequestUrlFilter;
+
   ///Set to `true` to be able to listen at the [PlatformWebViewCreationParams.onRenderProcessGone] event.
   ///
   ///If the [PlatformWebViewCreationParams.onRenderProcessGone] event is implemented and this value is `null`,
@@ -3715,6 +3731,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.regexToAllowSyncUrlLoading,
     this.useHybridComposition = true,
     this.useShouldInterceptRequest,
+    this.shouldInterceptRequestUrlFilter = const [],
     this.useOnRenderProcessGone,
     this.overScrollMode = OverScrollMode_.IF_CONTENT_SCROLLS,
     this.networkAvailable,

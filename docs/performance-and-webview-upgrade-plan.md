@@ -199,6 +199,8 @@ Problem at the review baseline: `shouldInterceptRequest` reached `Util.invokeMet
 
 Phase 1 status: the main looper no longer waits synchronously. Background resource callbacks use a shared main-looper dispatcher, bounded in-flight capacity, and method-specific timeouts (250 ms for WebView request interception and 500 ms by default) with a safe null fallback. Timeout telemetry and a fully asynchronous interception contract remain open work.
 
+URL filter status (unreleased, 2026-11-21): `InAppWebViewSettings.shouldInterceptRequestUrlFilter` (platform interface first, then Android) lets applications send only matching URLs to Dart. Patterns are compiled once in `InAppWebViewSettings.parse` into `UrlRegexFilter` and matched on the request thread; non-matching requests skip the bounded wait and keep the custom-scheme and content-blocker paths. Device evidence (Samsung SM-A165F, Android 16, WebView 157.0.8103.50, `flutter_inappwebview_forge_android/example/integration_test/intercept_url_filter_test.dart`, two runs): a page with 200 images plus one `fetch` sent only 19 and 36 requests to Dart without a filter, with 351 "Too many synchronous" bypass warnings across the runs, and the fetch was answered from Dart in one run of two; with a single-pattern filter exactly one request (the fetch) reached Dart and was answered both times, and clearing the filter through `setSettings` restored full interception. iOS/macOS have no equivalent per-request synchronous hook, so the setting is Android-only. JVM coverage: `UrlRegexFilterTest`.
+
 Plan:
 
 - Map the full request-interception call graph and identify which callbacks truly require a synchronous response.

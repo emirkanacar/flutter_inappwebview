@@ -1,5 +1,9 @@
 ## Unreleased
 
+- Add `InAppWebViewSettings.shouldInterceptRequestUrlFilter` (Android): a list
+  of regular expressions that limits which requests reach
+  `shouldInterceptRequest`. Defaults to an empty list (every request, as
+  before). Regenerated serializers and capability metadata.
 - Add opt-in `ChannelCallStats` / `ChannelCallStat` for measuring
   native-to-Dart platform channel traffic (call count, rate, optional encoded
   payload size, and Dart handler time per `<controller>.<method>`). Disabled

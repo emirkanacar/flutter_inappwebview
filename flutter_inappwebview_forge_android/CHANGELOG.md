@@ -1,11 +1,20 @@
 ## Unreleased
 
+- Support `InAppWebViewSettings.shouldInterceptRequestUrlFilter`. Patterns are
+  compiled once per settings update (`UrlRegexFilter`) and matched with a
+  partial `find()` on the request thread; non-matching requests skip the
+  synchronous Dart round trip and continue through `resourceCustomSchemes` and
+  content blockers. An invalid or non-String pattern disables the filter with
+  a warning instead of hiding requests. Measured on an Android 16 device with
+  a 201-request page: without a filter only 19-36 requests reached Dart (the
+  rest exceeded the synchronous-interception cap) and the targeted API request
+  was not always answered from Dart; with a one-pattern filter exactly that
+  request reached Dart and was answered in both runs.
 - Stop injecting the RSVP Promise polyfill document-start plugin script when
   the JavaScript bridge is enabled. Every supported Android System WebView
   (minSdk 24) has a native `Promise`, so the guarded polyfill never ran and
   only added a ~16 KB parse to every document and frame. `PromisePolyfillJS`
   is kept for source compatibility and marked `@Deprecated`.
-
 - Skip fire-and-forget `onConsoleMessage`, `onScrollChanged`,
   `onProgressChanged`, `onTitleChanged`, `onOverScrolled`, and
   `onZoomScaleChanged` events that have no Dart listener before they are
