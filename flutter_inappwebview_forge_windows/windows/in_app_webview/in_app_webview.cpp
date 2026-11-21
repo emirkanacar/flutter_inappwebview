@@ -5,6 +5,7 @@
 #include <regex>
 #include <set>
 #include <Shlwapi.h>
+#include <UIAutomation.h>
 #include <flutter/encodable_value.h>
 #include <wil/wrl.h>
 #include <winrt/Windows.Foundation.h>
@@ -57,6 +58,9 @@
 namespace flutter_inappwebview_plugin
 {
   using namespace Microsoft::WRL;
+
+  // Window property linking the hidden parent window to its InAppWebView (see hostWindowProc)
+  constexpr auto kHostWindowViewProp = L"flutter_inappwebview_forge.InAppWebView";
 
   namespace {
     constexpr wchar_t kFlutterAssetsHostName[] = L"flutter-inappwebview-forge.local";
@@ -118,6 +122,12 @@ namespace flutter_inappwebview_plugin
         std::cerr << "Cannot create InAppWebView surface." << std::endl;
       }
       registerSurfaceEventHandlers();
+      // enableAccessibilityFocus: with visual hosting the WebView2 accessibility
+      // tree is not attached to any window, so the parent window answers
+      // WM_GETOBJECT with it (hostWindowProc).
+      if (parentWindow && SetPropW(parentWindow, kHostWindowViewProp, this)) {
+        hostWindow_ = parentWindow;
+      }
     }
     else {
       this->webViewController->put_IsVisible(true);
@@ -2188,10 +2198,85 @@ namespace flutter_inappwebview_plugin
     }
   }
 
+  bool InAppWebView::isAccessibilityFocusEnabled() const
+  {
+    return settings && settings->enableAccessibilityFocus;
+  }
+
+  void InAppWebView::detachHostWindow()
+  {
+    if (hostWindow_) {
+      if (GetPropW(hostWindow_, kHostWindowViewProp) == this) {
+        RemovePropW(hostWindow_, kHostWindowViewProp);
+      }
+      hostWindow_ = nullptr;
+    }
+  }
+
+  LRESULT CALLBACK InAppWebView::hostWindowProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+  {
+    if (message == WM_GETOBJECT && static_cast<DWORD>(lparam) == static_cast<DWORD>(UiaRootObjectId)) {
+      auto view = static_cast<InAppWebView*>(GetPropW(hwnd, kHostWindowViewProp));
+      if (view && view->isAccessibilityFocusEnabled() && view->lifecycle_.acceptsCallbacks() &&
+        view->webViewCompositionController) {
+        wil::com_ptr<ICoreWebView2CompositionController2> compositionController2;
+        wil::com_ptr<IUnknown> automationProvider;
+        wil::com_ptr<IRawElementProviderSimple> provider;
+        if (SUCCEEDED(view->webViewCompositionController->QueryInterface(IID_PPV_ARGS(&compositionController2))) &&
+          compositionController2 &&
+          SUCCEEDED(compositionController2->get_AutomationProvider(automationProvider.put())) &&
+          automationProvider &&
+          SUCCEEDED(automationProvider->QueryInterface(IID_PPV_ARGS(&provider))) &&
+          provider) {
+          return UiaReturnRawElementProvider(hwnd, wparam, lparam, provider.get());
+        }
+      }
+    }
+    return DefWindowProc(hwnd, message, wparam, lparam);
+  }
+
+  void InAppWebView::moveFocus(bool next)
+  {
+    if (!isAccessibilityFocusEnabled() || !webViewController || !lifecycle_.acceptsCallbacks()) {
+      return;
+    }
+    failedLog(webViewController->MoveFocus(next ? COREWEBVIEW2_MOVE_FOCUS_REASON_NEXT : COREWEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS));
+  }
+
   void InAppWebView::registerSurfaceEventHandlers()
   {
     if (!webViewCompositionController) {
       return;
+    }
+
+    // enableAccessibilityFocus: Tab past the last element of the page
+    // (Shift+Tab before the first one) gives Win32 focus back to the Flutter
+    // view, and the Dart side moves Flutter focus on. With the setting off the
+    // event is left unhandled, as before.
+    if (webViewController) {
+      failedLog(webViewController->add_MoveFocusRequested(
+        Callback<ICoreWebView2MoveFocusRequestedEventHandler>(
+          [this](ICoreWebView2Controller* sender, ICoreWebView2MoveFocusRequestedEventArgs* args) -> HRESULT
+          {
+            if (!args || !isAccessibilityFocusEnabled() || !lifecycle_.acceptsCallbacks()) {
+              return S_OK;
+            }
+            COREWEBVIEW2_MOVE_FOCUS_REASON reason;
+            if (FAILED(args->get_Reason(&reason)) || reason == COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC) {
+              return S_OK;
+            }
+            args->put_Handled(TRUE);
+            if (plugin && plugin->registrar) {
+              auto flutterView = plugin->registrar->GetView();
+              if (flutterView) {
+                SetFocus(flutterView->GetNativeWindow());
+              }
+            }
+            if (moveFocusRequestedCallback_) {
+              moveFocusRequestedCallback_(reason == COREWEBVIEW2_MOVE_FOCUS_REASON_NEXT);
+            }
+            return S_OK;
+          }).Get(), nullptr));
     }
 
     failedLog(webViewCompositionController->add_CursorChanged(
@@ -4455,6 +4540,10 @@ namespace flutter_inappwebview_plugin
   InAppWebView::~InAppWebView()
   {
     debugLog("dealloc InAppWebView");
+    // Before anything else: the parent window must not answer WM_GETOBJECT
+    // with a view that is going away (idempotent).
+    detachHostWindow();
+    moveFocusRequestedCallback_ = nullptr;
     if (!lifecycle_.beginDisposal()) {
       return;
     }

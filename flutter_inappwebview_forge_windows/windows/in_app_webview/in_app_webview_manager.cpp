@@ -56,7 +56,9 @@ namespace flutter_inappwebview_plugin
     }
 
     windowClass_.lpszClassName = CustomPlatformView::CLASS_NAME;
-    windowClass_.lpfnWndProc = &DefWindowProc;
+    // Answers UI Automation with the WebView2 accessibility tree while
+    // enableAccessibilityFocus is true; DefWindowProc otherwise.
+    windowClass_.lpfnWndProc = &InAppWebView::hostWindowProc;
     windowClass_.style |= CS_NOCLOSE;
 
     RegisterClass(&windowClass_);
