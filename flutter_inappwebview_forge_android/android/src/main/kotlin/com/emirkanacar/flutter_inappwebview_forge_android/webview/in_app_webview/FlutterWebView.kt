@@ -16,6 +16,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh.PullTo
 import com.emirkanacar.flutter_inappwebview_forge_android.pull_to_refresh.PullToRefreshSettings
 import com.emirkanacar.flutter_inappwebview_forge_android.types.URLRequest
 import com.emirkanacar.flutter_inappwebview_forge_android.types.UserScript
+import com.emirkanacar.flutter_inappwebview_forge_android.webview.ChannelEventFilter
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.PlatformWebView
 import java.io.IOException
 import java.util.ArrayList
@@ -84,6 +85,7 @@ open class FlutterWebView : PlatformWebView {
             userScripts
         )
         webView = currentWebView
+        currentWebView.channelEventFilter.update(params[ChannelEventFilter.CREATION_PARAM])
         plugin.inAppWebViewManager?.webViews?.set(id, this)
         displayListenerProxy.onPostWebViewInitialization(displayManager)
 

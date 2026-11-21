@@ -60,6 +60,8 @@ public class FlutterWebViewController: NSObject, FlutterPlatformView, Disposable
                                    userScripts: userScripts)
         }
         
+        webView?.updateChannelEventFilter(params[ChannelEventFilter.CREATION_PARAM])
+
         let pullToRefreshSettings = PullToRefreshSettings()
         let _ = pullToRefreshSettings.parse(settings: pullToRefreshInitialSettings)
         let pullToRefreshControl = PullToRefreshControl(plugin: plugin, id: viewId, settings: pullToRefreshSettings)

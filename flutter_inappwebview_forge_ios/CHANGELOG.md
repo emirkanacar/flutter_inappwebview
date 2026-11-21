@@ -15,6 +15,27 @@
   ~16 KB parse to every document, frame, and content world. `PromisePolyfillJS`
   is kept for source compatibility and marked deprecated.
 
+- Skip fire-and-forget `onConsoleMessage`, `onScrollChanged`,
+  `onProgressChanged`, `onTitleChanged`, `onOverScrolled`, and
+  `onZoomScaleChanged` events that have no Dart listener before they are
+  encoded. Dart sends the list as the `skippedEvents` creation param (and
+  headless `run` param); every platform-view creation re-applies it, so
+  KeepAlive reuse and headless transfer follow the new owner. A missing list
+  keeps the previous behavior, and callbacks that wait for a Dart result are
+  never filtered.
+
+- Do not inject the `ConsoleLogJS` document-start hook when the WebView has
+  no Dart `onConsoleMessage` listener. Without a listener every `console.*`
+  call still stringified its arguments, posted a bridge message, parsed it
+  natively, and resolved a promise with `evaluateJavaScript` before the event
+  was dropped. A KeepAlive reattach or headless transfer that changes the
+  listener updates the hook for the current document (through a
+  `_consoleMessagesEnabled` switch on the bridge object) and for the next
+  navigation. The hook now installs at most once per document and content
+  world. InAppBrowser is unchanged.
+  Measured on an iPhone (iOS 27.2.1): 5000 `console.log` calls take about
+  40 ms with a listener and 1-2 ms without one, with no channel calls.
+
 ## 2.1.38 - 2026-11-14
 
 - Fix `writingToolsBehavior` never being applied. The native setting is an

@@ -6,6 +6,16 @@
   only added a ~16 KB parse to every document and frame. `PromisePolyfillJS`
   is kept for source compatibility and marked `@Deprecated`.
 
+- Skip fire-and-forget `onConsoleMessage`, `onScrollChanged`,
+  `onProgressChanged`, `onTitleChanged`, `onOverScrolled`, and
+  `onZoomScaleChanged` events that have no Dart listener before they are
+  encoded. Dart sends the list as the `skippedEvents` creation param (and
+  headless `run` param); every platform-view creation re-applies it, so
+  KeepAlive reuse and headless transfer follow the new owner. A missing list
+  keeps the previous behavior, and callbacks that wait for a Dart result are
+  never filtered. Measured on an Android 16 device: 25000 `console.log` calls
+  send no channel calls without a listener (25000 with one).
+
 ## 1.0.58 - 2026-11-14
 
 - Add `warmUpRendererProcess` to the container controller channel. It calls

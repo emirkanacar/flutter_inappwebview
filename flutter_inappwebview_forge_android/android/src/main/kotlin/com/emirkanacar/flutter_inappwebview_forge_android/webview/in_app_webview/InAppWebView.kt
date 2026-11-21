@@ -39,6 +39,7 @@ import com.emirkanacar.flutter_inappwebview_forge_android.types.*
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.InAppWebViewInterface
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.JavaScriptBridgeInterface
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.WebViewChannelDelegate
+import com.emirkanacar.flutter_inappwebview_forge_android.webview.ChannelEventFilter
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.ContextMenuSettings
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.web_message.WebMessageChannel
 import com.emirkanacar.flutter_inappwebview_forge_android.webview.web_message.WebMessageListener
@@ -179,6 +180,8 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
   private val saveWebArchiveCallbacks: MutableMap<String, ValueCallback<String>> = HashMap()
   private val saveWebArchiveOperationIds: MutableMap<String, Long> = HashMap()
   private val pendingScreenshotResults: MutableMap<Long, MethodChannel.Result> = HashMap()
+  @JvmField
+  val channelEventFilter = ChannelEventFilter()
   private var pendingScrollX: Int? = null
   private var pendingScrollY: Int? = null
   private var scrollChangedDispatchScheduled = false
@@ -2051,6 +2054,7 @@ class InAppWebView : InputAwareWebView, InAppWebViewInterface {
       it.alpha = 0f
       it.visibility = View.GONE
     }
+    if (channelEventFilter.isSkipped("onScrollChanged")) return
     if (x != oldX || y != oldY) {
       pendingScrollX = x
       pendingScrollY = y

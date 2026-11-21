@@ -5,6 +5,7 @@ import 'package:flutter_inappwebview_forge_platform_interface/flutter_inappwebvi
 import '../find_interaction/find_interaction_controller.dart';
 import '../pull_to_refresh/pull_to_refresh_controller.dart';
 import 'in_app_webview_controller.dart';
+import '_channel_event_filter.dart';
 
 /// Object specifying creation parameters for creating a [AndroidHeadlessInAppWebView].
 ///
@@ -368,6 +369,7 @@ class AndroidHeadlessInAppWebView extends PlatformHeadlessInAppWebView
             params.initialUserScripts?.map((e) => e.toMap()).toList() ?? [],
         'pullToRefreshSettings': pullToRefreshSettings,
         'initialSize': params.initialSize.toMap(),
+        skippedChannelEventsKey: skippedChannelEvents(params),
       },
     );
     await _sharedChannel.invokeMethod('run', args);
